@@ -458,3 +458,19 @@
 		</Card.Card>
 	</div>
 </div>
+
+<!-- Delete Confirmation Dialog -->
+<AlertDialog.Root bind:open={deleteDialogOpen}>
+	<AlertDialog.Content>
+		<AlertDialog.Header>
+			<AlertDialog.Title>Delete Project</AlertDialog.Title>
+			<AlertDialog.Description>
+				Are you sure you want to delete this project? This action cannot be undone.
+			</AlertDialog.Description>
+		</AlertDialog.Header>
+		<AlertDialog.Footer>
+			<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
+			<AlertDialog.Action onclick={confirmDelete}>Delete</AlertDialog.Action>
+		</AlertDialog.Footer>
+	</AlertDialog.Content>
+</AlertDialog.Root>

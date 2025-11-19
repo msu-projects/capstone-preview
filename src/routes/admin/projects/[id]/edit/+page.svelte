@@ -7,6 +7,7 @@
 	import ProjectFormHeader from '$lib/components/admin/projects/ProjectFormHeader.svelte';
 	import * as Card from '$lib/components/ui/card';
 	import * as Tabs from '$lib/components/ui/tabs';
+	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import { projects, sitios } from '$lib/mock-data';
 	import type { Project, ProjectStatus } from '$lib/types';
 	import { getLocalTimeZone, parseDate, today, type DateValue } from '@internationalized/date';
@@ -27,6 +28,7 @@
 	// Form state
 	let isSaving = $state(false);
 	let activeTab = $state('basic');
+	let cancelDialogOpen = $state(false);
 
 	// Basic Information
 	let title = $state(existingProject?.title ?? '');
@@ -270,9 +272,11 @@
 	}
 
 	function handleCancel() {
-		if (confirm('Are you sure you want to cancel? Any unsaved changes will be lost.')) {
-			window.location.href = '/admin/projects';
-		}
+		cancelDialogOpen = true;
+	}
+
+	function confirmCancel() {
+		window.location.href = '/admin/projects';
 	}
 
 	// Auto-calculate slippage
@@ -420,6 +424,22 @@
 		</div>
 	</div>
 </div>
+
+<!-- Cancel Confirmation Dialog -->
+<AlertDialog.Root bind:open={cancelDialogOpen}>
+	<AlertDialog.Content>
+		<AlertDialog.Header>
+			<AlertDialog.Title>Discard Changes</AlertDialog.Title>
+			<AlertDialog.Description>
+				Are you sure you want to cancel? Any unsaved changes will be lost.
+			</AlertDialog.Description>
+		</AlertDialog.Header>
+		<AlertDialog.Footer>
+			<AlertDialog.Cancel>Continue Editing</AlertDialog.Cancel>
+			<AlertDialog.Action onclick={confirmCancel}>Discard Changes</AlertDialog.Action>
+		</AlertDialog.Footer>
+	</AlertDialog.Content>
+</AlertDialog.Root>
 
 <style>
 	:global(input[readonly]) {

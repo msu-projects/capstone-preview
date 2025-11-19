@@ -2,7 +2,6 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Calendar } from '$lib/components/ui/calendar';
 	import * as Card from '$lib/components/ui/card';
-	import { CurrencyInput } from '$lib/components/ui/currency-input';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import * as Popover from '$lib/components/ui/popover';
@@ -253,12 +252,12 @@
 	<!-- Budget & Beneficiaries -->
 	<Card.Card>
 		<Card.CardHeader>
-			<Card.CardTitle>Budget & Impact</Card.CardTitle>
+			<Card.CardTitle>Project Impact</Card.CardTitle>
 		</Card.CardHeader>
 		<Card.CardContent class="space-y-4">
 			<div class="grid gap-4 md:grid-cols-2">
 				<!-- Budget -->
-				<div class="space-y-2">
+				<!-- <div class="space-y-2">
 					<Label for="budget">
 						Budget <span class="text-destructive">*</span>
 					</Label>
@@ -269,7 +268,7 @@
 						min={0}
 						required
 					/>
-				</div>
+				</div> -->
 
 				<!-- Beneficiaries -->
 				<div class="space-y-2">
