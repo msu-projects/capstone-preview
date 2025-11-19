@@ -374,7 +374,7 @@
 										<!-- Actions -->
 										<Table.TableCell class="text-right">
 											<div class="flex justify-end gap-1">
-												<Button variant="ghost" size="icon" href="/projects/{project.id}">
+												<Button variant="ghost" size="icon" href="/admin/projects/{project.id}">
 													<Eye class="size-4" />
 												</Button>
 												<Button
