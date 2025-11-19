@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Import Data - South Cotabato Data Bank</title>
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/utilities.css">
+  <link rel="stylesheet" href="../assets/css/admin.css">
+</head>
+<body>
+  <div class="admin-layout">
+    <aside class="admin-sidebar">
+      <div class="admin-sidebar-header"><a href="index.html" class="admin-logo"><i data-lucide="database"></i><span>SC Data Bank</span></a></div>
+      <nav class="admin-nav">
+        <div class="admin-nav-section">
+          <div class="admin-nav-title">Main</div>
+          <a href="index.html" class="admin-nav-link"><i data-lucide="layout-dashboard"></i><span>Dashboard</span></a>
+        </div>
+        <div class="admin-nav-section">
+          <div class="admin-nav-title">Data Management</div>
+          <a href="sitio-list.html" class="admin-nav-link"><i data-lucide="map-pin"></i><span>Sitios</span></a>
+          <a href="project-list.html" class="admin-nav-link"><i data-lucide="folder"></i><span>Projects</span></a>
+          <a href="import.html" class="admin-nav-link active"><i data-lucide="upload-cloud"></i><span>Import Data</span></a>
+        </div>
+      </nav>
+      <div class="admin-sidebar-footer">
+        <div class="admin-user-info"><div class="admin-user-avatar">A</div><div class="admin-user-details"><div class="admin-user-name">Admin User</div></div></div>
+      </div>
+    </aside>
+    <main class="admin-main">
+      <header class="admin-header">
+        <div class="admin-header-content"><h1 class="admin-page-title">Import Data</h1></div>
+      </header>
+      <div class="admin-content">
+        <div class="card">
+          <div class="card-header"><h3 class="card-title">Bulk Data Import</h3></div>
+          <div class="card-content">
+            <div class="form-group">
+              <label class="form-label">Data Type</label>
+              <select id="dataType" class="form-select">
+                <option value="sitios">Sitios</option>
+                <option value="projects">Projects</option>
+              </select>
+            </div>
+            <div class="upload-area" id="uploadArea">
+              <input type="file" id="fileInput" accept=".csv,.xlsx" style="display: none;">
+              <i data-lucide="upload-cloud" class="upload-icon"></i>
+              <h3 class="upload-title">Upload CSV or Excel File</h3>
+              <p class="upload-description">Drag and drop your file here, or click to browse</p>
+            </div>
+            <div id="fileInfo" style="display: none; margin-top: 1rem;">
+              <div class="alert alert-info">
+                <i data-lucide="file"></i>
+                <div><div class="alert-title">File Selected</div><span id="fileName"></span></div>
+              </div>
+            </div>
+            <div id="preview" style="display: none; margin-top: 1.5rem;">
+              <h4 style="margin-bottom: 1rem;">Preview (First 5 rows)</h4>
+              <div class="table-container"><table class="table"><thead id="previewHead"></thead><tbody id="previewBody"></tbody></table></div>
+            </div>
+          </div>
+          <div class="card-footer">
+            <button id="importBtn" class="btn btn-primary" style="display: none;" onclick="performImport()">
+              <i data-lucide="upload"></i><span>Import Data</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="../assets/js/icons.js"></script>
+  <script src="../assets/js/main.js"></script>
+  <script>
+    if (!localStorage.getItem('isLoggedIn')) window.location.href = 'login.html';
+
+    initFileUpload('uploadArea', 'fileInput', function(file) {
+      document.getElementById('fileName').textContent = file.name;
+      document.getElementById('fileInfo').style.display = 'block';
+      document.getElementById('preview').style.display = 'block';
+      document.getElementById('importBtn').style.display = 'inline-flex';
+      showPreview();
+      refreshIcons();
+    });
+
+    function showPreview() {
+      const mockData = [
+        {name: 'Sitio Maligaya', barangay: 'San Isidro', municipality: 'Koronadal City', population: 450},
+        {name: 'Sitio Riverside', barangay: 'Zone 1', municipality: 'Polomolok', population: 380},
+        {name: 'Sitio Greenhill', barangay: 'Poblacion', municipality: 'Tupi', population: 520}
+      ];
+
+      const headers = Object.keys(mockData[0]);
+      document.getElementById('previewHead').innerHTML = '<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
+      document.getElementById('previewBody').innerHTML = mockData.map(row => 
+        '<tr>' + headers.map(h => `<td>${row[h]}</td>`).join('') + '</tr>'
+      ).join('');
+    }
+
+    function performImport() {
+      const dataType = document.getElementById('dataType').value;
+      showToast(`Importing ${dataType}...`, 'info');
+      setTimeout(() => {
+        showToast('Data imported successfully!', 'success');
+        setTimeout(() => window.location.href = dataType === 'sitios' ? 'sitio-list.html' : 'project-list.html', 1500);
+      }, 2000);
+    }
+  </script>
+</body>
+</html>

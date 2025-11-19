@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sitio Form - South Cotabato Data Bank</title>
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/utilities.css">
+  <link rel="stylesheet" href="../assets/css/admin.css">
+</head>
+<body>
+  <div class="admin-layout">
+    <aside class="admin-sidebar">
+      <div class="admin-sidebar-header">
+        <a href="index.html" class="admin-logo">
+          <i data-lucide="database"></i>
+          <span>SC Data Bank</span>
+        </a>
+      </div>
+      <nav class="admin-nav">
+        <div class="admin-nav-section">
+          <div class="admin-nav-title">Main</div>
+          <a href="index.html" class="admin-nav-link">
+            <i data-lucide="layout-dashboard"></i>
+            <span>Dashboard</span>
+          </a>
+        </div>
+        <div class="admin-nav-section">
+          <div class="admin-nav-title">Data Management</div>
+          <a href="sitio-list.html" class="admin-nav-link active">
+            <i data-lucide="map-pin"></i>
+            <span>Sitios</span>
+          </a>
+          <a href="project-list.html" class="admin-nav-link">
+            <i data-lucide="folder"></i>
+            <span>Projects</span>
+          </a>
+          <a href="import.html" class="admin-nav-link">
+            <i data-lucide="upload-cloud"></i>
+            <span>Import Data</span>
+          </a>
+        </div>
+        <div class="admin-nav-section">
+          <div class="admin-nav-title">System</div>
+          <a href="users.html" class="admin-nav-link">
+            <i data-lucide="users"></i>
+            <span>Users</span>
+          </a>
+          <a href="../public/index.html" class="admin-nav-link">
+            <i data-lucide="external-link"></i>
+            <span>View Public Portal</span>
+          </a>
+        </div>
+      </nav>
+      <div class="admin-sidebar-footer">
+        <div class="admin-user-info">
+          <div class="admin-user-avatar">A</div>
+          <div class="admin-user-details">
+            <div class="admin-user-name">Admin User</div>
+            <div class="admin-user-role">Administrator</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="admin-main">
+      <header class="admin-header">
+        <div class="admin-header-content">
+          <div>
+            <div class="breadcrumb">
+              <a href="sitio-list.html" class="breadcrumb-link">Sitios</a>
+              <span class="breadcrumb-separator">/</span>
+              <span class="breadcrumb-current" id="pageTitle">Add New Sitio</span>
+            </div>
+            <h1 class="admin-page-title" id="formTitle">Add New Sitio</h1>
+          </div>
+          <div class="admin-header-actions">
+            <button class="btn btn-ghost btn-sm" onclick="window.location.href='sitio-list.html'">
+              <i data-lucide="x"></i>
+              <span>Cancel</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div class="admin-content">
+        <form id="sitioForm">
+          <!-- Basic Information -->
+          <div class="form-section">
+            <div class="form-section-header">
+              <h3 class="form-section-title">Basic Information</h3>
+              <p class="form-section-description">Primary details about the sitio</p>
+            </div>
+            <div class="form-grid">
+              <div>
+                <label for="name" class="form-label form-label-required">Sitio Name</label>
+                <input type="text" id="name" class="form-input" placeholder="e.g., Sitio Maligaya" required>
+              </div>
+              <div>
+                <label for="barangay" class="form-label form-label-required">Barangay</label>
+                <input type="text" id="barangay" class="form-input" placeholder="e.g., San Isidro" required>
+              </div>
+              <div>
+                <label for="municipality" class="form-label form-label-required">Municipality</label>
+                <select id="municipality" class="form-select" required>
+                  <option value="">Select Municipality</option>
+                  <option value="Koronadal City">Koronadal City</option>
+                  <option value="Polomolok">Polomolok</option>
+                  <option value="Tupi">Tupi</option>
+                  <option value="Tantangan">Tantangan</option>
+                  <option value="Surallah">Surallah</option>
+                  <option value="Banga">Banga</option>
+                </select>
+              </div>
+              <div>
+                <label for="province" class="form-label">Province</label>
+                <input type="text" id="province" class="form-input" value="South Cotabato" readonly>
+              </div>
+            </div>
+          </div>
+
+          <!-- Demographics -->
+          <div class="form-section">
+            <div class="form-section-header">
+              <h3 class="form-section-title">Demographics</h3>
+              <p class="form-section-description">Population and household data</p>
+            </div>
+            <div class="form-grid">
+              <div>
+                <label for="population" class="form-label form-label-required">Population</label>
+                <input type="number" id="population" class="form-input" placeholder="e.g., 450" required>
+              </div>
+              <div>
+                <label for="households" class="form-label form-label-required">Number of Households</label>
+                <input type="number" id="households" class="form-input" placeholder="e.g., 95" required>
+              </div>
+            </div>
+          </div>
+
+          <!-- Economic & Social Indicators -->
+          <div class="form-section">
+            <div class="form-section-header">
+              <h3 class="form-section-title">Economic & Social Indicators</h3>
+              <p class="form-section-description">Key community indicators (in percentages)</p>
+            </div>
+            <div class="form-grid">
+              <div>
+                <label for="employment_rate" class="form-label">Employment Rate (%)</label>
+                <input type="number" id="employment_rate" class="form-input" min="0" max="100" placeholder="e.g., 65">
+                <p class="form-helper">Percentage of working-age population employed</p>
+              </div>
+              <div>
+                <label for="poverty_incidence" class="form-label">Poverty Incidence (%)</label>
+                <input type="number" id="poverty_incidence" class="form-input" min="0" max="100" placeholder="e.g., 42">
+              </div>
+              <div>
+                <label for="farmers" class="form-label">Farmers (%)</label>
+                <input type="number" id="farmers" class="form-input" min="0" max="100" placeholder="e.g., 58">
+                <p class="form-helper">Percentage of households engaged in farming</p>
+              </div>
+              <div>
+                <label for="potable_water_access" class="form-label">Potable Water Access (%)</label>
+                <input type="number" id="potable_water_access" class="form-input" min="0" max="100" placeholder="e.g., 72">
+              </div>
+              <div>
+                <label for="electricity_access" class="form-label">Electricity Access (%)</label>
+                <input type="number" id="electricity_access" class="form-input" min="0" max="100" placeholder="e.g., 88">
+              </div>
+            </div>
+          </div>
+
+          <!-- Location Coordinates -->
+          <div class="form-section">
+            <div class="form-section-header">
+              <h3 class="form-section-title">Location Coordinates</h3>
+              <p class="form-section-description">GPS coordinates for map visualization</p>
+            </div>
+            <div class="form-grid">
+              <div>
+                <label for="latitude" class="form-label">Latitude</label>
+                <input type="number" id="latitude" class="form-input" step="0.0001" placeholder="e.g., 6.5008">
+              </div>
+              <div>
+                <label for="longitude" class="form-label">Longitude</label>
+                <input type="number" id="longitude" class="form-input" step="0.0001" placeholder="e.g., 124.8464">
+              </div>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+            <button type="button" class="btn btn-ghost" onclick="window.location.href='sitio-list.html'">Cancel</button>
+            <button type="submit" class="btn btn-primary">
+              <i data-lucide="save"></i>
+              <span>Save Sitio</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </main>
+  </div>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="../assets/js/icons.js"></script>
+  <script src="../assets/js/main.js"></script>
+  <script src="../assets/js/mock-data.js"></script>
+
+  <script>
+    if (!localStorage.getItem('isLoggedIn')) window.location.href = 'login.html';
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const sitioId = urlParams.get('id');
+
+    document.addEventListener('DOMContentLoaded', function() {
+      if (sitioId) {
+        document.getElementById('pageTitle').textContent = 'Edit Sitio';
+        document.getElementById('formTitle').textContent = 'Edit Sitio';
+        loadSitioData(sitioId);
+      }
+    });
+
+    function loadSitioData(id) {
+      const sitio = window.mockData.getSitioById(id);
+      if (!sitio) {
+        alert('Sitio not found');
+        window.location.href = 'sitio-list.html';
+        return;
+      }
+
+      document.getElementById('name').value = sitio.name;
+      document.getElementById('barangay').value = sitio.barangay;
+      document.getElementById('municipality').value = sitio.municipality;
+      document.getElementById('province').value = sitio.province;
+      document.getElementById('population').value = sitio.population;
+      document.getElementById('households').value = sitio.households;
+      document.getElementById('employment_rate').value = sitio.demographics.employment_rate;
+      document.getElementById('poverty_incidence').value = sitio.demographics.poverty_incidence;
+      document.getElementById('farmers').value = sitio.demographics.farmers;
+      document.getElementById('potable_water_access').value = sitio.demographics.potable_water_access;
+      document.getElementById('electricity_access').value = sitio.demographics.electricity_access;
+      document.getElementById('latitude').value = sitio.coordinates.lat;
+      document.getElementById('longitude').value = sitio.coordinates.lng;
+    }
+
+    document.getElementById('sitioForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const formData = {
+        name: document.getElementById('name').value,
+        barangay: document.getElementById('barangay').value,
+        municipality: document.getElementById('municipality').value,
+        province: document.getElementById('province').value,
+        population: parseInt(document.getElementById('population').value),
+        households: parseInt(document.getElementById('households').value),
+        demographics: {
+          employment_rate: parseInt(document.getElementById('employment_rate').value) || 0,
+          poverty_incidence: parseInt(document.getElementById('poverty_incidence').value) || 0,
+          farmers: parseInt(document.getElementById('farmers').value) || 0,
+          potable_water_access: parseInt(document.getElementById('potable_water_access').value) || 0,
+          electricity_access: parseInt(document.getElementById('electricity_access').value) || 0
+        },
+        coordinates: {
+          lat: parseFloat(document.getElementById('latitude').value) || 0,
+          lng: parseFloat(document.getElementById('longitude').value) || 0
+        }
+      };
+
+      // In a real app, this would be an API call
+      console.log('Saving sitio:', formData);
+
+      showToast(sitioId ? 'Sitio updated successfully' : 'Sitio created successfully', 'success');
+      setTimeout(() => window.location.href = 'sitio-list.html', 1500);
+    });
+  </script>
+</body>
+</html>

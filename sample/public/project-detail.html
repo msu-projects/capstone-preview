@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Project Details - South Cotabato Data Bank</title>
+    <link rel="stylesheet" href="../assets/css/variables.css" />
+    <link rel="stylesheet" href="../assets/css/base.css" />
+    <link rel="stylesheet" href="../assets/css/components.css" />
+    <link rel="stylesheet" href="../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../assets/css/public.css" />
+  </head>
+  <body>
+    <header class="public-header">
+      <div class="public-header-content">
+        <a href="index.html" class="public-logo"
+          ><i data-lucide="database"></i><span>SC Data Bank</span></a
+        >
+        <nav class="public-nav">
+          <a href="index.html" class="public-nav-link"
+            ><i data-lucide="home"></i><span>Home</span></a
+          >
+          <a href="map.html" class="public-nav-link"
+            ><i data-lucide="map"></i><span>Map View</span></a
+          >
+          <a href="projects.html" class="public-nav-link active"
+            ><i data-lucide="folder"></i><span>Projects</span></a
+          >
+          <a href="analytics.html" class="public-nav-link"
+            ><i data-lucide="bar-chart"></i><span>Analytics</span></a
+          >
+        </nav>
+      </div>
+    </header>
+
+    <div class="detail-header">
+      <div class="detail-header-content">
+        <div
+          class="breadcrumb"
+          style="color: rgba(255, 255, 255, 0.9); margin-bottom: 1rem"
+        >
+          <a href="projects.html" style="color: rgba(255, 255, 255, 0.9)"
+            >Projects</a
+          >
+          <span class="breadcrumb-separator">/</span>
+          <span>Details</span>
+        </div>
+        <h1 class="detail-title" id="projectTitle"></h1>
+        <div class="detail-meta">
+          <div class="detail-meta-item">
+            <i data-lucide="tag"></i><span id="projectCategory"></span>
+          </div>
+          <div class="detail-meta-item">
+            <i data-lucide="map-pin"></i><span id="projectLocation"></span>
+          </div>
+          <div class="detail-meta-item">
+            <i data-lucide="calendar"></i><span id="projectDates"></span>
+          </div>
+          <div class="detail-meta-item"><span id="projectStatus"></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-content">
+      <div class="detail-grid">
+        <div class="detail-main">
+          <!-- Description -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Project Description</h3>
+            </div>
+            <div class="card-content"><p id="projectDescription"></p></div>
+          </div>
+
+          <!-- Timeline -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Project Timeline</h3>
+            </div>
+            <div class="card-content">
+              <div class="timeline" id="projectTimeline"></div>
+            </div>
+          </div>
+
+          <!-- Monitoring Snapshot -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Monitoring Snapshot</h3>
+            </div>
+            <div class="card-content">
+              <div id="monitoringSnapshot" class="monitoring-detail-grid"></div>
+            </div>
+          </div>
+
+          <!-- Issues & Catch-up -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Issues & Catch-Up Plan</h3>
+            </div>
+            <div class="card-content" id="issuesCatchup"></div>
+          </div>
+        </div>
+
+        <div class="detail-sidebar">
+          <!-- Progress -->
+          <div class="card">
+            <div class="card-header"><h3 class="card-title">Progress</h3></div>
+            <div class="card-content">
+              <div style="text-align: center; margin-bottom: 1.5rem">
+                <div
+                  style="
+                    font-size: var(--text-4xl);
+                    font-weight: var(--font-bold);
+                    color: hsl(var(--primary));
+                  "
+                  id="progressPercentage"
+                >
+                  0%
+                </div>
+                <div
+                  style="
+                    font-size: var(--text-sm);
+                    color: hsl(var(--muted-foreground));
+                  "
+                >
+                  Complete
+                </div>
+              </div>
+              <div
+                style="
+                  height: 0.75rem;
+                  background: hsl(var(--muted));
+                  border-radius: 999px;
+                  overflow: hidden;
+                "
+              >
+                <div
+                  id="progressBar"
+                  style="
+                    height: 100%;
+                    background: hsl(var(--primary));
+                    transition: width 0.3s;
+                  "
+                ></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Key Info -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Key Information</h3>
+            </div>
+            <div class="card-content">
+              <div style="display: flex; flex-direction: column; gap: 1rem">
+                <div>
+                  <div
+                    style="
+                      font-size: var(--text-xs);
+                      color: hsl(var(--muted-foreground));
+                      margin-bottom: 0.25rem;
+                    "
+                  >
+                    Budget
+                  </div>
+                  <div
+                    style="font-weight: var(--font-semibold)"
+                    id="projectBudget"
+                  ></div>
+                </div>
+                <div>
+                  <div
+                    style="
+                      font-size: var(--text-xs);
+                      color: hsl(var(--muted-foreground));
+                      margin-bottom: 0.25rem;
+                    "
+                  >
+                    Beneficiaries
+                  </div>
+                  <div
+                    style="font-weight: var(--font-semibold)"
+                    id="projectBeneficiaries"
+                  ></div>
+                </div>
+                <div>
+                  <div
+                    style="
+                      font-size: var(--text-xs);
+                      color: hsl(var(--muted-foreground));
+                      margin-bottom: 0.25rem;
+                    "
+                  >
+                    Implementing Agency
+                  </div>
+                  <div
+                    style="font-weight: var(--font-semibold)"
+                    id="projectAgency"
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Related Sitio -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Sitio Information</h3>
+            </div>
+            <div class="card-content">
+              <button
+                id="viewSitioBtn"
+                class="btn btn-outline w-full"
+                onclick="viewSitio()"
+              >
+                <i data-lucide="map-pin"></i>
+                <span>View Sitio Profile</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="../assets/js/icons.js"></script>
+    <script src="../assets/js/main.js"></script>
+    <script src="../assets/js/mock-data.js"></script>
+    <script>
+      const urlParams = new URLSearchParams(window.location.search);
+      const projectId = urlParams.get("id");
+      let currentProject;
+
+      document.addEventListener("DOMContentLoaded", function () {
+        if (!projectId) {
+          window.location.href = "projects.html";
+          return;
+        }
+        loadProjectDetails();
+      });
+
+      function loadProjectDetails() {
+        currentProject = window.mockData.getProjectById(projectId);
+        if (!currentProject) {
+          alert("Project not found");
+          window.location.href = "projects.html";
+          return;
+        }
+
+        document.getElementById("projectTitle").textContent =
+          currentProject.title;
+        document.getElementById("projectCategory").textContent =
+          currentProject.category;
+        document.getElementById(
+          "projectLocation"
+        ).textContent = `${currentProject.sitio_name}, ${currentProject.municipality}`;
+        document.getElementById("projectDates").textContent = `${formatDate(
+          currentProject.start_date
+        )} - ${formatDate(currentProject.end_date)}`;
+        document.getElementById(
+          "projectStatus"
+        ).innerHTML = `<span class="badge ${getStatusBadgeClass(
+          currentProject.status
+        )}">${getStatusLabel(currentProject.status)}</span>`;
+        document.getElementById("projectDescription").textContent =
+          currentProject.description;
+        document.getElementById("projectBudget").textContent =
+          "₱" + formatNumber(currentProject.budget);
+        document.getElementById("projectBeneficiaries").textContent =
+          formatNumber(currentProject.beneficiaries) + " people";
+        document.getElementById("projectAgency").textContent =
+          currentProject.implementing_agency;
+        document.getElementById("progressPercentage").textContent =
+          currentProject.completion_percentage + "%";
+        document.getElementById("progressBar").style.width =
+          currentProject.completion_percentage + "%";
+
+        loadTimeline();
+        renderMonitoringDetails();
+        refreshIcons();
+      }
+
+      function loadTimeline() {
+        const timeline = currentProject.timeline || [];
+        const container = document.getElementById("projectTimeline");
+
+        container.innerHTML = timeline
+          .map(
+            (item, index) => `
+        <div class="timeline-item">
+          <div class="timeline-marker ${item.status}"></div>
+          <div class="timeline-content">
+            <div class="timeline-date">${formatDate(item.date)}</div>
+            <div class="timeline-title">${item.title}</div>
+            <div class="timeline-description">${item.description}</div>
+          </div>
+        </div>
+      `
+          )
+          .join("");
+      }
+
+      function viewSitio() {
+        window.location.href = `sitio-detail.html?id=${currentProject.sitio_id}`;
+      }
+
+      function renderMonitoringDetails() {
+        const monitoring = currentProject.monitoring || {};
+        const allotment = monitoring.allotment || {};
+        const expenditure = monitoring.expenditure || {};
+        const physical = monitoring.physical || {};
+        const employment = monitoring.employment || {};
+        const contract = monitoring.contract || {};
+        const statusSummary = monitoring.statusSummary || {};
+
+        const totalAllotted =
+          allotment.total ?? allotment.allocated ?? currentProject.budget;
+        const released = allotment.released ?? 0;
+        const obligations = expenditure.obligations ?? 0;
+        const contractCost = expenditure.contractCost ?? 0;
+        const supplemental = allotment.supplemental ?? 0;
+        const utilization = totalAllotted
+          ? Math.min(100, (obligations / totalAllotted) * 100).toFixed(1)
+          : "0.0";
+        const plan = physical.plan ?? currentProject.completion_percentage;
+        const actual = physical.actual ?? currentProject.completion_percentage;
+        const slippage = physical.slippage ?? actual - plan;
+
+        const snapshot = document.getElementById("monitoringSnapshot");
+        snapshot.innerHTML = `
+        <div class="metric-panel">
+          <div class="metric-panel-title">Financials</div>
+          <dl class="metric-list">
+            <div><dt>Allotted Budget</dt><dd>${formatCurrency(
+              totalAllotted
+            )}</dd></div>
+            <div><dt>Supplemental</dt><dd>${formatCurrency(
+              supplemental
+            )}</dd></div>
+            <div><dt>Released</dt><dd>${formatCurrency(released)}</dd></div>
+            <div><dt>Obligations</dt><dd>${formatCurrency(
+              obligations
+            )}</dd></div>
+            <div><dt>Contract Cost</dt><dd>${formatCurrency(
+              contractCost
+            )}</dd></div>
+          </dl>
+          <div class="metric-progress">
+            <div class="progress-dual">
+              <div class="progress-dual-plan" style="width: 100%; opacity: 0.2;"></div>
+              <div class="progress-dual-actual" style="width: ${Math.min(
+                100,
+                utilization
+              )}%;"></div>
+            </div>
+            <div class="monitoring-note">Financial utilization: ${utilization}% of ${formatCurrency(
+          totalAllotted
+        )}</div>
+          </div>
+        </div>
+        <div class="metric-panel">
+          <div class="metric-panel-title">Physical, Employment & Contract</div>
+          <dl class="metric-list">
+            <div><dt>Planned Progress</dt><dd>${formatPercent(plan)}</dd></div>
+            <div><dt>Actual Progress</dt><dd>${formatPercent(actual)}</dd></div>
+            <div><dt>Slippage</dt><dd>${formatSignedPercent(
+              slippage
+            )}</dd></div>
+            <div><dt>Employment (M/F)</dt><dd>${employment.male ?? 0} / ${
+          employment.female ?? 0
+        }</dd></div>
+            <div><dt>Contract Duration</dt><dd>${
+              contract.duration || "N/A"
+            }</dd></div>
+            <div><dt>Delivery Time</dt><dd>${
+              contract.delivery || "N/A"
+            }</dd></div>
+            <div><dt>Extension</dt><dd>${
+              contract.extension || "None"
+            }</dd></div>
+          </dl>
+        </div>
+      `;
+
+        const issuesContainer = document.getElementById("issuesCatchup");
+        issuesContainer.innerHTML = `
+        <div class="issues-grid">
+          <div>
+            <div class="metric-panel-title">Current Stage</div>
+            <p class="issues-highlight">${
+              statusSummary.stage || getStatusLabel(currentProject.status)
+            }</p>
+            <p>${statusSummary.issues || "No critical issues reported."}</p>
+          </div>
+          <div>
+            <div class="metric-panel-title">Recommendations & Catch-Up</div>
+            <p>${
+              statusSummary.recommendations || "Maintain current interventions."
+            }</p>
+            <div class="monitoring-note"><strong>Catch-Up Plan:</strong> ${
+              monitoring.catchUpPlan || "N/A"
+            }</div>
+          </div>
+        </div>
+      `;
+      }
+    </script>
+  </body>
+</html>

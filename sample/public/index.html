@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>South Cotabato Convergence Data Bank</title>
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/utilities.css">
+  <link rel="stylesheet" href="../assets/css/public.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="public-header">
+    <div class="public-header-content">
+      <a href="index.html" class="public-logo">
+        <i data-lucide="database"></i>
+        <span>SC Data Bank</span>
+      </a>
+      <nav class="public-nav">
+        <a href="index.html" class="public-nav-link active"><i data-lucide="home"></i><span>Home</span></a>
+        <a href="map.html" class="public-nav-link"><i data-lucide="map"></i><span>Map View</span></a>
+        <a href="projects.html" class="public-nav-link"><i data-lucide="folder"></i><span>Projects</span></a>
+        <a href="analytics.html" class="public-nav-link"><i data-lucide="bar-chart"></i><span>Analytics</span></a>
+        <a href="../admin/login.html" class="btn btn-primary btn-sm"><i data-lucide="log-in"></i><span>Admin</span></a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1 class="hero-title">South Cotabato Convergence Data Bank</h1>
+      <p class="hero-description">
+        Transparent tracking of CATCH-UP projects and vulnerable community development across South Cotabato Province.
+        Real-time progress monitoring for improved governance and accountability.
+      </p>
+      <div class="hero-actions">
+        <a href="map.html" class="btn btn-lg" style="background: white; color: hsl(var(--primary));">
+          <i data-lucide="map"></i>
+          <span>Explore Map</span>
+        </a>
+        <a href="projects.html" class="btn btn-lg btn-outline" style="border-color: white; color: white;">
+          <i data-lucide="folder"></i>
+          <span>View Projects</span>
+        </a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-value" id="totalSitios">0</div>
+          <div class="hero-stat-label">Vulnerable Sitios</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-value" id="totalProjects">0</div>
+          <div class="hero-stat-label">Active Projects</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-value" id="completedProjects">0</div>
+          <div class="hero-stat-label">Completed Projects</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Projects -->
+  <section class="section">
+    <div class="section-content">
+      <div class="section-header">
+        <h2 class="section-title">Featured Projects</h2>
+        <p class="section-description">Highlighting recent and ongoing CATCH-UP projects making a difference in vulnerable communities</p>
+      </div>
+      <div class="project-grid" id="featuredProjects"></div>
+      <div style="text-align: center; margin-top: 2rem;">
+        <a href="projects.html" class="btn btn-outline btn-lg">
+          <span>View All Projects</span>
+          <i data-lucide="arrow-right"></i>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quick Stats -->
+  <section class="section section-alt">
+    <div class="section-content">
+      <div class="section-header">
+        <h2 class="section-title">Impact Overview</h2>
+        <p class="section-description">Key metrics showcasing our commitment to transparent community development</p>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
+        <div class="card">
+          <div class="card-content" style="text-align: center; padding: 2rem;">
+            <i data-lucide="users" style="width: 3rem; height: 3rem; margin: 0 auto 1rem; color: hsl(var(--primary));"></i>
+            <div class="card-stat" id="totalBeneficiaries">0</div>
+            <p class="card-stat-label">Total Beneficiaries</p>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-content" style="text-align: center; padding: 2rem;">
+            <i data-lucide="dollar-sign" style="width: 3rem; height: 3rem; margin: 0 auto 1rem; color: hsl(var(--primary));"></i>
+            <div class="card-stat" id="totalBudget">₱0</div>
+            <p class="card-stat-label">Total Investment</p>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-content" style="text-align: center; padding: 2rem;">
+            <i data-lucide="map-pin" style="width: 3rem; height: 3rem; margin: 0 auto 1rem; color: hsl(var(--primary));"></i>
+            <div class="card-stat" id="totalMunicipalities">0</div>
+            <p class="card-stat-label">Municipalities Covered</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="public-footer">
+    <div class="footer-content">
+      <div class="footer-grid">
+        <div>
+          <h4 class="footer-section-title">About</h4>
+          <p style="font-size: var(--text-sm); color: hsl(var(--muted-foreground));">
+            The South Cotabato Convergence Data Bank is a transparency initiative tracking CATCH-UP project implementation across 200+ vulnerable sitios.
+          </p>
+        </div>
+        <div>
+          <h4 class="footer-section-title">Quick Links</h4>
+          <div class="footer-links">
+            <a href="map.html" class="footer-link">Interactive Map</a>
+            <a href="projects.html" class="footer-link">All Projects</a>
+            <a href="analytics.html" class="footer-link">Analytics</a>
+            <a href="../admin/login.html" class="footer-link">Admin Portal</a>
+          </div>
+        </div>
+        <div>
+          <h4 class="footer-section-title">Contact</h4>
+          <div class="footer-links">
+            <a href="#" class="footer-link">Provincial Government</a>
+            <a href="#" class="footer-link">DILG South Cotabato</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2024 South Cotabato Province. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="../assets/js/icons.js"></script>
+  <script src="../assets/js/main.js"></script>
+  <script src="../assets/js/mock-data.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      loadStats();
+      loadFeaturedProjects();
+    });
+
+    function loadStats() {
+      const stats = window.mockData.stats;
+      document.getElementById('totalSitios').textContent = formatNumber(stats.total_sitios);
+      document.getElementById('totalProjects').textContent = formatNumber(stats.active_projects);
+      document.getElementById('completedProjects').textContent = formatNumber(stats.completed_projects);
+      document.getElementById('totalBeneficiaries').textContent = formatNumber(stats.total_beneficiaries);
+      document.getElementById('totalBudget').textContent = '₱' + formatNumber(Math.round(stats.total_budget / 1000000)) + 'M';
+      document.getElementById('totalMunicipalities').textContent = stats.municipalities;
+    }
+
+    function loadFeaturedProjects() {
+      const projects = window.mockData.projects.slice(0, 6);
+      const container = document.getElementById('featuredProjects');
+
+      container.innerHTML = projects.map(project => `
+        <div class="project-card" onclick="window.location.href='project-detail.html?id=${project.id}'">
+          <div class="project-card-image">
+            <i data-lucide="image" style="width: 3rem; height: 3rem;"></i>
+          </div>
+          <div class="project-card-content">
+            <div class="project-card-header">
+              <h3 class="project-card-title">${truncateText(project.title, 60)}</h3>
+              <span class="badge ${getStatusBadgeClass(project.status)}">${getStatusLabel(project.status)}</span>
+            </div>
+            <div class="project-card-meta">
+              <div class="project-card-meta-item">
+                <i data-lucide="map-pin"></i>
+                <span>${project.sitio_name}, ${project.municipality}</span>
+              </div>
+              <div class="project-card-meta-item">
+                <i data-lucide="tag"></i>
+                <span>${project.category}</span>
+              </div>
+            </div>
+            <p class="project-card-description">${truncateText(project.description, 100)}</p>
+            <div class="project-card-footer">
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <i data-lucide="users" style="width: 1rem; height: 1rem;"></i>
+                <span style="font-size: var(--text-sm);">${formatNumber(project.beneficiaries)} beneficiaries</span>
+              </div>
+              <div style="font-weight: 500; color: hsl(var(--primary));">${project.completion_percentage}%</div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      refreshIcons();
+    }
+  </script>
+</body>
+</html>

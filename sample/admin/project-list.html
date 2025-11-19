@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Project Management - South Cotabato Data Bank</title>
+    <link rel="stylesheet" href="../assets/css/variables.css" />
+    <link rel="stylesheet" href="../assets/css/base.css" />
+    <link rel="stylesheet" href="../assets/css/components.css" />
+    <link rel="stylesheet" href="../assets/css/utilities.css" />
+    <link rel="stylesheet" href="../assets/css/admin.css" />
+  </head>
+  <body>
+    <div class="admin-layout">
+      <aside class="admin-sidebar">
+        <div class="admin-sidebar-header">
+          <a href="index.html" class="admin-logo"
+            ><i data-lucide="database"></i><span>SC Data Bank</span></a
+          >
+        </div>
+        <nav class="admin-nav">
+          <div class="admin-nav-section">
+            <div class="admin-nav-title">Main</div>
+            <a href="index.html" class="admin-nav-link"
+              ><i data-lucide="layout-dashboard"></i><span>Dashboard</span></a
+            >
+          </div>
+          <div class="admin-nav-section">
+            <div class="admin-nav-title">Data Management</div>
+            <a href="sitio-list.html" class="admin-nav-link"
+              ><i data-lucide="map-pin"></i><span>Sitios</span></a
+            >
+            <a href="project-list.html" class="admin-nav-link active"
+              ><i data-lucide="folder"></i><span>Projects</span></a
+            >
+            <a href="import.html" class="admin-nav-link"
+              ><i data-lucide="upload-cloud"></i><span>Import Data</span></a
+            >
+          </div>
+          <div class="admin-nav-section">
+            <div class="admin-nav-title">System</div>
+            <a href="users.html" class="admin-nav-link"
+              ><i data-lucide="users"></i><span>Users</span></a
+            >
+            <a href="../public/index.html" class="admin-nav-link"
+              ><i data-lucide="external-link"></i
+              ><span>View Public Portal</span></a
+            >
+          </div>
+        </nav>
+        <div class="admin-sidebar-footer">
+          <div class="admin-user-info">
+            <div class="admin-user-avatar">A</div>
+            <div class="admin-user-details">
+              <div class="admin-user-name">Admin User</div>
+              <div class="admin-user-role">Administrator</div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <main class="admin-main">
+        <header class="admin-header">
+          <div class="admin-header-content">
+            <h1 class="admin-page-title">Project Management</h1>
+            <div class="admin-header-actions">
+              <button class="btn btn-outline btn-sm">
+                <i data-lucide="download"></i><span>Export</span>
+              </button>
+              <button
+                class="btn btn-primary btn-sm"
+                onclick="window.location.href='project-form.html'"
+              >
+                <i data-lucide="plus"></i><span>Add Project</span>
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <div class="admin-content">
+          <div class="card" style="margin-bottom: 1.5rem">
+            <div class="card-content">
+              <div class="filters-bar">
+                <div class="search-bar" style="flex: 1; max-width: 400px">
+                  <i data-lucide="search" class="search-icon"></i>
+                  <input
+                    type="text"
+                    id="searchInput"
+                    class="search-input form-input"
+                    placeholder="Search projects..."
+                    onkeyup="filterProjects()"
+                  />
+                </div>
+                <div class="filter-group">
+                  <label class="filter-label">Status:</label>
+                  <select
+                    id="statusFilter"
+                    class="form-select"
+                    onchange="filterProjects()"
+                  >
+                    <option value="">All</option>
+                    <option value="planning">Planning</option>
+                    <option value="in_progress">In Progress</option>
+                    <option value="completed">Completed</option>
+                    <option value="suspended">Suspended</option>
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label class="filter-label">Category:</label>
+                  <select
+                    id="categoryFilter"
+                    class="form-select"
+                    onchange="filterProjects()"
+                  >
+                    <option value="">All</option>
+                  </select>
+                </div>
+                <button class="btn btn-ghost btn-sm" onclick="resetFilters()">
+                  <i data-lucide="x"></i><span>Clear</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">
+                All Projects (<span id="projectCount">0</span>)
+              </h3>
+              <button class="btn btn-ghost btn-sm" onclick="refreshTable()">
+                <i data-lucide="refresh-cw"></i>
+              </button>
+            </div>
+            <div class="card-content" style="padding: 0">
+              <div
+                class="table-container"
+                style="border: none; border-radius: 0"
+              >
+                <table class="table monitoring-summary-table">
+                  <thead>
+                    <tr>
+                      <th>Project</th>
+                      <th>Location</th>
+                      <th>Financial Snapshot</th>
+                      <th>Progress</th>
+                      <th>Status & Notes</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="projectsTable"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="card-footer"><div id="pagination"></div></div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="../assets/js/icons.js"></script>
+    <script src="../assets/js/main.js"></script>
+    <script src="../assets/js/mock-data.js"></script>
+    <script>
+      if (!localStorage.getItem("isLoggedIn"))
+        window.location.href = "login.html";
+
+      let currentPage = 1;
+      const itemsPerPage = 10;
+      let filteredProjects = [];
+
+      document.addEventListener("DOMContentLoaded", function () {
+        loadCategoryFilter();
+        filterProjects();
+      });
+
+      function loadCategoryFilter() {
+        const categories = [
+          ...new Set(window.mockData.projects.map((p) => p.category)),
+        ];
+        const select = document.getElementById("categoryFilter");
+        categories.forEach((cat) => {
+          const option = document.createElement("option");
+          option.value = cat;
+          option.textContent = cat;
+          select.appendChild(option);
+        });
+      }
+
+      function filterProjects() {
+        const search = document
+          .getElementById("searchInput")
+          .value.toLowerCase();
+        const status = document.getElementById("statusFilter").value;
+        const category = document.getElementById("categoryFilter").value;
+
+        filteredProjects = window.mockData.projects.filter((project) => {
+          const matchesSearch =
+            !search ||
+            project.title.toLowerCase().includes(search) ||
+            project.sitio_name.toLowerCase().includes(search);
+          const matchesStatus = !status || project.status === status;
+          const matchesCategory = !category || project.category === category;
+          return matchesSearch && matchesStatus && matchesCategory;
+        });
+
+        currentPage = 1;
+        renderTable();
+      }
+
+      function renderTable() {
+        const start = (currentPage - 1) * itemsPerPage;
+        const paginatedProjects = filteredProjects.slice(
+          start,
+          start + itemsPerPage
+        );
+
+        document.getElementById("projectsTable").innerHTML = paginatedProjects
+          .map((project) => {
+            const monitoring = project.monitoring || {};
+            const allotment = monitoring.allotment || {};
+            const expenditure = monitoring.expenditure || {};
+            const physical = monitoring.physical || {};
+            const contract = monitoring.contract || {};
+            const statusSummary = monitoring.statusSummary || {};
+            const location =
+              monitoring.location ||
+              `${project.sitio_name}, ${project.municipality}`;
+            const stage = statusSummary.stage || getStatusLabel(project.status);
+            const issues = statusSummary.issues || "No critical issues logged.";
+            const catchUpPlan = monitoring.catchUpPlan || "N/A";
+            const utilization = allotment.total
+              ? Math.min(
+                  100,
+                  (Number(expenditure.obligations || 0) /
+                    Number(allotment.total)) *
+                    100
+                ).toFixed(1)
+              : 0;
+
+            return `
+        <tr>
+          <td>
+            <div style="font-weight: 600;">${truncateText(
+              project.title,
+              70
+            )}</div>
+            <div class="monitoring-note">Implementer: ${
+              monitoring.implementingUnit || project.implementing_agency
+            }</div>
+            <div class="monitoring-note">Category: ${project.category}</div>
+            <div class="monitoring-note">Fund Source: ${
+              monitoring.fundSource || "20% LDF"
+            } • FY ${monitoring.fiscalYear || project.project_year}</div>
+          </td>
+          <td>
+            <div>${location}</div>
+            <div class="monitoring-note">Sitio: ${project.sitio_name}</div>
+            <div class="monitoring-note">Contract: ${
+              contract.duration || "N/A"
+            }</div>
+          </td>
+          <td>
+            <div class="summary-financial">
+              <div class="monitoring-metric"><span>Allotted</span><strong>${formatCurrency(
+                allotment.total ?? allotment.allocated ?? project.budget
+              )}</strong></div>
+              <div class="monitoring-metric"><span>Released</span><strong>${formatCurrency(
+                allotment.released ?? 0
+              )}</strong></div>
+              <div class="monitoring-metric"><span>Obligated</span><strong>${formatCurrency(
+                expenditure.obligations || 0
+              )}</strong></div>
+              <div class="monitoring-note">Utilization: ${utilization}%</div>
+            </div>
+          </td>
+          <td>
+            <div class="progress-dual">
+              <div class="progress-dual-plan" style="width: ${Math.min(
+                100,
+                physical.plan ?? project.completion_percentage
+              )}%"></div>
+              <div class="progress-dual-actual" style="width: ${Math.min(
+                100,
+                physical.actual ?? project.completion_percentage
+              )}%"></div>
+            </div>
+            <div class="progress-legend">
+              <span>Plan ${formatPercent(
+                physical.plan ?? project.completion_percentage
+              )}</span>
+              <span>Actual ${formatPercent(
+                physical.actual ?? project.completion_percentage
+              )}</span>
+            </div>
+            <div class="monitoring-note">Slippage: ${formatSignedPercent(
+              physical.slippage ?? 0
+            )}</div>
+          </td>
+          <td>
+            <div class="monitoring-status">
+              <span class="badge ${getStatusBadgeClass(
+                project.status
+              )}">${getStatusLabel(project.status)}</span>
+              <div class="monitoring-note"><strong>Stage:</strong> ${stage}</div>
+              <div class="monitoring-note"><strong>Issue:</strong> ${truncateText(
+                issues,
+                100
+              )}</div>
+              <div class="monitoring-note"><strong>Catch-up:</strong> ${truncateText(
+                catchUpPlan,
+                100
+              )}</div>
+            </div>
+          </td>
+          <td>
+            <div class="table-actions">
+              <button class="btn btn-ghost btn-sm" onclick="window.location.href='../public/project-detail.html?id=${
+                project.id
+              }'" title="View"><i data-lucide="eye"></i></button>
+              <button class="btn btn-ghost btn-sm" onclick="window.location.href='project-form.html?id=${
+                project.id
+              }'" title="Edit"><i data-lucide="edit"></i></button>
+              <button class="btn btn-ghost btn-sm" onclick="deleteProject(${
+                project.id
+              })" title="Delete"><i data-lucide="trash-2"></i></button>
+            </div>
+          </td>
+        </tr>`;
+          })
+          .join("");
+
+        document.getElementById("projectCount").textContent =
+          filteredProjects.length;
+
+        const paginationContainer = document.getElementById("pagination");
+        paginationContainer.innerHTML = "";
+        if (filteredProjects.length > itemsPerPage) {
+          paginationContainer.appendChild(
+            createPagination(
+              filteredProjects.length,
+              itemsPerPage,
+              currentPage,
+              (page) => {
+                currentPage = page;
+                renderTable();
+              }
+            )
+          );
+        }
+
+        refreshIcons();
+      }
+
+      function resetFilters() {
+        document.getElementById("searchInput").value = "";
+        document.getElementById("statusFilter").value = "";
+        document.getElementById("categoryFilter").value = "";
+        filterProjects();
+      }
+
+      function refreshTable() {
+        filterProjects();
+        showToast("Table refreshed", "success");
+      }
+
+      function deleteProject(id) {
+        if (confirm("Are you sure you want to delete this project?")) {
+          showToast("Project deleted successfully", "success");
+          filterProjects();
+        }
+      }
+    </script>
+  </body>
+</html>

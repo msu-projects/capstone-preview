@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sitio Management - South Cotabato Data Bank</title>
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/utilities.css">
+  <link rel="stylesheet" href="../assets/css/admin.css">
+</head>
+<body>
+  <div class="admin-layout">
+    <!-- Sidebar (same as dashboard) -->
+    <aside class="admin-sidebar">
+      <div class="admin-sidebar-header">
+        <a href="index.html" class="admin-logo">
+          <i data-lucide="database"></i>
+          <span>SC Data Bank</span>
+        </a>
+      </div>
+      <nav class="admin-nav">
+        <div class="admin-nav-section">
+          <div class="admin-nav-title">Main</div>
+          <a href="index.html" class="admin-nav-link">
+            <i data-lucide="layout-dashboard"></i>
+            <span>Dashboard</span>
+          </a>
+        </div>
+        <div class="admin-nav-section">
+          <div class="admin-nav-title">Data Management</div>
+          <a href="sitio-list.html" class="admin-nav-link active">
+            <i data-lucide="map-pin"></i>
+            <span>Sitios</span>
+          </a>
+          <a href="project-list.html" class="admin-nav-link">
+            <i data-lucide="folder"></i>
+            <span>Projects</span>
+          </a>
+          <a href="import.html" class="admin-nav-link">
+            <i data-lucide="upload-cloud"></i>
+            <span>Import Data</span>
+          </a>
+        </div>
+        <div class="admin-nav-section">
+          <div class="admin-nav-title">System</div>
+          <a href="users.html" class="admin-nav-link">
+            <i data-lucide="users"></i>
+            <span>Users</span>
+          </a>
+          <a href="../public/index.html" class="admin-nav-link">
+            <i data-lucide="external-link"></i>
+            <span>View Public Portal</span>
+          </a>
+        </div>
+      </nav>
+      <div class="admin-sidebar-footer">
+        <div class="admin-user-info">
+          <div class="admin-user-avatar">A</div>
+          <div class="admin-user-details">
+            <div class="admin-user-name">Admin User</div>
+            <div class="admin-user-role">Administrator</div>
+          </div>
+          <button class="btn-icon btn-ghost" onclick="logout()">
+            <i data-lucide="log-out"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+      <header class="admin-header">
+        <div class="admin-header-content">
+          <h1 class="admin-page-title">Sitio Management</h1>
+          <div class="admin-header-actions">
+            <button class="btn btn-outline btn-sm" onclick="window.location.href='import.html'">
+              <i data-lucide="upload"></i>
+              <span>Import</span>
+            </button>
+            <button class="btn btn-primary btn-sm" onclick="window.location.href='sitio-form.html'">
+              <i data-lucide="plus"></i>
+              <span>Add Sitio</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div class="admin-content">
+        <!-- Filters -->
+        <div class="card" style="margin-bottom: 1.5rem;">
+          <div class="card-content">
+            <div class="filters-bar">
+              <div class="search-bar" style="flex: 1; max-width: 400px;">
+                <i data-lucide="search" class="search-icon"></i>
+                <input
+                  type="text"
+                  id="searchInput"
+                  class="search-input form-input"
+                  placeholder="Search sitios..."
+                  onkeyup="filterSitios()"
+                >
+              </div>
+              <div class="filter-group">
+                <label class="filter-label">Municipality:</label>
+                <select id="municipalityFilter" class="form-select" onchange="filterSitios()">
+                  <option value="">All</option>
+                </select>
+              </div>
+              <button class="btn btn-ghost btn-sm" onclick="resetFilters()">
+                <i data-lucide="x"></i>
+                <span>Clear</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sitios Table -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">All Sitios (<span id="sitioCount">0</span>)</h3>
+            <button class="btn btn-ghost btn-sm" onclick="refreshTable()">
+              <i data-lucide="refresh-cw"></i>
+            </button>
+          </div>
+          <div class="card-content" style="padding: 0;">
+            <div class="table-container" style="border: none; border-radius: 0;">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Sitio Name</th>
+                    <th>Barangay</th>
+                    <th>Municipality</th>
+                    <th>Population</th>
+                    <th>Households</th>
+                    <th>Projects</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="sitiosTable">
+                  <!-- Populated by JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card-footer">
+            <div id="pagination"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="../assets/js/icons.js"></script>
+  <script src="../assets/js/main.js"></script>
+  <script src="../assets/js/mock-data.js"></script>
+
+  <script>
+    if (!localStorage.getItem('isLoggedIn')) window.location.href = 'login.html';
+
+    let currentPage = 1;
+    const itemsPerPage = 10;
+    let filteredSitios = [];
+
+    document.addEventListener('DOMContentLoaded', function() {
+      loadMunicipalityFilter();
+      filterSitios();
+    });
+
+    function loadMunicipalityFilter() {
+      const municipalities = [...new Set(window.mockData.sitios.map(s => s.municipality))];
+      const select = document.getElementById('municipalityFilter');
+      municipalities.forEach(mun => {
+        const option = document.createElement('option');
+        option.value = mun;
+        option.textContent = mun;
+        select.appendChild(option);
+      });
+    }
+
+    function filterSitios() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const municipality = document.getElementById('municipalityFilter').value;
+
+      filteredSitios = window.mockData.sitios.filter(sitio => {
+        const matchesSearch = !search ||
+          sitio.name.toLowerCase().includes(search) ||
+          sitio.barangay.toLowerCase().includes(search) ||
+          sitio.municipality.toLowerCase().includes(search);
+        const matchesMunicipality = !municipality || sitio.municipality === municipality;
+        return matchesSearch && matchesMunicipality;
+      });
+
+      currentPage = 1;
+      renderTable();
+    }
+
+    function renderTable() {
+      const start = (currentPage - 1) * itemsPerPage;
+      const end = start + itemsPerPage;
+      const paginatedSitios = filteredSitios.slice(start, end);
+
+      const tbody = document.getElementById('sitiosTable');
+      tbody.innerHTML = paginatedSitios.map(sitio => `
+        <tr>
+          <td>
+            <div style="font-weight: 500;">${sitio.name}</div>
+          </td>
+          <td>${sitio.barangay}</td>
+          <td>${sitio.municipality}</td>
+          <td>${formatNumber(sitio.population)}</td>
+          <td>${formatNumber(sitio.households)}</td>
+          <td>
+            <span class="badge badge-primary">${sitio.projects_count}</span>
+          </td>
+          <td>
+            <div class="table-actions">
+              <button class="btn btn-ghost btn-sm" onclick="viewSitio(${sitio.id})" title="View">
+                <i data-lucide="eye"></i>
+              </button>
+              <button class="btn btn-ghost btn-sm" onclick="editSitio(${sitio.id})" title="Edit">
+                <i data-lucide="edit"></i>
+              </button>
+              <button class="btn btn-ghost btn-sm" onclick="deleteSitio(${sitio.id})" title="Delete">
+                <i data-lucide="trash-2"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+
+      document.getElementById('sitioCount').textContent = filteredSitios.length;
+
+      // Render pagination
+      const paginationContainer = document.getElementById('pagination');
+      paginationContainer.innerHTML = '';
+      if (filteredSitios.length > itemsPerPage) {
+        const pagination = createPagination(filteredSitios.length, itemsPerPage, currentPage, (page) => {
+          currentPage = page;
+          renderTable();
+        });
+        paginationContainer.appendChild(pagination);
+      }
+
+      refreshIcons();
+    }
+
+    function resetFilters() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('municipalityFilter').value = '';
+      filterSitios();
+    }
+
+    function refreshTable() {
+      filterSitios();
+      showToast('Table refreshed', 'success');
+    }
+
+    function viewSitio(id) {
+      window.location.href = `../public/sitio-detail.html?id=${id}`;
+    }
+
+    function editSitio(id) {
+      window.location.href = `sitio-form.html?id=${id}`;
+    }
+
+    function deleteSitio(id) {
+      if (confirm('Are you sure you want to delete this sitio?')) {
+        showToast('Sitio deleted successfully', 'success');
+        filterSitios();
+      }
+    }
+
+    function logout() {
+      localStorage.clear();
+      window.location.href = 'login.html';
+    }
+  </script>
+</body>
+</html>
