@@ -41,7 +41,7 @@ function createMonitoringDetails(overrides: Partial<MonitoringDetails> = {}): Mo
 	const base: MonitoringDetails = {
 		fundSource: '20% LDF',
 		fiscalYear: 2025,
-		implementingUnit: "Provincial Governor's Office - CATCH-UP Program",
+		implementingUnit: "Provincial Governor's Office - CATCH-UP Program", // Always PGO-CATCH-UP
 		location: '',
 		allotment: {
 			allocated: 0,
@@ -78,6 +78,8 @@ function createMonitoringDetails(overrides: Partial<MonitoringDetails> = {}): Mo
 	return {
 		...base,
 		...overrides,
+		// Always ensure implementingUnit is set to default
+		implementingUnit: "Provincial Governor's Office - CATCH-UP Program",
 		allotment: { ...base.allotment, ...(overrides.allotment || {}) },
 		expenditure: { ...base.expenditure, ...(overrides.expenditure || {}) },
 		physical: { ...base.physical, ...(overrides.physical || {}) },
@@ -210,7 +212,7 @@ export const projects: Project[] = [
 		end_date: '2025-01-30',
 		completion_percentage: 92,
 		beneficiaries: 510,
-		implementing_agency: "Provincial Engineer's Office",
+		implementing_partner: "Provincial Engineer's Office",
 		project_year: 2024,
 		timeline: [
 			{
@@ -434,8 +436,7 @@ export const projects: Project[] = [
 			planned_start: '2024-06-10',
 			planned_end: '2024-11-15',
 			planned_duration_days: 158,
-			budget: 3900000,
-			milestones_count: 6
+			budget: 3900000
 		},
 		monitoring: createMonitoringDetails({
 			location: 'Brgy. Edwards, Tboli',
@@ -491,7 +492,7 @@ export const projects: Project[] = [
 		end_date: '2024-11-15',
 		completion_percentage: 100,
 		beneficiaries: 420,
-		implementing_agency: "Provincial Engineer's Office",
+		implementing_partner: "Provincial Engineer's Office",
 		project_year: 2024,
 		timeline: [
 			{
@@ -564,7 +565,7 @@ export const projects: Project[] = [
 		end_date: '2025-02-28',
 		completion_percentage: 58,
 		beneficiaries: 600,
-		implementing_agency: 'DepEd - South Cotabato',
+		implementing_partner: 'DepEd - South Cotabato',
 		project_year: 2024,
 		timeline: [
 			{
@@ -639,7 +640,7 @@ export const projects: Project[] = [
 		end_date: '2025-06-30',
 		completion_percentage: 5,
 		beneficiaries: 450,
-		implementing_agency: 'DepEd - South Cotabato',
+		implementing_partner: 'DepEd - South Cotabato',
 		project_year: 2025,
 		timeline: [
 			{
@@ -702,7 +703,7 @@ export const projects: Project[] = [
 		end_date: '2024-12-31',
 		completion_percentage: 70,
 		beneficiaries: 50,
-		implementing_agency: 'DA - Region XII',
+		implementing_partner: 'DA - Region XII',
 		project_year: 2024,
 		timeline: [
 			{
@@ -825,7 +826,7 @@ for (let i = 6; i <= 20; i++) {
 		end_date: `2024-${10 + (i % 3)}-30`,
 		completion_percentage: Math.round(actual),
 		beneficiaries: sitio.population,
-		implementing_agency: agencies[i % agencies.length],
+		implementing_partner: agencies[i % agencies.length],
 		project_year: 2024,
 		timeline: [
 			{

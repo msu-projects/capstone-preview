@@ -710,9 +710,11 @@
 						<div>
 							<div class="mb-1 flex items-center gap-2 text-xs text-muted-foreground">
 								<Building2 class="size-3" />
-								Implementing Agency
+								Partner Agency
 							</div>
-							<div class="font-semibold">{project.implementing_agency}</div>
+							<div class="font-semibold">
+								{project.implementing_partner || 'Provincial Governor\'s Office - CATCH-UP'}
+							</div>
 						</div>
 						<Separator />
 						<div>

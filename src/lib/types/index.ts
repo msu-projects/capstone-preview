@@ -182,7 +182,7 @@ export interface Project {
 	budget: number;
 	beneficiaries: number;
 	completion_percentage: number;
-	implementing_agency: string;
+	implementing_partner?: string; // Optional - for NGO/agency partners collaborating with PGO-CATCH-UP
 	project_year: number;
 	timeline?: TimelineEvent[];
 	phases?: Phase[];

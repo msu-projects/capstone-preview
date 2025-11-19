@@ -38,7 +38,7 @@
 	let endDate = $state<DateValue | undefined>(undefined);
 	let budget = $state('');
 	let beneficiaries = $state('');
-	let implementingAgency = $state('');
+	let implementingPartner = $state('');
 	let projectYear = $state(new Date().getFullYear().toString());
 	let completionPercentage = $state('0');
 
@@ -127,8 +127,7 @@
 			startDate !== undefined &&
 			endDate !== undefined &&
 			budget !== '' &&
-			beneficiaries !== '' &&
-			implementingAgency !== ''
+			beneficiaries !== ''
 	);
 
 	const canSave = $derived(isBasicInfoValid);
@@ -157,13 +156,13 @@
 			end_date: endDate?.toString() ?? '',
 			budget: Number(budget),
 			beneficiaries: Number(beneficiaries),
-			implementing_agency: implementingAgency,
+			implementing_partner: implementingPartner || undefined,
 			project_year: Number(projectYear),
 			completion_percentage: Number(completionPercentage),
 			monitoring: {
 				fundSource,
 				fiscalYear: Number(fiscalYear),
-				implementingUnit,
+				implementingUnit: "Provincial Governor's Office - CATCH-UP Program",
 				location,
 				allotment: {
 					allocated: Number(allocatedBudget),
@@ -311,9 +310,8 @@
 						bind:endDate
 						bind:budget
 						bind:beneficiaries
-						bind:implementingAgency
+						bind:implementingPartner
 						bind:projectYear
-						bind:completionPercentage
 						bind:baselineApproved
 						bind:startDateOpen
 						bind:endDateOpen

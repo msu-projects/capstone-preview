@@ -22,9 +22,8 @@
 		endDate: DateValue | undefined;
 		budget: string;
 		beneficiaries: string;
-		implementingAgency: string;
+		implementingPartner: string;
 		projectYear: string;
-		completionPercentage: string;
 		baselineApproved: DateValue | undefined;
 		startDateOpen: boolean;
 		endDateOpen: boolean;
@@ -41,9 +40,8 @@
 		endDate = $bindable(),
 		budget = $bindable(),
 		beneficiaries = $bindable(),
-		implementingAgency = $bindable(),
+		implementingPartner = $bindable(),
 		projectYear = $bindable(),
-		completionPercentage = $bindable(),
 		baselineApproved = $bindable(),
 		startDateOpen = $bindable(),
 		endDateOpen = $bindable(),
@@ -285,36 +283,24 @@
 					/>
 				</div>
 
-				<!-- Implementing Agency -->
+				<!-- Implementing Partner -->
 				<div class="space-y-2">
-					<Label for="implementingAgency">
-						Implementing Agency <span class="text-destructive">*</span>
-					</Label>
+					<Label for="implementingPartner">Partner Agency (Optional)</Label>
 					<Input
-						id="implementingAgency"
-						bind:value={implementingAgency}
-						placeholder="e.g., DPWH, DA, DOH"
-						required
+						id="implementingPartner"
+						bind:value={implementingPartner}
+						placeholder="e.g., DepEd, DOH, NGO partners"
 					/>
+					<p class="text-xs text-muted-foreground">
+						Primary implementer is Provincial Governor's Office - CATCH-UP. Add collaborating
+						partners here.
+					</p>
 				</div>
 
 				<!-- Project Year -->
 				<div class="space-y-2">
 					<Label for="projectYear">Project Year</Label>
 					<Input id="projectYear" type="number" bind:value={projectYear} min="2000" />
-				</div>
-
-				<!-- Completion Percentage -->
-				<div class="space-y-2">
-					<Label for="completionPercentage">Completion (%)</Label>
-					<Input
-						id="completionPercentage"
-						type="number"
-						bind:value={completionPercentage}
-						min="0"
-						max="100"
-						step="0.1"
-					/>
 				</div>
 			</div>
 		</Card.CardContent>

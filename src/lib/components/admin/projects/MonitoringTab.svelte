@@ -86,14 +86,18 @@
 					<Input id="fiscalYear" type="number" bind:value={fiscalYear} min="2000" />
 				</div>
 
-				<div class="space-y-2">
+				<!-- <div class="space-y-2">
 					<Label for="implementingUnit">Implementing Unit</Label>
 					<Input
 						id="implementingUnit"
-						bind:value={implementingUnit}
-						placeholder="Department/Division"
+						value="Provincial Governor's Office - CATCH-UP Program"
+						readonly
+						class="bg-muted"
 					/>
-				</div>
+					<p class="text-xs text-muted-foreground">
+						Fixed value. All projects are implemented by PGO-CATCH-UP.
+					</p>
+				</div> -->
 
 				<div class="space-y-2">
 					<Label for="location">Location</Label>
@@ -148,22 +152,12 @@
 
 				<div class="space-y-2">
 					<Label for="obligations">Obligations</Label>
-					<CurrencyInput
-						id="obligations"
-						bind:value={obligations}
-						placeholder="₱ 0"
-						min={0}
-					/>
+					<CurrencyInput id="obligations" bind:value={obligations} placeholder="₱ 0" min={0} />
 				</div>
 
 				<div class="space-y-2">
 					<Label for="contractCost">Contract Cost</Label>
-					<CurrencyInput
-						id="contractCost"
-						bind:value={contractCost}
-						placeholder="₱ 0"
-						min={0}
-					/>
+					<CurrencyInput id="contractCost" bind:value={contractCost} placeholder="₱ 0" min={0} />
 				</div>
 			</div>
 		</Card.CardContent>
