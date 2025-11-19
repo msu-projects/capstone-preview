@@ -5,9 +5,10 @@
 	import MilestonesTab from '$lib/components/admin/projects/MilestonesTab.svelte';
 	import MonitoringTab from '$lib/components/admin/projects/MonitoringTab.svelte';
 	import ProjectFormHeader from '$lib/components/admin/projects/ProjectFormHeader.svelte';
+	import QuickUpdateForm from '$lib/components/admin/projects/QuickUpdateForm.svelte';
+	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import * as Card from '$lib/components/ui/card';
 	import * as Tabs from '$lib/components/ui/tabs';
-	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import { projects, sitios } from '$lib/mock-data';
 	import type { Project, ProjectStatus } from '$lib/types';
 	import { getLocalTimeZone, parseDate, today, type DateValue } from '@internationalized/date';
@@ -29,6 +30,8 @@
 	let isSaving = $state(false);
 	let activeTab = $state('basic');
 	let cancelDialogOpen = $state(false);
+	// Default to Quick Update for existing projects, Full Edit for new projects
+	let editMode = $state<'quick' | 'full'>(isNewProject ? 'full' : 'quick');
 
 	// Basic Information
 	let title = $state(existingProject?.title ?? '');
@@ -44,7 +47,7 @@
 	);
 	let budget = $state(existingProject?.budget?.toString() ?? '');
 	let beneficiaries = $state(existingProject?.beneficiaries?.toString() ?? '');
-	let implementingPartner = $state(existingProject?.implementing_partner ?? '');
+	let implementingPartner = $state(existingProject?.implementing_agency ?? '');
 	let projectYear = $state(
 		existingProject?.project_year?.toString() ?? new Date().getFullYear().toString()
 	);
@@ -200,7 +203,7 @@
 			end_date: endDate?.toString() ?? '',
 			budget: Number(budget),
 			beneficiaries: Number(beneficiaries),
-			implementing_partner: implementingPartner || undefined,
+			implementing_agency: implementingPartner || undefined,
 			project_year: Number(projectYear),
 			completion_percentage: Number(completionPercentage),
 			monitoring: {
@@ -310,115 +313,174 @@
 	<!-- Content -->
 	<div class="flex-1 p-6">
 		<div class="mx-auto max-w-6xl">
-			<Tabs.Root bind:value={activeTab} class="w-full">
-				<!-- Tabs List -->
-				<Card.Card class="mb-6">
-					<Card.CardContent class="">
-						<Tabs.List class="grid w-full grid-cols-2 lg:grid-cols-5">
-							<Tabs.Trigger value="basic" class="flex items-center gap-2">
-								<Building2 class="size-4" />
-								Basic Info
-								{#if !isBasicInfoValid && activeTab !== 'basic'}
-									<CircleAlert class="size-3 text-destructive" />
-								{/if}
-							</Tabs.Trigger>
-							<Tabs.Trigger value="monitoring" class="flex items-center gap-2">
-								<DollarSign class="size-4" />
-								Monitoring
-							</Tabs.Trigger>
-							<Tabs.Trigger value="accountability" class="flex items-center gap-2">
-								<Users class="size-4" />
-								Accountability
-							</Tabs.Trigger>
-							<Tabs.Trigger value="baseline" class="flex items-center gap-2">
-								<CalendarIcon class="size-4" />
-								Baseline
-							</Tabs.Trigger>
-							<Tabs.Trigger value="milestones" class="flex items-center gap-2">
-								<CircleCheck class="size-4" />
-								Milestones
-							</Tabs.Trigger>
-						</Tabs.List>
-					</Card.CardContent>
-				</Card.Card>
+			<!-- Mode Toggle (only for existing projects) -->
+			{#if !isNewProject}
+				<div class="mb-6 flex justify-center">
+					<div class="inline-flex rounded-lg border border-border bg-background p-1">
+						<button
+							type="button"
+							onclick={() => (editMode = 'quick')}
+							class="rounded-md px-4 py-2 text-sm font-medium transition-colors {editMode ===
+							'quick'
+								? 'bg-primary text-primary-foreground'
+								: 'text-muted-foreground hover:text-foreground'}"
+						>
+							Quick Update
+						</button>
+						<button
+							type="button"
+							onclick={() => (editMode = 'full')}
+							class="rounded-md px-4 py-2 text-sm font-medium transition-colors {editMode === 'full'
+								? 'bg-primary text-primary-foreground'
+								: 'text-muted-foreground hover:text-foreground'}"
+						>
+							Full Edit
+						</button>
+					</div>
+				</div>
+			{/if}
 
-				<!-- Basic Information Tab -->
-				<Tabs.Content value="basic">
-					<BasicInfoTab
-						bind:title
-						bind:description
-						bind:category
-						bind:selectedSitio
-						bind:status
-						bind:startDate
-						bind:endDate
-						bind:budget
-						bind:beneficiaries
-						bind:implementingPartner
-						bind:projectYear
-						bind:baselineApproved
-						bind:startDateOpen
-						bind:endDateOpen
-						bind:baselineApprovedOpen
-					/>
-				</Tabs.Content>
-				<!-- Monitoring Tab -->
-				<Tabs.Content value="monitoring">
-					<MonitoringTab
-						bind:fundSource
-						bind:fiscalYear
-						bind:implementingUnit
-						bind:location
-						bind:allocatedBudget
-						bind:supplementalBudget
-						bind:releasedAmount
-						bind:obligations
-						bind:contractCost
-						bind:physicalPlan
-						bind:physicalActual
-						bind:physicalSlippage
-						bind:maleEmployment
-						bind:femaleEmployment
-						bind:contractDuration
-						bind:contractDelivery
-						bind:contractExtension
-						bind:statusStage
-						bind:statusIssues
-						bind:statusRecommendations
-						bind:catchUpPlan
-					/>
-				</Tabs.Content>
-				<!-- Accountability Tab -->
-				<Tabs.Content value="accountability">
-					<AccountabilityTab
-						bind:projectManager
-						bind:pmAgency
-						bind:technicalLead
-						bind:contractor
-						bind:oversightCommittee
-						bind:newCommitteeMember
-						bind:technicalContact
-						bind:administrativeContact
-					/>
-				</Tabs.Content>
+			{#if editMode === 'quick' && !isNewProject}
+				<!-- Quick Update Mode -->
+				<QuickUpdateForm
+					bind:status
+					bind:physicalActual
+					bind:statusStage
+					bind:statusIssues
+					bind:statusRecommendations
+					bind:catchUpPlan
+					bind:maleEmployment
+					bind:femaleEmployment
+					onSwitchToFull={() => (editMode = 'full')}
+				/>
+			{:else}
+				<!-- Full Edit Mode -->
+				{#if !isNewProject}
+					<!-- Quick Update Hint -->
+					<div class="mb-4 text-center">
+						<p class="text-sm text-muted-foreground">
+							Just updating progress?
+							<button
+								type="button"
+								onclick={() => (editMode = 'quick')}
+								class="text-primary underline-offset-4 hover:underline"
+							>
+								Switch to Quick Update
+							</button>
+						</p>
+					</div>
+				{/if}
 
-				<!-- Baseline Tab -->
-				<Tabs.Content value="baseline">
-					<BaselineTab
-						bind:baselinePlannedStart
-						bind:baselinePlannedEnd
-						bind:baselineDuration
-						bind:baselineBudget
-						bind:baselinePlannedStartOpen
-						bind:baselinePlannedEndOpen
-					/>
-				</Tabs.Content>
+				<Tabs.Root bind:value={activeTab} class="w-full">
+					<!-- Tabs List -->
+					<Card.Card class="mb-6">
+						<Card.CardContent class="">
+							<Tabs.List class="grid w-full grid-cols-2 lg:grid-cols-5">
+								<Tabs.Trigger value="basic" class="flex items-center gap-2">
+									<Building2 class="size-4" />
+									Basic Info
+									{#if !isBasicInfoValid && activeTab !== 'basic'}
+										<CircleAlert class="size-3 text-destructive" />
+									{/if}
+								</Tabs.Trigger>
+								<Tabs.Trigger value="monitoring" class="flex items-center gap-2">
+									<DollarSign class="size-4" />
+									Monitoring
+								</Tabs.Trigger>
+								<Tabs.Trigger value="accountability" class="flex items-center gap-2">
+									<Users class="size-4" />
+									Accountability
+								</Tabs.Trigger>
+								<Tabs.Trigger value="baseline" class="flex items-center gap-2">
+									<CalendarIcon class="size-4" />
+									Baseline
+								</Tabs.Trigger>
+								<Tabs.Trigger value="milestones" class="flex items-center gap-2">
+									<CircleCheck class="size-4" />
+									Milestones
+								</Tabs.Trigger>
+							</Tabs.List>
+						</Card.CardContent>
+					</Card.Card>
 
-				<!-- Milestones Tab -->
-				<Tabs.Content value="milestones">
-					<MilestonesTab bind:milestones bind:showMilestoneForm />
-				</Tabs.Content>
-			</Tabs.Root>
+					<!-- Basic Information Tab -->
+					<Tabs.Content value="basic">
+						<BasicInfoTab
+							bind:title
+							bind:description
+							bind:category
+							bind:selectedSitio
+							bind:status
+							bind:startDate
+							bind:endDate
+							bind:budget
+							bind:beneficiaries
+							bind:implementingPartner
+							bind:projectYear
+							bind:baselineApproved
+							bind:startDateOpen
+							bind:endDateOpen
+							bind:baselineApprovedOpen
+						/>
+					</Tabs.Content>
+					<!-- Monitoring Tab -->
+					<Tabs.Content value="monitoring">
+						<MonitoringTab
+							bind:fundSource
+							bind:fiscalYear
+							bind:implementingUnit
+							bind:location
+							bind:allocatedBudget
+							bind:supplementalBudget
+							bind:releasedAmount
+							bind:obligations
+							bind:contractCost
+							bind:physicalPlan
+							bind:physicalActual
+							bind:physicalSlippage
+							bind:maleEmployment
+							bind:femaleEmployment
+							bind:contractDuration
+							bind:contractDelivery
+							bind:contractExtension
+							bind:statusStage
+							bind:statusIssues
+							bind:statusRecommendations
+							bind:catchUpPlan
+						/>
+					</Tabs.Content>
+					<!-- Accountability Tab -->
+					<Tabs.Content value="accountability">
+						<AccountabilityTab
+							bind:projectManager
+							bind:pmAgency
+							bind:technicalLead
+							bind:contractor
+							bind:oversightCommittee
+							bind:newCommitteeMember
+							bind:technicalContact
+							bind:administrativeContact
+						/>
+					</Tabs.Content>
+
+					<!-- Baseline Tab -->
+					<Tabs.Content value="baseline">
+						<BaselineTab
+							bind:baselinePlannedStart
+							bind:baselinePlannedEnd
+							bind:baselineDuration
+							bind:baselineBudget
+							bind:baselinePlannedStartOpen
+							bind:baselinePlannedEndOpen
+						/>
+					</Tabs.Content>
+
+					<!-- Milestones Tab -->
+					<Tabs.Content value="milestones">
+						<MilestonesTab bind:milestones bind:showMilestoneForm />
+					</Tabs.Content>
+				</Tabs.Root>
+			{/if}
 		</div>
 	</div>
 </div>
