@@ -34,15 +34,15 @@
 	function getStatusBadgeVariant(status: ProjectStatus) {
 		switch (status) {
 			case 'planning':
-				return 'secondary';
+				return 'secondary' as const;
 			case 'in-progress':
-				return 'warning';
+				return 'outline' as const;
 			case 'completed':
-				return 'success';
+				return 'default' as const;
 			case 'suspended':
-				return 'destructive';
+				return 'destructive' as const;
 			default:
-				return 'default';
+				return 'default' as const;
 		}
 	}
 
