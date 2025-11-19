@@ -2,6 +2,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Calendar } from '$lib/components/ui/calendar';
 	import * as Card from '$lib/components/ui/card';
+	import { CurrencyInput } from '$lib/components/ui/currency-input';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import * as Popover from '$lib/components/ui/popover';
@@ -25,8 +26,10 @@
 		implementingAgency: string;
 		projectYear: string;
 		completionPercentage: string;
+		baselineApproved: DateValue | undefined;
 		startDateOpen: boolean;
 		endDateOpen: boolean;
+		baselineApprovedOpen: boolean;
 	}
 
 	let {
@@ -42,8 +45,10 @@
 		implementingAgency = $bindable(),
 		projectYear = $bindable(),
 		completionPercentage = $bindable(),
+		baselineApproved = $bindable(),
 		startDateOpen = $bindable(),
-		endDateOpen = $bindable()
+		endDateOpen = $bindable(),
+		baselineApprovedOpen = $bindable()
 	}: Props = $props();
 
 	const selectedSitioData = $derived(sitios.find((s) => s.id === Number(selectedSitio)));
@@ -59,16 +64,6 @@
 		'Social Services',
 		'Other'
 	];
-
-	function formatCurrency(amount: string): string {
-		const num = Number(amount);
-		if (isNaN(num)) return '₱0';
-		return new Intl.NumberFormat('en-PH', {
-			style: 'currency',
-			currency: 'PHP',
-			minimumFractionDigits: 0
-		}).format(num);
-	}
 </script>
 
 <div class="space-y-6">
@@ -108,7 +103,7 @@
 						Category <span class="text-destructive">*</span>
 					</Label>
 					<Select.Root type="single" bind:value={category}>
-						<Select.Trigger id="category">
+						<Select.Trigger id="category" class="w-full">
 							{category || 'Select category'}
 						</Select.Trigger>
 						<Select.Content>
@@ -123,7 +118,7 @@
 				<div class="space-y-2">
 					<Label for="status">Status</Label>
 					<Select.Root type="single" bind:value={status}>
-						<Select.Trigger id="status">
+						<Select.Trigger id="status" class="w-full">
 							{status === 'planning'
 								? 'Planning'
 								: status === 'in-progress'
@@ -156,7 +151,7 @@
 					Sitio <span class="text-destructive">*</span>
 				</Label>
 				<Select.Root type="single" bind:value={selectedSitio}>
-					<Select.Trigger id="sitio">
+					<Select.Trigger id="sitio" class="w-full">
 						{#if selectedSitioData}
 							{selectedSitioData.name}, {selectedSitioData.municipality}
 						{:else}
@@ -186,7 +181,7 @@
 						Start Date <span class="text-destructive">*</span>
 					</Label>
 					<Popover.Root bind:open={startDateOpen}>
-						<Popover.Trigger>
+						<Popover.Trigger class="w-full">
 							<Button variant="outline" class="w-full justify-start text-left font-normal">
 								<CalendarIcon class="mr-2 size-4" />
 								{startDate ? startDate.toString() : 'Pick a date'}
@@ -208,7 +203,7 @@
 						End Date <span class="text-destructive">*</span>
 					</Label>
 					<Popover.Root bind:open={endDateOpen}>
-						<Popover.Trigger>
+						<Popover.Trigger class="w-full">
 							<Button variant="outline" class="w-full justify-start text-left font-normal">
 								<CalendarIcon class="mr-2 size-4" />
 								{endDate ? endDate.toString() : 'Pick a date'}
@@ -225,6 +220,33 @@
 					</Popover.Root>
 				</div>
 			</div>
+
+			<!-- Baseline Approval Date -->
+			<div class="grid gap-4 md:grid-cols-2">
+				<div class="space-y-2">
+					<Label for="baselineApproved">Baseline Approval Date</Label>
+					<Popover.Root bind:open={baselineApprovedOpen}>
+						<Popover.Trigger class="w-full">
+							<Button variant="outline" class="w-full justify-start text-left font-normal">
+								<CalendarIcon class="mr-2 size-4" />
+								{baselineApproved ? baselineApproved.toString() : 'Pick a date'}
+							</Button>
+						</Popover.Trigger>
+						<Popover.Content class="w-auto p-0">
+							<Calendar
+								type="single"
+								bind:value={baselineApproved}
+								class="rounded-md border"
+								onValueChange={() => (baselineApprovedOpen = false)}
+							/>
+						</Popover.Content>
+					</Popover.Root>
+					<p class="text-sm text-muted-foreground">
+						Date when the original project plan was officially approved
+					</p>
+				</div>
+				<div></div>
+			</div>
 		</Card.CardContent>
 	</Card.Card>
 
@@ -238,22 +260,15 @@
 				<!-- Budget -->
 				<div class="space-y-2">
 					<Label for="budget">
-						Budget (PHP) <span class="text-destructive">*</span>
+						Budget <span class="text-destructive">*</span>
 					</Label>
-					<Input
+					<CurrencyInput
 						id="budget"
-						type="number"
 						bind:value={budget}
-						placeholder="0"
-						min="0"
-						step="1000"
+						placeholder="₱ 0"
+						min={0}
 						required
 					/>
-					{#if budget}
-						<p class="text-sm text-muted-foreground">
-							{formatCurrency(budget)}
-						</p>
-					{/if}
 				</div>
 
 				<!-- Beneficiaries -->

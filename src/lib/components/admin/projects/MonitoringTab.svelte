@@ -1,5 +1,6 @@
 <script lang="ts">
 	import * as Card from '$lib/components/ui/card';
+	import { CurrencyInput } from '$lib/components/ui/currency-input';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { Separator } from '$lib/components/ui/separator';
@@ -112,25 +113,21 @@
 			<div class="grid gap-4 md:grid-cols-3">
 				<div class="space-y-2">
 					<Label for="allocatedBudget">Allocated Budget</Label>
-					<Input
+					<CurrencyInput
 						id="allocatedBudget"
-						type="number"
 						bind:value={allocatedBudget}
-						placeholder="0"
-						min="0"
-						step="1000"
+						placeholder="₱ 0"
+						min={0}
 					/>
 				</div>
 
 				<div class="space-y-2">
 					<Label for="supplementalBudget">Supplemental Budget</Label>
-					<Input
+					<CurrencyInput
 						id="supplementalBudget"
-						type="number"
 						bind:value={supplementalBudget}
-						placeholder="0"
-						min="0"
-						step="1000"
+						placeholder="₱ 0"
+						min={0}
 					/>
 				</div>
 
@@ -141,37 +138,31 @@
 
 				<div class="space-y-2">
 					<Label for="releasedAmount">Released Amount</Label>
-					<Input
+					<CurrencyInput
 						id="releasedAmount"
-						type="number"
 						bind:value={releasedAmount}
-						placeholder="0"
-						min="0"
-						step="1000"
+						placeholder="₱ 0"
+						min={0}
 					/>
 				</div>
 
 				<div class="space-y-2">
 					<Label for="obligations">Obligations</Label>
-					<Input
+					<CurrencyInput
 						id="obligations"
-						type="number"
 						bind:value={obligations}
-						placeholder="0"
-						min="0"
-						step="1000"
+						placeholder="₱ 0"
+						min={0}
 					/>
 				</div>
 
 				<div class="space-y-2">
 					<Label for="contractCost">Contract Cost</Label>
-					<Input
+					<CurrencyInput
 						id="contractCost"
-						type="number"
 						bind:value={contractCost}
-						placeholder="0"
-						min="0"
-						step="1000"
+						placeholder="₱ 0"
+						min={0}
 					/>
 				</div>
 			</div>

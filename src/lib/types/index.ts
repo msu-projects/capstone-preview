@@ -129,7 +129,6 @@ export interface Baseline {
 	planned_end: string;
 	planned_duration_days: number;
 	budget: number;
-	milestones_count: number;
 }
 
 export interface MonitoringDetails {

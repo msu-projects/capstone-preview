@@ -9,25 +9,19 @@
 	import { Calendar as CalendarIcon } from '@lucide/svelte';
 
 	interface Props {
-		baselineApproved: DateValue | undefined;
 		baselinePlannedStart: DateValue | undefined;
 		baselinePlannedEnd: DateValue | undefined;
 		baselineDuration: string;
 		baselineBudget: string;
-		baselineMilestones: string;
-		baselineApprovedOpen: boolean;
 		baselinePlannedStartOpen: boolean;
 		baselinePlannedEndOpen: boolean;
 	}
 
 	let {
-		baselineApproved = $bindable(),
 		baselinePlannedStart = $bindable(),
 		baselinePlannedEnd = $bindable(),
 		baselineDuration = $bindable(),
 		baselineBudget = $bindable(),
-		baselineMilestones = $bindable(),
-		baselineApprovedOpen = $bindable(),
 		baselinePlannedStartOpen = $bindable(),
 		baselinePlannedEndOpen = $bindable()
 	}: Props = $props();
@@ -36,38 +30,22 @@
 <Card.Card>
 	<Card.CardHeader>
 		<Card.CardTitle>Baseline Information</Card.CardTitle>
-		<Card.CardDescription>Original approved plan for project comparison</Card.CardDescription>
+		<Card.CardDescription>
+			Original planned timeline and budget for variance tracking and accountability
+		</Card.CardDescription>
 	</Card.CardHeader>
 	<Card.CardContent class="space-y-4">
-		<div class="grid gap-4 md:grid-cols-2">
-			<div class="space-y-2">
-				<Label for="baselineApproved">Approved Date</Label>
-				<Popover.Root bind:open={baselineApprovedOpen}>
-					<Popover.Trigger class="w-full justify-start text-left font-normal">
-						<Button variant="outline" class="w-full justify-start text-left font-normal">
-							<CalendarIcon class="mr-2 size-4" />
-							{baselineApproved ? baselineApproved.toString() : 'Pick a date'}
-						</Button>
-					</Popover.Trigger>
-					<Popover.Content class="w-auto p-0">
-						<Calendar
-							type="single"
-							bind:value={baselineApproved}
-							class="rounded-md border"
-							onValueChange={() => (baselineApprovedOpen = false)}
-						/>
-					</Popover.Content>
-				</Popover.Root>
-			</div>
-			<div class="space-y-2">
-				<Label for="baselineBudget">Baseline Budget</Label>
-				<Input id="baselineBudget" type="number" bind:value={baselineBudget} min="0" step="1000" />
-			</div>
+		<div class="mb-4 rounded-md bg-muted p-3 text-sm text-muted-foreground">
+			This baseline captures the original project plan. Compare these values against current dates
+			and budget to measure project variance and delays.
+		</div>
 
+		<div class="grid gap-4 md:grid-cols-2">
+			<!-- Planned Start Date -->
 			<div class="space-y-2">
-				<Label for="baselinePlannedStart">Planned Start</Label>
+				<Label for="baselinePlannedStart">Original Planned Start Date</Label>
 				<Popover.Root bind:open={baselinePlannedStartOpen}>
-					<Popover.Trigger class="w-full justify-start text-left font-normal">
+					<Popover.Trigger class="w-full">
 						<Button variant="outline" class="w-full justify-start text-left font-normal">
 							<CalendarIcon class="mr-2 size-4" />
 							{baselinePlannedStart ? baselinePlannedStart.toString() : 'Pick a date'}
@@ -83,10 +61,12 @@
 					</Popover.Content>
 				</Popover.Root>
 			</div>
+
+			<!-- Planned End Date -->
 			<div class="space-y-2">
-				<Label for="baselinePlannedEnd">Planned End</Label>
+				<Label for="baselinePlannedEnd">Original Planned End Date</Label>
 				<Popover.Root bind:open={baselinePlannedEndOpen}>
-					<Popover.Trigger class="w-full justify-start text-left font-normal">
+					<Popover.Trigger class="w-full">
 						<Button variant="outline" class="w-full justify-start text-left font-normal">
 							<CalendarIcon class="mr-2 size-4" />
 							{baselinePlannedEnd ? baselinePlannedEnd.toString() : 'Pick a date'}
@@ -102,14 +82,30 @@
 					</Popover.Content>
 				</Popover.Root>
 			</div>
+
+			<!-- Planned Duration -->
 			<div class="space-y-2">
-				<Label for="baselineDuration">Duration (days)</Label>
-				<Input id="baselineDuration" type="number" bind:value={baselineDuration} min="0" />
+				<Label for="baselineDuration">Original Planned Duration (days)</Label>
+				<Input
+					id="baselineDuration"
+					type="number"
+					bind:value={baselineDuration}
+					placeholder="e.g., 180"
+					min="0"
+				/>
 			</div>
 
+			<!-- Baseline Budget -->
 			<div class="space-y-2">
-				<Label for="baselineMilestones">Number of Milestones</Label>
-				<Input id="baselineMilestones" type="number" bind:value={baselineMilestones} min="0" />
+				<Label for="baselineBudget">Original Approved Budget (PHP)</Label>
+				<Input
+					id="baselineBudget"
+					type="number"
+					bind:value={baselineBudget}
+					placeholder="0"
+					min="0"
+					step="1000"
+				/>
 			</div>
 		</div>
 	</Card.CardContent>

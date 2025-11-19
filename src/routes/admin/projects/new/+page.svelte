@@ -7,9 +7,9 @@
 	import ProjectFormHeader from '$lib/components/admin/projects/ProjectFormHeader.svelte';
 	import * as Card from '$lib/components/ui/card';
 	import * as Tabs from '$lib/components/ui/tabs';
-	import { projects, sitios } from '$lib/mock-data';
+	import { sitios } from '$lib/mock-data';
 	import type { Project, ProjectStatus } from '$lib/types';
-	import { getLocalTimeZone, parseDate, today, type DateValue } from '@internationalized/date';
+	import { getLocalTimeZone, today, type DateValue } from '@internationalized/date';
 	import {
 		Building2,
 		Calendar as CalendarIcon,
@@ -20,41 +20,31 @@
 	} from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
 
-	const { data } = $props();
-	const isNewProject = data.id === 'new';
-	const existingProject = isNewProject ? null : projects.find((p) => p.id === Number(data.id));
+	const isNewProject = true;
 
 	// Form state
 	let isSaving = $state(false);
 	let activeTab = $state('basic');
 
 	// Basic Information
-	let title = $state(existingProject?.title ?? '');
-	let description = $state(existingProject?.description ?? '');
-	let category = $state(existingProject?.category ?? '');
-	let selectedSitio = $state<string>(existingProject?.sitio_id.toString() ?? '');
-	let status = $state<ProjectStatus>(existingProject?.status ?? 'planning');
-	let startDate = $state<DateValue | undefined>(
-		existingProject?.start_date ? parseDate(existingProject.start_date) : today(getLocalTimeZone())
-	);
-	let endDate = $state<DateValue | undefined>(
-		existingProject?.end_date ? parseDate(existingProject.end_date) : undefined
-	);
-	let budget = $state(existingProject?.budget?.toString() ?? '');
-	let beneficiaries = $state(existingProject?.beneficiaries?.toString() ?? '');
-	let implementingAgency = $state(existingProject?.implementing_agency ?? '');
-	let projectYear = $state(
-		existingProject?.project_year?.toString() ?? new Date().getFullYear().toString()
-	);
-	let completionPercentage = $state(existingProject?.completion_percentage?.toString() ?? '0');
+	let title = $state('');
+	let description = $state('');
+	let category = $state('');
+	let selectedSitio = $state<string>('');
+	let status = $state<ProjectStatus>('planning');
+	let startDate = $state<DateValue | undefined>(today(getLocalTimeZone()));
+	let endDate = $state<DateValue | undefined>(undefined);
+	let budget = $state('');
+	let beneficiaries = $state('');
+	let implementingAgency = $state('');
+	let projectYear = $state(new Date().getFullYear().toString());
+	let completionPercentage = $state('0');
 
 	// Monitoring Details
-	let fundSource = $state(existingProject?.monitoring?.fundSource ?? '');
-	let fiscalYear = $state(
-		existingProject?.monitoring?.fiscalYear?.toString() ?? new Date().getFullYear().toString()
-	);
-	let implementingUnit = $state(existingProject?.monitoring?.implementingUnit ?? '');
-	let location = $state(existingProject?.monitoring?.location ?? '');
+	let fundSource = $state('');
+	let fiscalYear = $state(new Date().getFullYear().toString());
+	let implementingUnit = $state('');
+	let location = $state('');
 
 	// Popover states for date pickers
 	let startDateOpen = $state(false);
@@ -64,85 +54,51 @@
 	let baselinePlannedEndOpen = $state(false);
 
 	// Financial
-	let allocatedBudget = $state(
-		existingProject?.monitoring?.allotment?.allocated?.toString() ??
-			existingProject?.budget?.toString() ??
-			''
-	);
-	let supplementalBudget = $state(
-		existingProject?.monitoring?.allotment?.supplemental?.toString() ?? '0'
-	);
-	let releasedAmount = $state(existingProject?.monitoring?.allotment?.released?.toString() ?? '0');
-	let obligations = $state(
-		existingProject?.monitoring?.expenditure?.obligations?.toString() ?? '0'
-	);
-	let contractCost = $state(
-		existingProject?.monitoring?.expenditure?.contractCost?.toString() ?? '0'
-	);
+	let allocatedBudget = $state('');
+	let supplementalBudget = $state('0');
+	let releasedAmount = $state('0');
+	let obligations = $state('0');
+	let contractCost = $state('0');
 
 	// Physical Progress
-	let physicalPlan = $state(existingProject?.monitoring?.physical?.plan?.toString() ?? '100');
-	let physicalActual = $state(
-		existingProject?.monitoring?.physical?.actual?.toString() ??
-			existingProject?.completion_percentage?.toString() ??
-			'0'
-	);
-	let physicalSlippage = $state(existingProject?.monitoring?.physical?.slippage?.toString() ?? '0');
+	let physicalPlan = $state('100');
+	let physicalActual = $state('0');
+	let physicalSlippage = $state('0');
 
 	// Employment
-	let maleEmployment = $state(existingProject?.monitoring?.employment?.male?.toString() ?? '0');
-	let femaleEmployment = $state(existingProject?.monitoring?.employment?.female?.toString() ?? '0');
+	let maleEmployment = $state('0');
+	let femaleEmployment = $state('0');
 
 	// Contract
-	let contractDuration = $state(existingProject?.monitoring?.contract?.duration ?? '');
-	let contractDelivery = $state(existingProject?.monitoring?.contract?.delivery ?? '');
-	let contractExtension = $state(existingProject?.monitoring?.contract?.extension ?? '');
+	let contractDuration = $state('');
+	let contractDelivery = $state('');
+	let contractExtension = $state('');
 
 	// Status Summary
-	let statusStage = $state(existingProject?.monitoring?.statusSummary?.stage ?? '');
-	let statusIssues = $state(existingProject?.monitoring?.statusSummary?.issues ?? '');
-	let statusRecommendations = $state(
-		existingProject?.monitoring?.statusSummary?.recommendations ?? ''
-	);
-	let catchUpPlan = $state(existingProject?.monitoring?.catchUpPlan ?? '');
+	let statusStage = $state('');
+	let statusIssues = $state('');
+	let statusRecommendations = $state('');
+	let catchUpPlan = $state('');
 
 	// Accountability
-	let projectManager = $state(existingProject?.accountability?.project_manager ?? '');
-	let pmAgency = $state(existingProject?.accountability?.pm_agency ?? '');
-	let technicalLead = $state(existingProject?.accountability?.technical_lead ?? '');
-	let contractor = $state(existingProject?.accountability?.contractor ?? '');
-	let oversightCommittee = $state<string[]>(
-		existingProject?.accountability?.oversight_committee ?? []
-	);
+	let projectManager = $state('');
+	let pmAgency = $state('');
+	let technicalLead = $state('');
+	let contractor = $state('');
+	let oversightCommittee = $state<string[]>([]);
 	let newCommitteeMember = $state('');
-	let technicalContact = $state(
-		existingProject?.accountability?.escalation_contacts?.technical ?? ''
-	);
-	let administrativeContact = $state(
-		existingProject?.accountability?.escalation_contacts?.administrative ?? ''
-	);
+	let technicalContact = $state('');
+	let administrativeContact = $state('');
 
 	// Baseline
-	let baselineApproved = $state<DateValue | undefined>(
-		existingProject?.baseline?.approved_date
-			? parseDate(existingProject.baseline.approved_date)
-			: undefined
-	);
-	let baselinePlannedStart = $state<DateValue | undefined>(
-		existingProject?.baseline?.planned_start
-			? parseDate(existingProject.baseline.planned_start)
-			: undefined
-	);
-	let baselinePlannedEnd = $state<DateValue | undefined>(
-		existingProject?.baseline?.planned_end
-			? parseDate(existingProject.baseline.planned_end)
-			: undefined
-	);
-	let baselineDuration = $state(existingProject?.baseline?.planned_duration_days?.toString() ?? '');
-	let baselineBudget = $state(existingProject?.baseline?.budget?.toString() ?? '');
+	let baselineApproved = $state<DateValue | undefined>(undefined);
+	let baselinePlannedStart = $state<DateValue | undefined>(undefined);
+	let baselinePlannedEnd = $state<DateValue | undefined>(undefined);
+	let baselineDuration = $state('');
+	let baselineBudget = $state('');
 
 	// Milestones
-	let milestones = $state(existingProject?.milestones ?? []);
+	let milestones = $state([]);
 	let showMilestoneForm = $state(false);
 
 	// Derived values
@@ -261,7 +217,7 @@
 		console.log('Saving project:', projectData);
 
 		isSaving = false;
-		toast.success(isNewProject ? 'Project created successfully!' : 'Project updated successfully!');
+		toast.success('Project created successfully!');
 
 		// Redirect after save
 		setTimeout(() => {
@@ -290,14 +246,14 @@
 </script>
 
 <svelte:head>
-	<title>{isNewProject ? 'Create New Project' : `Edit ${existingProject?.title}`} - Admin</title>
+	<title>Create New Project - Admin</title>
 </svelte:head>
 
 <div class="flex min-h-screen flex-col bg-muted/30">
 	<!-- Header -->
 	<ProjectFormHeader
 		{isNewProject}
-		existingProject={existingProject ?? null}
+		existingProject={null}
 		{canSave}
 		{isSaving}
 		onSave={handleSave}

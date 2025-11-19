@@ -6,6 +6,7 @@
 	import { Progress } from '$lib/components/ui/progress';
 	import * as Select from '$lib/components/ui/select';
 	import * as Table from '$lib/components/ui/table';
+	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import { projects } from '$lib/mock-data';
 	import type { ProjectStatus } from '$lib/types';
 	import {
@@ -28,6 +29,8 @@
 	let sortBy = $state<'title' | 'budget' | 'progress' | 'status'>('title');
 	let sortOrder = $state<'asc' | 'desc'>('asc');
 	const itemsPerPage = 10;
+	let deleteDialogOpen = $state(false);
+	let projectToDelete = $state<number | null>(null);
 
 	// Get unique categories
 	const categories = $derived([...new Set(projects.map((p) => p.category))]);
@@ -140,10 +143,17 @@
 	}
 
 	function handleDelete(id: number) {
-		if (confirm('Are you sure you want to delete this project?')) {
+		projectToDelete = id;
+		deleteDialogOpen = true;
+	}
+
+	function confirmDelete() {
+		if (projectToDelete !== null) {
 			// In a real app, this would call an API
-			console.log('Delete project:', id);
+			console.log('Delete project:', projectToDelete);
+			projectToDelete = null;
 		}
+		deleteDialogOpen = false;
 	}
 
 	function handleExport() {
