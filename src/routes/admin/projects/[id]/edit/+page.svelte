@@ -204,7 +204,6 @@
 					};
 		});
 	}); // Tab 5: Budget & Resources
-	let totalProjectBudget = $state(existingProject?.budget?.toString() ?? '');
 	let fundingSources = $state<Omit<FundingSource, 'id' | 'project_id'>[]>(
 		existingProject?.funding_sources?.map((fs) => ({
 			source_name: fs.source_name,
@@ -240,9 +239,7 @@
 
 	const isTab4Valid = $derived(projectManager.trim() !== '' && pmAgency.trim() !== '');
 
-	const isTab5Valid = $derived(
-		totalProjectBudget !== '' && fundingSources.length > 0 && budgetComponents.length > 0
-	);
+	const isTab5Valid = $derived(fundingSources.length > 0 && budgetComponents.length > 0);
 
 	const canSave = $derived(isTab1Valid && isTab2Valid && isTab3Valid && isTab4Valid && isTab5Valid);
 
@@ -308,7 +305,7 @@
 				sectoral_rep: sectoralRep
 			},
 			// Tab 5
-			budget: Number(totalProjectBudget),
+			budget: Number(totalBudget),
 			funding_sources: fundingSources,
 			budget_components: budgetComponents
 		};
@@ -456,7 +453,7 @@
 				</Tabs.Content>
 
 				<Tabs.Content value="budget">
-					<BudgetResourcesTab bind:totalProjectBudget bind:fundingSources bind:budgetComponents />
+					<BudgetResourcesTab totalBudget={totalBudget} bind:fundingSources bind:budgetComponents />
 				</Tabs.Content>
 			</Tabs.Root>
 

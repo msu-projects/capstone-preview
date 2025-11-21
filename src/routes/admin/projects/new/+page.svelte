@@ -4,6 +4,7 @@
 	import CategoryProjectSelectionTab from '$lib/components/admin/projects/CategoryProjectSelectionTab.svelte';
 	import LocationBeneficiariesTab from '$lib/components/admin/projects/LocationBeneficiariesTab.svelte';
 	import PerformanceTargetsTab from '$lib/components/admin/projects/PerformanceTargetsTab.svelte';
+	import MonthlyTargetsForm from '$lib/components/projects/MonthlyTargetsForm.svelte';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
@@ -12,6 +13,7 @@
 		BudgetComponent,
 		CategoryKey,
 		FundingSource,
+		MonthlyReleaseSchedule,
 		PerformanceTarget,
 		ProjectSitio
 	} from '$lib/types';
@@ -21,6 +23,7 @@
 		ArrowLeft,
 		ArrowRight,
 		Banknote,
+		Calendar,
 		CircleAlert,
 		FolderOpen,
 		MapPin,
@@ -89,9 +92,12 @@
 	});
 
 	// Tab 5: Budget & Resources
-	let totalProjectBudget = $state('');
 	let fundingSources = $state<Omit<FundingSource, 'id' | 'project_id'>[]>([]);
 	let budgetComponents = $state<Omit<BudgetComponent, 'id' | 'project_id'>[]>([]);
+
+	// Tab 6: Monthly Planning
+	let monthlyReleaseSchedule = $state<Omit<MonthlyReleaseSchedule, 'id' | 'project_id'>[]>([]);
+	let performanceTargetsWithMonthly = $state<PerformanceTarget[]>([]);
 
 	// Validation
 	const isTab1Valid = $derived(
@@ -112,14 +118,20 @@
 
 	const isTab4Valid = $derived(projectManager.trim() !== '' && pmAgency.trim() !== '');
 
-	const isTab5Valid = $derived(
-		totalProjectBudget !== '' && fundingSources.length > 0 && budgetComponents.length > 0
+	const isTab5Valid = $derived(fundingSources.length > 0 && budgetComponents.length > 0);
+
+	const isTab6Valid = $derived(
+		performanceTargetsWithMonthly.length > 0 &&
+			performanceTargetsWithMonthly.every((target) => target.monthly_breakdown !== undefined) &&
+			monthlyReleaseSchedule.length > 0
 	);
 
-	const canSave = $derived(isTab1Valid && isTab2Valid && isTab3Valid && isTab4Valid && isTab5Valid);
+	const canSave = $derived(
+		isTab1Valid && isTab2Valid && isTab3Valid && isTab4Valid && isTab5Valid && isTab6Valid
+	);
 
 	// Tab navigation
-	const tabOrder = ['category', 'location', 'performance', 'accountability', 'budget'];
+	const tabOrder = ['category', 'location', 'performance', 'accountability', 'budget', 'monthly'];
 	const currentTabIndex = $derived(tabOrder.indexOf(activeTab));
 	const canGoNext = $derived(currentTabIndex < tabOrder.length - 1);
 	const canGoPrevious = $derived(currentTabIndex > 0);
@@ -157,7 +169,6 @@
 			project_sitios: projectSitios,
 			total_beneficiaries: projectSitios.reduce((sum, ps) => sum + ps.beneficiaries_target, 0),
 			// Tab 3
-			performance_targets: performanceTargets,
 			start_date: targetStartDate?.toString(),
 			end_date: targetEndDate?.toString(),
 			direct_beneficiaries_male: Number(directBeneficiariesMale),
@@ -179,9 +190,12 @@
 				sectoral_rep: sectoralRep
 			},
 			// Tab 5
-			budget: Number(totalProjectBudget),
+			budget: Number(totalBudget),
 			funding_sources: fundingSources,
-			budget_components: budgetComponents
+			budget_components: budgetComponents,
+			// Tab 6
+			performance_targets: performanceTargetsWithMonthly,
+			release_schedule: monthlyReleaseSchedule
 		};
 
 		console.log('Saving enhanced project:', projectData);
@@ -231,12 +245,12 @@
 
 	<!-- Content -->
 	<div class="flex-1 p-6">
-		<div class="mx-auto max-w-6xl">
+		<div class="mx-auto max-w-7xl">
 			<Tabs.Root bind:value={activeTab} class="w-full">
 				<!-- Tabs List -->
 				<Card.Card class="mb-6">
 					<Card.CardContent class="p-3">
-						<Tabs.List class="grid w-full grid-cols-5 gap-1">
+						<Tabs.List class="grid w-full grid-cols-6 gap-1">
 							<Tabs.Trigger value="category" class="flex items-center gap-2 text-xs">
 								<FolderOpen class="size-4" />
 								<span class="hidden lg:inline">Category &</span> Type
@@ -269,6 +283,13 @@
 								<Banknote class="size-4" />
 								<span class="hidden lg:inline">Budget &</span> Resources
 								{#if !isTab5Valid && activeTab !== 'budget'}
+									<CircleAlert class="size-3 text-destructive" />
+								{/if}
+							</Tabs.Trigger>
+							<Tabs.Trigger value="monthly" class="flex items-center gap-2 text-xs">
+								<Calendar class="size-4" />
+								<span class="hidden lg:inline">Monthly</span> Planning
+								{#if !isTab6Valid && activeTab !== 'monthly'}
 									<CircleAlert class="size-3 text-destructive" />
 								{/if}
 							</Tabs.Trigger>
@@ -319,12 +340,29 @@
 				</Tabs.Content>
 
 				<Tabs.Content value="budget">
-					<BudgetResourcesTab bind:totalProjectBudget bind:fundingSources bind:budgetComponents />
+					<BudgetResourcesTab totalBudget={totalBudget} bind:fundingSources bind:budgetComponents />
+				</Tabs.Content>
+
+				<Tabs.Content value="monthly">
+					<Card.Card>
+						<Card.CardContent class="p-6">
+							<MonthlyTargetsForm
+								performanceTargets={performanceTargets as PerformanceTarget[]}
+								startDate={targetStartDate?.toString() || ''}
+								endDate={targetEndDate?.toString() || ''}
+								totalBudget={Number(totalBudget)}
+								onUpdate={(data) => {
+									performanceTargetsWithMonthly = data.performanceTargets;
+									monthlyReleaseSchedule = data.releaseSchedule;
+								}}
+							/>
+						</Card.CardContent>
+					</Card.Card>
 				</Tabs.Content>
 			</Tabs.Root>
 
 			<!-- Navigation Buttons -->
-			<Card.Card class="mt-6">
+			<Card.Card class="mt-6 p-0">
 				<Card.CardContent class="flex justify-between p-4">
 					<Button variant="outline" onclick={previousTab} disabled={!canGoPrevious} class="gap-2">
 						<ArrowLeft class="size-4" />

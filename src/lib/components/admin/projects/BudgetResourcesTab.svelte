@@ -10,11 +10,11 @@
 	import { Banknote, Calendar, PieChart, Plus, Trash2 } from '@lucide/svelte';
 
 	let {
-		totalProjectBudget = $bindable(''),
+		totalBudget = '',
 		fundingSources = $bindable<Omit<FundingSource, 'id' | 'project_id'>[]>([]),
 		budgetComponents = $bindable<Omit<BudgetComponent, 'id' | 'project_id'>[]>([])
 	} = $props<{
-		totalProjectBudget: string;
+		totalBudget: string;
 		fundingSources: Omit<FundingSource, 'id' | 'project_id'>[];
 		budgetComponents: Omit<BudgetComponent, 'id' | 'project_id'>[];
 	}>();
@@ -30,7 +30,7 @@
 	let newComponentName = $state('');
 	let newComponentAmount = $state('');
 
-	const totalBudget = $derived(Number(totalProjectBudget) || 0);
+	const totalBudgetAmount = $derived(Number(totalBudget) || 0);
 
 	const totalFundingSources = $derived(
 		fundingSources.reduce((sum: number, fs: FundingSource) => sum + fs.amount, 0)
@@ -40,14 +40,14 @@
 		budgetComponents.reduce((sum: number, bc: BudgetComponent) => sum + bc.amount, 0)
 	);
 
-	const fundingGap = $derived(totalBudget - totalFundingSources);
-	const budgetGap = $derived(totalBudget - totalBudgetComponents);
+	const fundingGap = $derived(totalBudgetAmount - totalFundingSources);
+	const budgetGap = $derived(totalBudgetAmount - totalBudgetComponents);
 
 	function addFundingSource() {
 		if (!newSourceName || !newSourceAmount) return;
 
 		const amount = Number(newSourceAmount);
-		const percentage = totalBudget > 0 ? (amount / totalBudget) * 100 : 0;
+		const percentage = totalBudgetAmount > 0 ? (amount / totalBudgetAmount) * 100 : 0;
 
 		fundingSources = [
 			...fundingSources,
@@ -72,7 +72,7 @@
 		if (!newComponentName || !newComponentAmount) return;
 
 		const amount = Number(newComponentAmount);
-		const percentage = totalBudget > 0 ? (amount / totalBudget) * 100 : 0;
+		const percentage = totalBudgetAmount > 0 ? (amount / totalBudgetAmount) * 100 : 0;
 
 		budgetComponents = [
 			...budgetComponents,
@@ -113,34 +113,27 @@
 </script>
 
 <div class="space-y-6">
-	<!-- Total Project Budget -->
-	<Card.Card>
+	<!-- Total Project Budget (Read-only from Tab 3) -->
+	<Card.Card class="border-primary/20 bg-primary/5">
 		<Card.CardHeader>
 			<Card.CardTitle class="flex items-center gap-2">
 				<Banknote class="size-5" />
-				Total Project Budget
+				Target Budget
 			</Card.CardTitle>
-			<Card.CardDescription>Single overall budget for the entire project</Card.CardDescription>
+			<Card.CardDescription>
+				Budget defined in Performance Targets tab (funding sources and components must total to this
+				amount)
+			</Card.CardDescription>
 		</Card.CardHeader>
 		<Card.CardContent>
-			<div class="space-y-2">
-				<Label for="total-budget" class="required">Total Budget (PHP)</Label>
-				<CurrencyInput
-					id="total-budget"
-					bind:value={totalProjectBudget}
-					placeholder="₱ 0"
-					min={0}
-					class="text-lg font-semibold"
-					required
-				/>
-				{#if totalBudget > 0}
-					<p class="text-sm text-muted-foreground">
-						{new Intl.NumberFormat('en-PH', {
-							style: 'currency',
-							currency: 'PHP'
-						}).format(totalBudget)}
-					</p>
-				{/if}
+			<div class="rounded-lg border border-border bg-background p-4">
+				<p class="mb-1 text-sm font-medium text-muted-foreground">Total Project Budget</p>
+				<p class="text-3xl font-bold">
+					{new Intl.NumberFormat('en-PH', {
+						style: 'currency',
+						currency: 'PHP'
+					}).format(totalBudgetAmount)}
+				</p>
 			</div>
 		</Card.CardContent>
 	</Card.Card>
@@ -202,7 +195,7 @@
 								}).format(totalFundingSources)}
 							</Table.Cell>
 							<Table.Cell class="text-right">
-								{totalBudget > 0 ? ((totalFundingSources / totalBudget) * 100).toFixed(1) : 0}%
+								{totalBudgetAmount > 0 ? ((totalFundingSources / totalBudgetAmount) * 100).toFixed(1) : 0}%
 							</Table.Cell>
 							<Table.Cell></Table.Cell>
 						</Table.Row>
@@ -331,7 +324,7 @@
 								}).format(totalBudgetComponents)}
 							</Table.Cell>
 							<Table.Cell class="text-right">
-								{totalBudget > 0 ? ((totalBudgetComponents / totalBudget) * 100).toFixed(1) : 0}%
+								{totalBudgetAmount > 0 ? ((totalBudgetComponents / totalBudgetAmount) * 100).toFixed(1) : 0}%
 							</Table.Cell>
 							<Table.Cell></Table.Cell>
 						</Table.Row>
