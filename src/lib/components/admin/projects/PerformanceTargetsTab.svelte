@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';
+	import { CurrencyInput } from '$lib/components/ui/currency-input';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { getProjectTypeById } from '$lib/config/project-categories';
 	import type { PerformanceTarget } from '$lib/types';
 	import { parseDate, type DateValue } from '@internationalized/date';
-	import { Briefcase, Calendar, DollarSign, Info, Target, TrendingUp, Users } from '@lucide/svelte';
+	import { Banknote, Briefcase, Calendar, Info, Target, TrendingUp, Users } from '@lucide/svelte';
 
 	let {
 		selectedProjectTypeId = undefined,
@@ -184,16 +185,14 @@
 				<!-- Budget Allocation -->
 				<div class="space-y-2">
 					<Label for="total-budget" class="required flex items-center gap-2">
-						<DollarSign class="size-4" />
+						<Banknote class="size-4" />
 						Total Budget Allocation
 					</Label>
-					<Input
+					<CurrencyInput
 						id="total-budget"
-						type="number"
 						bind:value={totalBudget}
 						placeholder="Enter total project budget"
-						min="0"
-						step="0.01"
+						min={0}
 					/>
 				</div>
 
@@ -271,7 +270,7 @@
 
 		<!-- Milestone-Based Targets Info -->
 		<Card.Card class="border-primary/20 bg-primary/5">
-			<Card.CardContent class="pt-6">
+			<Card.CardContent class="">
 				<div class="flex gap-3">
 					<TrendingUp class="mt-0.5 size-5 shrink-0 text-primary" />
 					<div>

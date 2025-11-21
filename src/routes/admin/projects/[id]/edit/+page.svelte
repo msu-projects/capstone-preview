@@ -23,9 +23,9 @@
 	import {
 		ArrowLeft,
 		ArrowRight,
+		Banknote,
 		CircleAlert,
 		Clock,
-		DollarSign,
 		FolderOpen,
 		MapPin,
 		Save,
@@ -403,7 +403,7 @@
 								{/if}
 							</Tabs.Trigger>
 							<Tabs.Trigger value="budget" class="flex items-center gap-2 text-xs">
-								<DollarSign class="size-4" />
+								<Banknote class="size-4" />
 								<span class="hidden lg:inline">Budget &</span> Resources
 								{#if !isTab5Valid && activeTab !== 'budget'}
 									<CircleAlert class="size-3 text-destructive" />

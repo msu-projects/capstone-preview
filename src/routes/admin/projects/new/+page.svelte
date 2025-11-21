@@ -1,34 +1,33 @@
 <script lang="ts">
+	import AccountabilityPartnersTab from '$lib/components/admin/projects/AccountabilityPartnersTab.svelte';
+	import BudgetResourcesTab from '$lib/components/admin/projects/BudgetResourcesTab.svelte';
 	import CategoryProjectSelectionTab from '$lib/components/admin/projects/CategoryProjectSelectionTab.svelte';
 	import LocationBeneficiariesTab from '$lib/components/admin/projects/LocationBeneficiariesTab.svelte';
 	import PerformanceTargetsTab from '$lib/components/admin/projects/PerformanceTargetsTab.svelte';
-	import AccountabilityPartnersTab from '$lib/components/admin/projects/AccountabilityPartnersTab.svelte';
-	import BudgetResourcesTab from '$lib/components/admin/projects/BudgetResourcesTab.svelte';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
+	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import * as Tabs from '$lib/components/ui/tabs';
-	import { Button } from '$lib/components/ui/button';
-	import { Badge } from '$lib/components/ui/badge';
 	import type {
+		BudgetComponent,
 		CategoryKey,
-		ProjectSitio,
-		PerformanceTarget,
 		FundingSource,
-		BudgetComponent
+		PerformanceTarget,
+		ProjectSitio
 	} from '$lib/types';
 	import type { DateValue } from '@internationalized/date';
 	import { getLocalTimeZone, today } from '@internationalized/date';
 	import {
+		ArrowLeft,
+		ArrowRight,
+		Banknote,
+		CircleAlert,
 		FolderOpen,
 		MapPin,
+		Save,
 		Target,
 		Users,
-		DollarSign,
-		CircleAlert,
-		Save,
-		X,
-		ArrowLeft,
-		ArrowRight
+		X
 	} from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
 
@@ -66,14 +65,16 @@
 	let provincialTeam = $state<string[]>([]);
 	let dilgRep = $state('');
 	let sectoralRep = $state('');
-	let sitioCoordinators = $state<Array<{
-		sitio_id: number;
-		sitio_name: string;
-		barangay_captain: string;
-		sitio_leader: string;
-		volunteer_coordinator: string;
-		contact_numbers: string;
-	}>>([]);
+	let sitioCoordinators = $state<
+		Array<{
+			sitio_id: number;
+			sitio_name: string;
+			barangay_captain: string;
+			sitio_leader: string;
+			volunteer_coordinator: string;
+			contact_numbers: string;
+		}>
+	>([]);
 
 	// Auto-generate sitio coordinators when sitios are added
 	$effect(() => {
@@ -115,9 +116,7 @@
 		totalProjectBudget !== '' && fundingSources.length > 0 && budgetComponents.length > 0
 	);
 
-	const canSave = $derived(
-		isTab1Valid && isTab2Valid && isTab3Valid && isTab4Valid && isTab5Valid
-	);
+	const canSave = $derived(isTab1Valid && isTab2Valid && isTab3Valid && isTab4Valid && isTab5Valid);
 
 	// Tab navigation
 	const tabOrder = ['category', 'location', 'performance', 'accountability', 'budget'];
@@ -215,9 +214,7 @@
 		<div class="flex items-center justify-between p-4">
 			<div>
 				<h1 class="text-2xl font-bold">Create New Project</h1>
-				<p class="text-sm text-muted-foreground">
-					Enhanced multi-sitio project tracking system
-				</p>
+				<p class="text-sm text-muted-foreground">Enhanced multi-sitio project tracking system</p>
 			</div>
 			<div class="flex items-center gap-2">
 				<Button variant="outline" onclick={handleCancel} disabled={isSaving} class="gap-2">
@@ -269,7 +266,7 @@
 								{/if}
 							</Tabs.Trigger>
 							<Tabs.Trigger value="budget" class="flex items-center gap-2 text-xs">
-								<DollarSign class="size-4" />
+								<Banknote class="size-4" />
 								<span class="hidden lg:inline">Budget &</span> Resources
 								{#if !isTab5Valid && activeTab !== 'budget'}
 									<CircleAlert class="size-3 text-destructive" />
@@ -294,9 +291,9 @@
 				</Tabs.Content>
 
 				<Tabs.Content value="performance">
-				<PerformanceTargetsTab
-					selectedProjectTypeId={selectedProjectType}
-					bind:performanceTargets
+					<PerformanceTargetsTab
+						selectedProjectTypeId={selectedProjectType}
+						bind:performanceTargets
 						bind:targetStartDate
 						bind:targetEndDate
 						bind:totalBudget
@@ -313,32 +310,23 @@
 						bind:pmAgency
 						bind:technicalLead
 						bind:implementationPartners
-					bind:lguCounterparts
-					bind:provincialTeam
-					bind:dilgRep
-					bind:sectoralRep
-					{sitioCoordinators}
+						bind:lguCounterparts
+						bind:provincialTeam
+						bind:dilgRep
+						bind:sectoralRep
+						{sitioCoordinators}
 					/>
 				</Tabs.Content>
 
 				<Tabs.Content value="budget">
-					<BudgetResourcesTab
-						bind:totalProjectBudget
-						bind:fundingSources
-						bind:budgetComponents
-					/>
+					<BudgetResourcesTab bind:totalProjectBudget bind:fundingSources bind:budgetComponents />
 				</Tabs.Content>
 			</Tabs.Root>
 
 			<!-- Navigation Buttons -->
 			<Card.Card class="mt-6">
 				<Card.CardContent class="flex justify-between p-4">
-					<Button
-						variant="outline"
-						onclick={previousTab}
-						disabled={!canGoPrevious}
-						class="gap-2"
-					>
+					<Button variant="outline" onclick={previousTab} disabled={!canGoPrevious} class="gap-2">
 						<ArrowLeft class="size-4" />
 						Previous
 					</Button>

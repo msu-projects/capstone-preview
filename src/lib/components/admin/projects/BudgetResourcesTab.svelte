@@ -1,12 +1,13 @@
 <script lang="ts">
-	import * as Card from '$lib/components/ui/card';
-	import * as Table from '$lib/components/ui/table';
-	import { Label } from '$lib/components/ui/label';
-	import { Input } from '$lib/components/ui/input';
-	import { Button } from '$lib/components/ui/button';
 	import { Badge } from '$lib/components/ui/badge';
-	import type { FundingSource, BudgetComponent } from '$lib/types';
-	import { DollarSign, PieChart, Calendar, Plus, Trash2, TrendingUp } from '@lucide/svelte';
+	import { Button } from '$lib/components/ui/button';
+	import * as Card from '$lib/components/ui/card';
+	import { CurrencyInput } from '$lib/components/ui/currency-input';
+	import { Input } from '$lib/components/ui/input';
+	import { Label } from '$lib/components/ui/label';
+	import * as Table from '$lib/components/ui/table';
+	import type { BudgetComponent, FundingSource } from '$lib/types';
+	import { Banknote, Calendar, PieChart, Plus, Trash2 } from '@lucide/svelte';
 
 	let {
 		totalProjectBudget = $bindable(''),
@@ -100,9 +101,7 @@
 		return labels[type] || type;
 	}
 
-	function getSourceTypeVariant(
-		type: string
-	): 'default' | 'secondary' | 'destructive' | 'outline' {
+	function getSourceTypeVariant(type: string): 'default' | 'secondary' | 'destructive' | 'outline' {
 		const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
 			provincial: 'default',
 			national: 'secondary',
@@ -118,7 +117,7 @@
 	<Card.Card>
 		<Card.CardHeader>
 			<Card.CardTitle class="flex items-center gap-2">
-				<DollarSign class="size-5" />
+				<Banknote class="size-5" />
 				Total Project Budget
 			</Card.CardTitle>
 			<Card.CardDescription>Single overall budget for the entire project</Card.CardDescription>
@@ -126,14 +125,13 @@
 		<Card.CardContent>
 			<div class="space-y-2">
 				<Label for="total-budget" class="required">Total Budget (PHP)</Label>
-				<Input
+				<CurrencyInput
 					id="total-budget"
-					type="number"
 					bind:value={totalProjectBudget}
-					placeholder="Enter total project budget"
-					min="0"
-					step="0.01"
+					placeholder="₱ 0"
+					min={0}
 					class="text-lg font-semibold"
+					required
 				/>
 				{#if totalBudget > 0}
 					<p class="text-sm text-muted-foreground">
@@ -195,7 +193,7 @@
 								</Table.Cell>
 							</Table.Row>
 						{/each}
-						<Table.Row class="font-semibold bg-muted/30">
+						<Table.Row class="bg-muted/30 font-semibold">
 							<Table.Cell colspan={2}>Total Funding</Table.Cell>
 							<Table.Cell class="text-right">
 								{new Intl.NumberFormat('en-PH', {
@@ -204,9 +202,7 @@
 								}).format(totalFundingSources)}
 							</Table.Cell>
 							<Table.Cell class="text-right">
-								{totalBudget > 0
-									? ((totalFundingSources / totalBudget) * 100).toFixed(1)
-									: 0}%
+								{totalBudget > 0 ? ((totalFundingSources / totalBudget) * 100).toFixed(1) : 0}%
 							</Table.Cell>
 							<Table.Cell></Table.Cell>
 						</Table.Row>
@@ -257,13 +253,11 @@
 				</div>
 				<div class="space-y-2">
 					<Label for="source-amount" class="text-xs">Amount (PHP)</Label>
-					<Input
+					<CurrencyInput
 						id="source-amount"
-						type="number"
 						bind:value={newSourceAmount}
-						placeholder="Amount"
-						min="0"
-						step="0.01"
+						placeholder="₱ 0"
+						min={0}
 						class="h-9"
 					/>
 				</div>
@@ -273,7 +267,7 @@
 						onclick={addFundingSource}
 						size="sm"
 						disabled={!newSourceName || !newSourceAmount}
-						class="gap-2 w-full"
+						class="w-full gap-2"
 					>
 						<Plus class="size-4" />
 						Add Source
@@ -328,7 +322,7 @@
 								</Table.Cell>
 							</Table.Row>
 						{/each}
-						<Table.Row class="font-semibold bg-muted/30">
+						<Table.Row class="bg-muted/30 font-semibold">
 							<Table.Cell>Total Allocated</Table.Cell>
 							<Table.Cell class="text-right">
 								{new Intl.NumberFormat('en-PH', {
@@ -337,9 +331,7 @@
 								}).format(totalBudgetComponents)}
 							</Table.Cell>
 							<Table.Cell class="text-right">
-								{totalBudget > 0
-									? ((totalBudgetComponents / totalBudget) * 100).toFixed(1)
-									: 0}%
+								{totalBudget > 0 ? ((totalBudgetComponents / totalBudget) * 100).toFixed(1) : 0}%
 							</Table.Cell>
 							<Table.Cell></Table.Cell>
 						</Table.Row>
@@ -377,13 +369,11 @@
 				</div>
 				<div class="space-y-2">
 					<Label for="component-amount" class="text-xs">Amount (PHP)</Label>
-					<Input
+					<CurrencyInput
 						id="component-amount"
-						type="number"
 						bind:value={newComponentAmount}
-						placeholder="Amount"
-						min="0"
-						step="0.01"
+						placeholder="₱ 0"
+						min={0}
 						class="h-9"
 					/>
 				</div>
@@ -393,7 +383,7 @@
 						onclick={addBudgetComponent}
 						size="sm"
 						disabled={!newComponentName || !newComponentAmount}
-						class="gap-2 w-full"
+						class="w-full gap-2"
 					>
 						<Plus class="size-4" />
 						Add Component
@@ -402,7 +392,7 @@
 			</div>
 
 			<div class="rounded-lg border border-border bg-muted/30 p-4">
-				<p class="text-sm font-medium mb-2">Common Budget Components:</p>
+				<p class="mb-2 text-sm font-medium">Common Budget Components:</p>
 				<div class="flex flex-wrap gap-2 text-xs">
 					<Badge variant="outline">Materials/Supplies</Badge>
 					<Badge variant="outline">Labor/Services</Badge>
@@ -419,9 +409,9 @@
 	<Card.Card class="border-primary/20 bg-primary/5">
 		<Card.CardContent class="pt-6">
 			<div class="flex gap-3">
-				<Calendar class="size-5 text-primary shrink-0 mt-0.5" />
+				<Calendar class="mt-0.5 size-5 shrink-0 text-primary" />
 				<div>
-					<p class="font-medium mb-1">Monthly Release Schedule</p>
+					<p class="mb-1 font-medium">Monthly Release Schedule</p>
 					<p class="text-sm text-muted-foreground">
 						After project creation, you can define the monthly budget release schedule tied to
 						milestone achievements through the project management interface.

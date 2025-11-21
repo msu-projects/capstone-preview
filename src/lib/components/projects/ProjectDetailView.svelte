@@ -13,12 +13,12 @@
 		RecoveryActionStatus
 	} from '$lib/types';
 	import {
+		Banknote,
 		Building2,
 		Calendar,
 		CircleAlert,
 		CircleCheck,
 		Clock,
-		DollarSign,
 		Eye,
 		FileText,
 		Hammer,
@@ -266,7 +266,7 @@
 								<!-- Financial Details -->
 								<div>
 									<h4 class="mb-4 flex items-center gap-2 font-semibold">
-										<DollarSign class="size-4" />
+										<Banknote class="size-4" />
 										Financial Performance
 									</h4>
 									<div class="grid grid-cols-2 gap-4">
@@ -693,7 +693,7 @@
 					<Card.CardContent class="space-y-4">
 						<div>
 							<div class="mb-1 flex items-center gap-2 text-xs text-muted-foreground">
-								<DollarSign class="size-3" />
+								<Banknote class="size-3" />
 								Budget
 							</div>
 							<div class="font-semibold">{formatCurrency(project.budget)}</div>
@@ -713,7 +713,7 @@
 								Partner Agency
 							</div>
 							<div class="font-semibold">
-								{project.implementing_partner || 'Provincial Governor\'s Office - CATCH-UP'}
+								{project.implementing_partner || "Provincial Governor's Office - CATCH-UP"}
 							</div>
 						</div>
 						<Separator />
