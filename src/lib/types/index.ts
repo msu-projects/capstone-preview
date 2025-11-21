@@ -3,6 +3,22 @@ export type MilestoneStatus = 'not_started' | 'in_progress' | 'completed' | 'del
 export type DelayType = 'weather' | 'material' | 'utility_coordination' | 'permit' | 'other';
 export type DelaySeverity = 'low' | 'medium' | 'high' | 'critical';
 export type RecoveryActionStatus = 'planned' | 'in_progress' | 'completed' | 'cancelled';
+export type PriorityLevel = 'high' | 'medium' | 'low';
+export type IssueCategory =
+	| 'weather_climate'
+	| 'material_supply'
+	| 'budget_funding'
+	| 'community_concerns'
+	| 'technical_challenges'
+	| 'permit_clearance'
+	| 'partner_coordination';
+export type CategoryKey =
+	| 'infrastructure'
+	| 'agriculture'
+	| 'education'
+	| 'health'
+	| 'livelihood'
+	| 'environment';
 
 export interface Sitio {
 	id: number;
@@ -168,12 +184,151 @@ export interface MonitoringDetails {
 	catchUpPlan: string;
 }
 
+// ===== NEW ENHANCED TRACKING SYSTEM TYPES =====
+
+export interface Category {
+	id: number;
+	key: CategoryKey;
+	name: string;
+	description: string;
+	icon: string;
+}
+
+export interface ProjectType {
+	id: number;
+	category_key: CategoryKey;
+	name: string;
+	description: string;
+	default_indicators: PerformanceIndicator[];
+}
+
+export interface PerformanceIndicator {
+	id: string;
+	name: string;
+	unit: string;
+	description: string;
+}
+
+export interface ProjectSitio {
+	project_id: number;
+	sitio_id: number;
+	sitio_name: string;
+	municipality: string;
+	barangay: string;
+	beneficiaries_target: number;
+	priority_level: PriorityLevel;
+	focal_person?: string;
+	focal_contact?: string;
+}
+
+export interface PerformanceTarget {
+	id: number;
+	project_id: number;
+	indicator_type: string;
+	indicator_name: string;
+	target_value: number;
+	unit_of_measure: string;
+	monthly_breakdown?: Record<string, number>; // { '2025-01': 10, '2025-02': 15, ... }
+}
+
+export interface MonthlyProgress {
+	id: number;
+	project_id: number;
+	sitio_id?: number; // null means project-level progress
+	month_year: string; // Format: 'YYYY-MM'
+	achieved_outputs: Record<string, number>; // { 'seedlings_distributed': 500, 'training_sessions': 3 }
+	beneficiaries_reached: number;
+	issues_encountered?: string;
+	photo_urls?: string[];
+	status: 'on-track' | 'delayed' | 'ahead';
+	created_at: string;
+	updated_at: string;
+}
+
+export interface MonthlyBudgetUtilization {
+	id: number;
+	project_id: number;
+	month_year: string; // Format: 'YYYY-MM'
+	budget_released: number;
+	actual_expenses: number;
+	obligations: number;
+	remaining_balance: number;
+	created_at: string;
+	updated_at: string;
+}
+
+export interface ProjectIssue {
+	id: number;
+	project_id: number;
+	sitio_id?: number;
+	month_year: string;
+	category: IssueCategory;
+	title: string;
+	description: string;
+	affected_sitios: number[];
+	deliverables_at_risk: string[];
+	beneficiaries_impacted: number;
+	days_delay: number;
+	mitigation_actions?: string;
+	resources_needed?: string;
+	revised_timeline?: string;
+	status: 'open' | 'mitigating' | 'resolved';
+	created_at: string;
+	updated_at: string;
+}
+
+export interface Partner {
+	id: number;
+	name: string;
+	type: 'ngo' | 'cso' | 'private_sector' | 'lgu' | 'national_agency';
+	contact_person?: string;
+	contact_number?: string;
+	email?: string;
+}
+
+export interface ProjectPartner {
+	project_id: number;
+	partner_id: number;
+	role: string;
+	contribution_amount?: number;
+	contribution_inkind?: string;
+}
+
+export interface BudgetComponent {
+	id: number;
+	project_id: number;
+	component_name: string;
+	amount: number;
+	percentage: number;
+}
+
+export interface FundingSource {
+	id: number;
+	project_id: number;
+	source_name: string;
+	source_type: 'provincial' | 'national' | 'partner' | 'lgu_counterpart';
+	amount: number;
+	percentage: number;
+}
+
+export interface MonthlyReleaseSchedule {
+	id: number;
+	project_id: number;
+	month_year: string;
+	planned_release: number;
+	actual_release?: number;
+	milestone_tied?: string;
+}
+
 export interface Project {
 	id: number;
 	title: string;
 	description: string;
 	category: string;
-	sitio_id: number;
+	category_key?: CategoryKey; // NEW: For category-driven design
+	project_type_id?: number; // NEW: Links to ProjectType
+	project_type_name?: string; // NEW: Display name of project type
+	sitio_id: number; // DEPRECATED: Use project_sitios instead for multi-sitio support
 	sitio_name: string;
 	municipality: string;
 	status: ProjectStatus;
@@ -192,6 +347,35 @@ export interface Project {
 	accountability?: Accountability;
 	baseline?: Baseline;
 	monitoring?: MonitoringDetails;
+	// NEW ENHANCED FIELDS
+	project_sitios?: ProjectSitio[]; // Multi-sitio support
+	performance_targets?: PerformanceTarget[]; // Category-specific targets
+	monthly_progress?: MonthlyProgress[]; // Monthly tracking
+	monthly_budget?: MonthlyBudgetUtilization[]; // Monthly budget tracking
+	issues?: ProjectIssue[]; // Issue management
+	partners?: ProjectPartner[]; // Implementation partners
+	funding_sources?: FundingSource[]; // Multi-source funding
+	budget_components?: BudgetComponent[]; // Budget breakdown
+	release_schedule?: MonthlyReleaseSchedule[]; // Monthly releases
+	project_manager_team?: {
+		project_manager?: string;
+		agency?: string;
+		technical_lead?: string;
+		implementation_partners?: string[];
+		lgu_counterpart?: string[];
+	};
+	sitio_coordinators?: Array<{
+		sitio_id: number;
+		barangay_captain?: string;
+		sitio_leader?: string;
+		volunteer_coordinator?: string;
+		contact_numbers?: string[];
+	}>;
+	oversight_structure?: {
+		provincial_team?: string[];
+		dilg_rep?: string;
+		sectoral_rep?: string;
+	};
 	created_at: string;
 	updated_at: string;
 }

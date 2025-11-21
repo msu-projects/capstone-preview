@@ -9,6 +9,7 @@ import type {
 	Accountability,
 	MonitoringDetails
 } from '$lib/types';
+import { enhancedProjects } from './enhanced-projects';
 
 // ===== HELPER FUNCTIONS =====
 
@@ -196,7 +197,11 @@ for (let i = 4; i <= 25; i++) {
 
 // ===== PROJECTS DATA =====
 
-export const projects: Project[] = [
+// Use enhanced projects with comprehensive multi-sitio tracking
+export const projects: Project[] = enhancedProjects;
+
+// Legacy projects (for reference/backup - not currently exported)
+const legacyProjects: Project[] = [
 	{
 		id: 1,
 		title: 'Construction of Potable Water System - Sitio Bangkalang',
@@ -812,7 +817,7 @@ for (let i = 6; i <= 20; i++) {
 		suspended: 'Suspended'
 	};
 
-	projects.push({
+	legacyProjects.push({
 		id: i,
 		title: `${categories[i % 7]} Project ${i} - ${sitio.name}`,
 		description: `Community development project focused on ${categories[i % 7].toLowerCase()} improvement in ${sitio.name}.`,
@@ -994,7 +999,7 @@ export const stats: Stats = {
 // ===== CHART DATA =====
 
 export const chartData = {
-	projectsByCategory: categories.map((cat) => ({
+	projectsByCategory: [...new Set(projects.map((p) => p.category))].map((cat) => ({
 		category: cat,
 		count: projects.filter((p) => p.category === cat).length
 	})) as ChartDataItem[],
@@ -1037,7 +1042,13 @@ export function getProjectById(id: number): Project | undefined {
 }
 
 export function getProjectsBySitio(sitioId: number): Project[] {
-	return projects.filter((p) => p.sitio_id === sitioId);
+	return projects.filter((p) => {
+		// Check legacy sitio_id field
+		if (p.sitio_id === sitioId) return true;
+		// Check new project_sitios array for multi-sitio projects
+		if (p.project_sitios && p.project_sitios.some((ps) => ps.sitio_id === sitioId)) return true;
+		return false;
+	});
 }
 
 export function getProjectsByStatus(status: string): Project[] {

@@ -1,141 +1,145 @@
 <script lang="ts">
-	import AccountabilityTab from '$lib/components/admin/projects/AccountabilityTab.svelte';
-	import BaselineTab from '$lib/components/admin/projects/BaselineTab.svelte';
-	import BasicInfoTab from '$lib/components/admin/projects/BasicInfoTab.svelte';
-	import MilestonesTab from '$lib/components/admin/projects/MilestonesTab.svelte';
-	import MonitoringTab from '$lib/components/admin/projects/MonitoringTab.svelte';
-	import ProjectFormHeader from '$lib/components/admin/projects/ProjectFormHeader.svelte';
+	import CategoryProjectSelectionTab from '$lib/components/admin/projects/CategoryProjectSelectionTab.svelte';
+	import LocationBeneficiariesTab from '$lib/components/admin/projects/LocationBeneficiariesTab.svelte';
+	import PerformanceTargetsTab from '$lib/components/admin/projects/PerformanceTargetsTab.svelte';
+	import AccountabilityPartnersTab from '$lib/components/admin/projects/AccountabilityPartnersTab.svelte';
+	import BudgetResourcesTab from '$lib/components/admin/projects/BudgetResourcesTab.svelte';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import * as Card from '$lib/components/ui/card';
 	import * as Tabs from '$lib/components/ui/tabs';
-	import { sitios } from '$lib/mock-data';
-	import type { Project, ProjectStatus } from '$lib/types';
-	import { getLocalTimeZone, today, type DateValue } from '@internationalized/date';
+	import { Button } from '$lib/components/ui/button';
+	import { Badge } from '$lib/components/ui/badge';
+	import type {
+		CategoryKey,
+		ProjectSitio,
+		PerformanceTarget,
+		FundingSource,
+		BudgetComponent
+	} from '$lib/types';
+	import type { DateValue } from '@internationalized/date';
+	import { getLocalTimeZone, today } from '@internationalized/date';
 	import {
-		Building2,
-		Calendar as CalendarIcon,
-		CircleAlert,
-		CircleCheck,
+		FolderOpen,
+		MapPin,
+		Target,
+		Users,
 		DollarSign,
-		Users
+		CircleAlert,
+		Save,
+		X,
+		ArrowLeft,
+		ArrowRight
 	} from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
 
-	const isNewProject = true;
-
 	// Form state
 	let isSaving = $state(false);
-	let activeTab = $state('basic');
+	let activeTab = $state('category');
 	let cancelDialogOpen = $state(false);
 
-	// Basic Information
+	// Tab 1: Category & Project Selection
 	let title = $state('');
 	let description = $state('');
-	let category = $state('');
-	let selectedSitio = $state<string>('');
-	let status = $state<ProjectStatus>('planning');
-	let startDate = $state<DateValue | undefined>(today(getLocalTimeZone()));
-	let endDate = $state<DateValue | undefined>(undefined);
-	let budget = $state('');
-	let beneficiaries = $state('');
-	let implementingPartner = $state('');
-	let projectYear = $state(new Date().getFullYear().toString());
-	let completionPercentage = $state('0');
+	let selectedCategory = $state<CategoryKey | ''>('');
+	let selectedProjectType = $state<number | undefined>(undefined);
 
-	// Monitoring Details
-	let fundSource = $state('');
-	let fiscalYear = $state(new Date().getFullYear().toString());
-	let implementingUnit = $state('');
-	let location = $state('');
+	// Tab 2: Location & Beneficiaries
+	let projectSitios = $state<Omit<ProjectSitio, 'project_id'>[]>([]);
+	let showSitioSelection = $state(true);
 
-	// Popover states for date pickers
-	let startDateOpen = $state(false);
-	let endDateOpen = $state(false);
-	let baselineApprovedOpen = $state(false);
-	let baselinePlannedStartOpen = $state(false);
-	let baselinePlannedEndOpen = $state(false);
+	// Tab 3: Performance Targets
+	let performanceTargets = $state<Omit<PerformanceTarget, 'id' | 'project_id'>[]>([]);
+	let targetStartDate = $state<DateValue | undefined>(today(getLocalTimeZone()));
+	let targetEndDate = $state<DateValue | undefined>(undefined);
+	let totalBudget = $state('');
+	let directBeneficiariesMale = $state('');
+	let directBeneficiariesFemale = $state('');
+	let indirectBeneficiaries = $state('');
+	let employmentGenerated = $state('');
 
-	// Financial
-	let allocatedBudget = $state('');
-	let supplementalBudget = $state('0');
-	let releasedAmount = $state('0');
-	let obligations = $state('0');
-	let contractCost = $state('0');
-
-	// Physical Progress
-	let physicalPlan = $state('100');
-	let physicalActual = $state('0');
-	let physicalSlippage = $state('0');
-
-	// Employment
-	let maleEmployment = $state('0');
-	let femaleEmployment = $state('0');
-
-	// Contract
-	let contractDuration = $state('');
-	let contractDelivery = $state('');
-	let contractExtension = $state('');
-
-	// Status Summary
-	let statusStage = $state('');
-	let statusIssues = $state('');
-	let statusRecommendations = $state('');
-	let catchUpPlan = $state('');
-
-	// Accountability
+	// Tab 4: Accountability & Partners
 	let projectManager = $state('');
 	let pmAgency = $state('');
 	let technicalLead = $state('');
-	let contractor = $state('');
-	let oversightCommittee = $state<string[]>([]);
-	let newCommitteeMember = $state('');
-	let technicalContact = $state('');
-	let administrativeContact = $state('');
+	let implementationPartners = $state<string[]>([]);
+	let lguCounterparts = $state<string[]>([]);
+	let provincialTeam = $state<string[]>([]);
+	let dilgRep = $state('');
+	let sectoralRep = $state('');
+	let sitioCoordinators = $state<Array<{
+		sitio_id: number;
+		sitio_name: string;
+		barangay_captain: string;
+		sitio_leader: string;
+		volunteer_coordinator: string;
+		contact_numbers: string;
+	}>>([]);
 
-	// Baseline
-	let baselineApproved = $state<DateValue | undefined>(undefined);
-	let baselinePlannedStart = $state<DateValue | undefined>(undefined);
-	let baselinePlannedEnd = $state<DateValue | undefined>(undefined);
-	let baselineDuration = $state('');
-	let baselineBudget = $state('');
+	// Auto-generate sitio coordinators when sitios are added
+	$effect(() => {
+		sitioCoordinators = projectSitios.map((ps) => ({
+			sitio_id: ps.sitio_id,
+			sitio_name: ps.sitio_name,
+			barangay_captain: '',
+			sitio_leader: '',
+			volunteer_coordinator: '',
+			contact_numbers: ''
+		}));
+	});
 
-	// Milestones
-	let milestones = $state([]);
-	let showMilestoneForm = $state(false);
-
-	// Derived values
-	const selectedSitioData = $derived(sitios.find((s) => s.id === Number(selectedSitio)));
-
-	const categories = [
-		'Infrastructure',
-		'Agriculture',
-		'Education',
-		'Health',
-		'Water & Sanitation',
-		'Livelihood',
-		'Environment',
-		'Social Services',
-		'Other'
-	];
+	// Tab 5: Budget & Resources
+	let totalProjectBudget = $state('');
+	let fundingSources = $state<Omit<FundingSource, 'id' | 'project_id'>[]>([]);
+	let budgetComponents = $state<Omit<BudgetComponent, 'id' | 'project_id'>[]>([]);
 
 	// Validation
-	const isBasicInfoValid = $derived(
+	const isTab1Valid = $derived(
 		title.trim() !== '' &&
 			description.trim() !== '' &&
-			category !== '' &&
-			selectedSitio !== '' &&
-			startDate !== undefined &&
-			endDate !== undefined &&
-			budget !== '' &&
-			beneficiaries !== ''
+			selectedCategory !== '' &&
+			selectedProjectType !== undefined
 	);
 
-	const canSave = $derived(isBasicInfoValid);
+	const isTab2Valid = $derived(projectSitios.length > 0);
 
-	// Functions
+	const isTab3Valid = $derived(
+		performanceTargets.length > 0 &&
+			targetStartDate !== undefined &&
+			targetEndDate !== undefined &&
+			totalBudget !== ''
+	);
+
+	const isTab4Valid = $derived(projectManager.trim() !== '' && pmAgency.trim() !== '');
+
+	const isTab5Valid = $derived(
+		totalProjectBudget !== '' && fundingSources.length > 0 && budgetComponents.length > 0
+	);
+
+	const canSave = $derived(
+		isTab1Valid && isTab2Valid && isTab3Valid && isTab4Valid && isTab5Valid
+	);
+
+	// Tab navigation
+	const tabOrder = ['category', 'location', 'performance', 'accountability', 'budget'];
+	const currentTabIndex = $derived(tabOrder.indexOf(activeTab));
+	const canGoNext = $derived(currentTabIndex < tabOrder.length - 1);
+	const canGoPrevious = $derived(currentTabIndex > 0);
+
+	function nextTab() {
+		if (canGoNext) {
+			activeTab = tabOrder[currentTabIndex + 1];
+		}
+	}
+
+	function previousTab() {
+		if (canGoPrevious) {
+			activeTab = tabOrder[currentTabIndex - 1];
+		}
+	}
+
 	async function handleSave() {
 		if (!canSave) {
-			toast.error('Please fill in all required fields');
+			toast.error('Please complete all required fields in all tabs');
 			return;
 		}
 
@@ -144,78 +148,44 @@
 		// Simulate API call
 		await new Promise((resolve) => setTimeout(resolve, 1500));
 
-		const projectData: Partial<Project> = {
+		const projectData = {
+			// Tab 1
 			title,
 			description,
-			category,
-			sitio_id: Number(selectedSitio),
-			sitio_name: selectedSitioData?.name ?? '',
-			municipality: selectedSitioData?.municipality ?? '',
-			status,
-			start_date: startDate?.toString() ?? '',
-			end_date: endDate?.toString() ?? '',
-			budget: Number(budget),
-			beneficiaries: Number(beneficiaries),
-			implementing_partner: implementingPartner || undefined,
-			project_year: Number(projectYear),
-			completion_percentage: Number(completionPercentage),
-			monitoring: {
-				fundSource,
-				fiscalYear: Number(fiscalYear),
-				implementingUnit: "Provincial Governor's Office - CATCH-UP Program",
-				location,
-				allotment: {
-					allocated: Number(allocatedBudget),
-					supplemental: Number(supplementalBudget),
-					total: Number(allocatedBudget || 0) + Number(supplementalBudget || 0),
-					released: Number(releasedAmount)
-				},
-				expenditure: {
-					obligations: Number(obligations),
-					contractCost: Number(contractCost)
-				},
-				physical: {
-					plan: Number(physicalPlan),
-					actual: Number(physicalActual),
-					slippage: Number(physicalSlippage)
-				},
-				employment: {
-					male: Number(maleEmployment),
-					female: Number(femaleEmployment)
-				},
-				contract: {
-					duration: contractDuration,
-					delivery: contractDelivery,
-					extension: contractExtension
-				},
-				statusSummary: {
-					stage: statusStage,
-					issues: statusIssues,
-					recommendations: statusRecommendations
-				},
-				catchUpPlan
-			},
-			accountability: {
+			category_key: selectedCategory,
+			project_type_id: selectedProjectType,
+			// Tab 2
+			project_sitios: projectSitios,
+			total_beneficiaries: projectSitios.reduce((sum, ps) => sum + ps.beneficiaries_target, 0),
+			// Tab 3
+			performance_targets: performanceTargets,
+			start_date: targetStartDate?.toString(),
+			end_date: targetEndDate?.toString(),
+			direct_beneficiaries_male: Number(directBeneficiariesMale),
+			direct_beneficiaries_female: Number(directBeneficiariesFemale),
+			indirect_beneficiaries: Number(indirectBeneficiaries),
+			employment_generated: Number(employmentGenerated),
+			// Tab 4
+			project_manager_team: {
 				project_manager: projectManager,
-				pm_agency: pmAgency,
+				agency: pmAgency,
 				technical_lead: technicalLead,
-				contractor,
-				oversight_committee: oversightCommittee,
-				escalation_contacts: {
-					technical: technicalContact,
-					administrative: administrativeContact
-				}
+				implementation_partners: implementationPartners,
+				lgu_counterpart: lguCounterparts
 			},
-			baseline: {
-				approved_date: baselineApproved?.toString() ?? '',
-				planned_start: baselinePlannedStart?.toString() ?? '',
-				planned_end: baselinePlannedEnd?.toString() ?? '',
-				planned_duration_days: Number(baselineDuration),
-				budget: Number(baselineBudget)
-			}
+			sitio_coordinators: sitioCoordinators,
+			oversight_structure: {
+				provincial_team: provincialTeam,
+				dilg_rep: dilgRep,
+				sectoral_rep: sectoralRep
+			},
+			// Tab 5
+			budget: Number(totalProjectBudget),
+			funding_sources: fundingSources,
+			budget_components: budgetComponents
 		};
 
-		console.log('Saving project:', projectData);
+		console.log('Saving enhanced project:', projectData);
 
 		isSaving = false;
 		toast.success('Project created successfully!');
@@ -233,19 +203,6 @@
 	function confirmCancel() {
 		window.location.href = '/admin/projects';
 	}
-
-	// Auto-calculate slippage
-	$effect(() => {
-		const plan = Number(physicalPlan || 0);
-		const actual = Number(physicalActual || 0);
-		const calculatedSlippage = actual - plan;
-		physicalSlippage = calculatedSlippage.toString();
-	});
-
-	// Sync completion percentage with physical actual
-	$effect(() => {
-		completionPercentage = physicalActual;
-	});
 </script>
 
 <svelte:head>
@@ -254,14 +211,26 @@
 
 <div class="flex min-h-screen flex-col bg-muted/30">
 	<!-- Header -->
-	<ProjectFormHeader
-		{isNewProject}
-		existingProject={null}
-		{canSave}
-		{isSaving}
-		onSave={handleSave}
-		onCancel={handleCancel}
-	/>
+	<div class="sticky top-0 z-10 border-b border-border bg-background shadow-sm">
+		<div class="flex items-center justify-between p-4">
+			<div>
+				<h1 class="text-2xl font-bold">Create New Project</h1>
+				<p class="text-sm text-muted-foreground">
+					Enhanced multi-sitio project tracking system
+				</p>
+			</div>
+			<div class="flex items-center gap-2">
+				<Button variant="outline" onclick={handleCancel} disabled={isSaving} class="gap-2">
+					<X class="size-4" />
+					Cancel
+				</Button>
+				<Button onclick={handleSave} disabled={!canSave || isSaving} class="gap-2">
+					<Save class="size-4" />
+					{isSaving ? 'Saving...' : 'Save Project'}
+				</Button>
+			</div>
+		</div>
+	</div>
 
 	<!-- Content -->
 	<div class="flex-1 p-6">
@@ -269,112 +238,119 @@
 			<Tabs.Root bind:value={activeTab} class="w-full">
 				<!-- Tabs List -->
 				<Card.Card class="mb-6">
-					<Card.CardContent class="">
-						<Tabs.List class="grid w-full grid-cols-2 lg:grid-cols-5">
-							<Tabs.Trigger value="basic" class="flex items-center gap-2">
-								<Building2 class="size-4" />
-								Basic Info
-								{#if !isBasicInfoValid && activeTab !== 'basic'}
+					<Card.CardContent class="p-3">
+						<Tabs.List class="grid w-full grid-cols-5 gap-1">
+							<Tabs.Trigger value="category" class="flex items-center gap-2 text-xs">
+								<FolderOpen class="size-4" />
+								<span class="hidden lg:inline">Category &</span> Type
+								{#if !isTab1Valid && activeTab !== 'category'}
 									<CircleAlert class="size-3 text-destructive" />
 								{/if}
 							</Tabs.Trigger>
-							<Tabs.Trigger value="monitoring" class="flex items-center gap-2">
-								<DollarSign class="size-4" />
-								Monitoring
+							<Tabs.Trigger value="location" class="flex items-center gap-2 text-xs">
+								<MapPin class="size-4" />
+								<span class="hidden lg:inline">Location &</span> Beneficiaries
+								{#if !isTab2Valid && activeTab !== 'location'}
+									<CircleAlert class="size-3 text-destructive" />
+								{/if}
 							</Tabs.Trigger>
-							<Tabs.Trigger value="accountability" class="flex items-center gap-2">
+							<Tabs.Trigger value="performance" class="flex items-center gap-2 text-xs">
+								<Target class="size-4" />
+								<span class="hidden lg:inline">Performance</span> Targets
+								{#if !isTab3Valid && activeTab !== 'performance'}
+									<CircleAlert class="size-3 text-destructive" />
+								{/if}
+							</Tabs.Trigger>
+							<Tabs.Trigger value="accountability" class="flex items-center gap-2 text-xs">
 								<Users class="size-4" />
-								Accountability
+								<span class="hidden lg:inline">Accountability &</span> Partners
+								{#if !isTab4Valid && activeTab !== 'accountability'}
+									<CircleAlert class="size-3 text-destructive" />
+								{/if}
 							</Tabs.Trigger>
-							<Tabs.Trigger value="baseline" class="flex items-center gap-2">
-								<CalendarIcon class="size-4" />
-								Baseline
-							</Tabs.Trigger>
-							<Tabs.Trigger value="milestones" class="flex items-center gap-2">
-								<CircleCheck class="size-4" />
-								Milestones
+							<Tabs.Trigger value="budget" class="flex items-center gap-2 text-xs">
+								<DollarSign class="size-4" />
+								<span class="hidden lg:inline">Budget &</span> Resources
+								{#if !isTab5Valid && activeTab !== 'budget'}
+									<CircleAlert class="size-3 text-destructive" />
+								{/if}
 							</Tabs.Trigger>
 						</Tabs.List>
 					</Card.CardContent>
 				</Card.Card>
 
-				<!-- Basic Information Tab -->
-				<Tabs.Content value="basic">
-					<BasicInfoTab
+				<!-- Tab Content -->
+				<Tabs.Content value="category">
+					<CategoryProjectSelectionTab
 						bind:title
 						bind:description
-						bind:category
-						bind:selectedSitio
-						bind:status
-						bind:startDate
-						bind:endDate
-						bind:budget
-						bind:beneficiaries
-						bind:implementingPartner
-						bind:projectYear
-						bind:baselineApproved
-						bind:startDateOpen
-						bind:endDateOpen
-						bind:baselineApprovedOpen
+						bind:selectedCategory
+						bind:selectedProjectType
 					/>
 				</Tabs.Content>
-				<!-- Monitoring Tab -->
-				<Tabs.Content value="monitoring">
-					<MonitoringTab
-						bind:fundSource
-						bind:fiscalYear
-						bind:implementingUnit
-						bind:location
-						bind:allocatedBudget
-						bind:supplementalBudget
-						bind:releasedAmount
-						bind:obligations
-						bind:contractCost
-						bind:physicalPlan
-						bind:physicalActual
-						bind:physicalSlippage
-						bind:maleEmployment
-						bind:femaleEmployment
-						bind:contractDuration
-						bind:contractDelivery
-						bind:contractExtension
-						bind:statusStage
-						bind:statusIssues
-						bind:statusRecommendations
-						bind:catchUpPlan
+
+				<Tabs.Content value="location">
+					<LocationBeneficiariesTab bind:projectSitios bind:showSitioSelection />
+				</Tabs.Content>
+
+				<Tabs.Content value="performance">
+				<PerformanceTargetsTab
+					selectedProjectTypeId={selectedProjectType}
+					bind:performanceTargets
+						bind:targetStartDate
+						bind:targetEndDate
+						bind:totalBudget
+						bind:directBeneficiariesMale
+						bind:directBeneficiariesFemale
+						bind:indirectBeneficiaries
+						bind:employmentGenerated
 					/>
 				</Tabs.Content>
-				<!-- Accountability Tab -->
+
 				<Tabs.Content value="accountability">
-					<AccountabilityTab
+					<AccountabilityPartnersTab
 						bind:projectManager
 						bind:pmAgency
 						bind:technicalLead
-						bind:contractor
-						bind:oversightCommittee
-						bind:newCommitteeMember
-						bind:technicalContact
-						bind:administrativeContact
+						bind:implementationPartners
+					bind:lguCounterparts
+					bind:provincialTeam
+					bind:dilgRep
+					bind:sectoralRep
+					{sitioCoordinators}
 					/>
 				</Tabs.Content>
 
-				<!-- Baseline Tab -->
-				<Tabs.Content value="baseline">
-					<BaselineTab
-						bind:baselinePlannedStart
-						bind:baselinePlannedEnd
-						bind:baselineDuration
-						bind:baselineBudget
-						bind:baselinePlannedStartOpen
-						bind:baselinePlannedEndOpen
+				<Tabs.Content value="budget">
+					<BudgetResourcesTab
+						bind:totalProjectBudget
+						bind:fundingSources
+						bind:budgetComponents
 					/>
-				</Tabs.Content>
-
-				<!-- Milestones Tab -->
-				<Tabs.Content value="milestones">
-					<MilestonesTab bind:milestones bind:showMilestoneForm />
 				</Tabs.Content>
 			</Tabs.Root>
+
+			<!-- Navigation Buttons -->
+			<Card.Card class="mt-6">
+				<Card.CardContent class="flex justify-between p-4">
+					<Button
+						variant="outline"
+						onclick={previousTab}
+						disabled={!canGoPrevious}
+						class="gap-2"
+					>
+						<ArrowLeft class="size-4" />
+						Previous
+					</Button>
+					<div class="flex items-center gap-2 text-sm text-muted-foreground">
+						Step {currentTabIndex + 1} of {tabOrder.length}
+					</div>
+					<Button variant="outline" onclick={nextTab} disabled={!canGoNext} class="gap-2">
+						Next
+						<ArrowRight class="size-4" />
+					</Button>
+				</Card.CardContent>
+			</Card.Card>
 		</div>
 	</div>
 </div>
@@ -396,10 +372,3 @@
 		</AlertDialog.Footer>
 	</AlertDialog.Content>
 </AlertDialog.Root>
-
-<style>
-	:global(input[readonly]) {
-		opacity: 0.7;
-		cursor: not-allowed;
-	}
-</style>
