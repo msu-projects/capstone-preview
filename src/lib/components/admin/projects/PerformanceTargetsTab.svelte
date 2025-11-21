@@ -1,12 +1,15 @@
 <script lang="ts">
 	import { Badge } from '$lib/components/ui/badge';
+	import { Calendar as CalendarComponent } from '$lib/components/ui/calendar';
 	import * as Card from '$lib/components/ui/card';
 	import { CurrencyInput } from '$lib/components/ui/currency-input';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
+	import * as Popover from '$lib/components/ui/popover';
 	import { getProjectTypeById } from '$lib/config/project-categories';
 	import type { PerformanceTarget } from '$lib/types';
-	import { parseDate, type DateValue } from '@internationalized/date';
+	import { cn } from '$lib/utils';
+	import { type DateValue, getLocalTimeZone } from '@internationalized/date';
 	import { Banknote, Briefcase, Calendar, Info, Target, TrendingUp, Users } from '@lucide/svelte';
 
 	let {
@@ -154,31 +157,54 @@
 							<Calendar class="size-4" />
 							Target Start Date
 						</Label>
-						<Input
-							type="date"
-							value={targetStartDate?.toString() ?? ''}
-							onchange={(e) => {
-								const value = e.currentTarget.value;
-								targetStartDate = parseDate(value);
-
-								// Handle date change
-							}}
-						/>
+						<Popover.Root>
+							<Popover.Trigger
+								class={cn(
+									'flex h-10 w-full items-center justify-start rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none',
+									!targetStartDate && 'text-muted-foreground'
+								)}
+							>
+								<Calendar class="mr-2 size-4" />
+								{targetStartDate
+									? targetStartDate.toDate(getLocalTimeZone()).toLocaleDateString()
+									: 'Pick a date'}
+							</Popover.Trigger>
+							<Popover.Content class="w-auto p-0">
+								<CalendarComponent
+									type="single"
+									bind:value={targetStartDate}
+									class="rounded-md border"
+									captionLayout="dropdown"
+								/>
+							</Popover.Content>
+						</Popover.Root>
 					</div>
 					<div class="space-y-2">
 						<Label class="required flex items-center gap-2">
 							<Calendar class="size-4" />
 							Target Completion Date
 						</Label>
-						<Input
-							type="date"
-							value={targetEndDate?.toString() ?? ''}
-							onchange={(e) => {
-								const value = e.currentTarget.value;
-								targetEndDate = parseDate(value);
-								// Handle date change
-							}}
-						/>
+						<Popover.Root>
+							<Popover.Trigger
+								class={cn(
+									'flex h-10 w-full items-center justify-start rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none',
+									!targetEndDate && 'text-muted-foreground'
+								)}
+							>
+								<Calendar class="mr-2 size-4" />
+								{targetEndDate
+									? targetEndDate.toDate(getLocalTimeZone()).toLocaleDateString()
+									: 'Pick a date'}
+							</Popover.Trigger>
+							<Popover.Content class="w-auto p-0">
+								<CalendarComponent
+									type="single"
+									bind:value={targetEndDate}
+									class="rounded-md border"
+									captionLayout="dropdown"
+								/>
+							</Popover.Content>
+						</Popover.Root>
 					</div>
 				</div>
 
@@ -188,12 +214,7 @@
 						<Banknote class="size-4" />
 						Total Budget Allocation
 					</Label>
-					<CurrencyInput
-						id="total-budget"
-						bind:value={totalBudget}
-						placeholder="Enter total project budget"
-						min={0}
-					/>
+					<CurrencyInput id="total-budget" bind:value={totalBudget} placeholder="₱ 0" min={0} />
 				</div>
 
 				<!-- Direct Beneficiaries -->
