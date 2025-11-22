@@ -4,10 +4,32 @@
 	import { Label } from '$lib/components/ui/label';
 	import * as Select from '$lib/components/ui/select';
 	import { Textarea } from '$lib/components/ui/textarea';
+	import { Badge } from '$lib/components/ui/badge';
 	import type { ProjectStatus } from '$lib/types';
-	import { Zap } from '@lucide/svelte';
+	import {
+		Zap,
+		TrendingUp,
+		TrendingDown,
+		DollarSign,
+		Calendar,
+		Users,
+		AlertTriangle,
+		CheckCircle,
+		Info
+	} from '@lucide/svelte';
+	import {
+		calculateBudgetUtilization,
+		calculateDaysRemaining,
+		calculateBeneficiaryProgress,
+		calculateProgressSlippage,
+		formatCurrency,
+		formatPercentage,
+		getCurrentMonth
+	} from '$lib/utils/project-calculations';
+	import { formatMonth } from '$lib/utils/monthly-planning';
 
 	interface Props {
+		// Existing fields
 		status: ProjectStatus;
 		physicalActual: string;
 		statusStage: string;
@@ -16,6 +38,21 @@
 		catchUpPlan: string;
 		maleEmployment: string;
 		femaleEmployment: string;
+		// New fields - Financial
+		totalBudget: number;
+		budgetDisbursed: string;
+		// New fields - Timeline
+		startDate: string;
+		targetEndDate: string;
+		extensionRequested: boolean;
+		extensionDate: string;
+		// New fields - Beneficiaries
+		targetBeneficiaries: number;
+		currentBeneficiaries: string;
+		householdsReached: string;
+		// New fields - Progress tracking
+		plannedPercentage: string;
+		// Callback
 		onSwitchToFull: () => void;
 	}
 
@@ -28,11 +65,39 @@
 		catchUpPlan = $bindable(),
 		maleEmployment = $bindable(),
 		femaleEmployment = $bindable(),
+		totalBudget = $bindable(),
+		budgetDisbursed = $bindable(),
+		startDate = $bindable(),
+		targetEndDate = $bindable(),
+		extensionRequested = $bindable(),
+		extensionDate = $bindable(),
+		targetBeneficiaries = $bindable(),
+		currentBeneficiaries = $bindable(),
+		householdsReached = $bindable(),
+		plannedPercentage = $bindable(),
 		onSwitchToFull
 	}: Props = $props();
 
-	// Derived computed values
+	// Derived computed values - Employment
 	let totalEmployment = $derived(Number(maleEmployment || 0) + Number(femaleEmployment || 0));
+
+	// Derived computed values - Budget
+	let budgetMetrics = $derived(
+		calculateBudgetUtilization(totalBudget, Number(budgetDisbursed || 0))
+	);
+
+	// Derived computed values - Timeline
+	let timelineMetrics = $derived(calculateDaysRemaining(targetEndDate));
+
+	// Derived computed values - Beneficiaries
+	let beneficiaryMetrics = $derived(
+		calculateBeneficiaryProgress(targetBeneficiaries, Number(currentBeneficiaries || 0))
+	);
+
+	// Derived computed values - Progress slippage
+	let slippageMetrics = $derived(
+		calculateProgressSlippage(Number(plannedPercentage || 0), Number(physicalActual || 0))
+	);
 
 	// Get status label for display
 	const getStatusLabel = (s: ProjectStatus) => {
@@ -49,6 +114,34 @@
 				return 'Select status';
 		}
 	};
+
+	// Get badge variant for metrics (mapped to valid Badge variants)
+	const getBadgeVariant = (
+		status: string
+	): 'default' | 'secondary' | 'outline' | 'destructive' => {
+		switch (status) {
+			case 'on-track':
+			case 'healthy':
+			case 'ahead':
+			case 'on-time':
+				return 'default'; // Use 'default' for success states
+			case 'warning':
+			case 'needs-attention':
+			case 'below-target':
+				return 'secondary'; // Use 'secondary' for warning states
+			case 'critical':
+			case 'overrun':
+			case 'overdue':
+			case 'behind':
+				return 'destructive';
+			default:
+				return 'outline';
+		}
+	};
+
+	// Get current month for display
+	const currentMonth = getCurrentMonth();
+	const currentMonthFormatted = formatMonth(currentMonth);
 </script>
 
 <div class="space-y-6">
@@ -56,9 +149,16 @@
 	<div class="flex items-start gap-3 rounded-lg border border-border bg-muted/50 p-4">
 		<Zap class="mt-0.5 size-5 text-primary" />
 		<div class="flex-1">
-			<h3 class="text-sm font-semibold">Quick Update Mode</h3>
-			<p class="text-xs text-muted-foreground">
-				Update the most commonly changed monitoring fields. Need to edit project details?
+			<div class="flex items-center gap-2">
+				<h3 class="text-sm font-semibold">Quick Update Mode</h3>
+				<Badge variant="outline" class="gap-1.5 text-xs">
+					<Calendar class="size-3" />
+					{currentMonthFormatted}
+				</Badge>
+			</div>
+			<p class="mt-1 text-xs text-muted-foreground">
+				Update the most commonly changed monitoring fields for <strong>{currentMonthFormatted}</strong>.
+				Need to edit project details?
 				<button
 					type="button"
 					onclick={onSwitchToFull}
@@ -70,10 +170,297 @@
 		</div>
 	</div>
 
+	<!-- Financial Section -->
 	<Card.Root>
-		<Card.Header>
-			<Card.Title>Project Status & Progress</Card.Title>
-			<Card.Description>Update project status and completion percentage</Card.Description>
+		<Card.Header class="flex flex-row items-center justify-between">
+			<div class="space-y-1.5">
+				<div class="flex items-center gap-2">
+					<DollarSign class="size-4 text-primary" />
+					<Card.Title>Financial Status</Card.Title>
+				</div>
+				<Card.Description>Track budget utilization and balance</Card.Description>
+			</div>
+			{#if budgetMetrics.status}
+				<Badge variant={getBadgeVariant(budgetMetrics.status)}>
+					{budgetMetrics.status.replace('-', ' ')}
+				</Badge>
+			{/if}
+		</Card.Header>
+		<Card.Content class="space-y-4">
+			<div class="grid gap-4 md:grid-cols-2">
+				<!-- Total Budget (Read-only, informational) -->
+				<div class="space-y-2">
+					<Label for="total-budget">Total Budget</Label>
+					<Input
+						id="total-budget"
+						type="text"
+						value={formatCurrency(totalBudget)}
+						disabled
+						class="font-medium opacity-75"
+					/>
+				</div>
+
+				<!-- Budget Disbursed -->
+				<div class="space-y-2">
+					<Label for="budget-disbursed">Budget Disbursed</Label>
+					<div class="relative">
+						<Input
+							id="budget-disbursed"
+							type="number"
+							min="0"
+							bind:value={budgetDisbursed}
+							placeholder="0"
+						/>
+						<span class="pointer-events-none absolute top-2.5 right-3 text-sm text-muted-foreground"
+							>PHP</span
+						>
+					</div>
+				</div>
+
+				<!-- Auto-calculated: Balance Remaining -->
+				<div class="space-y-2">
+					<Label for="budget-balance" class="flex items-center gap-1.5">
+						Balance Remaining
+						<Info class="size-3.5 text-muted-foreground" />
+					</Label>
+					<Input
+						id="budget-balance"
+						type="text"
+						value={formatCurrency(budgetMetrics.balance)}
+						disabled
+						class="font-medium opacity-75"
+					/>
+				</div>
+
+				<!-- Auto-calculated: Utilization % -->
+				<div class="space-y-2">
+					<Label for="budget-utilization" class="flex items-center gap-1.5">
+						Budget Utilization
+						<Info class="size-3.5 text-muted-foreground" />
+					</Label>
+					<div class="relative">
+						<Input
+							id="budget-utilization"
+							type="text"
+							value={budgetMetrics.utilizationPercentage.toFixed(2)}
+							disabled
+							class="font-medium opacity-75"
+						/>
+						<span class="pointer-events-none absolute top-2.5 right-3 text-sm text-muted-foreground"
+							>%</span
+						>
+					</div>
+				</div>
+			</div>
+
+			<!-- Budget warnings -->
+			{#if budgetMetrics.isOverBudget}
+				<div class="flex items-start gap-2 rounded-lg border border-destructive bg-destructive/10 p-3">
+					<AlertTriangle class="mt-0.5 size-4 text-destructive" />
+					<div class="flex-1 text-xs text-destructive">
+						<strong>Budget Overrun:</strong> Disbursed amount exceeds total budget by
+						{formatCurrency(Number(budgetDisbursed || 0) - totalBudget)}
+					</div>
+				</div>
+			{:else if budgetMetrics.utilizationPercentage > 90}
+				<div class="flex items-start gap-2 rounded-lg border border-warning bg-warning/10 p-3">
+					<AlertTriangle class="mt-0.5 size-4 text-warning" />
+					<div class="flex-1 text-xs text-warning">
+						<strong>High Utilization:</strong> Budget is over 90% utilized. Monitor remaining balance
+						carefully.
+					</div>
+				</div>
+			{/if}
+		</Card.Content>
+	</Card.Root>
+
+	<!-- Timeline Section -->
+	<Card.Root>
+		<Card.Header class="flex flex-row items-center justify-between">
+			<div class="space-y-1.5">
+				<div class="flex items-center gap-2">
+					<Calendar class="size-4 text-primary" />
+					<Card.Title>Timeline & Schedule</Card.Title>
+				</div>
+				<Card.Description>Track project timeline and deadlines</Card.Description>
+			</div>
+			{#if timelineMetrics.status}
+				<Badge variant={getBadgeVariant(timelineMetrics.status)}>
+					{timelineMetrics.formattedMessage}
+				</Badge>
+			{/if}
+		</Card.Header>
+		<Card.Content class="space-y-4">
+			<div class="grid gap-4 md:grid-cols-2">
+				<!-- Start Date (Read-only) -->
+				<div class="space-y-2">
+					<Label for="start-date">Start Date</Label>
+					<Input
+						id="start-date"
+						type="date"
+						bind:value={startDate}
+						disabled
+						class="opacity-75"
+					/>
+				</div>
+
+				<!-- Target End Date -->
+				<div class="space-y-2">
+					<Label for="target-end-date">Target End Date</Label>
+					<Input id="target-end-date" type="date" bind:value={targetEndDate} />
+				</div>
+
+				<!-- Extension Requested -->
+				<div class="space-y-2">
+					<Label for="extension-requested" class="flex items-center gap-2">
+						<input
+							id="extension-requested"
+							type="checkbox"
+							bind:checked={extensionRequested}
+							class="size-4 rounded border-input"
+						/>
+						Extension Requested
+					</Label>
+				</div>
+
+				<!-- Extension Date (conditional) -->
+				{#if extensionRequested}
+					<div class="space-y-2">
+						<Label for="extension-date">New Target Date</Label>
+						<Input id="extension-date" type="date" bind:value={extensionDate} />
+					</div>
+				{/if}
+			</div>
+
+			<!-- Timeline status indicator -->
+			{#if timelineMetrics.isOverdue}
+				<div class="flex items-start gap-2 rounded-lg border border-destructive bg-destructive/10 p-3">
+					<AlertTriangle class="mt-0.5 size-4 text-destructive" />
+					<div class="flex-1 text-xs text-destructive">
+						<strong>Project Overdue:</strong>
+						{timelineMetrics.formattedMessage}
+					</div>
+				</div>
+			{:else if timelineMetrics.status === 'warning'}
+				<div class="flex items-start gap-2 rounded-lg border border-warning bg-warning/10 p-3">
+					<AlertTriangle class="mt-0.5 size-4 text-warning" />
+					<div class="flex-1 text-xs text-warning">
+						<strong>Deadline Approaching:</strong>
+						{timelineMetrics.formattedMessage}
+					</div>
+				</div>
+			{/if}
+		</Card.Content>
+	</Card.Root>
+
+	<!-- Beneficiaries Section -->
+	<Card.Root>
+		<Card.Header class="flex flex-row items-center justify-between">
+			<div class="space-y-1.5">
+				<div class="flex items-center gap-2">
+					<Users class="size-4 text-primary" />
+					<Card.Title>Beneficiaries & Reach</Card.Title>
+				</div>
+				<Card.Description>Track beneficiary targets and progress</Card.Description>
+			</div>
+			{#if beneficiaryMetrics.status}
+				<Badge variant={getBadgeVariant(beneficiaryMetrics.status)}>
+					{beneficiaryMetrics.percentage.toFixed(1)}% of target
+				</Badge>
+			{/if}
+		</Card.Header>
+		<Card.Content class="space-y-4">
+			<div class="grid gap-4 md:grid-cols-3">
+				<!-- Target Beneficiaries (Read-only) -->
+				<div class="space-y-2">
+					<Label for="target-beneficiaries">Target Beneficiaries</Label>
+					<Input
+						id="target-beneficiaries"
+						type="number"
+						value={targetBeneficiaries}
+						disabled
+						class="font-medium opacity-75"
+					/>
+				</div>
+
+				<!-- Current Beneficiaries Served -->
+				<div class="space-y-2">
+					<Label for="current-beneficiaries">Beneficiaries Served</Label>
+					<Input
+						id="current-beneficiaries"
+						type="number"
+						min="0"
+						bind:value={currentBeneficiaries}
+						placeholder="0"
+					/>
+				</div>
+
+				<!-- Households Reached -->
+				<div class="space-y-2">
+					<Label for="households-reached">Households Reached</Label>
+					<Input
+						id="households-reached"
+						type="number"
+						min="0"
+						bind:value={householdsReached}
+						placeholder="0"
+					/>
+				</div>
+
+				<!-- Auto-calculated: Remaining -->
+				<div class="space-y-2 md:col-span-3">
+					<Label class="flex items-center gap-1.5">
+						Progress to Target
+						<Info class="size-3.5 text-muted-foreground" />
+					</Label>
+					<div class="flex items-center gap-3 rounded-lg border bg-muted/30 p-3">
+						<div class="flex-1">
+							<div class="mb-1 text-xs text-muted-foreground">Remaining</div>
+							<div class="text-sm font-semibold">{beneficiaryMetrics.remaining} beneficiaries</div>
+						</div>
+						<div class="flex-1">
+							<div class="mb-1 text-xs text-muted-foreground">Progress</div>
+							<div class="text-sm font-semibold">{beneficiaryMetrics.percentage.toFixed(1)}%</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Beneficiary warnings -->
+			{#if beneficiaryMetrics.status === 'below-target' && Number(physicalActual || 0) > 70}
+				<div class="flex items-start gap-2 rounded-lg border border-warning bg-warning/10 p-3">
+					<AlertTriangle class="mt-0.5 size-4 text-warning" />
+					<div class="flex-1 text-xs text-warning">
+						<strong>Low Beneficiary Reach:</strong> Physical progress is at {physicalActual}% but beneficiary
+						reach is only {beneficiaryMetrics.percentage.toFixed(1)}% of target.
+					</div>
+				</div>
+			{/if}
+		</Card.Content>
+	</Card.Root>
+
+	<!-- Enhanced Progress Section -->
+	<Card.Root>
+		<Card.Header class="flex flex-row items-center justify-between">
+			<div class="space-y-1.5">
+				<Card.Title>Physical Progress & Status</Card.Title>
+				<Card.Description>Update project status, progress, and current stage</Card.Description>
+			</div>
+			{#if slippageMetrics.status !== 'on-track'}
+				<Badge variant={getBadgeVariant(slippageMetrics.status)}>
+					{#if slippageMetrics.status === 'ahead'}
+						<TrendingUp class="mr-1 size-3" />
+					{:else}
+						<TrendingDown class="mr-1 size-3" />
+					{/if}
+					{slippageMetrics.formattedMessage}
+				</Badge>
+			{:else}
+				<Badge variant="default">
+					<CheckCircle class="mr-1 size-3" />
+					On Schedule
+				</Badge>
+			{/if}
 		</Card.Header>
 		<Card.Content class="space-y-4">
 			<div class="grid gap-4 md:grid-cols-2">
@@ -93,9 +480,38 @@
 					</Select.Root>
 				</div>
 
-				<!-- Completion Percentage -->
+				<!-- Current Stage -->
 				<div class="space-y-2">
-					<Label for="completion">Completion Percentage</Label>
+					<Label for="current-stage">Current Stage</Label>
+					<Input
+						id="current-stage"
+						type="text"
+						bind:value={statusStage}
+						placeholder="e.g., Foundation work ongoing"
+					/>
+				</div>
+
+				<!-- Planned Percentage (for comparison) -->
+				<div class="space-y-2">
+					<Label for="planned-percentage">Planned Progress (%)</Label>
+					<div class="relative">
+						<Input
+							id="planned-percentage"
+							type="number"
+							min="0"
+							max="100"
+							bind:value={plannedPercentage}
+							placeholder="0"
+						/>
+						<span class="pointer-events-none absolute top-2.5 right-3 text-sm text-muted-foreground"
+							>%</span
+						>
+					</div>
+				</div>
+
+				<!-- Actual Completion Percentage -->
+				<div class="space-y-2">
+					<Label for="completion">Actual Progress (%)</Label>
 					<div class="relative">
 						<Input
 							id="completion"
@@ -110,18 +526,55 @@
 						>
 					</div>
 				</div>
-
-				<!-- Current Stage -->
-				<div class="space-y-2 md:col-span-2">
-					<Label for="current-stage">Current Stage</Label>
-					<Input
-						id="current-stage"
-						type="text"
-						bind:value={statusStage}
-						placeholder="e.g., Foundation work ongoing, Installation phase"
-					/>
-				</div>
 			</div>
+
+			<!-- Slippage indicator -->
+			{#if slippageMetrics.slippage !== 0}
+				<div class="rounded-lg border bg-muted/30 p-3">
+					<div class="mb-1 text-xs font-medium text-muted-foreground">Schedule Variance</div>
+					<div class="flex items-center gap-2">
+						{#if slippageMetrics.status === 'ahead'}
+							<TrendingUp class="size-4 text-primary" />
+							<span class="text-sm font-semibold text-primary">
+								{Math.abs(slippageMetrics.slippage).toFixed(2)}% ahead of schedule
+							</span>
+						{:else if slippageMetrics.status === 'behind'}
+							{#if slippageMetrics.severity === 'severe'}
+								<TrendingDown class="size-4 text-destructive" />
+								<span class="text-sm font-semibold text-destructive">
+									{Math.abs(slippageMetrics.slippage).toFixed(2)}% behind schedule (Severe)
+								</span>
+							{:else}
+								<TrendingDown class="size-4 text-muted-foreground" />
+								<span class="text-sm font-semibold text-muted-foreground">
+									{Math.abs(slippageMetrics.slippage).toFixed(2)}% behind schedule
+									{#if slippageMetrics.severity === 'moderate'}
+										(Moderate)
+									{/if}
+								</span>
+							{/if}
+						{/if}
+					</div>
+				</div>
+			{/if}
+
+			<!-- Progress warnings -->
+			{#if Number(physicalActual || 0) > 100}
+				<div class="flex items-start gap-2 rounded-lg border border-warning bg-warning/10 p-3">
+					<AlertTriangle class="mt-0.5 size-4 text-warning" />
+					<div class="flex-1 text-xs text-warning">
+						<strong>Invalid Progress:</strong> Progress percentage cannot exceed 100%.
+					</div>
+				</div>
+			{:else if slippageMetrics.severity === 'severe'}
+				<div class="flex items-start gap-2 rounded-lg border border-destructive bg-destructive/10 p-3">
+					<AlertTriangle class="mt-0.5 size-4 text-destructive" />
+					<div class="flex-1 text-xs text-destructive">
+						<strong>Severe Delay:</strong> Project is significantly behind schedule. Review catch-up
+						plan below.
+					</div>
+				</div>
+			{/if}
 		</Card.Content>
 	</Card.Root>
 
