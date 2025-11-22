@@ -6,6 +6,7 @@
 	import * as Table from '$lib/components/ui/table';
 	import { activities, chartData, projects, stats } from '$lib/mock-data';
 	import type { ProjectStatus } from '$lib/types';
+	import { downloadProjectMonitoringPDF } from '$lib/utils/pdf-generator';
 	import {
 		Activity,
 		ArrowRight,
@@ -95,6 +96,11 @@
 
 	const topCategories = chartData.projectsByCategory.sort((a, b) => b.count - a.count).slice(0, 5);
 	const maxCategoryCount = Math.max(...topCategories.map((c) => c.count));
+
+	function handleExportReport() {
+		// Download PDF for all projects
+		downloadProjectMonitoringPDF(projects, '3rd');
+	}
 </script>
 
 <svelte:head>
@@ -107,7 +113,7 @@
 		<div class="flex items-center justify-between p-6">
 			<h1 class="text-3xl font-bold">Dashboard</h1>
 			<div class="flex gap-2">
-				<Button variant="outline" size="sm">
+				<Button variant="outline" size="sm" onclick={handleExportReport}>
 					<Download class="mr-2" />
 					Export Report
 				</Button>

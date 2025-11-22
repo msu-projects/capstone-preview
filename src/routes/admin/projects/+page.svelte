@@ -9,6 +9,7 @@
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import { projects } from '$lib/mock-data';
 	import type { ProjectStatus } from '$lib/types';
+	import { downloadProjectMonitoringPDF, downloadSingleProjectPDF } from '$lib/utils/pdf-generator';
 	import {
 		ArrowDownUp,
 		Download,
@@ -157,11 +158,21 @@
 	}
 
 	function handleExport() {
-		console.log('Export projects');
+		// Download PDF for all filtered projects
+		const projectsToExport = filteredProjects.length > 0 ? filteredProjects : projects;
+		downloadProjectMonitoringPDF(projectsToExport, '3rd');
 	}
 
 	function handleRefresh() {
 		console.log('Refresh table');
+	}
+
+	function handleDownloadPDF(projectId: number) {
+		const project = projects.find((p) => p.id === projectId);
+		if (project) {
+			const fileName = `${project.title.replace(/[^a-z0-9]/gi, '_')}_Report.pdf`;
+			downloadSingleProjectPDF(project, fileName);
+		}
 	}
 </script>
 
@@ -393,6 +404,14 @@
 													href="/admin/projects/{project.id}/edit"
 												>
 													<SquarePen class="size-4" />
+												</Button>
+												<Button
+													variant="ghost"
+													size="icon"
+													onclick={() => handleDownloadPDF(project.id)}
+													title="Download PDF Report"
+												>
+													<Download class="size-4" />
 												</Button>
 												<Button
 													variant="ghost"

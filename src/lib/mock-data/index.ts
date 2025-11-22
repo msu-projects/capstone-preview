@@ -129,7 +129,85 @@ export function refreshSitios(): Sitio[] {
 // ===== PROJECTS DATA =====
 
 // Use enhanced projects with comprehensive multi-sitio tracking
-export const projects: Project[] = enhancedProjects;
+// Add monitoring data to enhanced projects for PDF generation
+const enhancedProjectsWithMonitoring = enhancedProjects.map((project) => {
+	// Add monitoring data based on project status and budget
+	const allocated = project.budget;
+	const supplemental = Math.floor(allocated * 0.1);
+	const total = allocated + supplemental;
+	const released = Math.floor(total * 0.85);
+	const obligations = Math.floor(released * 0.9);
+	const contractCost = Math.floor(total * 0.95);
+
+	const plan = project.completion_percentage + 5;
+	const actual = project.completion_percentage;
+	const slippage = Number((actual - plan).toFixed(2));
+
+	const maleEmployment = 8 + Math.floor(Math.random() * 15);
+	const femaleEmployment = 5 + Math.floor(Math.random() * 10);
+
+	return {
+		...project,
+		monitoring: createMonitoringDetails({
+			location: `${project.municipality}`,
+			fiscalYear: project.project_year,
+			allotment: {
+				allocated,
+				supplemental,
+				total,
+				released
+			},
+			expenditure: {
+				obligations,
+				contractCost
+			},
+			physical: {
+				plan,
+				actual,
+				slippage
+			},
+			employment: {
+				male: maleEmployment,
+				female: femaleEmployment
+			},
+			contract: {
+				duration: '120 CD',
+				delivery: '120 CD',
+				extension: project.status === 'suspended' ? 'Pending approval' : 'None'
+			},
+			statusSummary: {
+				stage:
+					project.status === 'completed'
+						? 'Completed'
+						: project.status === 'in-progress'
+							? 'Implementation'
+							: project.status === 'suspended'
+								? 'Suspended'
+								: 'Planning',
+				issues:
+					project.status === 'suspended'
+						? 'Project temporarily halted due to weather conditions.'
+						: project.status === 'in-progress'
+							? 'Ongoing, minor delays in material delivery.'
+							: 'None',
+				recommendations:
+					project.status === 'suspended'
+						? 'Resume works once weather improves and deploy catch-up teams.'
+						: project.status === 'in-progress'
+							? 'Coordinate with suppliers to expedite material delivery.'
+							: 'Proceed as planned.'
+			},
+			catchUpPlan:
+				project.status === 'suspended'
+					? 'Deploy double shifts upon resumption to recover lost time.'
+					: project.status === 'in-progress'
+						? 'Maintain current pace and monitor progress weekly.'
+						: 'N/A'
+		})
+	};
+});
+
+export const projects: Project[] = enhancedProjectsWithMonitoring;
 
 // Legacy projects (for reference/backup - not currently exported)
 const legacyProjects: Project[] = [
