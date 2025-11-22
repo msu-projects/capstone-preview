@@ -10,7 +10,7 @@ import type {
 	User
 } from '$lib/types';
 import { loadSitios, saveSitios } from '$lib/utils/storage';
-import { generateConsistentDemographics } from '$lib/utils/demographic-validation';
+import { csvSitiosData } from './csv-sitios';
 import { enhancedProjects } from './enhanced-projects';
 
 // ===== HELPER FUNCTIONS =====
@@ -94,151 +94,24 @@ function createMonitoringDetails(overrides: Partial<MonitoringDetails> = {}): Mo
 
 // ===== SITIOS DATA =====
 
-// Mock sitios data (used as default when LocalStorage is empty)
-const mockSitiosData: Sitio[] = [
-	{
-		id: 1,
-		name: 'Sitio Bangkalang',
-		barangay: 'Brgy. Edwards',
-		municipality: 'Tboli',
-		province: 'South Cotabato',
-		coordinates: { lat: 6.1862, lng: 124.9251 },
-		population: 510,
-		households: 110,
-		demographics: {
-			male: 260,
-			female: 250,
-			total: 510,
-			age_0_14: 180,
-			age_15_64: 280,
-			age_65_above: 50,
-			employment_rate: 62,
-			poverty_incidence: 44,
-			farmers: 61,
-			potable_water_access: 55,
-			electricity_access: 78
-		},
-		projects_count: 5,
-		created_at: '2024-01-15',
-		updated_at: '2024-11-10'
-	},
-	{
-		id: 2,
-		name: 'Sitio Paraiso',
-		barangay: 'El Nonok',
-		municipality: 'Banga',
-		province: 'South Cotabato',
-		coordinates: { lat: 6.4045, lng: 124.7833 },
-		population: 420,
-		households: 90,
-		demographics: {
-			male: 210,
-			female: 210,
-			total: 420,
-			age_0_14: 150,
-			age_15_64: 230,
-			age_65_above: 40,
-			employment_rate: 59,
-			poverty_incidence: 40,
-			farmers: 54,
-			potable_water_access: 70,
-			electricity_access: 84
-		},
-		projects_count: 3,
-		created_at: '2024-01-20',
-		updated_at: '2024-10-28'
-	},
-	{
-		id: 3,
-		name: 'Bukay Pal Proper',
-		barangay: 'Bukay Pal',
-		municipality: 'Tantangan',
-		province: 'South Cotabato',
-		coordinates: { lat: 6.6189, lng: 124.7488 },
-		population: 600,
-		households: 125,
-		demographics: {
-			male: 300,
-			female: 300,
-			total: 600,
-			age_0_14: 210,
-			age_15_64: 340,
-			age_65_above: 50,
-			employment_rate: 66,
-			poverty_incidence: 36,
-			farmers: 49,
-			potable_water_access: 82,
-			electricity_access: 90
-		},
-		projects_count: 7,
-		created_at: '2024-02-05',
-		updated_at: '2024-11-12'
-	}
-];
-
-// Generate additional sitios (total 25 for demo)
-const sitioNames = [
-	'Bagong Silang',
-	'Malaya',
-	'Masaya',
-	'Pagasa',
-	'Dahlia',
-	'Sampaguita',
-	'Rosal',
-	'Ilang-Ilang'
-];
-const barangays = ['Zone 1', 'Poblacion', 'San Isidro', 'Santa Cruz', 'San Jose'];
-const municipalities = ['Koronadal City', 'Polomolok', 'Tupi', 'Tantangan', 'Surallah', 'Banga'];
-
-for (let i = 4; i <= 25; i++) {
-	const population = 300 + Math.floor(Math.random() * 300);
-	const households = 60 + Math.floor(Math.random() * 60);
-	const demographics = generateConsistentDemographics(population);
-
-	mockSitiosData.push({
-		id: i,
-		name: `Sitio ${sitioNames[i % 8]}${i}`,
-		barangay: barangays[i % 5],
-		municipality: municipalities[i % 6],
-		province: 'South Cotabato',
-		coordinates: {
-			lat: 6.2 + Math.random() * 0.5,
-			lng: 124.8 + Math.random() * 0.5
-		},
-		population: population,
-		households: households,
-		demographics: {
-			...demographics,
-			employment_rate: 50 + Math.floor(Math.random() * 30),
-			poverty_incidence: 30 + Math.floor(Math.random() * 30),
-			farmers: 40 + Math.floor(Math.random() * 40),
-			potable_water_access: 60 + Math.floor(Math.random() * 30),
-			electricity_access: 70 + Math.floor(Math.random() * 25)
-		},
-		projects_count: Math.floor(Math.random() * 8),
-		created_at: `2024-0${(i % 9) + 1}-${10 + (i % 20)}`,
-		updated_at: `2024-${10 + (i % 2)}-${10 + (i % 20)}`
-	});
-}
-
-// Initialize LocalStorage with mock data if empty (runs only in browser)
+// Initialize LocalStorage with CSV data if empty (runs only in browser)
 function initializeSitios(): Sitio[] {
 	if (typeof window === 'undefined') {
-		// Server-side: return mock data
-		return mockSitiosData;
+		// Server-side: return CSV data
+		return csvSitiosData;
 	}
 
 	try {
 		const storedSitios = loadSitios();
 		if (storedSitios.length === 0) {
-			// First load: initialize with mock data
-			saveSitios(mockSitiosData);
-			return mockSitiosData;
+			// First load: initialize with CSV data
+			saveSitios(csvSitiosData);
+			return csvSitiosData;
 		}
 		return storedSitios;
 	} catch (error) {
 		console.error('Failed to initialize sitios from storage:', error);
-		return mockSitiosData;
+		return csvSitiosData;
 	}
 }
 
@@ -248,7 +121,7 @@ export const sitios: Sitio[] = initializeSitios();
 // Export function to refresh sitios from storage (useful after imports)
 export function refreshSitios(): Sitio[] {
 	if (typeof window === 'undefined') {
-		return mockSitiosData;
+		return csvSitiosData;
 	}
 	return loadSitios();
 }
