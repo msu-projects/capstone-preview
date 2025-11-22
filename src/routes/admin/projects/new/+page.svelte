@@ -51,6 +51,7 @@
 
 	// Tab 3: Performance Targets
 	let performanceTargets = $state<Omit<PerformanceTarget, 'id' | 'project_id'>[]>([]);
+	$inspect(performanceTargets);
 	let targetStartDate = $state<DateValue | undefined>(today(getLocalTimeZone()));
 	let targetEndDate = $state<DateValue | undefined>(undefined);
 	let totalBudget = $state('');
@@ -340,7 +341,7 @@
 				</Tabs.Content>
 
 				<Tabs.Content value="budget">
-					<BudgetResourcesTab totalBudget={totalBudget} bind:fundingSources bind:budgetComponents />
+					<BudgetResourcesTab {totalBudget} bind:fundingSources bind:budgetComponents />
 				</Tabs.Content>
 
 				<Tabs.Content value="monthly">

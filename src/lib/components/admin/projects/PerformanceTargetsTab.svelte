@@ -295,11 +295,14 @@
 				<div class="flex gap-3">
 					<TrendingUp class="mt-0.5 size-5 shrink-0 text-primary" />
 					<div>
-						<p class="mb-1 font-medium">Milestone-Based Tracking</p>
+						<p class="mb-1 font-medium">Percentage-Based Progress Tracking</p>
 						<p class="text-sm text-muted-foreground">
-							After project creation, you'll be able to break down these targets into monthly
-							deliverables and track actual progress against targets through the monthly monitoring
-							interface.
+							In the Monthly Planning tab, you'll track progress as <strong
+								>cumulative percentages</strong
+							>
+							(Plan % vs Actual %). Set planned monthly progress that reaches 100% by project completion,
+							then update actual progress to automatically calculate slippage. This aligns with the official
+							20% LDF monitoring form requirements.
 						</p>
 					</div>
 				</div>

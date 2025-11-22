@@ -186,3 +186,130 @@ export function adjustMonthlyBreakdown(
 
 	return adjusted;
 }
+
+/**
+ * Generates cumulative percentage template across months
+ * @param months - Array of month strings
+ * @param strategy - Distribution strategy ('even' or 'weighted')
+ * @returns Record of month -> cumulative percentage (final month = 100%)
+ */
+export function generateCumulativePercentageTemplate(
+	months: string[],
+	strategy: 'even' | 'weighted' = 'even'
+): Record<string, number> {
+	const percentages: Record<string, number> = {};
+
+	if (months.length === 0) {
+		return percentages;
+	}
+
+	if (strategy === 'even') {
+		// Even distribution: cumulative increases evenly
+		const incrementPer = 100 / months.length;
+		let cumulative = 0;
+
+		months.forEach((month, index) => {
+			cumulative += incrementPer;
+			// Ensure final month is exactly 100%
+			percentages[month] = index === months.length - 1 ? 100 : Math.round(cumulative * 100) / 100;
+		});
+	} else if (strategy === 'weighted') {
+		// Weighted strategy: slower start (10% first month), accelerates to middle, steady to end
+		const weights: number[] = [];
+		const midpoint = Math.floor(months.length / 2);
+
+		months.forEach((_, index) => {
+			if (index < midpoint) {
+				// Ramp up phase: 0.3 to 1.0
+				weights.push(0.3 + (index / midpoint) * 0.7);
+			} else {
+				// Steady phase
+				weights.push(1.0);
+			}
+		});
+
+		const totalWeight = weights.reduce((sum, w) => sum + w, 0);
+		let cumulative = 0;
+
+		months.forEach((month, index) => {
+			cumulative += (100 * weights[index]) / totalWeight;
+			// Ensure final month is exactly 100%
+			percentages[month] = index === months.length - 1 ? 100 : Math.round(cumulative * 100) / 100;
+		});
+	}
+
+	return percentages;
+}
+
+/**
+ * Validates cumulative percentage breakdown
+ * @param cumulativePercentages - Record of month -> cumulative percentage
+ * @param months - Array of month strings in order
+ * @returns Validation result
+ */
+export function validateCumulativePercentage(
+	cumulativePercentages: Record<string, number>,
+	months: string[]
+): { isValid: boolean; message: string; finalPercentage: number } {
+	if (months.length === 0) {
+		return { isValid: false, message: 'No months provided', finalPercentage: 0 };
+	}
+
+	const finalMonth = months[months.length - 1];
+	const finalPercentage = cumulativePercentages[finalMonth] || 0;
+
+	// Check if percentages are increasing
+	let previousValue = 0;
+	for (const month of months) {
+		const currentValue = cumulativePercentages[month] || 0;
+		if (currentValue < previousValue) {
+			return {
+				isValid: false,
+				message: 'Percentages must be cumulative (non-decreasing)',
+				finalPercentage
+			};
+		}
+		if (currentValue > 100) {
+			return {
+				isValid: false,
+				message: 'Percentage cannot exceed 100%',
+				finalPercentage
+			};
+		}
+		previousValue = currentValue;
+	}
+
+	// Final month must be 100%
+	if (Math.abs(finalPercentage - 100) > 0.01) {
+		return {
+			isValid: false,
+			message: `Final month must be 100% (currently ${finalPercentage}%)`,
+			finalPercentage
+		};
+	}
+
+	return { isValid: true, message: 'Valid', finalPercentage };
+}
+
+/**
+ * Calculates slippage (Plan % - Actual %) for each month
+ * @param planPercentages - Record of month -> planned cumulative percentage
+ * @param actualPercentages - Record of month -> actual cumulative percentage
+ * @param months - Array of month strings
+ * @returns Record of month -> slippage percentage
+ */
+export function calculateSlippage(
+	planPercentages: Record<string, number>,
+	actualPercentages: Record<string, number>,
+	months: string[]
+): Record<string, number> {
+	const slippage: Record<string, number> = {};
+
+	months.forEach((month) => {
+		const plan = planPercentages[month] || 0;
+		const actual = actualPercentages[month] || 0;
+		slippage[month] = plan - actual; // Positive = behind, Negative = ahead
+	});
+
+	return slippage;
+}

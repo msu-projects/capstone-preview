@@ -228,7 +228,9 @@ export interface PerformanceTarget {
 	indicator_name: string;
 	target_value: number;
 	unit_of_measure: string;
-	monthly_breakdown?: Record<string, number>; // { '2025-01': 10, '2025-02': 15, ... }
+	monthly_breakdown?: Record<string, number>; // DEPRECATED: Use monthly_plan_percentage instead
+	monthly_plan_percentage?: Record<string, number>; // Cumulative planned progress % { '2025-01': 15, '2025-02': 35, ... final: 100 }
+	monthly_actual_percentage?: Record<string, number>; // Cumulative actual progress % { '2025-01': 12, '2025-02': 30, ... }
 }
 
 export interface MonthlyProgress {

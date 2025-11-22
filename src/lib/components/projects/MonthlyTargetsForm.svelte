@@ -9,9 +9,10 @@
 	import type { MonthlyReleaseSchedule, PerformanceTarget } from '$lib/types';
 	import {
 		formatMonth,
+		generateCumulativePercentageTemplate,
 		generateMonthRange,
 		generateMonthlyTemplate,
-		validateMonthlyBreakdown
+		validateCumulativePercentage
 	} from '$lib/utils/monthly-planning';
 	import {
 		Calendar,
@@ -33,18 +34,10 @@
 		}) => void;
 	}
 
-	let { performanceTargets, startDate, endDate, totalBudget, onUpdate }: Props = $props();
+	let { performanceTargets: targets, startDate, endDate, totalBudget, onUpdate }: Props = $props();
 
 	// Generate month range
 	const months = $derived(generateMonthRange(startDate, endDate));
-
-	// Initialize monthly breakdown for each target
-	let targets = $state<PerformanceTarget[]>(
-		performanceTargets.map((target) => ({
-			...target,
-			monthly_breakdown: target.monthly_breakdown || {}
-		}))
-	);
 
 	// Initialize budget release schedule
 	let releaseSchedule = $state<Omit<MonthlyReleaseSchedule, 'id' | 'project_id'>[]>([]);
@@ -71,14 +64,14 @@
 	let budgetExpanded = $state(false);
 
 	/**
-	 * Generate smart template for a specific performance indicator
+	 * Generate smart template for a specific performance indicator (Plan %)
 	 */
 	function generateTemplate(targetIndex: number, strategy: 'even' | 'weighted' = 'even') {
 		const target = targets[targetIndex];
-		const template = generateMonthlyTemplate(target.target_value, months, strategy);
+		const template = generateCumulativePercentageTemplate(months, strategy);
 		targets[targetIndex] = {
 			...target,
-			monthly_breakdown: template
+			monthly_plan_percentage: template
 		};
 		notifyUpdate();
 	}
@@ -98,14 +91,29 @@
 	}
 
 	/**
-	 * Update monthly value for a target
+	 * Update monthly plan percentage for a target
 	 */
-	function updateMonthlyValue(targetIndex: number, month: string, value: number) {
+	function updateMonthlyPlanPercentage(targetIndex: number, month: string, value: number) {
 		const target = targets[targetIndex];
 		targets[targetIndex] = {
 			...target,
-			monthly_breakdown: {
-				...target.monthly_breakdown,
+			monthly_plan_percentage: {
+				...target.monthly_plan_percentage,
+				[month]: value
+			}
+		};
+		notifyUpdate();
+	}
+
+	/**
+	 * Update monthly actual percentage for a target
+	 */
+	function updateMonthlyActualPercentage(targetIndex: number, month: string, value: number) {
+		const target = targets[targetIndex];
+		targets[targetIndex] = {
+			...target,
+			monthly_actual_percentage: {
+				...target.monthly_actual_percentage,
 				[month]: value
 			}
 		};
@@ -123,17 +131,20 @@
 	}
 
 	/**
-	 * Get validation status for a target
+	 * Get validation status for a target (Plan %)
 	 */
 	function getValidationStatus(target: PerformanceTarget) {
-		if (!target.monthly_breakdown || Object.keys(target.monthly_breakdown).length === 0) {
-			return { isValid: false, message: 'No monthly targets set', variant: 'secondary' as const };
+		if (
+			!target.monthly_plan_percentage ||
+			Object.keys(target.monthly_plan_percentage).length === 0
+		) {
+			return { isValid: false, message: 'No monthly plan set', variant: 'secondary' as const };
 		}
-		const validation = validateMonthlyBreakdown(target.monthly_breakdown, target.target_value);
+		const validation = validateCumulativePercentage(target.monthly_plan_percentage, months);
 		if (!validation.isValid) {
 			return {
 				isValid: false,
-				message: `Total: ${validation.total} (${validation.difference > 0 ? '+' : ''}${validation.difference})`,
+				message: validation.message,
 				variant: 'destructive' as const
 			};
 		}
@@ -172,7 +183,7 @@
 		<div>
 			<h3 class="text-lg font-semibold">Monthly Targets & Planning</h3>
 			<p class="mt-1 text-sm text-muted-foreground">
-				Break down your performance targets and budget into monthly deliverables
+				Track cumulative physical progress % (Plan vs Actual) and monthly budget releases
 			</p>
 			{#if months.length > 0}
 				<div class="mt-2 flex items-center gap-4 text-sm">
@@ -217,8 +228,9 @@
 			<Sparkles class="size-4" />
 			<Alert.Title>Smart Templates Available</Alert.Title>
 			<Alert.Description>
-				Use the "Generate Template" button to automatically distribute targets evenly across months,
-				then adjust individual months as needed.
+				Use the "Generate Template" button to create cumulative percentage plans that reach 100% by
+				the final month. Adjust individual months as needed. Enter actual progress % as work
+				progresses to track slippage.
 			</Alert.Description>
 		</Alert.Root>
 	{/if}
@@ -242,7 +254,8 @@
 							</Card.Title>
 							<div class="mt-1 flex items-center gap-2">
 								<span class="text-xs text-muted-foreground">
-									Target: {target.target_value.toLocaleString()} units
+									Target: {target.target_value.toLocaleString()}
+									{target.unit_of_measure}
 								</span>
 								<Badge variant={validation.variant} class="text-xs">
 									{validation.message}
@@ -271,26 +284,91 @@
 
 				{#if isExpanded}
 					<Card.Content>
-						<div class="grid grid-cols-3 gap-3">
+						<div class="space-y-4">
+							<!-- Header Row -->
+							<div
+								class="grid grid-cols-4 gap-2 border-b pb-2 text-xs font-semibold text-muted-foreground"
+							>
+								<div>Month</div>
+								<div>Plan %</div>
+								<div>Actual %</div>
+								<div>Slippage</div>
+							</div>
+
+							<!-- Data Rows -->
 							{#each months as month (month)}
-								{@const value = target.monthly_breakdown?.[month] || 0}
-								<div class="space-y-1.5">
-									<Label for={`target-${targetIndex}-${month}`} class="text-xs">
-										{formatMonth(month)}
-									</Label>
-									<Input
-										id={`target-${targetIndex}-${month}`}
-										type="number"
-										min="0"
-										{value}
-										oninput={(e) => {
-											const val = parseInt(e.currentTarget.value) || 0;
-											updateMonthlyValue(targetIndex, month, val);
-										}}
-										class="h-8 text-sm"
-									/>
+								{@const planValue = target.monthly_plan_percentage?.[month] || 0}
+								{@const actualValue = target.monthly_actual_percentage?.[month] || 0}
+								{@const slippageValue = planValue - actualValue}
+								{@const slippageColor =
+									Math.abs(slippageValue) < 1
+										? 'text-green-600'
+										: slippageValue > 0
+											? 'text-red-600'
+											: 'text-green-600'}
+								<div class="grid grid-cols-4 items-center gap-2">
+									<div class="text-xs font-medium">{formatMonth(month)}</div>
+									<div>
+										<Input
+											id={`plan-${targetIndex}-${month}`}
+											type="number"
+											min="0"
+											max="100"
+											step="0.1"
+											value={planValue}
+											oninput={(e) => {
+												const val = parseFloat(e.currentTarget.value) || 0;
+												updateMonthlyPlanPercentage(targetIndex, month, val);
+											}}
+											class="h-8 text-sm"
+											placeholder="0%"
+										/>
+									</div>
+									<div>
+										<Input
+											id={`actual-${targetIndex}-${month}`}
+											type="number"
+											min="0"
+											max="100"
+											step="0.1"
+											value={actualValue}
+											oninput={(e) => {
+												const val = parseFloat(e.currentTarget.value) || 0;
+												updateMonthlyActualPercentage(targetIndex, month, val);
+											}}
+											class="h-8 bg-muted/30 text-sm"
+											placeholder="0%"
+										/>
+									</div>
+									<div class="text-sm font-medium {slippageColor}">
+										{slippageValue > 0 ? '+' : ''}{slippageValue.toFixed(1)}%
+									</div>
 								</div>
 							{/each}
+
+							<!-- Summary Row -->
+							{#if months.length > 0}
+								{@const finalPlanValue =
+									target.monthly_plan_percentage?.[months[months.length - 1]] || 0}
+								{@const finalActualValue =
+									target.monthly_actual_percentage?.[months[months.length - 1]] || 0}
+								<div class="grid grid-cols-4 gap-2 border-t pt-2 text-sm font-semibold">
+									<div>Final</div>
+									<div class={finalPlanValue === 100 ? 'text-green-600' : 'text-destructive'}>
+										{finalPlanValue}%
+									</div>
+									<div>{finalActualValue}%</div>
+									<div
+										class={finalPlanValue - finalActualValue === 0
+											? 'text-green-600'
+											: 'text-destructive'}
+									>
+										{finalPlanValue - finalActualValue > 0 ? '+' : ''}{(
+											finalPlanValue - finalActualValue
+										).toFixed(1)}%
+									</div>
+								</div>
+							{/if}
 						</div>
 					</Card.Content>
 				{/if}
@@ -366,7 +444,8 @@
 			<CircleAlert class="size-4" />
 			<Alert.Title>Validation Issues</Alert.Title>
 			<Alert.Description>
-				Please ensure all monthly targets sum to their overall targets before proceeding.
+				Please ensure all plan percentages are cumulative and reach 100% in the final month before
+				proceeding.
 			</Alert.Description>
 		</Alert.Root>
 	{/if}
