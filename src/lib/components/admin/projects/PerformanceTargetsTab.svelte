@@ -295,9 +295,9 @@
 				<div class="flex gap-3">
 					<TrendingUp class="mt-0.5 size-5 shrink-0 text-primary" />
 					<div>
-						<p class="mb-1 font-medium">Percentage-Based Progress Tracking</p>
+						<p class="mb-1 font-medium">Monthly Progress Tracking</p>
 						<p class="text-sm text-muted-foreground">
-							In the Monthly Planning tab, you'll track progress as <strong
+							In the Monthly Planning tab, you'll track overall physical progress as <strong
 								>cumulative percentages</strong
 							>
 							(Plan % vs Actual %). Set planned monthly progress that reaches 100% by project completion,

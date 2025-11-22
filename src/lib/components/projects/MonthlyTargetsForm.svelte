@@ -6,7 +6,7 @@
 	import { CurrencyInput } from '$lib/components/ui/currency-input';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
-	import type { MonthlyReleaseSchedule, PerformanceTarget } from '$lib/types';
+	import type { MonthlyPhysicalProgress, MonthlyReleaseSchedule } from '$lib/types';
 	import {
 		formatMonth,
 		generateCumulativePercentageTemplate,
@@ -24,23 +24,34 @@
 	} from '@lucide/svelte';
 
 	interface Props {
-		performanceTargets: PerformanceTarget[];
 		startDate: string;
 		endDate: string;
 		totalBudget: number;
 		onUpdate: (data: {
-			performanceTargets: PerformanceTarget[];
+			physicalProgress: MonthlyPhysicalProgress[];
 			releaseSchedule: Omit<MonthlyReleaseSchedule, 'id' | 'project_id'>[];
 		}) => void;
 	}
 
-	let { performanceTargets: targets, startDate, endDate, totalBudget, onUpdate }: Props = $props();
+	let { startDate, endDate, totalBudget, onUpdate }: Props = $props();
 
 	// Generate month range
 	const months = $derived(generateMonthRange(startDate, endDate));
 
+	// Initialize physical progress tracking
+	let physicalProgress = $state<MonthlyPhysicalProgress[]>([]);
+
 	// Initialize budget release schedule
 	let releaseSchedule = $state<Omit<MonthlyReleaseSchedule, 'id' | 'project_id'>[]>([]);
+
+	// Initialize physical progress when months change
+	$effect(() => {
+		physicalProgress = months.map((month) => ({
+			month_year: month,
+			plan_percentage: 0,
+			actual_percentage: 0
+		}));
+	});
 
 	// Update release schedule when months change
 	$effect(() => {
@@ -52,27 +63,26 @@
 		}));
 	});
 
-	// Notify parent when releaseSchedule changes
+	// Notify parent when data changes
 	$effect(() => {
-		if (releaseSchedule.length > 0) {
+		if (physicalProgress.length > 0 && releaseSchedule.length > 0) {
 			notifyUpdate();
 		}
 	});
 
 	// Track which section is expanded
-	let expandedTarget = $state<number | null>(null);
 	let budgetExpanded = $state(false);
 
 	/**
-	 * Generate smart template for a specific performance indicator (Plan %)
+	 * Generate smart template for physical progress (Plan %)
 	 */
-	function generateTemplate(targetIndex: number, strategy: 'even' | 'weighted' = 'even') {
-		const target = targets[targetIndex];
+	function generatePhysicalProgressTemplate(strategy: 'even' | 'weighted' = 'even') {
 		const template = generateCumulativePercentageTemplate(months, strategy);
-		targets[targetIndex] = {
-			...target,
-			monthly_plan_percentage: template
-		};
+		physicalProgress = months.map((month) => ({
+			month_year: month,
+			plan_percentage: template[month] || 0,
+			actual_percentage: 0
+		}));
 		notifyUpdate();
 	}
 
@@ -91,56 +101,33 @@
 	}
 
 	/**
-	 * Update monthly plan percentage for a target
-	 */
-	function updateMonthlyPlanPercentage(targetIndex: number, month: string, value: number) {
-		const target = targets[targetIndex];
-		targets[targetIndex] = {
-			...target,
-			monthly_plan_percentage: {
-				...target.monthly_plan_percentage,
-				[month]: value
-			}
-		};
-		notifyUpdate();
-	}
-
-	/**
-	 * Update monthly actual percentage for a target
-	 */
-	function updateMonthlyActualPercentage(targetIndex: number, month: string, value: number) {
-		const target = targets[targetIndex];
-		targets[targetIndex] = {
-			...target,
-			monthly_actual_percentage: {
-				...target.monthly_actual_percentage,
-				[month]: value
-			}
-		};
-		notifyUpdate();
-	}
-
-	/**
 	 * Notify parent of updates
 	 */
 	function notifyUpdate() {
 		onUpdate({
-			performanceTargets: targets,
+			physicalProgress,
 			releaseSchedule
 		});
 	}
 
 	/**
-	 * Get validation status for a target (Plan %)
+	 * Get validation status for physical progress (Plan %)
 	 */
-	function getValidationStatus(target: PerformanceTarget) {
-		if (
-			!target.monthly_plan_percentage ||
-			Object.keys(target.monthly_plan_percentage).length === 0
-		) {
+	function getPhysicalProgressValidationStatus() {
+		if (physicalProgress.length === 0) {
 			return { isValid: false, message: 'No monthly plan set', variant: 'secondary' as const };
 		}
-		const validation = validateCumulativePercentage(target.monthly_plan_percentage, months);
+
+		const planPercentages = physicalProgress.reduce(
+			(acc, mp) => {
+				acc[mp.month_year] = mp.plan_percentage;
+				return acc;
+			},
+			{} as Record<string, number>
+		);
+
+		const validation = validateCumulativePercentage(planPercentages, months);
+
 		if (!validation.isValid) {
 			return {
 				isValid: false,
@@ -171,9 +158,9 @@
 	 * Check if all validations pass
 	 */
 	const allValid = $derived.by(() => {
-		const targetsValid = targets.every((t) => getValidationStatus(t).isValid);
+		const physicalValid = getPhysicalProgressValidationStatus().isValid;
 		const budgetValid = getBudgetValidationStatus().isValid;
-		return targetsValid && budgetValid;
+		return physicalValid && budgetValid;
 	});
 </script>
 
@@ -235,145 +222,118 @@
 		</Alert.Root>
 	{/if}
 
-	<!-- Performance Targets -->
+	<!-- Physical Progress Tracker -->
 	<div class="space-y-4">
 		<h4 class="flex items-center gap-2 text-sm font-semibold">
 			<TrendingUp class="size-4" />
-			Physical Progress Targets
+			Physical Progress Tracker
 		</h4>
 
-		{#each targets as target, targetIndex (target.indicator_type || targetIndex)}
-			{@const validation = getValidationStatus(target)}
-			{@const isExpanded = expandedTarget === targetIndex}
-			<Card.Root>
-				<Card.Header class="pb-3">
-					<div class="flex items-start justify-between">
-						<div class="flex-1">
-							<Card.Title class="text-sm">
-								{target.indicator_name}
-							</Card.Title>
-							<div class="mt-1 flex items-center gap-2">
-								<span class="text-xs text-muted-foreground">
-									Target: {target.target_value.toLocaleString()}
-									{target.unit_of_measure}
-								</span>
-								<Badge variant={validation.variant} class="text-xs">
-									{validation.message}
-								</Badge>
-							</div>
-						</div>
-						<div class="flex items-center gap-2">
-							<Button
-								variant="outline"
-								size="sm"
-								onclick={() => generateTemplate(targetIndex, 'even')}
-							>
-								<Sparkles class="size-3" />
-								Generate Template
-							</Button>
-							<Button
-								variant="ghost"
-								size="sm"
-								onclick={() => (expandedTarget = isExpanded ? null : targetIndex)}
-							>
-								{isExpanded ? 'Collapse' : 'Expand'}
-							</Button>
+		<Card.Root>
+			{@const validation = getPhysicalProgressValidationStatus()}
+			<Card.Header class="pb-3">
+				<div class="flex items-start justify-between">
+					<div class="flex-1">
+						<Card.Title class="text-sm">
+							Monthly Physical Progress (Cumulative %)
+						</Card.Title>
+						<div class="mt-1 flex items-center gap-2">
+							<span class="text-xs text-muted-foreground">
+								Track overall project completion progress monthly
+							</span>
+							<Badge variant={validation.variant} class="text-xs">
+								{validation.message}
+							</Badge>
 						</div>
 					</div>
-				</Card.Header>
+					<div class="flex items-center gap-2">
+						<Button
+							variant="outline"
+							size="sm"
+							onclick={() => generatePhysicalProgressTemplate('even')}
+						>
+							<Sparkles class="size-3" />
+							Generate Template
+						</Button>
+					</div>
+				</div>
+			</Card.Header>
 
-				{#if isExpanded}
-					<Card.Content>
-						<div class="space-y-4">
-							<!-- Header Row -->
-							<div
-								class="grid grid-cols-4 gap-2 border-b pb-2 text-xs font-semibold text-muted-foreground"
-							>
-								<div>Month</div>
-								<div>Plan %</div>
-								<div>Actual %</div>
-								<div>Slippage</div>
+			<Card.Content>
+				<div class="space-y-4">
+					<!-- Header Row -->
+					<div
+						class="grid grid-cols-4 gap-2 border-b pb-2 text-xs font-semibold text-muted-foreground"
+					>
+						<div>Month</div>
+						<div>Plan %</div>
+						<div>Actual %</div>
+						<div>Slippage</div>
+					</div>
+
+					<!-- Data Rows -->
+					{#each physicalProgress as progress, index (progress.month_year)}
+						{@const slippageValue = progress.plan_percentage - progress.actual_percentage}
+						{@const slippageColor =
+							Math.abs(slippageValue) < 1
+								? 'text-green-600'
+								: slippageValue > 0
+									? 'text-red-600'
+									: 'text-green-600'}
+						<div class="grid grid-cols-4 items-center gap-2">
+							<div class="text-xs font-medium">{formatMonth(progress.month_year)}</div>
+							<div>
+								<Input
+									id={`plan-${progress.month_year}`}
+									type="number"
+									min="0"
+									max="100"
+									step="0.1"
+									bind:value={physicalProgress[index].plan_percentage}
+									oninput={() => notifyUpdate()}
+									class="h-8 text-sm"
+									placeholder="0%"
+								/>
 							</div>
-
-							<!-- Data Rows -->
-							{#each months as month (month)}
-								{@const planValue = target.monthly_plan_percentage?.[month] || 0}
-								{@const actualValue = target.monthly_actual_percentage?.[month] || 0}
-								{@const slippageValue = planValue - actualValue}
-								{@const slippageColor =
-									Math.abs(slippageValue) < 1
-										? 'text-green-600'
-										: slippageValue > 0
-											? 'text-red-600'
-											: 'text-green-600'}
-								<div class="grid grid-cols-4 items-center gap-2">
-									<div class="text-xs font-medium">{formatMonth(month)}</div>
-									<div>
-										<Input
-											id={`plan-${targetIndex}-${month}`}
-											type="number"
-											min="0"
-											max="100"
-											step="0.1"
-											value={planValue}
-											oninput={(e) => {
-												const val = parseFloat(e.currentTarget.value) || 0;
-												updateMonthlyPlanPercentage(targetIndex, month, val);
-											}}
-											class="h-8 text-sm"
-											placeholder="0%"
-										/>
-									</div>
-									<div>
-										<Input
-											id={`actual-${targetIndex}-${month}`}
-											type="number"
-											min="0"
-											max="100"
-											step="0.1"
-											value={actualValue}
-											oninput={(e) => {
-												const val = parseFloat(e.currentTarget.value) || 0;
-												updateMonthlyActualPercentage(targetIndex, month, val);
-											}}
-											class="h-8 bg-muted/30 text-sm"
-											placeholder="0%"
-										/>
-									</div>
-									<div class="text-sm font-medium {slippageColor}">
-										{slippageValue > 0 ? '+' : ''}{slippageValue.toFixed(1)}%
-									</div>
-								</div>
-							{/each}
-
-							<!-- Summary Row -->
-							{#if months.length > 0}
-								{@const finalPlanValue =
-									target.monthly_plan_percentage?.[months[months.length - 1]] || 0}
-								{@const finalActualValue =
-									target.monthly_actual_percentage?.[months[months.length - 1]] || 0}
-								<div class="grid grid-cols-4 gap-2 border-t pt-2 text-sm font-semibold">
-									<div>Final</div>
-									<div class={finalPlanValue === 100 ? 'text-green-600' : 'text-destructive'}>
-										{finalPlanValue}%
-									</div>
-									<div>{finalActualValue}%</div>
-									<div
-										class={finalPlanValue - finalActualValue === 0
-											? 'text-green-600'
-											: 'text-destructive'}
-									>
-										{finalPlanValue - finalActualValue > 0 ? '+' : ''}{(
-											finalPlanValue - finalActualValue
-										).toFixed(1)}%
-									</div>
-								</div>
-							{/if}
+							<div>
+								<Input
+									id={`actual-${progress.month_year}`}
+									type="number"
+									min="0"
+									max="100"
+									step="0.1"
+									bind:value={physicalProgress[index].actual_percentage}
+									oninput={() => notifyUpdate()}
+									class="h-8 bg-muted/30 text-sm"
+									placeholder="0%"
+								/>
+							</div>
+							<div class="text-sm font-medium {slippageColor}">
+								{slippageValue > 0 ? '+' : ''}{slippageValue.toFixed(1)}%
+							</div>
 						</div>
-					</Card.Content>
-				{/if}
-			</Card.Root>
-		{/each}
+					{/each}
+
+					<!-- Summary Row -->
+					{#if physicalProgress.length > 0}
+						{@const finalProgress = physicalProgress[physicalProgress.length - 1]}
+						{@const finalSlippage = finalProgress.plan_percentage - finalProgress.actual_percentage}
+						<div class="grid grid-cols-4 gap-2 border-t pt-2 text-sm font-semibold">
+							<div>Final</div>
+							<div
+								class={finalProgress.plan_percentage === 100 ? 'text-green-600' : 'text-destructive'}
+							>
+								{finalProgress.plan_percentage}%
+							</div>
+							<div>{finalProgress.actual_percentage}%</div>
+							<div class={finalSlippage === 0 ? 'text-green-600' : 'text-destructive'}>
+								{finalSlippage > 0 ? '+' : ''}{finalSlippage.toFixed(1)}%
+							</div>
+						</div>
+					{/if}
+				</div>
+			</Card.Content>
+		</Card.Root>
 	</div>
 
 	<!-- Budget Release Schedule -->

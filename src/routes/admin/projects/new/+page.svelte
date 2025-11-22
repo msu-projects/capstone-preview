@@ -13,6 +13,7 @@
 		BudgetComponent,
 		CategoryKey,
 		FundingSource,
+		MonthlyPhysicalProgress,
 		MonthlyReleaseSchedule,
 		PerformanceTarget,
 		ProjectSitio
@@ -98,7 +99,7 @@
 
 	// Tab 6: Monthly Planning
 	let monthlyReleaseSchedule = $state<Omit<MonthlyReleaseSchedule, 'id' | 'project_id'>[]>([]);
-	let performanceTargetsWithMonthly = $state<PerformanceTarget[]>([]);
+	let monthlyPhysicalProgress = $state<MonthlyPhysicalProgress[]>([]);
 
 	// Validation
 	const isTab1Valid = $derived(
@@ -122,8 +123,8 @@
 	const isTab5Valid = $derived(fundingSources.length > 0 && budgetComponents.length > 0);
 
 	const isTab6Valid = $derived(
-		performanceTargetsWithMonthly.length > 0 &&
-			performanceTargetsWithMonthly.every((target) => target.monthly_breakdown !== undefined) &&
+		monthlyPhysicalProgress.length > 0 &&
+			monthlyPhysicalProgress.every((mp) => mp.plan_percentage !== undefined) &&
 			monthlyReleaseSchedule.length > 0
 	);
 
@@ -195,7 +196,8 @@
 			funding_sources: fundingSources,
 			budget_components: budgetComponents,
 			// Tab 6
-			performance_targets: performanceTargetsWithMonthly,
+			performance_targets: performanceTargets,
+			monthly_physical_progress: monthlyPhysicalProgress,
 			release_schedule: monthlyReleaseSchedule
 		};
 
@@ -348,12 +350,11 @@
 					<Card.Card>
 						<Card.CardContent class="p-6">
 							<MonthlyTargetsForm
-								performanceTargets={performanceTargets as PerformanceTarget[]}
 								startDate={targetStartDate?.toString() || ''}
 								endDate={targetEndDate?.toString() || ''}
 								totalBudget={Number(totalBudget)}
 								onUpdate={(data) => {
-									performanceTargetsWithMonthly = data.performanceTargets;
+									monthlyPhysicalProgress = data.physicalProgress;
 									monthlyReleaseSchedule = data.releaseSchedule;
 								}}
 							/>

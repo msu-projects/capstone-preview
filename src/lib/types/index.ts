@@ -322,6 +322,12 @@ export interface MonthlyReleaseSchedule {
 	milestone_tied?: string;
 }
 
+export interface MonthlyPhysicalProgress {
+	month_year: string; // Format: 'YYYY-MM'
+	plan_percentage: number; // Cumulative planned %
+	actual_percentage: number; // Cumulative actual %
+}
+
 export interface Project {
 	id: number;
 	title: string;
