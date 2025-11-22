@@ -3,7 +3,7 @@
 	import * as Card from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
-	import { MapPin } from '@lucide/svelte';
+	import { LoaderCircle, MapPin, Search, X } from '@lucide/svelte';
 	import type { Map as LeafletMap, Marker as LeafletMarker } from 'leaflet';
 	import { onMount } from 'svelte';
 
@@ -25,6 +25,21 @@
 	let map: LeafletMap | null = $state(null);
 	let marker: LeafletMarker | null = $state(null);
 	let L: typeof import('leaflet') | null = $state(null);
+
+	// Search state
+	let searchQuery = $state('');
+	let searchResults = $state<
+		Array<{
+			display_name: string;
+			lat: string;
+			lon: string;
+			type: string;
+			importance: number;
+		}>
+	>([]);
+	let isSearching = $state(false);
+	let showResults = $state(false);
+	let searchTimeout: ReturnType<typeof setTimeout> | null = null;
 
 	// Default center - South Cotabato, Philippines
 	const defaultCenter: [number, number] = [6.5, 124.85];
@@ -188,8 +203,15 @@
 		}, 50);
 	});
 
-	// Watch for municipality/barangay changes and update map center
+	// Watch for municipality/barangay changes and update map center and search query
 	$effect(() => {
+		// Update search query based on municipality and barangay
+		if (municipality && barangay) {
+			searchQuery = `${barangay}, ${municipality}, South Cotabato, Philippines`;
+		} else if (municipality) {
+			searchQuery = `${municipality}, South Cotabato, Philippines`;
+		}
+
 		if (!map) return;
 
 		// If barangay is selected, center on barangay
@@ -333,6 +355,89 @@
 			input.value = '0.000000';
 		}
 	}
+
+	async function searchLocation() {
+		if (!searchQuery.trim()) {
+			searchResults = [];
+			showResults = false;
+			return;
+		}
+
+		isSearching = true;
+		try {
+			// Use Nominatim API with South Cotabato bounds as priority
+			const response = await fetch(
+				`https://nominatim.openstreetmap.org/search?` +
+					`q=${encodeURIComponent(searchQuery)}&` +
+					`format=json&` +
+					`limit=5&` +
+					`countrycodes=ph&` +
+					`viewbox=124.5,6.1,125.3,6.8&` +
+					`bounded=0`
+			);
+
+			if (response.ok) {
+				const data = await response.json();
+				searchResults = data;
+				showResults = data.length > 0;
+			}
+		} catch (error) {
+			console.error('Search failed:', error);
+			searchResults = [];
+			showResults = false;
+		} finally {
+			isSearching = false;
+		}
+	}
+
+	function handleSearchInput() {
+		// Clear any existing timeout
+		if (searchTimeout) {
+			clearTimeout(searchTimeout);
+		}
+
+		// If search query is empty, clear results immediately
+		if (!searchQuery.trim()) {
+			searchResults = [];
+			showResults = false;
+			isSearching = false;
+			return;
+		}
+
+		// Show loading state
+		isSearching = true;
+
+		// Set a new timeout to search after 500ms of no typing
+		searchTimeout = setTimeout(() => {
+			searchLocation();
+		}, 500);
+	}
+
+	function selectSearchResult(result: (typeof searchResults)[0]) {
+		lat = parseFloat(parseFloat(result.lat).toFixed(6));
+		lng = parseFloat(parseFloat(result.lon).toFixed(6));
+
+		if (map) {
+			map.setView([lat, lng], 15);
+			addMarker([lat, lng]);
+		}
+
+		searchQuery = result.display_name;
+		showResults = false;
+	}
+
+	function clearSearch() {
+		searchQuery = '';
+		searchResults = [];
+		showResults = false;
+	}
+
+	// Close search results when clicking outside
+	function handleSearchBlur() {
+		setTimeout(() => {
+			showResults = false;
+		}, 200);
+	}
 </script>
 
 <Card.Root>
@@ -346,6 +451,71 @@
 		</Card.Description>
 	</Card.Header>
 	<Card.Content class="space-y-4">
+		<!-- Search Location -->
+		<div class="relative">
+			<Label for="location-search">Search Location</Label>
+			<div class="relative mt-2">
+				<Search class="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+				<Input
+					id="location-search"
+					type="text"
+					bind:value={searchQuery}
+					oninput={handleSearchInput}
+					onblur={handleSearchBlur}
+					onfocus={() => {
+						if (searchResults.length > 0) showResults = true;
+					}}
+					onkeydown={(e) => {
+						if (e.key === 'Enter') {
+							e.preventDefault();
+							searchLocation();
+						}
+					}}
+					placeholder="Search for a place, address, or landmark..."
+					class="pr-9 pl-9"
+				/>
+				{#if searchQuery}
+					<button
+						type="button"
+						onclick={clearSearch}
+						class="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+					>
+						<X class="size-4" />
+					</button>
+				{/if}
+				{#if isSearching}
+					<div class="absolute top-1/2 right-3 -translate-y-1/2">
+						<LoaderCircle class="size-4 animate-spin text-muted-foreground" />
+					</div>
+				{/if}
+			</div>
+
+			<!-- Search Results Dropdown -->
+			{#if showResults && searchResults.length > 0}
+				<div
+					class="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-border bg-popover shadow-lg"
+				>
+					{#each searchResults as result, i (i)}
+						<button
+							type="button"
+							onclick={() => selectSearchResult(result)}
+							class="flex w-full flex-col gap-1 border-b border-border px-4 py-3 text-left text-sm transition-colors last:border-b-0 hover:bg-accent"
+						>
+							<div class="flex items-start gap-2">
+								<MapPin class="mt-0.5 size-4 shrink-0 text-primary" />
+								<div class="flex-1">
+									<div class="font-medium text-foreground">{result.display_name}</div>
+									<div class="text-xs text-muted-foreground">
+										{result.type} • {result.lat}, {result.lon}
+									</div>
+								</div>
+							</div>
+						</button>
+					{/each}
+				</div>
+			{/if}
+		</div>
+
 		<!-- Action Buttons -->
 		<div class="flex gap-2">
 			<Button type="button" variant="outline" onclick={useCurrentLocation} class="flex-1">
