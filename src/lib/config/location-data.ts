@@ -35,7 +35,35 @@ export const MUNICIPALITIES_DATA: MunicipalityData[] = [
 	},
 	{
 		name: 'KORONADAL',
-		barangays: []
+		barangays: [
+			'ASSUMPTION',
+			'AVANCEÑA',
+			'CACUB',
+			'CALOOCAN',
+			'CARPENTER HILL',
+			'CONCEPCION',
+			'ESPERANZA',
+			'GENERAL PAULINO SANTOS',
+			'MABINI',
+			'MAGSAYSAY',
+			'MAMBUCAL',
+			'MORALES',
+			'NAMNAMA',
+			'NEW PANGASINAN',
+			'PARAISO',
+			'ROTONDA',
+			'SAN ISIDRO',
+			'SAN JOSE',
+			'SAN ROQUE',
+			'SANTA CRUZ',
+			'STO. NIÑO',
+			'SARAVIA',
+			'TOPLAND',
+			'ZONE 1',
+			'ZONE 2',
+			'ZONE 3',
+			'ZONE 4'
+		]
 	},
 	{
 		name: 'LAKE SEBU',

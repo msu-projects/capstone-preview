@@ -454,40 +454,51 @@
 		<!-- Search Location -->
 		<div class="relative">
 			<Label for="location-search">Search Location</Label>
-			<div class="relative mt-2">
-				<Search class="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-				<Input
-					id="location-search"
-					type="text"
-					bind:value={searchQuery}
-					oninput={handleSearchInput}
-					onblur={handleSearchBlur}
-					onfocus={() => {
-						if (searchResults.length > 0) showResults = true;
-					}}
-					onkeydown={(e) => {
-						if (e.key === 'Enter') {
-							e.preventDefault();
-							searchLocation();
-						}
-					}}
-					placeholder="Search for a place, address, or landmark..."
-					class="pr-9 pl-9"
-				/>
-				{#if searchQuery}
-					<button
-						type="button"
-						onclick={clearSearch}
-						class="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-					>
-						<X class="size-4" />
-					</button>
-				{/if}
-				{#if isSearching}
-					<div class="absolute top-1/2 right-3 -translate-y-1/2">
-						<LoaderCircle class="size-4 animate-spin text-muted-foreground" />
-					</div>
-				{/if}
+			<div class="mt-2 flex gap-2">
+				<div class="relative flex-1">
+					<Search class="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+					<Input
+						id="location-search"
+						type="text"
+						bind:value={searchQuery}
+						oninput={handleSearchInput}
+						onblur={handleSearchBlur}
+						onfocus={() => {
+							if (searchResults.length > 0) showResults = true;
+						}}
+						onkeydown={(e) => {
+							if (e.key === 'Enter') {
+								e.preventDefault();
+								searchLocation();
+							}
+						}}
+						placeholder="Search for a place, address, or landmark..."
+						class="pr-9 pl-9"
+					/>
+					{#if searchQuery && !isSearching}
+						<button
+							type="button"
+							onclick={clearSearch}
+							class="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+						>
+							<X class="size-4" />
+						</button>
+					{/if}
+					{#if isSearching}
+						<div class="absolute top-1/2 right-3 -translate-y-1/2">
+							<LoaderCircle class="size-4 animate-spin text-muted-foreground" />
+						</div>
+					{/if}
+				</div>
+				<Button
+					type="button"
+					onclick={searchLocation}
+					disabled={!searchQuery.trim() || isSearching}
+					class="shrink-0"
+				>
+					<Search class="mr-2 size-4" />
+					Search
+				</Button>
 			</div>
 
 			<!-- Search Results Dropdown -->
