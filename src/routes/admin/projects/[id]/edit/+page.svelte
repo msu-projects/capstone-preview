@@ -4,6 +4,7 @@
 	import CategoryProjectSelectionTab from '$lib/components/admin/projects/CategoryProjectSelectionTab.svelte';
 	import LocationBeneficiariesTab from '$lib/components/admin/projects/LocationBeneficiariesTab.svelte';
 	import PerformanceTargetsTab from '$lib/components/admin/projects/PerformanceTargetsTab.svelte';
+	import MonthlyTargetsForm from '$lib/components/projects/MonthlyTargetsForm.svelte';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
@@ -15,6 +16,8 @@
 		BudgetComponent,
 		CategoryKey,
 		FundingSource,
+		MonthlyPhysicalProgress,
+		MonthlyReleaseSchedule,
 		PerformanceTarget,
 		ProjectSitio
 	} from '$lib/types';
@@ -24,6 +27,7 @@
 		ArrowLeft,
 		ArrowRight,
 		Banknote,
+		Calendar,
 		CircleAlert,
 		Clock,
 		FolderOpen,
@@ -203,7 +207,9 @@
 						contact_numbers: ''
 					};
 		});
-	}); // Tab 5: Budget & Resources
+	});
+
+	// Tab 5: Budget & Resources
 	let fundingSources = $state<Omit<FundingSource, 'id' | 'project_id'>[]>(
 		existingProject?.funding_sources?.map((fs) => ({
 			source_name: fs.source_name,
@@ -217,6 +223,22 @@
 			component_name: bc.component_name,
 			amount: bc.amount,
 			percentage: bc.percentage
+		})) ?? []
+	);
+
+	// Tab 6: Monthly Planning
+	let monthlyReleaseSchedule = $state<Omit<MonthlyReleaseSchedule, 'id' | 'project_id'>[]>(
+		(existingProject as any)?.release_schedule?.map((rs: MonthlyReleaseSchedule) => ({
+			month_year: rs.month_year,
+			planned_release: rs.planned_release,
+			actual_release: rs.actual_release
+		})) ?? []
+	);
+	let monthlyPhysicalProgress = $state<MonthlyPhysicalProgress[]>(
+		(existingProject as any)?.monthly_physical_progress?.map((mp: MonthlyPhysicalProgress) => ({
+			month_year: mp.month_year,
+			plan_percentage: mp.plan_percentage,
+			actual_percentage: mp.actual_percentage
 		})) ?? []
 	);
 
@@ -241,10 +263,18 @@
 
 	const isTab5Valid = $derived(fundingSources.length > 0 && budgetComponents.length > 0);
 
-	const canSave = $derived(isTab1Valid && isTab2Valid && isTab3Valid && isTab4Valid && isTab5Valid);
+	const isTab6Valid = $derived(
+		monthlyPhysicalProgress.length > 0 &&
+			monthlyPhysicalProgress.every((mp) => mp.plan_percentage !== undefined) &&
+			monthlyReleaseSchedule.length > 0
+	);
+
+	const canSave = $derived(
+		isTab1Valid && isTab2Valid && isTab3Valid && isTab4Valid && isTab5Valid && isTab6Valid
+	);
 
 	// Tab navigation
-	const tabOrder = ['category', 'location', 'performance', 'accountability', 'budget'];
+	const tabOrder = ['category', 'location', 'performance', 'accountability', 'budget', 'monthly'];
 	const currentTabIndex = $derived(tabOrder.indexOf(activeTab));
 	const canGoNext = $derived(currentTabIndex < tabOrder.length - 1);
 	const canGoPrevious = $derived(currentTabIndex > 0);
@@ -307,7 +337,10 @@
 			// Tab 5
 			budget: Number(totalBudget),
 			funding_sources: fundingSources,
-			budget_components: budgetComponents
+			budget_components: budgetComponents,
+			// Tab 6
+			monthly_physical_progress: monthlyPhysicalProgress,
+			release_schedule: monthlyReleaseSchedule
 		};
 
 		console.log('Updating enhanced project:', projectData);
@@ -365,12 +398,12 @@
 
 	<!-- Content -->
 	<div class="flex-1 p-6">
-		<div class="mx-auto max-w-6xl">
+		<div class="w-full">
 			<Tabs.Root bind:value={activeTab} class="w-full">
 				<!-- Tabs List -->
-				<Card.Card class="mb-6">
+				<Card.Card class="mb-6 py-0">
 					<Card.CardContent class="p-3">
-						<Tabs.List class="grid w-full grid-cols-5 gap-1">
+						<Tabs.List class="grid w-full grid-cols-6 gap-1">
 							<Tabs.Trigger value="category" class="flex items-center gap-2 text-xs">
 								<FolderOpen class="size-4" />
 								<span class="hidden lg:inline">Category &</span> Type
@@ -403,6 +436,13 @@
 								<Banknote class="size-4" />
 								<span class="hidden lg:inline">Budget &</span> Resources
 								{#if !isTab5Valid && activeTab !== 'budget'}
+									<CircleAlert class="size-3 text-destructive" />
+								{/if}
+							</Tabs.Trigger>
+							<Tabs.Trigger value="monthly" class="flex items-center gap-2 text-xs">
+								<Calendar class="size-4" />
+								<span class="hidden lg:inline">Monthly</span> Planning
+								{#if !isTab6Valid && activeTab !== 'monthly'}
 									<CircleAlert class="size-3 text-destructive" />
 								{/if}
 							</Tabs.Trigger>
@@ -453,12 +493,28 @@
 				</Tabs.Content>
 
 				<Tabs.Content value="budget">
-					<BudgetResourcesTab totalBudget={totalBudget} bind:fundingSources bind:budgetComponents />
+					<BudgetResourcesTab {totalBudget} bind:fundingSources bind:budgetComponents />
+				</Tabs.Content>
+
+				<Tabs.Content value="monthly">
+					<Card.Card class="py-0">
+						<Card.CardContent class="p-6">
+							<MonthlyTargetsForm
+								startDate={targetStartDate?.toString() || ''}
+								endDate={targetEndDate?.toString() || ''}
+								totalBudget={Number(totalBudget)}
+								onUpdate={(data) => {
+									monthlyPhysicalProgress = data.physicalProgress;
+									monthlyReleaseSchedule = data.releaseSchedule;
+								}}
+							/>
+						</Card.CardContent>
+					</Card.Card>
 				</Tabs.Content>
 			</Tabs.Root>
 
 			<!-- Navigation Buttons -->
-			<Card.Card class="mt-6">
+			<Card.Card class="mt-6 p-0">
 				<Card.CardContent class="flex justify-between p-4">
 					<Button variant="outline" onclick={previousTab} disabled={!canGoPrevious} class="gap-2">
 						<ArrowLeft class="size-4" />
