@@ -1,14 +1,15 @@
 import type {
+	Accountability,
 	Activity,
 	ChartDataItem,
+	MonitoringDetails,
+	Phase,
 	Project,
 	Sitio,
 	Stats,
-	User,
-	Phase,
-	Accountability,
-	MonitoringDetails
+	User
 } from '$lib/types';
+import { loadSitios, saveSitios } from '$lib/utils/storage';
 import { enhancedProjects } from './enhanced-projects';
 
 // ===== HELPER FUNCTIONS =====
@@ -92,7 +93,8 @@ function createMonitoringDetails(overrides: Partial<MonitoringDetails> = {}): Mo
 
 // ===== SITIOS DATA =====
 
-export const sitios: Sitio[] = [
+// Mock sitios data (used as default when LocalStorage is empty)
+const mockSitiosData: Sitio[] = [
 	{
 		id: 1,
 		name: 'Sitio Bangkalang',
@@ -103,6 +105,12 @@ export const sitios: Sitio[] = [
 		population: 510,
 		households: 110,
 		demographics: {
+			male: 260,
+			female: 250,
+			total: 510,
+			age_0_14: 180,
+			age_15_64: 280,
+			age_65_above: 50,
 			employment_rate: 62,
 			poverty_incidence: 44,
 			farmers: 61,
@@ -123,6 +131,12 @@ export const sitios: Sitio[] = [
 		population: 420,
 		households: 90,
 		demographics: {
+			male: 210,
+			female: 210,
+			total: 420,
+			age_0_14: 150,
+			age_15_64: 230,
+			age_65_above: 40,
 			employment_rate: 59,
 			poverty_incidence: 40,
 			farmers: 54,
@@ -143,6 +157,12 @@ export const sitios: Sitio[] = [
 		population: 600,
 		households: 125,
 		demographics: {
+			male: 300,
+			female: 300,
+			total: 600,
+			age_0_14: 210,
+			age_15_64: 340,
+			age_65_above: 50,
 			employment_rate: 66,
 			poverty_incidence: 36,
 			farmers: 49,
@@ -170,7 +190,7 @@ const barangays = ['Zone 1', 'Poblacion', 'San Isidro', 'Santa Cruz', 'San Jose'
 const municipalities = ['Koronadal City', 'Polomolok', 'Tupi', 'Tantangan', 'Surallah', 'Banga'];
 
 for (let i = 4; i <= 25; i++) {
-	sitios.push({
+	mockSitiosData.push({
 		id: i,
 		name: `Sitio ${sitioNames[i % 8]}${i}`,
 		barangay: barangays[i % 5],
@@ -183,6 +203,12 @@ for (let i = 4; i <= 25; i++) {
 		population: 300 + Math.floor(Math.random() * 300),
 		households: 60 + Math.floor(Math.random() * 60),
 		demographics: {
+			male: 150 + Math.floor(Math.random() * 150),
+			female: 150 + Math.floor(Math.random() * 150),
+			total: 300 + Math.floor(Math.random() * 300),
+			age_0_14: 100 + Math.floor(Math.random() * 100),
+			age_15_64: 150 + Math.floor(Math.random() * 150),
+			age_65_above: 20 + Math.floor(Math.random() * 30),
 			employment_rate: 50 + Math.floor(Math.random() * 30),
 			poverty_incidence: 30 + Math.floor(Math.random() * 30),
 			farmers: 40 + Math.floor(Math.random() * 40),
@@ -193,6 +219,38 @@ for (let i = 4; i <= 25; i++) {
 		created_at: `2024-0${(i % 9) + 1}-${10 + (i % 20)}`,
 		updated_at: `2024-${10 + (i % 2)}-${10 + (i % 20)}`
 	});
+}
+
+// Initialize LocalStorage with mock data if empty (runs only in browser)
+function initializeSitios(): Sitio[] {
+	if (typeof window === 'undefined') {
+		// Server-side: return mock data
+		return mockSitiosData;
+	}
+
+	try {
+		const storedSitios = loadSitios();
+		if (storedSitios.length === 0) {
+			// First load: initialize with mock data
+			saveSitios(mockSitiosData);
+			return mockSitiosData;
+		}
+		return storedSitios;
+	} catch (error) {
+		console.error('Failed to initialize sitios from storage:', error);
+		return mockSitiosData;
+	}
+}
+
+// Export sitios with LocalStorage integration
+export const sitios: Sitio[] = initializeSitios();
+
+// Export function to refresh sitios from storage (useful after imports)
+export function refreshSitios(): Sitio[] {
+	if (typeof window === 'undefined') {
+		return mockSitiosData;
+	}
+	return loadSitios();
 }
 
 // ===== PROJECTS DATA =====
@@ -380,7 +438,8 @@ const legacyProjects: Project[] = [
 				resolution_target_date: '2024-11-30',
 				resolution_actual_date: null,
 				recovery_action_ids: [1, 2],
-				lessons_learned: 'Engage utility companies during project planning phase, not during implementation',
+				lessons_learned:
+					'Engage utility companies during project planning phase, not during implementation',
 				preventive_actions_future:
 					'Add utility coordination checklist to all projects with electrical requirements'
 			}
@@ -621,8 +680,7 @@ const legacyProjects: Project[] = [
 			statusSummary: {
 				stage: 'Ongoing',
 				issues: 'Delayed procurement of roofing materials and adverse weather conditions.',
-				recommendations:
-					'Allow partial turnover and authorize overtime work once materials arrive.'
+				recommendations: 'Allow partial turnover and authorize overtime work once materials arrive.'
 			},
 			catchUpPlan:
 				'Implement staggered shifts for finishing works and pre-procure fixtures to stay on track for Q1 2025 completion.'
@@ -684,8 +742,7 @@ const legacyProjects: Project[] = [
 			statusSummary: {
 				stage: 'In Detailed Engineering',
 				issues: 'Awaiting approval of supplemental budget and building permits.',
-				recommendations:
-					'Coordinate with LGU engineering office for expedited permit processing.'
+				recommendations: 'Coordinate with LGU engineering office for expedited permit processing.'
 			},
 			catchUpPlan:
 				'Front-load procurement for structural materials so works can begin immediately after permit release.'

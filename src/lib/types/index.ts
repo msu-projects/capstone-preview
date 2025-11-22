@@ -21,27 +21,152 @@ export type CategoryKey =
 	| 'environment';
 
 export interface Sitio {
+	// Core identification (required for backwards compatibility)
 	id: number;
-	name: string;
+	name: string; // maps to SITIO column
 	municipality: string;
 	barangay: string;
 	province?: string;
-	population: number;
-	households: number;
+	population: number; // maps to POPULATION - TOTAL
+	households: number; // maps to No. of Households
 	coordinates: {
 		lat: number;
 		lng: number;
 	};
-	demographics?: {
-		employment_rate: number;
-		poverty_incidence: number;
-		farmers: number;
-		potable_water_access: number;
-		electricity_access: number;
+
+	// Coding information
+	coding?: {
+		number: string; // NO.
+		code: string; // CODING (e.g., "1-1")
 	};
+
+	// Demographics (expanded for 86-column dataset)
+	demographics: {
+		male: number;
+		female: number;
+		total: number;
+		age_0_14: number;
+		age_15_64: number;
+		age_65_above: number;
+		// Legacy fields (kept for backwards compatibility)
+		employment_rate?: number;
+		poverty_incidence?: number;
+		farmers?: number;
+		potable_water_access?: number;
+		electricity_access?: number;
+	};
+
+	// Social services
+	social_services?: {
+		registered_voters: number;
+		philhealth_beneficiaries: number;
+		fourps_beneficiaries: number;
+	};
+
+	// Economic condition
+	economic_condition?: {
+		top_employments: string[]; // Array of top 3
+		top_income_brackets: string[]; // Array of top 3
+	};
+
+	// Agriculture
+	agriculture?: {
+		farmers_count: number;
+		farmer_associations: number;
+		farm_area_hectares: number;
+		top_crops: string[]; // Array of top 5
+	};
+
+	// Water and sanitation
+	water_sanitation?: {
+		water_systems_count: number;
+		water_sources: Array<{ source: string; condition?: string }>;
+		households_without_toilet: number;
+		toilet_facility_types: string[];
+		waste_segregation_practice: boolean | null;
+	};
+
+	// Livestock and poultry
+	livestock_poultry?: {
+		pigs?: number;
+		cows?: number;
+		carabaos?: number;
+		horses?: number;
+		goats?: number;
+		chickens?: number;
+		ducks?: number;
+	};
+
+	// Food security
+	food_security?: {
+		households_with_backyard_garden: number;
+		common_garden_commodities: string[]; // Top 3
+	};
+
+	// Housing
+	housing?: {
+		quality_types: string[]; // Concrete, Wood, Half-Concrete, Makeshift, Others
+		ownership_types: string[]; // Owned, Rented, Protected Land, Informal Settler, Owner Consent
+	};
+
+	// Domestic animals
+	domestic_animals?: {
+		total_count: number;
+		dogs: number;
+		cats: number;
+		dogs_vaccinated: number;
+		cats_vaccinated: number;
+	};
+
+	// Community empowerment
+	community_empowerment?: {
+		sectoral_organizations: number;
+		info_dissemination_methods: string[]; // Radio, Signages, Person in Authority, etc.
+		transportation_methods: string[]; // Motorcycle, Tricycle, 4-Wheels, Boat
+	};
+
+	// Utilities
+	utilities?: {
+		households_with_electricity: number;
+		alternative_electricity_sources: string[]; // Solar, Generator, Battery
+	};
+
+	// Metadata
 	projects_count?: number;
 	created_at: string;
 	updated_at?: string;
+}
+
+// Import-related types
+export interface ImportedRow {
+	[key: string]: string | number | null;
+}
+
+export interface ColumnMapping {
+	csvHeader: string;
+	sitioField: string;
+	isRequired: boolean;
+	autoMatched: boolean;
+}
+
+export interface ImportValidationError {
+	row: number;
+	field: string;
+	message: string;
+}
+
+export interface ImportResult {
+	total: number;
+	successful: number;
+	failed: number;
+	duplicates: number;
+	errors: ImportValidationError[];
+}
+
+export interface DuplicateSitio {
+	existing: Sitio;
+	incoming: Sitio;
+	key: string; // municipality-barangay-sitio identifier
 }
 
 export interface TimelineEvent {
