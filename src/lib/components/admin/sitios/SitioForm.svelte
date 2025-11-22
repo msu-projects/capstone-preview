@@ -4,9 +4,14 @@
 	import { Checkbox } from '$lib/components/ui/checkbox';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
+	import { LocationPicker } from '$lib/components/ui/location-picker';
+	import { NumberInput } from '$lib/components/ui/number-input';
+	import * as Popover from '$lib/components/ui/popover';
 	import * as Tabs from '$lib/components/ui/tabs';
+	import { MUNICIPALITIES, getBarangaysForMunicipality } from '$lib/config/location-data';
 	import type { Sitio } from '$lib/types';
-	import { AlertCircle, Save } from '@lucide/svelte';
+	import { cn } from '$lib/utils';
+	import { AlertCircle, Check, ChevronsUpDown, Save } from '@lucide/svelte';
 
 	let {
 		initialData = null,
@@ -110,6 +115,39 @@
 	});
 
 	let errors = $state<Record<string, string>>({});
+
+	// Popover states for searchable dropdowns
+	let municipalityPopoverOpen = $state(false);
+	let barangayPopoverOpen = $state(false);
+	let municipalitySearchQuery = $state('');
+	let barangaySearchQuery = $state('');
+
+	// Filtered lists for searchable dropdowns
+	const filteredMunicipalities = $derived(
+		MUNICIPALITIES.filter((m) => m.toLowerCase().includes(municipalitySearchQuery.toLowerCase()))
+	);
+
+	const availableBarangays = $derived(
+		formData.municipality ? getBarangaysForMunicipality(formData.municipality) : []
+	);
+
+	const filteredBarangays = $derived(
+		availableBarangays.filter((b) => b.toLowerCase().includes(barangaySearchQuery.toLowerCase()))
+	);
+
+	function selectMunicipality(municipality: string) {
+		formData.municipality = municipality;
+		// Reset barangay when municipality changes
+		formData.barangay = '';
+		municipalityPopoverOpen = false;
+		municipalitySearchQuery = '';
+	}
+
+	function selectBarangay(barangay: string) {
+		formData.barangay = barangay;
+		barangayPopoverOpen = false;
+		barangaySearchQuery = '';
+	}
 
 	function validateForm(): boolean {
 		errors = {};
@@ -228,31 +266,126 @@
 				</Card.Header>
 				<Card.Content class="space-y-4">
 					<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+						<!-- Municipality Searchable Dropdown -->
 						<div class="space-y-2">
 							<Label for="municipality">
 								Municipality <span class="text-destructive">*</span>
 							</Label>
-							<Input
-								id="municipality"
-								bind:value={formData.municipality}
-								placeholder="Enter municipality"
-								class={errors.municipality ? 'border-destructive' : ''}
-							/>
+							<Popover.Root bind:open={municipalityPopoverOpen}>
+								<Popover.Trigger
+									class={cn(
+										'flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+										errors.municipality ? 'border-destructive' : ''
+									)}
+								>
+									<span class={cn('truncate', !formData.municipality && 'text-muted-foreground')}>
+										{formData.municipality || 'Select municipality...'}
+									</span>
+									<ChevronsUpDown class="ml-2 size-4 shrink-0 opacity-50" />
+								</Popover.Trigger>
+								<Popover.Content class="w-[400px] p-0" align="start">
+									<div class="p-2">
+										<Input
+											placeholder="Search municipalities..."
+											bind:value={municipalitySearchQuery}
+											class="h-9"
+										/>
+									</div>
+									<div class="max-h-[300px] overflow-y-auto">
+										{#if filteredMunicipalities.length === 0}
+											<div class="px-2 py-6 text-center text-sm text-muted-foreground">
+												No municipalities found
+											</div>
+										{:else}
+											<div class="p-1">
+												{#each filteredMunicipalities as municipality}
+													<button
+														type="button"
+														class={cn(
+															'relative flex w-full cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm outline-none select-none hover:bg-accent hover:text-accent-foreground',
+															formData.municipality === municipality && 'bg-accent'
+														)}
+														onclick={() => selectMunicipality(municipality)}
+													>
+														<Check
+															class={cn(
+																'mr-2 size-4',
+																formData.municipality === municipality ? 'opacity-100' : 'opacity-0'
+															)}
+														/>
+														{municipality}
+													</button>
+												{/each}
+											</div>
+										{/if}
+									</div>
+								</Popover.Content>
+							</Popover.Root>
 							{#if errors.municipality}
 								<p class="text-sm text-destructive">{errors.municipality}</p>
 							{/if}
 						</div>
 
+						<!-- Barangay Searchable Dropdown -->
 						<div class="space-y-2">
 							<Label for="barangay">
 								Barangay <span class="text-destructive">*</span>
 							</Label>
-							<Input
-								id="barangay"
-								bind:value={formData.barangay}
-								placeholder="Enter barangay"
-								class={errors.barangay ? 'border-destructive' : ''}
-							/>
+							<Popover.Root bind:open={barangayPopoverOpen}>
+								<Popover.Trigger
+									disabled={!formData.municipality}
+									class={cn(
+										'flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+										errors.barangay ? 'border-destructive' : ''
+									)}
+								>
+									<span class={cn('truncate', !formData.barangay && 'text-muted-foreground')}>
+										{formData.barangay || 'Select barangay...'}
+									</span>
+									<ChevronsUpDown class="ml-2 size-4 shrink-0 opacity-50" />
+								</Popover.Trigger>
+								<Popover.Content class="w-[400px] p-0" align="start">
+									<div class="p-2">
+										<Input
+											placeholder="Search barangays..."
+											bind:value={barangaySearchQuery}
+											class="h-9"
+										/>
+									</div>
+									<div class="max-h-[300px] overflow-y-auto">
+										{#if !formData.municipality}
+											<div class="px-2 py-6 text-center text-sm text-muted-foreground">
+												Please select a municipality first
+											</div>
+										{:else if filteredBarangays.length === 0}
+											<div class="px-2 py-6 text-center text-sm text-muted-foreground">
+												No barangays found
+											</div>
+										{:else}
+											<div class="p-1">
+												{#each filteredBarangays as barangay}
+													<button
+														type="button"
+														class={cn(
+															'relative flex w-full cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm outline-none select-none hover:bg-accent hover:text-accent-foreground',
+															formData.barangay === barangay && 'bg-accent'
+														)}
+														onclick={() => selectBarangay(barangay)}
+													>
+														<Check
+															class={cn(
+																'mr-2 size-4',
+																formData.barangay === barangay ? 'opacity-100' : 'opacity-0'
+															)}
+														/>
+														{barangay}
+													</button>
+												{/each}
+											</div>
+										{/if}
+									</div>
+								</Popover.Content>
+							</Popover.Root>
 							{#if errors.barangay}
 								<p class="text-sm text-destructive">{errors.barangay}</p>
 							{/if}
@@ -273,61 +406,35 @@
 							{/if}
 						</div>
 
-						<div class="space-y-2">
+						<!-- <div class="space-y-2">
 							<Label for="province">Province</Label>
 							<Input id="province" bind:value={formData.province} placeholder="Enter province" />
-						</div>
+						</div> -->
 
 						<div class="space-y-2">
 							<Label for="population">Total Population</Label>
-							<Input
-								id="population"
-								type="number"
-								bind:value={formData.population}
-								placeholder="0"
-							/>
+							<NumberInput id="population" bind:value={formData.population} placeholder="0" />
 						</div>
 
 						<div class="space-y-2">
 							<Label for="households">Number of Households</Label>
-							<Input
-								id="households"
-								type="number"
-								bind:value={formData.households}
-								placeholder="0"
-							/>
+							<NumberInput id="households" bind:value={formData.households} placeholder="0" />
 						</div>
+					</div>
 
-						<div class="space-y-2">
-							<Label for="lat">Latitude</Label>
-							<Input
-								id="lat"
-								type="number"
-								step="0.000001"
-								bind:value={formData.coordinates.lat}
-								placeholder="0.000000"
-								class={errors.coordinates_lat ? 'border-destructive' : ''}
-							/>
-							{#if errors.coordinates_lat}
-								<p class="text-sm text-destructive">{errors.coordinates_lat}</p>
-							{/if}
-						</div>
+					<!-- Location Picker -->
+					<LocationPicker
+						bind:lat={formData.coordinates.lat}
+						bind:lng={formData.coordinates.lng}
+						municipality={formData.municipality}
+						barangay={formData.barangay}
+						errors={{
+							lat: errors.coordinates_lat,
+							lng: errors.coordinates_lng
+						}}
+					/>
 
-						<div class="space-y-2">
-							<Label for="lng">Longitude</Label>
-							<Input
-								id="lng"
-								type="number"
-								step="0.000001"
-								bind:value={formData.coordinates.lng}
-								placeholder="0.000000"
-								class={errors.coordinates_lng ? 'border-destructive' : ''}
-							/>
-							{#if errors.coordinates_lng}
-								<p class="text-sm text-destructive">{errors.coordinates_lng}</p>
-							{/if}
-						</div>
-
+					<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 						<div class="space-y-2">
 							<Label for="coding_number">Record Number</Label>
 							<Input
@@ -357,49 +464,32 @@
 					<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
 						<div class="space-y-2">
 							<Label for="male">Male Population</Label>
-							<Input
-								id="male"
-								type="number"
-								bind:value={formData.demographics.male}
-								placeholder="0"
-							/>
+							<NumberInput id="male" bind:value={formData.demographics.male} placeholder="0" />
 						</div>
-
 						<div class="space-y-2">
 							<Label for="female">Female Population</Label>
-							<Input
-								id="female"
-								type="number"
-								bind:value={formData.demographics.female}
-								placeholder="0"
-							/>
+							<NumberInput id="female" bind:value={formData.demographics.female} placeholder="0" />
 						</div>
-
 						<div class="space-y-2">
 							<Label for="total_pop">Total Population</Label>
-							<Input
+							<NumberInput
 								id="total_pop"
-								type="number"
 								bind:value={formData.demographics.total}
 								placeholder="0"
 							/>
 						</div>
-
 						<div class="space-y-2">
 							<Label for="age_0_14">Age 0-14</Label>
-							<Input
+							<NumberInput
 								id="age_0_14"
-								type="number"
 								bind:value={formData.demographics.age_0_14}
 								placeholder="0"
 							/>
 						</div>
-
 						<div class="space-y-2">
 							<Label for="age_15_64">Age 15-64</Label>
-							<Input
+							<NumberInput
 								id="age_15_64"
-								type="number"
 								bind:value={formData.demographics.age_15_64}
 								placeholder="0"
 							/>
@@ -407,9 +497,8 @@
 
 						<div class="space-y-2">
 							<Label for="age_65_above">Age 65+</Label>
-							<Input
+							<NumberInput
 								id="age_65_above"
-								type="number"
 								bind:value={formData.demographics.age_65_above}
 								placeholder="0"
 							/>
@@ -430,19 +519,16 @@
 					<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
 						<div class="space-y-2">
 							<Label for="registered_voters">Registered Voters</Label>
-							<Input
+							<NumberInput
 								id="registered_voters"
-								type="number"
 								bind:value={formData.social_services!.registered_voters}
 								placeholder="0"
 							/>
 						</div>
-
 						<div class="space-y-2">
 							<Label for="philhealth">PhilHealth Beneficiaries</Label>
-							<Input
+							<NumberInput
 								id="philhealth"
-								type="number"
 								bind:value={formData.social_services!.philhealth_beneficiaries}
 								placeholder="0"
 							/>
@@ -450,9 +536,8 @@
 
 						<div class="space-y-2">
 							<Label for="fourps">4Ps Beneficiaries</Label>
-							<Input
+							<NumberInput
 								id="fourps"
-								type="number"
 								bind:value={formData.social_services!.fourps_beneficiaries}
 								placeholder="0"
 							/>
@@ -516,9 +601,8 @@
 					<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
 						<div class="space-y-2">
 							<Label for="farmers_count">Number of Farmers</Label>
-							<Input
+							<NumberInput
 								id="farmers_count"
-								type="number"
 								bind:value={formData.agriculture!.farmers_count}
 								placeholder="0"
 							/>
@@ -526,9 +610,8 @@
 
 						<div class="space-y-2">
 							<Label for="farmer_associations">Farmer Associations</Label>
-							<Input
+							<NumberInput
 								id="farmer_associations"
-								type="number"
 								bind:value={formData.agriculture!.farmer_associations}
 								placeholder="0"
 							/>
@@ -536,9 +619,8 @@
 
 						<div class="space-y-2">
 							<Label for="farm_area">Farm Area (Hectares)</Label>
-							<Input
+							<NumberInput
 								id="farm_area"
-								type="number"
 								step="0.01"
 								bind:value={formData.agriculture!.farm_area_hectares}
 								placeholder="0.00"
@@ -576,19 +658,16 @@
 					<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 						<div class="space-y-2">
 							<Label for="water_systems">Number of Water Systems</Label>
-							<Input
+							<NumberInput
 								id="water_systems"
-								type="number"
 								bind:value={formData.water_sanitation!.water_systems_count}
 								placeholder="0"
 							/>
 						</div>
-
 						<div class="space-y-2">
 							<Label for="households_without_toilet">Households Without Toilet</Label>
-							<Input
+							<NumberInput
 								id="households_without_toilet"
-								type="number"
 								bind:value={formData.water_sanitation!.households_without_toilet}
 								placeholder="0"
 							/>
@@ -710,69 +789,56 @@
 					<div class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
 						<div class="space-y-2">
 							<Label for="pigs">Pigs</Label>
-							<Input
+							<NumberInput
 								id="pigs"
-								type="number"
 								bind:value={formData.livestock_poultry!.pigs}
 								placeholder="0"
 							/>
 						</div>
-
 						<div class="space-y-2">
 							<Label for="cows">Cows</Label>
-							<Input
+							<NumberInput
 								id="cows"
-								type="number"
 								bind:value={formData.livestock_poultry!.cows}
 								placeholder="0"
 							/>
 						</div>
-
 						<div class="space-y-2">
 							<Label for="carabaos">Carabaos</Label>
-							<Input
+							<NumberInput
 								id="carabaos"
-								type="number"
 								bind:value={formData.livestock_poultry!.carabaos}
 								placeholder="0"
 							/>
 						</div>
-
 						<div class="space-y-2">
 							<Label for="horses">Horses</Label>
-							<Input
+							<NumberInput
 								id="horses"
-								type="number"
 								bind:value={formData.livestock_poultry!.horses}
 								placeholder="0"
 							/>
 						</div>
-
 						<div class="space-y-2">
 							<Label for="goats">Goats</Label>
-							<Input
+							<NumberInput
 								id="goats"
-								type="number"
 								bind:value={formData.livestock_poultry!.goats}
 								placeholder="0"
 							/>
 						</div>
-
 						<div class="space-y-2">
 							<Label for="chickens">Chickens</Label>
-							<Input
+							<NumberInput
 								id="chickens"
-								type="number"
 								bind:value={formData.livestock_poultry!.chickens}
 								placeholder="0"
 							/>
 						</div>
-
 						<div class="space-y-2">
 							<Label for="ducks">Ducks</Label>
-							<Input
+							<NumberInput
 								id="ducks"
-								type="number"
 								bind:value={formData.livestock_poultry!.ducks}
 								placeholder="0"
 							/>
@@ -792,9 +858,8 @@
 				<Card.Content class="space-y-6">
 					<div class="space-y-2">
 						<Label for="backyard_gardens">Households with Backyard Garden</Label>
-						<Input
+						<NumberInput
 							id="backyard_gardens"
-							type="number"
 							bind:value={formData.food_security!.households_with_backyard_garden}
 							placeholder="0"
 						/>
@@ -883,9 +948,8 @@
 					<div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
 						<div class="space-y-2">
 							<Label for="total_domestic">Total Domestic Animals</Label>
-							<Input
+							<NumberInput
 								id="total_domestic"
-								type="number"
 								bind:value={formData.domestic_animals!.total_count}
 								placeholder="0"
 							/>
@@ -893,29 +957,18 @@
 
 						<div class="space-y-2">
 							<Label for="dogs">Dogs</Label>
-							<Input
-								id="dogs"
-								type="number"
-								bind:value={formData.domestic_animals!.dogs}
-								placeholder="0"
-							/>
+							<NumberInput id="dogs" bind:value={formData.domestic_animals!.dogs} placeholder="0" />
 						</div>
 
 						<div class="space-y-2">
 							<Label for="cats">Cats</Label>
-							<Input
-								id="cats"
-								type="number"
-								bind:value={formData.domestic_animals!.cats}
-								placeholder="0"
-							/>
+							<NumberInput id="cats" bind:value={formData.domestic_animals!.cats} placeholder="0" />
 						</div>
 
 						<div class="space-y-2">
 							<Label for="dogs_vaccinated">Dogs Vaccinated</Label>
-							<Input
+							<NumberInput
 								id="dogs_vaccinated"
-								type="number"
 								bind:value={formData.domestic_animals!.dogs_vaccinated}
 								placeholder="0"
 							/>
@@ -923,9 +976,8 @@
 
 						<div class="space-y-2">
 							<Label for="cats_vaccinated">Cats Vaccinated</Label>
-							<Input
+							<NumberInput
 								id="cats_vaccinated"
-								type="number"
 								bind:value={formData.domestic_animals!.cats_vaccinated}
 								placeholder="0"
 							/>
@@ -947,9 +999,8 @@
 				<Card.Content class="space-y-6">
 					<div class="space-y-2">
 						<Label for="sectoral_orgs">Sectoral Organizations</Label>
-						<Input
+						<NumberInput
 							id="sectoral_orgs"
-							type="number"
 							bind:value={formData.community_empowerment!.sectoral_organizations}
 							placeholder="0"
 						/>
@@ -1014,9 +1065,8 @@
 				<Card.Content class="space-y-6">
 					<div class="space-y-2">
 						<Label for="electricity_households">Households with Electricity</Label>
-						<Input
+						<NumberInput
 							id="electricity_households"
-							type="number"
 							bind:value={formData.utilities!.households_with_electricity}
 							placeholder="0"
 						/>
