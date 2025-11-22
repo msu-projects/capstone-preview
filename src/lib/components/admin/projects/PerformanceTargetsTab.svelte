@@ -95,7 +95,7 @@
 <div class="space-y-6">
 	{#if !selectedProjectTypeId}
 		<Card.Card>
-			<Card.CardContent class="pt-6">
+			<Card.CardContent class="">
 				<div class="flex items-center gap-3 text-muted-foreground">
 					<Info class="size-5" />
 					<p>

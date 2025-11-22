@@ -195,7 +195,9 @@
 								}).format(totalFundingSources)}
 							</Table.Cell>
 							<Table.Cell class="text-right">
-								{totalBudgetAmount > 0 ? ((totalFundingSources / totalBudgetAmount) * 100).toFixed(1) : 0}%
+								{totalBudgetAmount > 0
+									? ((totalFundingSources / totalBudgetAmount) * 100).toFixed(1)
+									: 0}%
 							</Table.Cell>
 							<Table.Cell></Table.Cell>
 						</Table.Row>
@@ -324,7 +326,9 @@
 								}).format(totalBudgetComponents)}
 							</Table.Cell>
 							<Table.Cell class="text-right">
-								{totalBudgetAmount > 0 ? ((totalBudgetComponents / totalBudgetAmount) * 100).toFixed(1) : 0}%
+								{totalBudgetAmount > 0
+									? ((totalBudgetComponents / totalBudgetAmount) * 100).toFixed(1)
+									: 0}%
 							</Table.Cell>
 							<Table.Cell></Table.Cell>
 						</Table.Row>
@@ -399,8 +403,8 @@
 	</Card.Card>
 
 	<!-- Monthly Release Schedule Note -->
-	<Card.Card class="border-primary/20 bg-primary/5">
-		<Card.CardContent class="pt-6">
+	<Card.Card class="hidden border-primary/20 bg-primary/5">
+		<Card.CardContent class="">
 			<div class="flex gap-3">
 				<Calendar class="mt-0.5 size-5 shrink-0 text-primary" />
 				<div>

@@ -1,10 +1,10 @@
 <script lang="ts">
-	import * as Card from '$lib/components/ui/card';
-	import { Label } from '$lib/components/ui/label';
-	import { Input } from '$lib/components/ui/input';
-	import { Button } from '$lib/components/ui/button';
 	import { Badge } from '$lib/components/ui/badge';
-	import { Users, UserPlus, X, Building, Shield } from '@lucide/svelte';
+	import { Button } from '$lib/components/ui/button';
+	import * as Card from '$lib/components/ui/card';
+	import { Input } from '$lib/components/ui/input';
+	import { Label } from '$lib/components/ui/label';
+	import { Building, Shield, UserPlus, Users, X } from '@lucide/svelte';
 
 	let {
 		projectManager = $bindable(''),
@@ -131,20 +131,26 @@
 				<Building class="size-5" />
 				Implementation Partners
 			</Card.CardTitle>
-			<Card.CardDescription>NGOs, CSOs, Private Sector, or National Agencies involved</Card.CardDescription>
+			<Card.CardDescription
+				>NGOs, CSOs, Private Sector, or National Agencies involved</Card.CardDescription
+			>
 		</Card.CardHeader>
 		<Card.CardContent class="space-y-4">
 			{#if implementationPartners.length > 0}
-				<div class="flex flex-wrap gap-2">
+				<ul class="space-y-2">
 					{#each implementationPartners as partner, index}
-						<Badge variant="secondary" class="gap-2">
-							{partner}
-							<button type="button" onclick={() => removePartner(index)} class="hover:text-destructive">
-								<X class="size-3" />
+						<li class="flex items-center justify-between rounded-md border px-3 py-2">
+							<span class="text-sm">{partner}</span>
+							<button
+								type="button"
+								onclick={() => removePartner(index)}
+								class="text-muted-foreground transition-colors hover:text-destructive"
+							>
+								<X class="size-4" />
 							</button>
-						</Badge>
+						</li>
 					{/each}
-				</div>
+				</ul>
 			{/if}
 			<div class="flex gap-2">
 				<Input
@@ -152,7 +158,7 @@
 					placeholder="Partner organization name"
 					onkeydown={(e) => e.key === 'Enter' && (e.preventDefault(), addPartner())}
 				/>
-				<Button type="button" onclick={addPartner} variant="outline" class="gap-2 shrink-0">
+				<Button type="button" onclick={addPartner} variant="outline" class="shrink-0 gap-2">
 					<UserPlus class="size-4" />
 					Add
 				</Button>
@@ -167,24 +173,25 @@
 				<Building class="size-5" />
 				LGU Counterpart Personnel
 			</Card.CardTitle>
-			<Card.CardDescription>Local government unit staff supporting the project</Card.CardDescription>
+			<Card.CardDescription>Local government unit staff supporting the project</Card.CardDescription
+			>
 		</Card.CardHeader>
 		<Card.CardContent class="space-y-4">
 			{#if lguCounterparts.length > 0}
-				<div class="flex flex-wrap gap-2">
+				<ul class="space-y-2">
 					{#each lguCounterparts as counterpart, index}
-						<Badge variant="secondary" class="gap-2">
-							{counterpart}
+						<li class="flex items-center justify-between rounded-md border px-3 py-2">
+							<span class="text-sm">{counterpart}</span>
 							<button
 								type="button"
 								onclick={() => removeLguCounterpart(index)}
-								class="hover:text-destructive"
+								class="text-muted-foreground transition-colors hover:text-destructive"
 							>
-								<X class="size-3" />
+								<X class="size-4" />
 							</button>
-						</Badge>
+						</li>
 					{/each}
-				</div>
+				</ul>
 			{/if}
 			<div class="flex gap-2">
 				<Input
@@ -192,7 +199,7 @@
 					placeholder="LGU personnel name or office"
 					onkeydown={(e) => e.key === 'Enter' && (e.preventDefault(), addLguCounterpart())}
 				/>
-				<Button type="button" onclick={addLguCounterpart} variant="outline" class="gap-2 shrink-0">
+				<Button type="button" onclick={addLguCounterpart} variant="outline" class="shrink-0 gap-2">
 					<UserPlus class="size-4" />
 					Add
 				</Button>
@@ -239,7 +246,7 @@
 						type="button"
 						onclick={addProvincialMember}
 						variant="outline"
-						class="gap-2 shrink-0"
+						class="shrink-0 gap-2"
 					>
 						<UserPlus class="size-4" />
 						Add
@@ -280,8 +287,8 @@
 			<Card.CardContent>
 				<div class="space-y-4">
 					{#each sitioCoordinators as coordinator}
-						<div class="rounded-lg border p-4 space-y-3">
-							<div class="font-medium text-sm flex items-center gap-2">
+						<div class="space-y-3 rounded-lg border p-4">
+							<div class="flex items-center gap-2 text-sm font-medium">
 								<Badge variant="outline">{coordinator.sitio_name}</Badge>
 							</div>
 							<div class="grid gap-3 md:grid-cols-2">
@@ -304,7 +311,9 @@
 									/>
 								</div>
 								<div class="space-y-1.5">
-									<Label for={`vc-${coordinator.sitio_id}`} class="text-xs">Volunteer Coordinator</Label>
+									<Label for={`vc-${coordinator.sitio_id}`} class="text-xs"
+										>Volunteer Coordinator</Label
+									>
 									<Input
 										id={`vc-${coordinator.sitio_id}`}
 										bind:value={coordinator.volunteer_coordinator}

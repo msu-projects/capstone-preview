@@ -248,10 +248,10 @@
 
 	<!-- Content -->
 	<div class="flex-1 p-6">
-		<div class="mx-auto max-w-7xl">
+		<div class="w-full">
 			<Tabs.Root bind:value={activeTab} class="w-full">
 				<!-- Tabs List -->
-				<Card.Card class="mb-6">
+				<Card.Card class="mb-6 py-0">
 					<Card.CardContent class="p-3">
 						<Tabs.List class="grid w-full grid-cols-6 gap-1">
 							<Tabs.Trigger value="category" class="flex items-center gap-2 text-xs">
@@ -347,7 +347,7 @@
 				</Tabs.Content>
 
 				<Tabs.Content value="monthly">
-					<Card.Card>
+					<Card.Card class="py-0">
 						<Card.CardContent class="p-6">
 							<MonthlyTargetsForm
 								startDate={targetStartDate?.toString() || ''}
