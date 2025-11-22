@@ -10,6 +10,7 @@ import type {
 	User
 } from '$lib/types';
 import { loadSitios, saveSitios } from '$lib/utils/storage';
+import { generateConsistentDemographics } from '$lib/utils/demographic-validation';
 import { enhancedProjects } from './enhanced-projects';
 
 // ===== HELPER FUNCTIONS =====
@@ -190,6 +191,10 @@ const barangays = ['Zone 1', 'Poblacion', 'San Isidro', 'Santa Cruz', 'San Jose'
 const municipalities = ['Koronadal City', 'Polomolok', 'Tupi', 'Tantangan', 'Surallah', 'Banga'];
 
 for (let i = 4; i <= 25; i++) {
+	const population = 300 + Math.floor(Math.random() * 300);
+	const households = 60 + Math.floor(Math.random() * 60);
+	const demographics = generateConsistentDemographics(population);
+
 	mockSitiosData.push({
 		id: i,
 		name: `Sitio ${sitioNames[i % 8]}${i}`,
@@ -200,15 +205,10 @@ for (let i = 4; i <= 25; i++) {
 			lat: 6.2 + Math.random() * 0.5,
 			lng: 124.8 + Math.random() * 0.5
 		},
-		population: 300 + Math.floor(Math.random() * 300),
-		households: 60 + Math.floor(Math.random() * 60),
+		population: population,
+		households: households,
 		demographics: {
-			male: 150 + Math.floor(Math.random() * 150),
-			female: 150 + Math.floor(Math.random() * 150),
-			total: 300 + Math.floor(Math.random() * 300),
-			age_0_14: 100 + Math.floor(Math.random() * 100),
-			age_15_64: 150 + Math.floor(Math.random() * 150),
-			age_65_above: 20 + Math.floor(Math.random() * 30),
+			...demographics,
 			employment_rate: 50 + Math.floor(Math.random() * 30),
 			poverty_incidence: 30 + Math.floor(Math.random() * 30),
 			farmers: 40 + Math.floor(Math.random() * 40),

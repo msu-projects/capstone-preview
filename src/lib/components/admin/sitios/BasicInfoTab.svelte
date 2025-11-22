@@ -7,7 +7,7 @@
 	import * as Popover from '$lib/components/ui/popover';
 	import { MUNICIPALITIES, getBarangaysForMunicipality } from '$lib/config/location-data';
 	import { cn } from '$lib/utils';
-	import { Check, ChevronsUpDown } from '@lucide/svelte';
+	import { AlertCircle, Check, CheckCircle2, ChevronsUpDown } from '@lucide/svelte';
 
 	let {
 		municipality = $bindable(''),
@@ -17,7 +17,8 @@
 		population = $bindable(0),
 		households = $bindable(0),
 		coordinates = $bindable({ lat: 0, lng: 0 }),
-		coding = $bindable({ number: '', code: '' })
+		coding = $bindable({ number: '', code: '' }),
+		demographicsTotal = 0
 	}: {
 		municipality: string;
 		barangay: string;
@@ -27,7 +28,13 @@
 		households: number;
 		coordinates: { lat: number; lng: number };
 		coding: { number: string; code: string };
+		demographicsTotal?: number;
 	} = $props();
+
+	// Validation for population vs demographics
+	const hasPopulation = $derived(population > 0);
+	const hasDemographics = $derived(demographicsTotal > 0);
+	const isPopulationSynced = $derived(population === demographicsTotal);
 
 	let municipalityPopoverOpen = $state(false);
 	let barangayPopoverOpen = $state(false);
@@ -199,8 +206,28 @@
 
 			<!-- Population -->
 			<div class="space-y-2">
-				<Label for="population">Population</Label>
+				<div class="flex items-center justify-between">
+					<Label for="population">Population</Label>
+					{#if hasPopulation && hasDemographics}
+						{#if isPopulationSynced}
+							<div class="flex items-center gap-1 text-xs text-success">
+								<CheckCircle2 class="size-3" />
+								<span>Synced with demographics</span>
+							</div>
+						{:else}
+							<div class="flex items-center gap-1 text-xs text-destructive">
+								<AlertCircle class="size-3" />
+								<span>Mismatch: {population} ≠ {demographicsTotal}</span>
+							</div>
+						{/if}
+					{/if}
+				</div>
 				<NumberInput id="population" bind:value={population} placeholder="0" min={0} />
+				{#if hasPopulation && hasDemographics && !isPopulationSynced}
+					<p class="text-xs text-muted-foreground">
+						Demographics total is {demographicsTotal}. Population should match.
+					</p>
+				{/if}
 			</div>
 
 			<!-- Households -->

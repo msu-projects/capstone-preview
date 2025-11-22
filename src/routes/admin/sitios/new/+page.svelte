@@ -13,6 +13,7 @@
 	import * as Tabs from '$lib/components/ui/tabs';
 	import type { Sitio } from '$lib/types';
 	import { loadSitios, saveSitios } from '$lib/utils/storage';
+	import { validateDemographics } from '$lib/utils/demographic-validation';
 	import {
 		ArrowLeft,
 		ArrowRight,
@@ -163,6 +164,19 @@
 			return;
 		}
 
+		// Validate demographics
+		const demographicValidation = validateDemographics({
+			population,
+			demographics
+		});
+
+		if (!demographicValidation.isValid) {
+			const errorMessages = demographicValidation.errors.map((e) => e.message).join('\n');
+			toast.error('Demographic data validation failed:\n' + errorMessages);
+			activeTab = 'demographics'; // Switch to demographics tab to show errors
+			return;
+		}
+
 		isSaving = true;
 
 		const sitios = loadSitios();
@@ -300,6 +314,7 @@
 						bind:households
 						bind:coordinates
 						bind:coding
+						demographicsTotal={demographics.total}
 					/>
 				</Tabs.Content>
 
@@ -311,6 +326,7 @@
 						bind:age_0_14={demographics.age_0_14}
 						bind:age_15_64={demographics.age_15_64}
 						bind:age_65_above={demographics.age_65_above}
+						{population}
 					/>
 				</Tabs.Content>
 

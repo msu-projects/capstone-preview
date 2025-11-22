@@ -11,7 +11,8 @@
 	import { MUNICIPALITIES, getBarangaysForMunicipality } from '$lib/config/location-data';
 	import type { Sitio } from '$lib/types';
 	import { cn } from '$lib/utils';
-	import { AlertCircle, Check, ChevronsUpDown, Save } from '@lucide/svelte';
+	import { validateDemographics } from '$lib/utils/demographic-validation';
+	import { AlertCircle, Check, CheckCircle2, ChevronsUpDown, Save } from '@lucide/svelte';
 
 	let {
 		initialData = null,
@@ -116,6 +117,30 @@
 
 	let errors = $state<Record<string, string>>({});
 
+	// Real-time demographic validation (population is the source of truth)
+	const genderTotal = $derived(formData.demographics.male + formData.demographics.female);
+	const ageTotal = $derived(
+		formData.demographics.age_0_14 +
+			formData.demographics.age_15_64 +
+			formData.demographics.age_65_above
+	);
+	const hasGenderData = $derived(formData.demographics.male > 0 || formData.demographics.female > 0);
+	const hasAgeData = $derived(
+		formData.demographics.age_0_14 > 0 ||
+			formData.demographics.age_15_64 > 0 ||
+			formData.demographics.age_65_above > 0
+	);
+	const hasPopulation = $derived(formData.population > 0);
+
+	// Validate against population (the source of truth)
+	const isGenderValid = $derived(genderTotal === formData.population);
+	const isAgeValid = $derived(ageTotal === formData.population);
+
+	// Auto-sync demographics.total with gender
+	$effect(() => {
+		formData.demographics.total = genderTotal;
+	});
+
 	// Popover states for searchable dropdowns
 	let municipalityPopoverOpen = $state(false);
 	let barangayPopoverOpen = $state(false);
@@ -171,6 +196,18 @@
 			if (formData.coordinates.lng < -180 || formData.coordinates.lng > 180) {
 				errors.coordinates_lng = 'Longitude must be between -180 and 180';
 			}
+		}
+
+		// Demographic validation
+		const demographicValidation = validateDemographics({
+			population: formData.population,
+			demographics: formData.demographics
+		});
+
+		if (!demographicValidation.isValid) {
+			demographicValidation.errors.forEach((error) => {
+				errors[`demographic_${error.field}`] = error.message;
+			});
 		}
 
 		return Object.keys(errors).length === 0;
@@ -460,50 +497,141 @@
 					<Card.Title>Demographics</Card.Title>
 					<Card.Description>Population breakdown by gender and age groups</Card.Description>
 				</Card.Header>
-				<Card.Content class="space-y-4">
-					<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-						<div class="space-y-2">
-							<Label for="male">Male Population</Label>
-							<NumberInput id="male" bind:value={formData.demographics.male} placeholder="0" />
+				<Card.Content class="space-y-6">
+					<!-- Gender Distribution -->
+					<div class="space-y-4">
+						<div class="flex items-center justify-between">
+							<h3 class="text-lg font-semibold">Gender Distribution</h3>
+							{#if hasGenderData && hasPopulation}
+								{#if isGenderValid}
+									<div class="flex items-center gap-2 text-sm text-success">
+										<CheckCircle2 class="size-4" />
+										<span>Matches population ({genderTotal})</span>
+									</div>
+								{:else}
+									<div class="flex items-center gap-2 text-sm text-destructive">
+										<AlertCircle class="size-4" />
+										<span>Must equal {formData.population} (currently {genderTotal})</span>
+									</div>
+								{/if}
+							{/if}
 						</div>
-						<div class="space-y-2">
-							<Label for="female">Female Population</Label>
-							<NumberInput id="female" bind:value={formData.demographics.female} placeholder="0" />
+						<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+							<div class="space-y-2">
+								<Label for="male">Male Population</Label>
+								<NumberInput id="male" bind:value={formData.demographics.male} placeholder="0" min={0} />
+							</div>
+							<div class="space-y-2">
+								<Label for="female">Female Population</Label>
+								<NumberInput id="female" bind:value={formData.demographics.female} placeholder="0" min={0} />
+							</div>
+							<div class="space-y-2">
+								<Label for="total_pop">Total (Auto-calculated)</Label>
+								<NumberInput
+									id="total_pop"
+									value={formData.demographics.total}
+									placeholder="0"
+									disabled
+								/>
+							</div>
 						</div>
-						<div class="space-y-2">
-							<Label for="total_pop">Total Population</Label>
-							<NumberInput
-								id="total_pop"
-								bind:value={formData.demographics.total}
-								placeholder="0"
-							/>
-						</div>
-						<div class="space-y-2">
-							<Label for="age_0_14">Age 0-14</Label>
-							<NumberInput
-								id="age_0_14"
-								bind:value={formData.demographics.age_0_14}
-								placeholder="0"
-							/>
-						</div>
-						<div class="space-y-2">
-							<Label for="age_15_64">Age 15-64</Label>
-							<NumberInput
-								id="age_15_64"
-								bind:value={formData.demographics.age_15_64}
-								placeholder="0"
-							/>
-						</div>
-
-						<div class="space-y-2">
-							<Label for="age_65_above">Age 65+</Label>
-							<NumberInput
-								id="age_65_above"
-								bind:value={formData.demographics.age_65_above}
-								placeholder="0"
-							/>
-						</div>
+						{#if hasGenderData && hasPopulation && !isGenderValid}
+							<div class="rounded-md border border-destructive/50 bg-destructive/10 p-3">
+								<div class="flex gap-2">
+									<AlertCircle class="size-4 shrink-0 text-destructive mt-0.5" />
+									<div class="text-sm">
+										<p class="font-medium text-destructive">Gender distribution must equal total population</p>
+										<p class="text-muted-foreground mt-1">
+											Male ({formData.demographics.male}) + Female ({formData.demographics.female}) = {genderTotal}, but Population is {formData.population}
+										</p>
+									</div>
+								</div>
+							</div>
+						{/if}
 					</div>
+
+					<!-- Age Distribution -->
+					<div class="space-y-4">
+						<div class="flex items-center justify-between">
+							<h3 class="text-lg font-semibold">Age Distribution</h3>
+							{#if hasAgeData && hasPopulation}
+								{#if isAgeValid}
+									<div class="flex items-center gap-2 text-sm text-success">
+										<CheckCircle2 class="size-4" />
+										<span>Matches population ({ageTotal})</span>
+									</div>
+								{:else}
+									<div class="flex items-center gap-2 text-sm text-destructive">
+										<AlertCircle class="size-4" />
+										<span>Must equal {formData.population} (currently {ageTotal})</span>
+									</div>
+								{/if}
+							{/if}
+						</div>
+						<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+							<div class="space-y-2">
+								<Label for="age_0_14">Age 0-14</Label>
+								<NumberInput
+									id="age_0_14"
+									bind:value={formData.demographics.age_0_14}
+									placeholder="0"
+									min={0}
+								/>
+							</div>
+							<div class="space-y-2">
+								<Label for="age_15_64">Age 15-64</Label>
+								<NumberInput
+									id="age_15_64"
+									bind:value={formData.demographics.age_15_64}
+									placeholder="0"
+									min={0}
+								/>
+							</div>
+							<div class="space-y-2">
+								<Label for="age_65_above">Age 65+</Label>
+								<NumberInput
+									id="age_65_above"
+									bind:value={formData.demographics.age_65_above}
+									placeholder="0"
+									min={0}
+								/>
+							</div>
+						</div>
+						{#if hasAgeData && hasPopulation && !isAgeValid}
+							<div class="rounded-md border border-destructive/50 bg-destructive/10 p-3">
+								<div class="flex gap-2">
+									<AlertCircle class="size-4 shrink-0 text-destructive mt-0.5" />
+									<div class="text-sm">
+										<p class="font-medium text-destructive">Age distribution must equal total population</p>
+										<p class="text-muted-foreground mt-1">
+											Age 0-14 ({formData.demographics.age_0_14}) + Age 15-64 ({formData.demographics.age_15_64}) + Age 65+ ({formData.demographics.age_65_above}) = {ageTotal}, but Population is {formData.population}
+										</p>
+									</div>
+								</div>
+							</div>
+						{/if}
+					</div>
+
+					<!-- Validation Summary -->
+					{#if errors.demographic_gender || errors.demographic_age || errors.demographic_population}
+						<div class="rounded-md border border-destructive/50 bg-destructive/10 p-3">
+							<div class="flex gap-2">
+								<AlertCircle class="size-4 shrink-0 text-destructive mt-0.5" />
+								<div class="text-sm space-y-1">
+									<p class="font-medium text-destructive">Demographic data validation errors:</p>
+									{#if errors.demographic_gender}
+										<p class="text-muted-foreground">• {errors.demographic_gender}</p>
+									{/if}
+									{#if errors.demographic_age}
+										<p class="text-muted-foreground">• {errors.demographic_age}</p>
+									{/if}
+									{#if errors.demographic_population}
+										<p class="text-muted-foreground">• {errors.demographic_population}</p>
+									{/if}
+								</div>
+							</div>
+						</div>
+					{/if}
 				</Card.Content>
 			</Card.Root>
 		</Tabs.Content>
