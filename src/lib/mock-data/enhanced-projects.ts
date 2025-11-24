@@ -203,8 +203,8 @@ export const enhancedProjects: Project[] = [
 				issues_encountered: 'Heavy rains delayed distribution in Sitio Pagasa by 5 days',
 				photo_urls: [],
 				status: 'delayed',
-				created_at: '2025-03-31',
-				updated_at: '2025-03-31'
+				created_at: '2025-11-11',
+				updated_at: '2025-11-11'
 			}
 		],
 		monthly_budget: [
@@ -238,8 +238,8 @@ export const enhancedProjects: Project[] = [
 				actual_expenses: 165000,
 				obligations: 170000,
 				remaining_balance: 450000,
-				created_at: '2025-03-31',
-				updated_at: '2025-03-31'
+				created_at: '2025-11-11',
+				updated_at: '2025-11-11'
 			}
 		],
 		issues: [
@@ -411,7 +411,7 @@ export const enhancedProjects: Project[] = [
 			sectoral_rep: 'Federation of Farmers Associations - South Cotabato'
 		},
 		created_at: '2025-01-10',
-		updated_at: '2025-03-31'
+		updated_at: '2025-11-11'
 	},
 
 	{
@@ -521,8 +521,8 @@ export const enhancedProjects: Project[] = [
 				issues_encountered: 'Engineering design and geological survey completed',
 				photo_urls: [],
 				status: 'on-track',
-				created_at: '2025-03-31',
-				updated_at: '2025-03-31'
+				created_at: '2025-11-11',
+				updated_at: '2025-11-11'
 			}
 		],
 		monthly_budget: [
@@ -534,8 +534,8 @@ export const enhancedProjects: Project[] = [
 				actual_expenses: 195000,
 				obligations: 200000,
 				remaining_balance: 5305000,
-				created_at: '2025-03-31',
-				updated_at: '2025-03-31'
+				created_at: '2025-11-11',
+				updated_at: '2025-11-11'
 			}
 		],
 		funding_sources: [
@@ -606,7 +606,7 @@ export const enhancedProjects: Project[] = [
 			sectoral_rep: 'Water District Representative'
 		},
 		created_at: '2025-02-15',
-		updated_at: '2025-03-31'
+		updated_at: '2025-11-11'
 	},
 
 	{
@@ -789,8 +789,8 @@ export const enhancedProjects: Project[] = [
 				issues_encountered: 'Construction sites prepared, first training batch completed',
 				photo_urls: [],
 				status: 'on-track',
-				created_at: '2025-03-31',
-				updated_at: '2025-03-31'
+				created_at: '2025-11-11',
+				updated_at: '2025-11-11'
 			}
 		],
 		monthly_budget: [
@@ -813,8 +813,8 @@ export const enhancedProjects: Project[] = [
 				actual_expenses: 425000,
 				obligations: 440000,
 				remaining_balance: 2490000,
-				created_at: '2025-03-31',
-				updated_at: '2025-03-31'
+				created_at: '2025-11-11',
+				updated_at: '2025-11-11'
 			}
 		],
 		funding_sources: [
@@ -893,7 +893,7 @@ export const enhancedProjects: Project[] = [
 			sectoral_rep: 'Tribal Chieftains Association - South Cotabato'
 		},
 		created_at: '2025-01-20',
-		updated_at: '2025-03-31'
+		updated_at: '2025-11-11'
 	},
 
 	{
@@ -1106,8 +1106,8 @@ export const enhancedProjects: Project[] = [
 				issues_encountered: 'Road access difficult in Sitio Kipalbig due to landslide',
 				photo_urls: [],
 				status: 'delayed',
-				created_at: '2025-03-31',
-				updated_at: '2025-03-31'
+				created_at: '2025-11-11',
+				updated_at: '2025-11-11'
 			}
 		],
 		monthly_budget: [
@@ -1141,8 +1141,8 @@ export const enhancedProjects: Project[] = [
 				actual_expenses: 242000,
 				obligations: 248000,
 				remaining_balance: 2078000,
-				created_at: '2025-03-31',
-				updated_at: '2025-03-31'
+				created_at: '2025-11-11',
+				updated_at: '2025-11-11'
 			}
 		],
 		issues: [
@@ -1244,7 +1244,7 @@ export const enhancedProjects: Project[] = [
 			sectoral_rep: 'Barangay Health Workers Association - South Cotabato'
 		},
 		created_at: '2025-01-05',
-		updated_at: '2025-03-31'
+		updated_at: '2025-11-11'
 	},
 
 	{
@@ -1433,8 +1433,8 @@ export const enhancedProjects: Project[] = [
 				issues_encountered: 'Heavy rains delayed concrete pouring for 8 days',
 				photo_urls: [],
 				status: 'delayed',
-				created_at: '2025-03-31',
-				updated_at: '2025-03-31'
+				created_at: '2025-11-11',
+				updated_at: '2025-11-11'
 			}
 		],
 		monthly_budget: [
@@ -1468,8 +1468,8 @@ export const enhancedProjects: Project[] = [
 				actual_expenses: 1825000,
 				obligations: 1880000,
 				remaining_balance: 6045000,
-				created_at: '2025-03-31',
-				updated_at: '2025-03-31'
+				created_at: '2025-11-11',
+				updated_at: '2025-11-11'
 			}
 		],
 		funding_sources: [
@@ -1548,7 +1548,7 @@ export const enhancedProjects: Project[] = [
 			sectoral_rep: 'Farmers Cooperative Association - Banga-Norala'
 		},
 		created_at: '2024-10-15',
-		updated_at: '2025-03-31'
+		updated_at: '2025-11-11'
 	},
 
 	{
@@ -1707,8 +1707,8 @@ export const enhancedProjects: Project[] = [
 				issues_encountered: 'Excellent turnout, exceeded target',
 				photo_urls: [],
 				status: 'ahead',
-				created_at: '2025-03-31',
-				updated_at: '2025-03-31'
+				created_at: '2025-11-11',
+				updated_at: '2025-11-11'
 			}
 		],
 		monthly_budget: [
@@ -1731,8 +1731,8 @@ export const enhancedProjects: Project[] = [
 				actual_expenses: 295000,
 				obligations: 310000,
 				remaining_balance: 1960000,
-				created_at: '2025-03-31',
-				updated_at: '2025-03-31'
+				created_at: '2025-11-11',
+				updated_at: '2025-11-11'
 			}
 		],
 		funding_sources: [
@@ -1811,7 +1811,7 @@ export const enhancedProjects: Project[] = [
 			sectoral_rep: "Provincial Women's Council"
 		},
 		created_at: '2025-02-01',
-		updated_at: '2025-03-31'
+		updated_at: '2025-11-11'
 	}
 ];
 

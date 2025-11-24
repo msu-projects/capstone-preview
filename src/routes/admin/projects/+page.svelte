@@ -27,7 +27,7 @@
 	let statusFilter = $state<string>('');
 	let categoryFilter = $state<string>('');
 	let currentPage = $state(1);
-	let sortBy = $state<'title' | 'budget' | 'progress' | 'status'>('title');
+	let sortBy = $state<'title' | 'budget' | 'progress' | 'status' | 'updated'>('title');
 	let sortOrder = $state<'asc' | 'desc'>('asc');
 	const itemsPerPage = 10;
 	let deleteDialogOpen = $state(false);
@@ -70,6 +70,11 @@
 					break;
 				case 'status':
 					comparison = a.status.localeCompare(b.status);
+					break;
+				case 'updated':
+					const dateA = new Date(a.updated_at).getTime();
+					const dateB = new Date(b.updated_at).getTime();
+					comparison = dateA - dateB;
 					break;
 			}
 			return sortOrder === 'asc' ? comparison : -comparison;
@@ -125,6 +130,29 @@
 
 	function truncateText(text: string, maxLength: number): string {
 		return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+	}
+
+	function formatDate(dateString: string): string {
+		const date = new Date(dateString);
+		return new Intl.DateTimeFormat('en-PH', {
+			year: 'numeric',
+			month: 'short',
+			day: 'numeric'
+		}).format(date);
+	}
+
+	function formatRelativeTime(dateString: string): string {
+		const date = new Date(dateString);
+		const now = new Date();
+		const diffInMs = now.getTime() - date.getTime();
+		const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+
+		if (diffInDays === 0) return 'Today';
+		if (diffInDays === 1) return 'Yesterday';
+		if (diffInDays < 7) return `${diffInDays} days ago`;
+		if (diffInDays < 30) return `${Math.floor(diffInDays / 7)} weeks ago`;
+		if (diffInDays < 365) return `${Math.floor(diffInDays / 30)} months ago`;
+		return `${Math.floor(diffInDays / 365)} years ago`;
 	}
 
 	function resetFilters() {
@@ -324,13 +352,24 @@
 										/>
 									</button>
 								</Table.TableHead>
+								<Table.TableHead class="w-[140px]">
+									<button
+										class="flex items-center gap-1 hover:text-foreground"
+										onclick={() => toggleSort('updated')}
+									>
+										Last Updated
+										<ArrowDownUp
+											class="size-3 {sortBy === 'updated' ? 'opacity-100' : 'opacity-30'}"
+										/>
+									</button>
+								</Table.TableHead>
 								<Table.TableHead class="w-[100px] text-right">Actions</Table.TableHead>
 							</Table.TableRow>
 						</Table.TableHeader>
 						<Table.TableBody>
 							{#if paginatedProjects.length === 0}
 								<Table.TableRow>
-									<Table.TableCell colspan={6} class="h-32 text-center">
+									<Table.TableCell colspan={7} class="h-32 text-center">
 										<div class="flex flex-col items-center justify-center gap-2">
 											<p class="text-muted-foreground">No projects found</p>
 										</div>
@@ -390,6 +429,16 @@
 											<Badge variant={getStatusBadgeVariant(project.status)}>
 												{getStatusLabel(project.status)}
 											</Badge>
+										</Table.TableCell>
+
+										<!-- Last Updated -->
+										<Table.TableCell>
+											<div class="space-y-1">
+												<div class="text-sm">{formatDate(project.updated_at)}</div>
+												<div class="text-xs text-muted-foreground">
+													{formatRelativeTime(project.updated_at)}
+												</div>
+											</div>
 										</Table.TableCell>
 
 										<!-- Actions -->
