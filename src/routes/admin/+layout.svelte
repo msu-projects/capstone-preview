@@ -1,5 +1,5 @@
 <script lang="ts">
-	import AppSidebar from '$lib/components/admin/app-sidebar.svelte';
+	import AppSidebar from '$lib/components/admin/AppSidebar.svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar';
 
 	let { children } = $props();
