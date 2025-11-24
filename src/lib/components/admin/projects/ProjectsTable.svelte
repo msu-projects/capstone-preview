@@ -7,7 +7,14 @@
 	import { Progress } from '$lib/components/ui/progress';
 	import * as Table from '$lib/components/ui/table';
 	import type { Project, ProjectStatus } from '$lib/types';
-	import { ArrowDownUp, Download, EllipsisVertical, RefreshCw, SquarePen, Trash2 } from '@lucide/svelte';
+	import {
+		ArrowDownUp,
+		Download,
+		EllipsisVertical,
+		RefreshCw,
+		SquarePen,
+		Trash2
+	} from '@lucide/svelte';
 
 	interface Props {
 		projects: Project[];
@@ -251,22 +258,44 @@
 
 								<!-- Actions -->
 								<Table.TableCell class="text-right">
-									<div class="flex justify-end gap-1">
-										<Button variant="ghost" size="icon" href="/admin/projects/{project.id}/edit">
-											<SquarePen class="size-4" />
-										</Button>
-										<Button
-											variant="ghost"
-											size="icon"
-											onclick={() => onDownloadPDF(project.id)}
-											title="Download PDF Report"
-										>
-											<Download class="size-4" />
-										</Button>
-										<Button variant="ghost" size="icon" onclick={() => onDelete(project.id)}>
-											<Trash2 class="size-4" />
-										</Button>
-									</div>
+									<DropdownMenu.Root>
+										<DropdownMenu.Trigger>
+											<Button variant="ghost" size="icon" onclick={(e) => e.stopPropagation()}>
+												<EllipsisVertical class="size-4" />
+											</Button>
+										</DropdownMenu.Trigger>
+										<DropdownMenu.Content align="end">
+											<DropdownMenu.Item
+												onclick={(e) => {
+													e.stopPropagation();
+													window.location.href = `/admin/projects/${project.id}/edit`;
+												}}
+											>
+												<SquarePen class="mr-2 size-4" />
+												Edit
+											</DropdownMenu.Item>
+											<DropdownMenu.Item
+												onclick={(e) => {
+													e.stopPropagation();
+													onDownloadPDF(project.id);
+												}}
+											>
+												<Download class="mr-2 size-4" />
+												Download PDF
+											</DropdownMenu.Item>
+											<DropdownMenu.Separator />
+											<DropdownMenu.Item
+												onclick={(e) => {
+													e.stopPropagation();
+													onDelete(project.id);
+												}}
+												class="text-destructive"
+											>
+												<Trash2 class="mr-2 size-4" />
+												Delete
+											</DropdownMenu.Item>
+										</DropdownMenu.Content>
+									</DropdownMenu.Root>
 								</Table.TableCell>
 							</Table.TableRow>
 						{/each}
