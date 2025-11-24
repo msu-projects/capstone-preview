@@ -28,7 +28,7 @@ export interface QuickUpdateFormData {
 	startDate: string;
 	targetEndDate: string;
 	extensionRequested: boolean;
-	extensionDate: string;
+	extensionDays: string;
 	// Beneficiaries
 	targetBeneficiaries: number;
 	currentBeneficiaries: string;
@@ -80,7 +80,15 @@ export function projectToQuickUpdate(project: Project): QuickUpdateFormData {
 		startDate: project.start_date || '',
 		targetEndDate: project.end_date || '',
 		extensionRequested: !!project.monitoring?.contract?.extension,
-		extensionDate: project.monitoring?.contract?.extension || '',
+		extensionDays: (() => {
+			// Calculate extension days from stored extension date
+			if (!project.monitoring?.contract?.extension || !project.end_date) return '';
+			const endDate = new Date(project.end_date);
+			const extensionDate = new Date(project.monitoring.contract.extension);
+			const diffInMs = extensionDate.getTime() - endDate.getTime();
+			const diffInDays = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
+			return diffInDays > 0 ? diffInDays.toString() : '';
+		})(),
 		// Beneficiaries
 		targetBeneficiaries: project.beneficiaries || 0,
 		currentBeneficiaries:
@@ -138,7 +146,16 @@ export function applyQuickUpdateToProject(
 			...project.monitoring?.contract,
 			duration: project.monitoring?.contract?.duration || '',
 			delivery: project.monitoring?.contract?.delivery || '',
-			extension: formData.extensionRequested ? formData.extensionDate : ''
+			extension: (() => {
+				// Calculate extension date from calendar days
+				if (!formData.extensionRequested || !formData.extensionDays) return '';
+				const days = Number(formData.extensionDays);
+				if (isNaN(days) || days <= 0) return '';
+				const baseDate = new Date(formData.targetEndDate);
+				const extensionDate = new Date(baseDate);
+				extensionDate.setDate(extensionDate.getDate() + days);
+				return extensionDate.toISOString().split('T')[0];
+			})()
 		},
 		statusSummary: {
 			stage: formData.statusStage,
@@ -290,17 +307,15 @@ export function validateQuickUpdateData(
 		errors.push('Current beneficiaries cannot be negative');
 	}
 
-	// Validate dates
-	if (formData.extensionRequested && !formData.extensionDate) {
-		errors.push('Extension date is required when extension is requested');
+	// Validate extension
+	if (formData.extensionRequested && !formData.extensionDays) {
+		errors.push('Extension days is required when extension is requested');
 	}
 
-	if (formData.extensionRequested && formData.extensionDate) {
-		const extension = new Date(formData.extensionDate);
-		const current = new Date(formData.targetEndDate);
-
-		if (extension <= current) {
-			errors.push('Extension date must be after the current target end date');
+	if (formData.extensionRequested && formData.extensionDays) {
+		const days = Number(formData.extensionDays);
+		if (isNaN(days) || days <= 0) {
+			errors.push('Extension days must be a positive number');
 		}
 	}
 

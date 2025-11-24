@@ -9,7 +9,6 @@
 	}
 
 	let { sitios, maxVisible = 1 }: Props = $props();
-	console.log(maxVisible);
 
 	const visibleSitios = $derived(sitios.slice(0, maxVisible));
 	const remainingSitios = $derived(sitios.slice(maxVisible));

@@ -1,32 +1,32 @@
 <script lang="ts">
+	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';
+	import CurrencyInput from '$lib/components/ui/currency-input/currency-input.svelte';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import * as Select from '$lib/components/ui/select';
 	import { Textarea } from '$lib/components/ui/textarea';
-	import { Badge } from '$lib/components/ui/badge';
 	import type { ProjectStatus } from '$lib/types';
+	import { formatMonth } from '$lib/utils/monthly-planning';
 	import {
-		Zap,
-		TrendingUp,
-		TrendingDown,
-		DollarSign,
-		Calendar,
-		Users,
-		AlertTriangle,
-		CheckCircle,
-		Info
-	} from '@lucide/svelte';
-	import {
+		calculateBeneficiaryProgress,
 		calculateBudgetUtilization,
 		calculateDaysRemaining,
-		calculateBeneficiaryProgress,
 		calculateProgressSlippage,
 		formatCurrency,
-		formatPercentage,
 		getCurrentMonth
 	} from '$lib/utils/project-calculations';
-	import { formatMonth } from '$lib/utils/monthly-planning';
+	import {
+		AlertTriangle,
+		Banknote,
+		Calendar,
+		CheckCircle,
+		Info,
+		TrendingDown,
+		TrendingUp,
+		Users,
+		Zap
+	} from '@lucide/svelte';
 
 	interface Props {
 		// Existing fields
@@ -45,7 +45,7 @@
 		startDate: string;
 		targetEndDate: string;
 		extensionRequested: boolean;
-		extensionDate: string;
+		extensionDays: string;
 		// New fields - Beneficiaries
 		targetBeneficiaries: number;
 		currentBeneficiaries: string;
@@ -70,7 +70,7 @@
 		startDate = $bindable(),
 		targetEndDate = $bindable(),
 		extensionRequested = $bindable(),
-		extensionDate = $bindable(),
+		extensionDays = $bindable(),
 		targetBeneficiaries = $bindable(),
 		currentBeneficiaries = $bindable(),
 		householdsReached = $bindable(),
@@ -99,6 +99,19 @@
 		calculateProgressSlippage(Number(plannedPercentage || 0), Number(physicalActual || 0))
 	);
 
+	// Calculate new target date from extension days
+	let calculatedExtensionDate = $derived.by(() => {
+		if (!extensionRequested || !extensionDays || !targetEndDate) return '';
+		const days = Number(extensionDays);
+		if (isNaN(days) || days <= 0) return '';
+
+		const baseDate = new Date(targetEndDate);
+		const newDate = new Date(baseDate);
+		newDate.setDate(newDate.getDate() + days);
+
+		return newDate.toISOString().split('T')[0];
+	});
+
 	// Get status label for display
 	const getStatusLabel = (s: ProjectStatus) => {
 		switch (s) {
@@ -116,9 +129,7 @@
 	};
 
 	// Get badge variant for metrics (mapped to valid Badge variants)
-	const getBadgeVariant = (
-		status: string
-	): 'default' | 'secondary' | 'outline' | 'destructive' => {
+	const getBadgeVariant = (status: string): 'default' | 'secondary' | 'outline' | 'destructive' => {
 		switch (status) {
 			case 'on-track':
 			case 'healthy':
@@ -157,8 +168,9 @@
 				</Badge>
 			</div>
 			<p class="mt-1 text-xs text-muted-foreground">
-				Update the most commonly changed monitoring fields for <strong>{currentMonthFormatted}</strong>.
-				Need to edit project details?
+				Update the most commonly changed monitoring fields for <strong
+					>{currentMonthFormatted}</strong
+				>. Need to edit project details?
 				<button
 					type="button"
 					onclick={onSwitchToFull}
@@ -175,7 +187,7 @@
 		<Card.Header class="flex flex-row items-center justify-between">
 			<div class="space-y-1.5">
 				<div class="flex items-center gap-2">
-					<DollarSign class="size-4 text-primary" />
+					<Banknote class="size-4 text-primary" />
 					<Card.Title>Financial Status</Card.Title>
 				</div>
 				<Card.Description>Track budget utilization and balance</Card.Description>
@@ -204,12 +216,11 @@
 				<div class="space-y-2">
 					<Label for="budget-disbursed">Budget Disbursed</Label>
 					<div class="relative">
-						<Input
+						<CurrencyInput
 							id="budget-disbursed"
-							type="number"
-							min="0"
+							min={0}
 							bind:value={budgetDisbursed}
-							placeholder="0"
+							placeholder="₱0"
 						/>
 						<span class="pointer-events-none absolute top-2.5 right-3 text-sm text-muted-foreground"
 							>PHP</span
@@ -255,7 +266,9 @@
 
 			<!-- Budget warnings -->
 			{#if budgetMetrics.isOverBudget}
-				<div class="flex items-start gap-2 rounded-lg border border-destructive bg-destructive/10 p-3">
+				<div
+					class="flex items-start gap-2 rounded-lg border border-destructive bg-destructive/10 p-3"
+				>
 					<AlertTriangle class="mt-0.5 size-4 text-destructive" />
 					<div class="flex-1 text-xs text-destructive">
 						<strong>Budget Overrun:</strong> Disbursed amount exceeds total budget by
@@ -295,19 +308,13 @@
 				<!-- Start Date (Read-only) -->
 				<div class="space-y-2">
 					<Label for="start-date">Start Date</Label>
-					<Input
-						id="start-date"
-						type="date"
-						bind:value={startDate}
-						disabled
-						class="opacity-75"
-					/>
+					<Input id="start-date" type="date" bind:value={startDate} disabled class="opacity-75" />
 				</div>
 
 				<!-- Target End Date -->
 				<div class="space-y-2">
 					<Label for="target-end-date">Target End Date</Label>
-					<Input id="target-end-date" type="date" bind:value={targetEndDate} />
+					<Input id="target-end-date" type="date" bind:value={targetEndDate} disabled />
 				</div>
 
 				<!-- Extension Requested -->
@@ -323,18 +330,43 @@
 					</Label>
 				</div>
 
-				<!-- Extension Date (conditional) -->
+				<!-- Extension Days (conditional) -->
 				{#if extensionRequested}
 					<div class="space-y-2">
-						<Label for="extension-date">New Target Date</Label>
-						<Input id="extension-date" type="date" bind:value={extensionDate} />
+						<Label for="extension-days">Extension (Calendar Days)</Label>
+						<Input
+							id="extension-days"
+							type="number"
+							min="1"
+							bind:value={extensionDays}
+							placeholder="Number of days"
+						/>
 					</div>
 				{/if}
 			</div>
 
+			<!-- Show calculated new target date if extension is requested -->
+			{#if extensionRequested && calculatedExtensionDate}
+				<div class="space-y-2">
+					<Label for="calculated-extension-date" class="flex items-center gap-1.5">
+						New Target Date
+						<Info class="size-3.5 text-muted-foreground" />
+					</Label>
+					<Input
+						id="calculated-extension-date"
+						type="date"
+						value={calculatedExtensionDate}
+						disabled
+						class="font-medium opacity-75"
+					/>
+				</div>
+			{/if}
+
 			<!-- Timeline status indicator -->
 			{#if timelineMetrics.isOverdue}
-				<div class="flex items-start gap-2 rounded-lg border border-destructive bg-destructive/10 p-3">
+				<div
+					class="flex items-start gap-2 rounded-lg border border-destructive bg-destructive/10 p-3"
+				>
 					<AlertTriangle class="mt-0.5 size-4 text-destructive" />
 					<div class="flex-1 text-xs text-destructive">
 						<strong>Project Overdue:</strong>
@@ -431,8 +463,8 @@
 				<div class="flex items-start gap-2 rounded-lg border border-warning bg-warning/10 p-3">
 					<AlertTriangle class="mt-0.5 size-4 text-warning" />
 					<div class="flex-1 text-xs text-warning">
-						<strong>Low Beneficiary Reach:</strong> Physical progress is at {physicalActual}% but beneficiary
-						reach is only {beneficiaryMetrics.percentage.toFixed(1)}% of target.
+						<strong>Low Beneficiary Reach:</strong> Physical progress is at {physicalActual}% but
+						beneficiary reach is only {beneficiaryMetrics.percentage.toFixed(1)}% of target.
 					</div>
 				</div>
 			{/if}
@@ -567,7 +599,9 @@
 					</div>
 				</div>
 			{:else if slippageMetrics.severity === 'severe'}
-				<div class="flex items-start gap-2 rounded-lg border border-destructive bg-destructive/10 p-3">
+				<div
+					class="flex items-start gap-2 rounded-lg border border-destructive bg-destructive/10 p-3"
+				>
 					<AlertTriangle class="mt-0.5 size-4 text-destructive" />
 					<div class="flex-1 text-xs text-destructive">
 						<strong>Severe Delay:</strong> Project is significantly behind schedule. Review catch-up

@@ -277,7 +277,7 @@
 		</Card.Card>
 
 		<!-- Milestone-Based Targets Info -->
-		<Card.Card class="border-primary/20 bg-primary/5">
+		<Card.Card class="hidden border-primary/20 bg-primary/5">
 			<Card.CardContent class="">
 				<div class="flex gap-3">
 					<TrendingUp class="mt-0.5 size-5 shrink-0 text-primary" />

@@ -10,7 +10,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import * as Tabs from '$lib/components/ui/tabs';
-	import { projects } from '$lib/mock-data';
+	import { refreshProjects } from '$lib/mock-data';
 	import { enhancedProjects } from '$lib/mock-data/enhanced-projects';
 	import type {
 		BudgetComponent,
@@ -19,7 +19,9 @@
 		MonthlyPhysicalProgress,
 		MonthlyReleaseSchedule,
 		PerformanceTarget,
-		ProjectSitio
+		Project,
+		ProjectSitio,
+		ProjectStatus
 	} from '$lib/types';
 	import {
 		applyQuickUpdateToProject,
@@ -27,6 +29,7 @@
 		projectToQuickUpdate,
 		validateQuickUpdateData
 	} from '$lib/utils/project-adapters';
+	import { updateProject } from '$lib/utils/storage';
 	import type { DateValue } from '@internationalized/date';
 	import { getLocalTimeZone, parseDate, today } from '@internationalized/date';
 	import {
@@ -50,10 +53,11 @@
 
 	const { data } = $props();
 
-	// Try to find project in enhanced projects first, then fall back to regular projects
-	const existingProject =
-		enhancedProjects.find((p) => p.id === Number(data.id)) ||
-		projects.find((p) => p.id === Number(data.id));
+	// Load projects from storage (includes both mock data and localStorage projects)
+	const allProjects = refreshProjects();
+
+	// Try to find project in all projects (including localStorage)
+	const existingProject = allProjects.find((p) => p.id === Number(data.id));
 
 	if (!existingProject) {
 		// Redirect if project not found
@@ -336,42 +340,52 @@
 
 			isSaving = true;
 
-			// Apply quick update to project
-			const updatedProject = applyQuickUpdateToProject(quickUpdateData, existingProject!);
+			try {
+				// Apply quick update to project
+				const updatedProject = applyQuickUpdateToProject(quickUpdateData, existingProject!);
 
-			// Simulate API call
-			await new Promise((resolve) => setTimeout(resolve, 1500));
+				// Save to localStorage
+				const saved = updateProject(existingProject!.id, updatedProject);
 
-			console.log('Quick Update - Updated project:', updatedProject);
-
-			isSaving = false;
-
-			// Success toast with continuation options
-			toast.success('Quick update saved successfully!', {
-				duration: 10000,
-				action: {
-					label: 'View Project',
-					onClick: () => {
-						window.location.href = `/admin/projects/${existingProject?.id}`;
-					}
+				if (!saved) {
+					throw new Error('Failed to save project to localStorage');
 				}
-			});
 
-			// Show additional action options via separate toast
-			toast.info('What would you like to do next?', {
-				duration: 10000,
-				action: {
-					label: 'Back to List',
-					onClick: () => {
-						window.location.href = '/admin/projects';
+				console.log('Quick Update - Updated project:', updatedProject);
+
+				isSaving = false;
+
+				// Success toast with continuation options
+				toast.success('Quick update saved successfully!', {
+					duration: 10000,
+					action: {
+						label: 'View Project',
+						onClick: () => {
+							window.location.href = `/admin/projects/${existingProject?.id}`;
+						}
 					}
-				}
-			});
+				});
 
-			// Auto-redirect to list after delay if no action taken
-			setTimeout(() => {
-				window.location.href = '/admin/projects';
-			}, 10000);
+				// Show additional action options via separate toast
+				toast.info('What would you like to do next?', {
+					duration: 10000,
+					action: {
+						label: 'Back to List',
+						onClick: () => {
+							window.location.href = '/admin/projects';
+						}
+					}
+				});
+
+				// Auto-redirect to list after delay if no action taken
+				setTimeout(() => {
+					window.location.href = '/admin/projects';
+				}, 10000);
+			} catch (error) {
+				console.error('Error saving quick update:', error);
+				isSaving = false;
+				toast.error('Failed to save quick update. Please try again.');
+			}
 		} else {
 			// Full mode - existing validation and save logic
 			if (!canSave) {
@@ -381,45 +395,91 @@
 
 			isSaving = true;
 
-			// Simulate API call
-			await new Promise((resolve) => setTimeout(resolve, 1500));
+			try {
+				// Get the first sitio info for legacy fields (required by Project type)
+				const firstSitio = projectSitios[0];
+				const totalBeneficiaries = projectSitios.reduce((sum, ps) => sum + ps.beneficiaries_target, 0);
 
-			const projectData = {
-				id: existingProject?.id,
-				// Tab 1
-				title,
-				description,
-				category_key: selectedCategory,
-				project_type_id: selectedProjectType,
-				implementing_agency: implementingAgency,
-				// Tab 2
-				project_sitios: projectSitios,
-				total_beneficiaries: projectSitios.reduce((sum, ps) => sum + ps.beneficiaries_target, 0),
-				// Tab 3
-				performance_targets: performanceTargets,
-				start_date: targetStartDate?.toString(),
-				end_date: targetEndDate?.toString(),
-				direct_beneficiaries_male: Number(directBeneficiariesMale),
-				direct_beneficiaries_female: Number(directBeneficiariesFemale),
-				employment_generated: Number(employmentGenerated),
-				// Tab 4
-				budget: Number(totalBudget),
-				funding_sources: fundingSources,
-				budget_components: budgetComponents,
-				// Tab 5
-				monthly_physical_progress: monthlyPhysicalProgress,
-				release_schedule: monthlyReleaseSchedule
-			};
+				// Determine project status based on start date and completion
+				const startDateValue = targetStartDate?.toString() || existingProject?.start_date || '';
+				const today = new Date();
+				const projectStartDate = new Date(startDateValue);
+				let status: ProjectStatus = existingProject?.status || 'planning';
 
-			console.log('Updating enhanced project:', projectData);
+				// Auto-update status based on dates if still in planning
+				if (status === 'planning' && projectStartDate <= today) {
+					status = 'in-progress';
+				}
 
-			isSaving = false;
-			toast.success('Project updated successfully!');
+				// Create the updated Project object
+				const updatedProjectData: Partial<Project> = {
+					// Tab 1
+					title,
+					description,
+					category: selectedCategory || '',
+					category_key: selectedCategory as any,
+					project_type_id: selectedProjectType,
+					// Legacy fields (using first sitio for backwards compatibility)
+					sitio_id: firstSitio?.sitio_id || existingProject?.sitio_id || 0,
+					sitio_name: firstSitio?.sitio_name || existingProject?.sitio_name || '',
+					municipality: firstSitio?.municipality || existingProject?.municipality || '',
+					status,
+					start_date: startDateValue,
+					end_date: targetEndDate?.toString() || existingProject?.end_date || '',
+					budget: Number(totalBudget),
+					beneficiaries: totalBeneficiaries,
+					// Tab 2
+					project_sitios: projectSitios.map((ps) => ({
+						...ps,
+						project_id: existingProject!.id
+					})),
+					// Tab 3
+					performance_targets: performanceTargets.map((pt) => ({
+						...pt,
+						id: 0,
+						project_id: existingProject!.id
+					})),
+					// Tab 4
+					funding_sources: fundingSources.map((fs) => ({
+						...fs,
+						id: 0,
+						project_id: existingProject!.id
+					})),
+					budget_components: budgetComponents.map((bc) => ({
+						...bc,
+						id: 0,
+						project_id: existingProject!.id
+					})),
+					// Tab 5
+					release_schedule: monthlyReleaseSchedule.map((mrs) => ({
+						...mrs,
+						id: 0,
+						project_id: existingProject!.id
+					})),
+					updated_at: new Date().toISOString()
+				};
 
-			// Redirect after save
-			setTimeout(() => {
-				window.location.href = '/admin/projects';
-			}, 1000);
+				// Save to localStorage
+				const saved = updateProject(existingProject!.id, updatedProjectData);
+
+				if (!saved) {
+					throw new Error('Failed to save project to localStorage');
+				}
+
+				console.log('Project updated successfully:', updatedProjectData);
+
+				isSaving = false;
+				toast.success('Project updated successfully!');
+
+				// Redirect after save
+				setTimeout(() => {
+					window.location.href = '/admin/projects';
+				}, 1000);
+			} catch (error) {
+				console.error('Error updating project:', error);
+				isSaving = false;
+				toast.error('Failed to update project. Please try again.');
+			}
 		}
 	}
 
@@ -527,7 +587,7 @@
 							bind:startDate={quickUpdateData.startDate}
 							bind:targetEndDate={quickUpdateData.targetEndDate}
 							bind:extensionRequested={quickUpdateData.extensionRequested}
-							bind:extensionDate={quickUpdateData.extensionDate}
+							bind:extensionDays={quickUpdateData.extensionDays}
 							bind:targetBeneficiaries={quickUpdateData.targetBeneficiaries}
 							bind:currentBeneficiaries={quickUpdateData.currentBeneficiaries}
 							bind:householdsReached={quickUpdateData.householdsReached}

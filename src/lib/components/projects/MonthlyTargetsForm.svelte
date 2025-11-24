@@ -1,7 +1,6 @@
 <script lang="ts">
 	import * as Alert from '$lib/components/ui/alert';
 	import { Badge } from '$lib/components/ui/badge';
-	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import { CurrencyInput } from '$lib/components/ui/currency-input';
 	import { Input } from '$lib/components/ui/input';
@@ -15,10 +14,10 @@
 		validateCumulativePercentage
 	} from '$lib/utils/monthly-planning';
 	import {
+		Banknote,
 		Calendar,
 		CircleAlert,
 		CircleCheck,
-		DollarSign,
 		Sparkles,
 		TrendingUp
 	} from '@lucide/svelte';
@@ -211,9 +210,7 @@
 			<Card.Header class="pb-3">
 				<div class="flex items-start justify-between">
 					<div class="flex-1">
-						<Card.Title class="text-sm">
-							Monthly Physical Progress (Cumulative %)
-						</Card.Title>
+						<Card.Title class="text-sm">Monthly Physical Progress (Cumulative %)</Card.Title>
 						<div class="mt-1 flex items-center gap-2">
 							<span class="text-xs text-muted-foreground">
 								Track overall project completion progress monthly
@@ -262,7 +259,9 @@
 						<div class="grid grid-cols-2 gap-2 border-t pt-2 text-sm font-semibold">
 							<div>Final Target</div>
 							<div
-								class={finalProgress.plan_percentage === 100 ? 'text-green-600' : 'text-destructive'}
+								class={finalProgress.plan_percentage === 100
+									? 'text-green-600'
+									: 'text-destructive'}
 							>
 								{finalProgress.plan_percentage}%
 							</div>
@@ -276,7 +275,7 @@
 	<!-- Budget Release Schedule -->
 	<div class="space-y-4">
 		<h4 class="flex items-center gap-2 text-sm font-semibold">
-			<DollarSign class="size-4" />
+			<Banknote class="size-4" />
 			Budget Release Schedule
 		</h4>
 
