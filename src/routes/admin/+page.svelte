@@ -1,4 +1,5 @@
 <script lang="ts">
+	import SitioList from '$lib/components/projects/SitioList.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
@@ -218,7 +219,7 @@
 							<Table.TableHeader>
 								<Table.TableRow>
 									<Table.TableHead>Project</Table.TableHead>
-									<Table.TableHead>Sitio</Table.TableHead>
+									<Table.TableHead>Location</Table.TableHead>
 									<Table.TableHead>Status</Table.TableHead>
 									<Table.TableHead>Progress</Table.TableHead>
 								</Table.TableRow>
@@ -230,7 +231,13 @@
 											<div class="font-medium">{truncateText(project.title, 40)}</div>
 											<div class="text-xs text-muted-foreground">{project.category}</div>
 										</Table.TableCell>
-										<Table.TableCell>{project.sitio_name}</Table.TableCell>
+										<Table.TableCell>
+											{#if project.project_sitios && project.project_sitios.length > 0}
+												<SitioList sitios={project.project_sitios} maxVisible={1} />
+											{:else}
+												<div class="text-sm">{project.sitio_name}</div>
+											{/if}
+										</Table.TableCell>
 										<Table.TableCell>
 											<Badge variant={getStatusBadgeVariant(project.status)}>
 												{getStatusLabel(project.status)}

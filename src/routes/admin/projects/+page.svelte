@@ -1,4 +1,6 @@
 <script lang="ts">
+	import SitioList from '$lib/components/projects/SitioList.svelte';
+	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
@@ -6,7 +8,6 @@
 	import { Progress } from '$lib/components/ui/progress';
 	import * as Select from '$lib/components/ui/select';
 	import * as Table from '$lib/components/ui/table';
-	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import { projects } from '$lib/mock-data';
 	import type { ProjectStatus } from '$lib/types';
 	import { downloadProjectMonitoringPDF, downloadSingleProjectPDF } from '$lib/utils/pdf-generator';
@@ -39,11 +40,29 @@
 	// Filter and sort projects
 	const filteredProjects = $derived.by(() => {
 		const filtered = projects.filter((project) => {
-			const matchesSearch =
-				!searchQuery ||
-				project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-				project.sitio_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-				project.municipality.toLowerCase().includes(searchQuery.toLowerCase());
+			let matchesSearch = !searchQuery;
+
+			if (searchQuery) {
+				const query = searchQuery.toLowerCase();
+				const titleMatch = project.title.toLowerCase().includes(query);
+
+				// Search through project_sitios if available
+				const sitioMatch = project.project_sitios
+					? project.project_sitios.some(
+							(s) =>
+								s.sitio_name.toLowerCase().includes(query) ||
+								s.municipality.toLowerCase().includes(query) ||
+								s.barangay.toLowerCase().includes(query)
+						)
+					: false;
+
+				// Fallback to legacy fields
+				const legacyMatch =
+					project.sitio_name.toLowerCase().includes(query) ||
+					project.municipality.toLowerCase().includes(query);
+
+				matchesSearch = titleMatch || sitioMatch || legacyMatch;
+			}
 
 			const matchesStatus = !statusFilter || project.status === statusFilter;
 			const matchesCategory = !categoryFilter || project.category === categoryFilter;
@@ -396,12 +415,16 @@
 
 										<!-- Location -->
 										<Table.TableCell>
-											<div class="space-y-1">
-												<div class="text-sm">{project.municipality}</div>
-												<div class="text-xs text-muted-foreground">
-													{project.sitio_name}
+											{#if project.project_sitios && project.project_sitios.length > 0}
+												<SitioList sitios={project.project_sitios} maxVisible={1} />
+											{:else}
+												<div class="space-y-1">
+													<div class="text-sm">{project.municipality}</div>
+													<div class="text-xs text-muted-foreground">
+														{project.sitio_name}
+													</div>
 												</div>
-											</div>
+											{/if}
 										</Table.TableCell>
 
 										<!-- Budget -->

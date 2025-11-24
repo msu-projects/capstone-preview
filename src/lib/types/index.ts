@@ -461,8 +461,11 @@ export interface Project {
 	category_key?: CategoryKey; // NEW: For category-driven design
 	project_type_id?: number; // NEW: Links to ProjectType
 	project_type_name?: string; // NEW: Display name of project type
-	sitio_id: number; // DEPRECATED: Use project_sitios instead for multi-sitio support
+	/** @deprecated Use project_sitios instead for multi-sitio support */
+	sitio_id: number;
+	/** @deprecated Use project_sitios instead for multi-sitio support */
 	sitio_name: string;
+	/** @deprecated Use project_sitios instead for multi-sitio support */
 	municipality: string;
 	status: ProjectStatus;
 	start_date: string;
