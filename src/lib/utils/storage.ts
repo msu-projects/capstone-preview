@@ -1,7 +1,10 @@
-import type { Sitio } from '$lib/types';
+import type { Project, Sitio } from '$lib/types';
 
-const STORAGE_KEY = 'sccdp_sitios';
+const SITIOS_STORAGE_KEY = 'sccdp_sitios';
+const PROJECTS_STORAGE_KEY = 'sccdp_projects';
 const MAX_STORAGE_SIZE = 5 * 1024 * 1024; // 5MB
+
+// ===== SITIOS STORAGE FUNCTIONS =====
 
 /**
  * Save sitios to LocalStorage
@@ -14,7 +17,7 @@ export function saveSitios(sitios: Sitio[]): boolean {
 		if (json.length > MAX_STORAGE_SIZE) {
 			throw new Error('Data exceeds LocalStorage limit (5MB)');
 		}
-		localStorage.setItem(STORAGE_KEY, json);
+		localStorage.setItem(SITIOS_STORAGE_KEY, json);
 		return true;
 	} catch (error) {
 		console.error('Failed to save sitios:', error);
@@ -28,7 +31,7 @@ export function saveSitios(sitios: Sitio[]): boolean {
  */
 export function loadSitios(): Sitio[] {
 	try {
-		const json = localStorage.getItem(STORAGE_KEY);
+		const json = localStorage.getItem(SITIOS_STORAGE_KEY);
 		return json ? JSON.parse(json) : [];
 	} catch (error) {
 		console.error('Failed to load sitios:', error);
@@ -40,33 +43,33 @@ export function loadSitios(): Sitio[] {
  * Clear all sitios from LocalStorage
  */
 export function clearSitios(): void {
-	localStorage.removeItem(STORAGE_KEY);
+	localStorage.removeItem(SITIOS_STORAGE_KEY);
 }
 
 /**
- * Get current storage size in bytes
+ * Get current storage size in bytes for sitios
  * @returns Size in bytes
  */
-export function getStorageSize(): number {
-	const json = localStorage.getItem(STORAGE_KEY);
+export function getSitiosStorageSize(): number {
+	const json = localStorage.getItem(SITIOS_STORAGE_KEY);
 	return json ? json.length : 0;
 }
 
 /**
- * Get storage usage percentage
+ * Get storage usage percentage for sitios
  * @returns Percentage (0-100)
  */
-export function getStorageUsagePercentage(): number {
-	const size = getStorageSize();
+export function getSitiosStorageUsagePercentage(): number {
+	const size = getSitiosStorageSize();
 	return (size / MAX_STORAGE_SIZE) * 100;
 }
 
 /**
- * Check if storage is approaching limit (80%+)
+ * Check if sitios storage is approaching limit (80%+)
  * @returns true if storage is at or above 80% capacity
  */
-export function isStorageNearLimit(): boolean {
-	return getStorageUsagePercentage() >= 80;
+export function isSitiosStorageNearLimit(): boolean {
+	return getSitiosStorageUsagePercentage() >= 80;
 }
 
 /**
@@ -139,4 +142,137 @@ export function getNextSitioId(): number {
 	const sitios = loadSitios();
 	if (sitios.length === 0) return 1;
 	return Math.max(...sitios.map((s) => s.id)) + 1;
+}
+
+// ===== PROJECTS STORAGE FUNCTIONS =====
+
+/**
+ * Save projects to LocalStorage
+ * @param projects Array of Project objects to save
+ * @returns true if successful, false otherwise
+ */
+export function saveProjects(projects: Project[]): boolean {
+	try {
+		const json = JSON.stringify(projects);
+		if (json.length > MAX_STORAGE_SIZE) {
+			throw new Error('Data exceeds LocalStorage limit (5MB)');
+		}
+		localStorage.setItem(PROJECTS_STORAGE_KEY, json);
+		return true;
+	} catch (error) {
+		console.error('Failed to save projects:', error);
+		return false;
+	}
+}
+
+/**
+ * Load projects from LocalStorage
+ * @returns Array of Project objects, empty array if none found or on error
+ */
+export function loadProjects(): Project[] {
+	try {
+		const json = localStorage.getItem(PROJECTS_STORAGE_KEY);
+		return json ? JSON.parse(json) : [];
+	} catch (error) {
+		console.error('Failed to load projects:', error);
+		return [];
+	}
+}
+
+/**
+ * Clear all projects from LocalStorage
+ */
+export function clearProjects(): void {
+	localStorage.removeItem(PROJECTS_STORAGE_KEY);
+}
+
+/**
+ * Get current storage size in bytes for projects
+ * @returns Size in bytes
+ */
+export function getProjectsStorageSize(): number {
+	const json = localStorage.getItem(PROJECTS_STORAGE_KEY);
+	return json ? json.length : 0;
+}
+
+/**
+ * Add a new project to storage
+ * @param project Project object to add
+ * @returns true if successful, false otherwise
+ */
+export function addProject(project: Project): boolean {
+	const projects = loadProjects();
+	projects.push(project);
+	return saveProjects(projects);
+}
+
+/**
+ * Update an existing project in storage
+ * @param id Project ID to update
+ * @param updates Partial project data to update
+ * @returns true if successful, false otherwise
+ */
+export function updateProject(id: number, updates: Partial<Project>): boolean {
+	const projects = loadProjects();
+	const index = projects.findIndex((p) => p.id === id);
+
+	if (index === -1) {
+		console.error(`Project with id ${id} not found`);
+		return false;
+	}
+
+	projects[index] = {
+		...projects[index],
+		...updates,
+		updated_at: new Date().toISOString()
+	};
+
+	return saveProjects(projects);
+}
+
+/**
+ * Delete a project from storage
+ * @param id Project ID to delete
+ * @returns true if successful, false otherwise
+ */
+export function deleteProject(id: number): boolean {
+	const projects = loadProjects();
+	const filteredProjects = projects.filter((p) => p.id !== id);
+
+	if (filteredProjects.length === projects.length) {
+		console.error(`Project with id ${id} not found`);
+		return false;
+	}
+
+	return saveProjects(filteredProjects);
+}
+
+/**
+ * Get a single project by ID
+ * @param id Project ID
+ * @returns Project object or null if not found
+ */
+export function getProjectById(id: number): Project | null {
+	const projects = loadProjects();
+	return projects.find((p) => p.id === id) || null;
+}
+
+/**
+ * Get the next available ID for a new project
+ * Note: In production, this should consider both localStorage and mock data IDs
+ * to avoid conflicts. For safety, we start at ID 1000 for user-created projects.
+ * @returns Next available ID
+ */
+export function getNextProjectId(): number {
+	const projects = loadProjects();
+
+	// Start user-created projects at ID 1000 to avoid conflicts with mock data
+	const MIN_USER_PROJECT_ID = 1000;
+
+	if (projects.length === 0) {
+		return MIN_USER_PROJECT_ID;
+	}
+
+	const maxId = Math.max(...projects.map((p) => p.id));
+	return Math.max(maxId + 1, MIN_USER_PROJECT_ID);
 }

@@ -32,6 +32,8 @@
 		X
 	} from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
+	import { addProject, getNextProjectId } from '$lib/utils/storage';
+	import type { Project, ProjectStatus } from '$lib/types';
 
 	// Form state
 	let isSaving = $state(false);
@@ -175,44 +177,96 @@
 
 		isSaving = true;
 
-		// Simulate API call
-		await new Promise((resolve) => setTimeout(resolve, 1500));
+		try {
+			// Get next available ID
+			const nextId = getNextProjectId();
 
-		const projectData = {
-			// Tab 1
-			title,
-			description,
-			category_key: selectedCategory,
-			project_type_id: selectedProjectType,
-			implementing_agency: implementingAgency,
-			// Tab 2
-			project_sitios: projectSitios,
-			total_beneficiaries: projectSitios.reduce((sum, ps) => sum + ps.beneficiaries_target, 0),
-			// Tab 3
-			start_date: targetStartDate?.toString(),
-			end_date: targetEndDate?.toString(),
-			direct_beneficiaries_male: Number(directBeneficiariesMale),
-			direct_beneficiaries_female: Number(directBeneficiariesFemale),
-			employment_generated: Number(employmentGenerated),
-			// Tab 4
-			budget: Number(totalBudget),
-			funding_sources: fundingSources,
-			budget_components: budgetComponents,
-			// Tab 5
-			performance_targets: performanceTargets,
-			monthly_physical_progress: monthlyPhysicalProgress,
-			release_schedule: monthlyReleaseSchedule
-		};
+			// Get the first sitio info for legacy fields (required by Project type)
+			const firstSitio = projectSitios[0];
+			const totalBeneficiaries = projectSitios.reduce((sum, ps) => sum + ps.beneficiaries_target, 0);
 
-		console.log('Saving enhanced project:', projectData);
+			// Determine project status based on start date
+			const startDateValue = targetStartDate?.toString() || '';
+			const today = new Date();
+			const projectStartDate = new Date(startDateValue);
+			let status: ProjectStatus = 'planning';
 
-		isSaving = false;
-		toast.success('Project created successfully!');
+			if (projectStartDate <= today) {
+				status = 'in-progress';
+			}
 
-		// Redirect after save
-		setTimeout(() => {
-			window.location.href = '/admin/projects';
-		}, 1000);
+			// Get current year for project_year
+			const currentYear = new Date().getFullYear();
+
+			// Create the Project object
+			const newProject: Project = {
+				id: nextId,
+				title,
+				description,
+				category: selectedCategory || '',
+				category_key: selectedCategory as any,
+				project_type_id: selectedProjectType,
+				// Legacy fields (using first sitio for backwards compatibility)
+				sitio_id: firstSitio?.sitio_id || 0,
+				sitio_name: firstSitio?.sitio_name || '',
+				municipality: firstSitio?.municipality || '',
+				status,
+				start_date: startDateValue,
+				end_date: targetEndDate?.toString() || '',
+				budget: Number(totalBudget),
+				beneficiaries: totalBeneficiaries,
+				completion_percentage: 0,
+				project_year: currentYear,
+				// New enhanced fields
+				project_sitios: projectSitios.map((ps) => ({
+					...ps,
+					project_id: nextId
+				})),
+				performance_targets: performanceTargets.map((pt) => ({
+					...pt,
+					id: 0, // Will be assigned by backend
+					project_id: nextId
+				})),
+				funding_sources: fundingSources.map((fs) => ({
+					...fs,
+					id: 0,
+					project_id: nextId
+				})),
+				budget_components: budgetComponents.map((bc) => ({
+					...bc,
+					id: 0,
+					project_id: nextId
+				})),
+				release_schedule: monthlyReleaseSchedule.map((mrs) => ({
+					...mrs,
+					id: 0,
+					project_id: nextId
+				})),
+				created_at: new Date().toISOString(),
+				updated_at: new Date().toISOString()
+			};
+
+			// Save to localStorage
+			const saved = addProject(newProject);
+
+			if (!saved) {
+				throw new Error('Failed to save project to localStorage');
+			}
+
+			console.log('Project saved successfully:', newProject);
+
+			isSaving = false;
+			toast.success('Project created successfully!');
+
+			// Redirect after save
+			setTimeout(() => {
+				window.location.href = '/admin/projects';
+			}, 1000);
+		} catch (error) {
+			console.error('Error saving project:', error);
+			isSaving = false;
+			toast.error('Failed to save project. Please try again.');
+		}
 	}
 
 	function handleCancel() {

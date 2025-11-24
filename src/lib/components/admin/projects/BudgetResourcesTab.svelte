@@ -5,6 +5,7 @@
 	import { CurrencyInput } from '$lib/components/ui/currency-input';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
+	import * as Select from '$lib/components/ui/select';
 	import * as Table from '$lib/components/ui/table';
 	import type { BudgetComponent, FundingSource } from '$lib/types';
 	import { Banknote, Calendar, PieChart, Plus, Trash2 } from '@lucide/svelte';
@@ -42,6 +43,17 @@
 
 	const fundingGap = $derived(totalBudgetAmount - totalFundingSources);
 	const budgetGap = $derived(totalBudgetAmount - totalBudgetComponents);
+
+	const sourceTypeOptions = [
+		{ value: 'provincial', label: 'Provincial Government' },
+		{ value: 'national', label: 'National Government' },
+		{ value: 'partner', label: 'Partner Organization' },
+		{ value: 'lgu_counterpart', label: 'LGU Counterpart' }
+	];
+
+	const sourceTypeLabel = $derived(
+		sourceTypeOptions.find((opt) => opt.value === newSourceType)?.label ?? 'Select Type'
+	);
 
 	function addFundingSource() {
 		if (!newSourceName || !newSourceAmount) return;
@@ -159,7 +171,7 @@
 						</Table.Row>
 					</Table.Header>
 					<Table.Body>
-						{#each fundingSources as source, index}
+						{#each fundingSources as source, index (source)}
 							<Table.Row>
 								<Table.Cell class="font-medium">{source.source_name}</Table.Cell>
 								<Table.Cell>
@@ -235,16 +247,18 @@
 				</div>
 				<div class="space-y-2">
 					<Label for="source-type" class="text-xs">Type</Label>
-					<select
-						id="source-type"
-						bind:value={newSourceType}
-						class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors"
-					>
-						<option value="provincial">Provincial Government</option>
-						<option value="national">National Government</option>
-						<option value="partner">Partner Organization</option>
-						<option value="lgu_counterpart">LGU Counterpart</option>
-					</select>
+					<Select.Root type="single" name="source-type" bind:value={newSourceType}>
+						<Select.Trigger class="h-9 w-full">
+							{sourceTypeLabel}
+						</Select.Trigger>
+						<Select.Content>
+							{#each sourceTypeOptions as option (option.value)}
+								<Select.Item value={option.value} label={option.label}>
+									{option.label}
+								</Select.Item>
+							{/each}
+						</Select.Content>
+					</Select.Root>
 				</div>
 				<div class="space-y-2">
 					<Label for="source-amount" class="text-xs">Amount (PHP)</Label>

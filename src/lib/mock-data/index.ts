@@ -9,7 +9,7 @@ import type {
 	Stats,
 	User
 } from '$lib/types';
-import { loadSitios, saveSitios } from '$lib/utils/storage';
+import { loadProjects, loadSitios, saveSitios } from '$lib/utils/storage';
 import { csvSitiosData } from './csv-sitios';
 import { enhancedProjects } from './enhanced-projects';
 
@@ -207,7 +207,83 @@ const enhancedProjectsWithMonitoring = enhancedProjects.map((project) => {
 	};
 });
 
-export const projects: Project[] = enhancedProjectsWithMonitoring;
+/**
+ * Initialize projects by merging mock data with localStorage projects
+ */
+function initializeProjects(): Project[] {
+	if (typeof window === 'undefined') {
+		// Server-side: return default mock data
+		return enhancedProjectsWithMonitoring;
+	}
+
+	try {
+		const storedProjects = loadProjects();
+
+		// Merge: localStorage projects take precedence (by ID)
+		// Start with mock data
+		const mockProjectsMap = new Map<number, Project>(
+			enhancedProjectsWithMonitoring.map((p) => [p.id, p])
+		);
+
+		// Override with localStorage projects (or add new ones)
+		// Ensure monitoring details exist for stored projects
+		storedProjects.forEach((storedProject) => {
+			const projectWithMonitoring: Project = {
+				...storedProject,
+				// Add monitoring details if not present
+				monitoring: storedProject.monitoring || createMonitoringDetails({
+					location: storedProject.municipality || '',
+					fiscalYear: storedProject.project_year,
+					allotment: {
+						allocated: storedProject.budget,
+						supplemental: 0,
+						total: storedProject.budget,
+						released: 0
+					}
+				})
+			};
+			mockProjectsMap.set(storedProject.id, projectWithMonitoring);
+		});
+
+		// Convert back to array and sort by ID
+		return Array.from(mockProjectsMap.values()).sort((a, b) => a.id - b.id);
+	} catch (error) {
+		console.error('Failed to initialize projects from storage:', error);
+		return enhancedProjectsWithMonitoring;
+	}
+}
+
+// Export projects with LocalStorage integration
+export const projects: Project[] = initializeProjects();
+
+// Export function to refresh projects from storage (useful after creating new projects)
+export function refreshProjects(): Project[] {
+	if (typeof window === 'undefined') {
+		return enhancedProjectsWithMonitoring;
+	}
+
+	const storedProjects = loadProjects();
+	const mockProjectsMap = new Map<number, Project>(
+		enhancedProjectsWithMonitoring.map((p) => [p.id, p])
+	);
+	storedProjects.forEach((storedProject) => {
+		const projectWithMonitoring: Project = {
+			...storedProject,
+			monitoring: storedProject.monitoring || createMonitoringDetails({
+				location: storedProject.municipality || '',
+				fiscalYear: storedProject.project_year,
+				allotment: {
+					allocated: storedProject.budget,
+					supplemental: 0,
+					total: storedProject.budget,
+					released: 0
+				}
+			})
+		};
+		mockProjectsMap.set(storedProject.id, projectWithMonitoring);
+	});
+	return Array.from(mockProjectsMap.values()).sort((a, b) => a.id - b.id);
+}
 
 // Legacy projects (for reference/backup - not currently exported)
 const legacyProjects: Project[] = [

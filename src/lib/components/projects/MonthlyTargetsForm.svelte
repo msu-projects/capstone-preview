@@ -44,23 +44,31 @@
 	// Initialize budget release schedule
 	let releaseSchedule = $state<Omit<MonthlyReleaseSchedule, 'id' | 'project_id'>[]>([]);
 
-	// Initialize physical progress when months change
+	// Initialize physical progress when months change - automatically generate template
 	$effect(() => {
-		physicalProgress = months.map((month) => ({
-			month_year: month,
-			plan_percentage: 0,
-			actual_percentage: undefined // Not tracked during creation - only during monitoring
-		}));
+		if (months.length > 0) {
+			// Auto-generate cumulative percentage template
+			const template = generateCumulativePercentageTemplate(months, 'even');
+			physicalProgress = months.map((month) => ({
+				month_year: month,
+				plan_percentage: template[month] || 0,
+				actual_percentage: undefined // Not tracked during creation - only during monitoring
+			}));
+		}
 	});
 
-	// Update release schedule when months change
+	// Update release schedule when months change - automatically generate template
 	$effect(() => {
-		releaseSchedule = months.map((month) => ({
-			month_year: month,
-			planned_release: 0,
-			// actual_release is not set during creation - only during monitoring
-			milestone_tied: ''
-		}));
+		if (months.length > 0 && totalBudget > 0) {
+			// Auto-generate budget template
+			const template = generateMonthlyTemplate(totalBudget, months, 'even');
+			releaseSchedule = months.map((month) => ({
+				month_year: month,
+				planned_release: template[month] || 0,
+				// actual_release is not set during creation - only during monitoring
+				milestone_tied: ''
+			}));
+		}
 	});
 
 	// Notify parent when data changes
@@ -69,36 +77,6 @@
 			notifyUpdate();
 		}
 	});
-
-	// Track which section is expanded
-	let budgetExpanded = $state(false);
-
-	/**
-	 * Generate smart template for physical progress (Plan %)
-	 */
-	function generatePhysicalProgressTemplate(strategy: 'even' | 'weighted' = 'even') {
-		const template = generateCumulativePercentageTemplate(months, strategy);
-		physicalProgress = months.map((month) => ({
-			month_year: month,
-			plan_percentage: template[month] || 0,
-			actual_percentage: undefined // Not tracked during creation - only during monitoring
-		}));
-		notifyUpdate();
-	}
-
-	/**
-	 * Generate smart template for budget
-	 */
-	function generateBudgetTemplate(strategy: 'even' | 'weighted' = 'even') {
-		const template = generateMonthlyTemplate(totalBudget, months, strategy);
-		releaseSchedule = months.map((month) => ({
-			month_year: month,
-			planned_release: template[month] || 0,
-			// actual_release is not set during creation - only during monitoring
-			milestone_tied: ''
-		}));
-		notifyUpdate();
-	}
 
 	/**
 	 * Notify parent of updates
@@ -213,10 +191,10 @@
 	{:else}
 		<Alert.Root>
 			<Sparkles class="size-4" />
-			<Alert.Title>Smart Templates Available</Alert.Title>
+			<Alert.Title>Auto-Generated Templates</Alert.Title>
 			<Alert.Description>
-				Use the "Generate Template" button to create cumulative percentage plans that reach 100% by
-				the final month. Adjust individual months as needed.
+				Monthly targets are automatically distributed evenly across all project months. Physical
+				progress reaches 100% by the final month. Adjust individual months as needed.
 			</Alert.Description>
 		</Alert.Root>
 	{/if}
@@ -244,16 +222,6 @@
 								{validation.message}
 							</Badge>
 						</div>
-					</div>
-					<div class="flex items-center gap-2">
-						<Button
-							variant="outline"
-							size="sm"
-							onclick={() => generatePhysicalProgressTemplate('even')}
-						>
-							<Sparkles class="size-3" />
-							Generate Template
-						</Button>
 					</div>
 				</div>
 			</Card.Header>
@@ -328,39 +296,28 @@
 								</Badge>
 							</div>
 						</div>
-						<div class="flex items-center gap-2">
-							<Button variant="outline" size="sm" onclick={() => generateBudgetTemplate('even')}>
-								<Sparkles class="size-3" />
-								Generate Template
-							</Button>
-							<Button variant="ghost" size="sm" onclick={() => (budgetExpanded = !budgetExpanded)}>
-								{budgetExpanded ? 'Collapse' : 'Expand'}
-							</Button>
-						</div>
 					</div>
 				</Card.Header>
 
-				{#if budgetExpanded}
-					<Card.Content>
-						<div class="grid grid-cols-3 gap-3">
-							{#each releaseSchedule as schedule, index (schedule.month_year)}
-								{@const budgetInputId = `budget-${schedule.month_year}`}
-								<div class="space-y-1.5">
-									<Label for={budgetInputId} class="text-xs">
-										{formatMonth(schedule.month_year)}
-									</Label>
-									<CurrencyInput
-										id={budgetInputId}
-										bind:value={releaseSchedule[index].planned_release}
-										class="h-8 text-sm"
-										placeholder="₱ 0"
-										min={0}
-									/>
-								</div>
-							{/each}
-						</div>
-					</Card.Content>
-				{/if}
+				<Card.Content>
+					<div class="grid grid-cols-3 gap-3">
+						{#each releaseSchedule as schedule, index (schedule.month_year)}
+							{@const budgetInputId = `budget-${schedule.month_year}`}
+							<div class="space-y-1.5">
+								<Label for={budgetInputId} class="text-xs">
+									{formatMonth(schedule.month_year)}
+								</Label>
+								<CurrencyInput
+									id={budgetInputId}
+									bind:value={releaseSchedule[index].planned_release}
+									class="h-8 text-sm"
+									placeholder="₱ 0"
+									min={0}
+								/>
+							</div>
+						{/each}
+					</div>
+				</Card.Content>
 			</Card.Root>
 		{/snippet}
 
