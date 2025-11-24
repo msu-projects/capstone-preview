@@ -21,12 +21,14 @@
 		title = $bindable(),
 		description = $bindable(),
 		selectedCategory = $bindable<CategoryKey | ''>(''),
-		selectedProjectType = $bindable<number | undefined>(undefined)
+		selectedProjectType = $bindable<number | undefined>(undefined),
+		implementingAgency = $bindable('')
 	} = $props<{
 		title: string;
 		description: string;
 		selectedCategory: CategoryKey | '';
 		selectedProjectType: number | undefined;
+		implementingAgency: string;
 	}>();
 
 	const iconMap: Record<string, any> = {
@@ -294,6 +296,23 @@
 			/>
 			<p class="text-xs text-muted-foreground">
 				Include key objectives, target outcomes, and how this project addresses sitio needs.
+			</p>
+		</div>
+
+		<!-- Implementing Agency -->
+		<div class="space-y-2">
+			<Label for="implementing-agency" class="required flex items-center gap-2">
+				<Building2 class="size-4" />
+				Implementing Agency
+			</Label>
+			<Input
+				id="implementing-agency"
+				bind:value={implementingAgency}
+				placeholder="e.g., Provincial Engineer's Office, DA - Region XII"
+				class="w-full"
+			/>
+			<p class="text-xs text-muted-foreground">
+				The government office or agency primarily responsible for implementing this project.
 			</p>
 		</div>
 	</Card.CardContent>

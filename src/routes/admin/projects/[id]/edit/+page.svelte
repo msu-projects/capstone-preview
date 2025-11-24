@@ -1,5 +1,4 @@
 <script lang="ts">
-	import AccountabilityPartnersTab from '$lib/components/admin/projects/AccountabilityPartnersTab.svelte';
 	import BudgetResourcesTab from '$lib/components/admin/projects/BudgetResourcesTab.svelte';
 	import CategoryProjectSelectionTab from '$lib/components/admin/projects/CategoryProjectSelectionTab.svelte';
 	import LocationBeneficiariesTab from '$lib/components/admin/projects/LocationBeneficiariesTab.svelte';
@@ -103,6 +102,11 @@
 	let description = $state(existingProject?.description ?? '');
 	let selectedCategory = $state<CategoryKey | ''>(getCategoryKey(existingProject));
 	let selectedProjectType = $state<number | undefined>(existingProject?.project_type_id);
+	let implementingAgency = $state(
+		existingProject?.project_manager_team?.agency ??
+			existingProject?.accountability?.pm_agency ??
+			''
+	);
 
 	// Tab 2: Location & Beneficiaries
 	let projectSitios = $state<Omit<ProjectSitio, 'project_id'>[]>(
@@ -149,10 +153,19 @@
 	let targetEndDate = $state<DateValue | undefined>(
 		existingProject?.end_date ? parseDate(existingProject.end_date) : undefined
 	);
+	// Calculate duration in calendar days from existing dates
+	let durationInCalendarDays = $state(
+		existingProject?.start_date && existingProject?.end_date
+			? Math.ceil(
+					(new Date(existingProject.end_date).getTime() -
+						new Date(existingProject.start_date).getTime()) /
+						(1000 * 60 * 60 * 24)
+				).toString()
+			: ''
+	);
 	let totalBudget = $state(existingProject?.budget?.toString() ?? '');
 	let directBeneficiariesMale = $state('');
 	let directBeneficiariesFemale = $state('');
-	let indirectBeneficiaries = $state('');
 	let employmentGenerated = $state('');
 
 	// Tab 4: Accountability & Partners
@@ -170,9 +183,6 @@
 		existingProject?.project_manager_team?.technical_lead ??
 			existingProject?.accountability?.technical_lead ??
 			''
-	);
-	let implementationPartners = $state<string[]>(
-		existingProject?.project_manager_team?.implementation_partners ?? []
 	);
 	let lguCounterparts = $state<string[]>(
 		existingProject?.project_manager_team?.lgu_counterpart ?? []
@@ -263,7 +273,8 @@
 		title.trim() !== '' &&
 			description.trim() !== '' &&
 			selectedCategory !== '' &&
-			selectedProjectType !== undefined
+			selectedProjectType !== undefined &&
+			implementingAgency.trim() !== ''
 	);
 
 	const isTab2Valid = $derived(projectSitios.length > 0);
@@ -275,22 +286,20 @@
 			totalBudget !== ''
 	);
 
-	const isTab4Valid = $derived(projectManager.trim() !== '' && pmAgency.trim() !== '');
+	const isTab4Valid = $derived(fundingSources.length > 0 && budgetComponents.length > 0);
 
-	const isTab5Valid = $derived(fundingSources.length > 0 && budgetComponents.length > 0);
-
-	const isTab6Valid = $derived(
+	const isTab5Valid = $derived(
 		monthlyPhysicalProgress.length > 0 &&
 			monthlyPhysicalProgress.every((mp) => mp.plan_percentage !== undefined) &&
 			monthlyReleaseSchedule.length > 0
 	);
 
 	const canSave = $derived(
-		isTab1Valid && isTab2Valid && isTab3Valid && isTab4Valid && isTab5Valid && isTab6Valid
+		isTab1Valid && isTab2Valid && isTab3Valid && isTab4Valid && isTab5Valid
 	);
 
 	// Tab navigation
-	const tabOrder = ['category', 'location', 'performance', 'accountability', 'budget', 'monthly'];
+	const tabOrder = ['category', 'location', 'performance', 'budget', 'monthly'];
 	const currentTabIndex = $derived(tabOrder.indexOf(activeTab));
 	const canGoNext = $derived(currentTabIndex < tabOrder.length - 1);
 	const canGoPrevious = $derived(currentTabIndex > 0);
@@ -382,6 +391,7 @@
 				description,
 				category_key: selectedCategory,
 				project_type_id: selectedProjectType,
+				implementing_agency: implementingAgency,
 				// Tab 2
 				project_sitios: projectSitios,
 				total_beneficiaries: projectSitios.reduce((sum, ps) => sum + ps.beneficiaries_target, 0),
@@ -391,27 +401,12 @@
 				end_date: targetEndDate?.toString(),
 				direct_beneficiaries_male: Number(directBeneficiariesMale),
 				direct_beneficiaries_female: Number(directBeneficiariesFemale),
-				indirect_beneficiaries: Number(indirectBeneficiaries),
 				employment_generated: Number(employmentGenerated),
 				// Tab 4
-				project_manager_team: {
-					project_manager: projectManager,
-					agency: pmAgency,
-					technical_lead: technicalLead,
-					implementation_partners: implementationPartners,
-					lgu_counterpart: lguCounterparts
-				},
-				sitio_coordinators: sitioCoordinators,
-				oversight_structure: {
-					provincial_team: provincialTeam,
-					dilg_rep: dilgRep,
-					sectoral_rep: sectoralRep
-				},
-				// Tab 5
 				budget: Number(totalBudget),
 				funding_sources: fundingSources,
 				budget_components: budgetComponents,
-				// Tab 6
+				// Tab 5
 				monthly_physical_progress: monthlyPhysicalProgress,
 				release_schedule: monthlyReleaseSchedule
 			};
@@ -547,7 +542,7 @@
 					<!-- Tabs List -->
 					<Card.Card class="mb-6 py-0">
 						<Card.CardContent class="p-3">
-							<Tabs.List class="grid w-full grid-cols-6 gap-1">
+							<Tabs.List class="grid w-full grid-cols-5 gap-1">
 								<Tabs.Trigger value="category" class="flex items-center gap-2 text-xs">
 									<FolderOpen class="size-4" />
 									<span class="hidden lg:inline">Category &</span> Type
@@ -569,24 +564,17 @@
 										<CircleAlert class="size-3 text-destructive" />
 									{/if}
 								</Tabs.Trigger>
-								<Tabs.Trigger value="accountability" class="flex items-center gap-2 text-xs">
-									<Users class="size-4" />
-									<span class="hidden lg:inline">Accountability &</span> Partners
-									{#if !isTab4Valid && activeTab !== 'accountability'}
-										<CircleAlert class="size-3 text-destructive" />
-									{/if}
-								</Tabs.Trigger>
 								<Tabs.Trigger value="budget" class="flex items-center gap-2 text-xs">
 									<Banknote class="size-4" />
 									<span class="hidden lg:inline">Budget &</span> Resources
-									{#if !isTab5Valid && activeTab !== 'budget'}
+									{#if !isTab4Valid && activeTab !== 'budget'}
 										<CircleAlert class="size-3 text-destructive" />
 									{/if}
 								</Tabs.Trigger>
 								<Tabs.Trigger value="monthly" class="flex items-center gap-2 text-xs">
 									<Calendar class="size-4" />
 									<span class="hidden lg:inline">Monthly</span> Planning
-									{#if !isTab6Valid && activeTab !== 'monthly'}
+									{#if !isTab5Valid && activeTab !== 'monthly'}
 										<CircleAlert class="size-3 text-destructive" />
 									{/if}
 								</Tabs.Trigger>
@@ -601,6 +589,7 @@
 							bind:description
 							bind:selectedCategory
 							bind:selectedProjectType
+							bind:implementingAgency
 						/>
 					</Tabs.Content>
 
@@ -614,25 +603,11 @@
 							bind:performanceTargets
 							bind:targetStartDate
 							bind:targetEndDate
+							bind:durationInCalendarDays
 							bind:totalBudget
 							bind:directBeneficiariesMale
 							bind:directBeneficiariesFemale
-							bind:indirectBeneficiaries
 							bind:employmentGenerated
-						/>
-					</Tabs.Content>
-
-					<Tabs.Content value="accountability">
-						<AccountabilityPartnersTab
-							bind:projectManager
-							bind:pmAgency
-							bind:technicalLead
-							bind:implementationPartners
-							bind:lguCounterparts
-							bind:provincialTeam
-							bind:dilgRep
-							bind:sectoralRep
-							bind:sitioCoordinators
 						/>
 					</Tabs.Content>
 

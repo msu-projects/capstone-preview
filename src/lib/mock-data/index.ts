@@ -226,7 +226,6 @@ const legacyProjects: Project[] = [
 		end_date: '2025-01-30',
 		completion_percentage: 92,
 		beneficiaries: 510,
-		implementing_partner: "Provincial Engineer's Office",
 		project_year: 2024,
 		timeline: [
 			{
@@ -507,7 +506,6 @@ const legacyProjects: Project[] = [
 		end_date: '2024-11-15',
 		completion_percentage: 100,
 		beneficiaries: 420,
-		implementing_partner: "Provincial Engineer's Office",
 		project_year: 2024,
 		timeline: [
 			{
@@ -580,7 +578,6 @@ const legacyProjects: Project[] = [
 		end_date: '2025-02-28',
 		completion_percentage: 58,
 		beneficiaries: 600,
-		implementing_partner: 'DepEd - South Cotabato',
 		project_year: 2024,
 		timeline: [
 			{
@@ -654,7 +651,6 @@ const legacyProjects: Project[] = [
 		end_date: '2025-06-30',
 		completion_percentage: 5,
 		beneficiaries: 450,
-		implementing_partner: 'DepEd - South Cotabato',
 		project_year: 2025,
 		timeline: [
 			{
@@ -716,7 +712,6 @@ const legacyProjects: Project[] = [
 		end_date: '2024-12-31',
 		completion_percentage: 70,
 		beneficiaries: 50,
-		implementing_partner: 'DA - Region XII',
 		project_year: 2024,
 		timeline: [
 			{
@@ -839,7 +834,6 @@ for (let i = 6; i <= 20; i++) {
 		end_date: `2024-${10 + (i % 3)}-30`,
 		completion_percentage: Math.round(actual),
 		beneficiaries: sitio.population,
-		implementing_partner: agencies[i % agencies.length],
 		project_year: 2024,
 		timeline: [
 			{

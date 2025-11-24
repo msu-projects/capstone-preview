@@ -111,7 +111,7 @@ export function applyQuickUpdateToProject(
 		...project.monitoring,
 		fundSource: project.monitoring?.fundSource || '',
 		fiscalYear: project.monitoring?.fiscalYear || project.project_year || new Date().getFullYear(),
-		implementingUnit: project.monitoring?.implementingUnit || project.implementing_partner || '',
+		implementingUnit: project.monitoring?.implementingUnit || '',
 		location: project.monitoring?.location || project.sitio_name || '',
 		allotment: {
 			...project.monitoring?.allotment,

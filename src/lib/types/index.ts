@@ -450,7 +450,7 @@ export interface MonthlyReleaseSchedule {
 export interface MonthlyPhysicalProgress {
 	month_year: string; // Format: 'YYYY-MM'
 	plan_percentage: number; // Cumulative planned %
-	actual_percentage: number; // Cumulative actual %
+	actual_percentage?: number; // Cumulative actual % - optional, only filled during monitoring
 }
 
 export interface Project {
@@ -473,7 +473,6 @@ export interface Project {
 	budget: number;
 	beneficiaries: number;
 	completion_percentage: number;
-	implementing_partner?: string; // Optional - for NGO/agency partners collaborating with PGO-CATCH-UP
 	project_year: number;
 	timeline?: TimelineEvent[];
 	phases?: Phase[];
@@ -497,7 +496,6 @@ export interface Project {
 		project_manager?: string;
 		agency?: string;
 		technical_lead?: string;
-		implementation_partners?: string[];
 		lgu_counterpart?: string[];
 	};
 	sitio_coordinators?: Array<{

@@ -10,7 +10,6 @@
 		projectManager = $bindable(''),
 		pmAgency = $bindable(''),
 		technicalLead = $bindable(''),
-		implementationPartners = $bindable<string[]>([]),
 		lguCounterparts = $bindable<string[]>([]),
 		provincialTeam = $bindable<string[]>([]),
 		dilgRep = $bindable(''),
@@ -29,7 +28,6 @@
 		projectManager: string;
 		pmAgency: string;
 		technicalLead: string;
-		implementationPartners: string[];
 		lguCounterparts: string[];
 		provincialTeam: string[];
 		dilgRep: string;
@@ -44,20 +42,8 @@
 		}>;
 	}>();
 
-	let newPartner = $state('');
 	let newLguCounterpart = $state('');
 	let newProvincialMember = $state('');
-
-	function addPartner() {
-		if (newPartner.trim()) {
-			implementationPartners = [...implementationPartners, newPartner.trim()];
-			newPartner = '';
-		}
-	}
-
-	function removePartner(index: number) {
-		implementationPartners = implementationPartners.filter((_: string, i: number) => i !== index);
-	}
 
 	function addLguCounterpart() {
 		if (newLguCounterpart.trim()) {
@@ -120,48 +106,6 @@
 						placeholder="Name of technical lead"
 					/>
 				</div>
-			</div>
-		</Card.CardContent>
-	</Card.Card>
-
-	<!-- Implementation Partners -->
-	<Card.Card>
-		<Card.CardHeader>
-			<Card.CardTitle class="flex items-center gap-2">
-				<Building class="size-5" />
-				Implementation Partners
-			</Card.CardTitle>
-			<Card.CardDescription
-				>NGOs, CSOs, Private Sector, or National Agencies involved</Card.CardDescription
-			>
-		</Card.CardHeader>
-		<Card.CardContent class="space-y-4">
-			{#if implementationPartners.length > 0}
-				<ul class="space-y-2">
-					{#each implementationPartners as partner, index}
-						<li class="flex items-center justify-between rounded-md border px-3 py-2">
-							<span class="text-sm">{partner}</span>
-							<button
-								type="button"
-								onclick={() => removePartner(index)}
-								class="text-muted-foreground transition-colors hover:text-destructive"
-							>
-								<X class="size-4" />
-							</button>
-						</li>
-					{/each}
-				</ul>
-			{/if}
-			<div class="flex gap-2">
-				<Input
-					bind:value={newPartner}
-					placeholder="Partner organization name"
-					onkeydown={(e) => e.key === 'Enter' && (e.preventDefault(), addPartner())}
-				/>
-				<Button type="button" onclick={addPartner} variant="outline" class="shrink-0 gap-2">
-					<UserPlus class="size-4" />
-					Add
-				</Button>
 			</div>
 		</Card.CardContent>
 	</Card.Card>

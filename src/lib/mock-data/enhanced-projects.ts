@@ -27,7 +27,6 @@ export const enhancedProjects: Project[] = [
 		budget: 850000,
 		beneficiaries: 450, // Total across all sitios
 		completion_percentage: 35,
-		implementing_partner: 'DA - Region XII',
 		project_year: 2025,
 		// NEW ENHANCED FIELDS
 		project_sitios: [
@@ -381,7 +380,6 @@ export const enhancedProjects: Project[] = [
 			project_manager: 'Agri. Techn. Maria Gonzales',
 			agency: "Provincial Agriculturist's Office",
 			technical_lead: 'Dr. Ramon Torres',
-			implementation_partners: ['DA - Region XII', 'TLOA (Tboli-Lake Sebu Farmers Association)'],
 			lgu_counterpart: ['MAO - Lake Sebu', 'MAO - Tboli']
 		},
 		sitio_coordinators: [
@@ -434,7 +432,6 @@ export const enhancedProjects: Project[] = [
 		budget: 5500000,
 		beneficiaries: 680,
 		completion_percentage: 8,
-		implementing_partner: "Provincial Engineer's Office",
 		project_year: 2025,
 		project_sitios: [
 			{
@@ -599,7 +596,6 @@ export const enhancedProjects: Project[] = [
 			project_manager: 'Engr. Carlos Martinez',
 			agency: "Provincial Engineer's Office",
 			technical_lead: 'Engr. Sophia Lim',
-			implementation_partners: ['ABC Construction Corp.'],
 			lgu_counterpart: ['MEO - Surallah']
 		},
 		oversight_structure: {
@@ -629,7 +625,6 @@ export const enhancedProjects: Project[] = [
 		budget: 3200000,
 		beneficiaries: 890,
 		completion_percentage: 42,
-		implementing_partner: 'DepEd - Division of South Cotabato',
 		project_year: 2025,
 		project_sitios: [
 			{
@@ -886,7 +881,6 @@ export const enhancedProjects: Project[] = [
 			project_manager: 'Dr. Sarah Bonifacio',
 			agency: 'DepEd - Division of South Cotabato',
 			technical_lead: 'Ms. Jennifer Lumban',
-			implementation_partners: ['NCIP Region XII', 'Save the Children Philippines'],
 			lgu_counterpart: ["MSWD - T'boli", 'MSWD - Lake Sebu']
 		},
 		oversight_structure: {
@@ -916,7 +910,6 @@ export const enhancedProjects: Project[] = [
 		budget: 2800000,
 		beneficiaries: 1250,
 		completion_percentage: 28,
-		implementing_partner: 'Provincial Health Office',
 		project_year: 2025,
 		project_sitios: [
 			{
@@ -1237,7 +1230,6 @@ export const enhancedProjects: Project[] = [
 			project_manager: 'Dr. Antonio Flores',
 			agency: 'Provincial Health Office',
 			technical_lead: 'Dr. Maria Concepcion Torres',
-			implementation_partners: ['RHU - Tampakan', 'RHU - Columbio', 'DOH Region XII'],
 			lgu_counterpart: ['MHO - Tampakan', 'MHO - Columbio']
 		},
 		oversight_structure: {
@@ -1267,7 +1259,6 @@ export const enhancedProjects: Project[] = [
 		budget: 18500000,
 		beneficiaries: 2850,
 		completion_percentage: 58,
-		implementing_partner: "Provincial Engineer's Office",
 		project_year: 2025,
 		project_sitios: [
 			{
@@ -1541,7 +1532,6 @@ export const enhancedProjects: Project[] = [
 			project_manager: 'Engr. Roberto Santos',
 			agency: "Provincial Engineer's Office",
 			technical_lead: 'Engr. Michelle Tan',
-			implementation_partners: ['JMC Construction & Development Corp.'],
 			lgu_counterpart: ['MEO - Banga', 'MEO - Norala']
 		},
 		oversight_structure: {
@@ -1571,7 +1561,6 @@ export const enhancedProjects: Project[] = [
 		budget: 2400000,
 		beneficiaries: 620,
 		completion_percentage: 35,
-		implementing_partner: 'DSWD - Provincial Office',
 		project_year: 2025,
 		project_sitios: [
 			{
@@ -1804,7 +1793,6 @@ export const enhancedProjects: Project[] = [
 			project_manager: 'Ms. Luisa Fernandez',
 			agency: 'DSWD - Provincial Office',
 			technical_lead: 'Ms. Catherine Morales',
-			implementation_partners: ['TESDA Region XII', 'DTI - South Cotabato', "Women's Federation"],
 			lgu_counterpart: ['MSWD - All participating municipalities']
 		},
 		oversight_structure: {

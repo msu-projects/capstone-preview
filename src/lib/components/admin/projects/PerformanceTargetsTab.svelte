@@ -17,20 +17,20 @@
 		performanceTargets = $bindable([]),
 		targetStartDate = $bindable<DateValue | undefined>(undefined),
 		targetEndDate = $bindable<DateValue | undefined>(undefined),
+		durationInCalendarDays = $bindable(''),
 		totalBudget = $bindable(''),
 		directBeneficiariesMale = $bindable(''),
 		directBeneficiariesFemale = $bindable(''),
-		indirectBeneficiaries = $bindable(''),
 		employmentGenerated = $bindable('')
 	} = $props<{
 		selectedProjectTypeId: number | undefined;
 		performanceTargets: Omit<PerformanceTarget, 'id' | 'project_id'>[];
 		targetStartDate: DateValue | undefined;
 		targetEndDate: DateValue | undefined;
+		durationInCalendarDays: string;
 		totalBudget: string;
 		directBeneficiariesMale: string;
 		directBeneficiariesFemale: string;
-		indirectBeneficiaries: string;
 		employmentGenerated: string;
 	}>();
 
@@ -90,6 +90,16 @@
 	const totalDirectBeneficiaries = $derived(
 		(Number(directBeneficiariesMale) || 0) + (Number(directBeneficiariesFemale) || 0)
 	);
+
+	// Auto-calculate target end date based on start date + calendar days
+	$effect(() => {
+		if (targetStartDate && durationInCalendarDays) {
+			const days = Number(durationInCalendarDays);
+			if (days > 0) {
+				targetEndDate = targetStartDate.add({ days });
+			}
+		}
+	});
 </script>
 
 <div class="space-y-6">
@@ -180,31 +190,26 @@
 						</Popover.Root>
 					</div>
 					<div class="space-y-2">
-						<Label class="required flex items-center gap-2">
+						<Label for="duration-cd" class="required flex items-center gap-2">
 							<Calendar class="size-4" />
-							Target Completion Date
+							Project Duration (Calendar Days)
 						</Label>
-						<Popover.Root>
-							<Popover.Trigger
-								class={cn(
-									'flex h-10 w-full items-center justify-start rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none',
-									!targetEndDate && 'text-muted-foreground'
-								)}
-							>
-								<Calendar class="mr-2 size-4" />
-								{targetEndDate
-									? targetEndDate.toDate(getLocalTimeZone()).toLocaleDateString()
-									: 'Pick a date'}
-							</Popover.Trigger>
-							<Popover.Content class="w-auto p-0">
-								<CalendarComponent
-									type="single"
-									bind:value={targetEndDate}
-									class="rounded-md border"
-									captionLayout="dropdown"
-								/>
-							</Popover.Content>
-						</Popover.Root>
+						<Input
+							id="duration-cd"
+							type="number"
+							bind:value={durationInCalendarDays}
+							placeholder="e.g., 120"
+							min="1"
+						/>
+						<p class="text-xs text-muted-foreground">
+							{#if targetStartDate && durationInCalendarDays && Number(durationInCalendarDays) > 0}
+								Target completion: <strong
+									>{targetEndDate?.toDate(getLocalTimeZone()).toLocaleDateString()}</strong
+								>
+							{:else}
+								Enter duration in calendar days (CD)
+							{/if}
+						</p>
 					</div>
 				</div>
 
@@ -249,24 +254,6 @@
 							<Input type="number" value={totalDirectBeneficiaries} disabled class="bg-muted" />
 						</div>
 					</div>
-				</div>
-
-				<!-- Indirect Beneficiaries -->
-				<div class="space-y-2">
-					<Label for="indirect-beneficiaries" class="flex items-center gap-2">
-						<Users class="size-4" />
-						Indirect Beneficiaries
-					</Label>
-					<Input
-						id="indirect-beneficiaries"
-						type="number"
-						bind:value={indirectBeneficiaries}
-						placeholder="Estimated indirect beneficiaries"
-						min="0"
-					/>
-					<p class="text-xs text-muted-foreground">
-						Community members who benefit indirectly from the project
-					</p>
 				</div>
 
 				<!-- Employment Generation -->

@@ -49,7 +49,7 @@
 		physicalProgress = months.map((month) => ({
 			month_year: month,
 			plan_percentage: 0,
-			actual_percentage: 0
+			actual_percentage: undefined // Not tracked during creation - only during monitoring
 		}));
 	});
 
@@ -58,7 +58,7 @@
 		releaseSchedule = months.map((month) => ({
 			month_year: month,
 			planned_release: 0,
-			actual_release: 0,
+			// actual_release is not set during creation - only during monitoring
 			milestone_tied: ''
 		}));
 	});
@@ -81,7 +81,7 @@
 		physicalProgress = months.map((month) => ({
 			month_year: month,
 			plan_percentage: template[month] || 0,
-			actual_percentage: 0
+			actual_percentage: undefined // Not tracked during creation - only during monitoring
 		}));
 		notifyUpdate();
 	}
@@ -94,7 +94,7 @@
 		releaseSchedule = months.map((month) => ({
 			month_year: month,
 			planned_release: template[month] || 0,
-			actual_release: 0,
+			// actual_release is not set during creation - only during monitoring
 			milestone_tied: ''
 		}));
 		notifyUpdate();
@@ -170,7 +170,7 @@
 		<div>
 			<h3 class="text-lg font-semibold">Monthly Targets & Planning</h3>
 			<p class="mt-1 text-sm text-muted-foreground">
-				Track cumulative physical progress % (Plan vs Actual) and monthly budget releases
+				Set cumulative planned physical progress % and monthly budget release targets
 			</p>
 			{#if months.length > 0}
 				<div class="mt-2 flex items-center gap-4 text-sm">
@@ -216,8 +216,7 @@
 			<Alert.Title>Smart Templates Available</Alert.Title>
 			<Alert.Description>
 				Use the "Generate Template" button to create cumulative percentage plans that reach 100% by
-				the final month. Adjust individual months as needed. Enter actual progress % as work
-				progresses to track slippage.
+				the final month. Adjust individual months as needed.
 			</Alert.Description>
 		</Alert.Root>
 	{/if}
@@ -263,24 +262,15 @@
 				<div class="space-y-4">
 					<!-- Header Row -->
 					<div
-						class="grid grid-cols-4 gap-2 border-b pb-2 text-xs font-semibold text-muted-foreground"
+						class="grid grid-cols-2 gap-2 border-b pb-2 text-xs font-semibold text-muted-foreground"
 					>
 						<div>Month</div>
-						<div>Plan %</div>
-						<div>Actual %</div>
-						<div>Slippage</div>
+						<div>Planned Target %</div>
 					</div>
 
 					<!-- Data Rows -->
 					{#each physicalProgress as progress, index (progress.month_year)}
-						{@const slippageValue = progress.plan_percentage - progress.actual_percentage}
-						{@const slippageColor =
-							Math.abs(slippageValue) < 1
-								? 'text-green-600'
-								: slippageValue > 0
-									? 'text-red-600'
-									: 'text-green-600'}
-						<div class="grid grid-cols-4 items-center gap-2">
+						<div class="grid grid-cols-2 items-center gap-2">
 							<div class="text-xs font-medium">{formatMonth(progress.month_year)}</div>
 							<div>
 								<Input
@@ -295,39 +285,18 @@
 									placeholder="0%"
 								/>
 							</div>
-							<div>
-								<Input
-									id={`actual-${progress.month_year}`}
-									type="number"
-									min="0"
-									max="100"
-									step="0.1"
-									bind:value={physicalProgress[index].actual_percentage}
-									oninput={() => notifyUpdate()}
-									class="h-8 bg-muted/30 text-sm"
-									placeholder="0%"
-								/>
-							</div>
-							<div class="text-sm font-medium {slippageColor}">
-								{slippageValue > 0 ? '+' : ''}{slippageValue.toFixed(1)}%
-							</div>
 						</div>
 					{/each}
 
 					<!-- Summary Row -->
 					{#if physicalProgress.length > 0}
 						{@const finalProgress = physicalProgress[physicalProgress.length - 1]}
-						{@const finalSlippage = finalProgress.plan_percentage - finalProgress.actual_percentage}
-						<div class="grid grid-cols-4 gap-2 border-t pt-2 text-sm font-semibold">
-							<div>Final</div>
+						<div class="grid grid-cols-2 gap-2 border-t pt-2 text-sm font-semibold">
+							<div>Final Target</div>
 							<div
 								class={finalProgress.plan_percentage === 100 ? 'text-green-600' : 'text-destructive'}
 							>
 								{finalProgress.plan_percentage}%
-							</div>
-							<div>{finalProgress.actual_percentage}%</div>
-							<div class={finalSlippage === 0 ? 'text-green-600' : 'text-destructive'}>
-								{finalSlippage > 0 ? '+' : ''}{finalSlippage.toFixed(1)}%
 							</div>
 						</div>
 					{/if}

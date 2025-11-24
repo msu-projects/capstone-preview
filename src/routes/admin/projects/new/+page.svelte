@@ -1,5 +1,4 @@
 <script lang="ts">
-	import AccountabilityPartnersTab from '$lib/components/admin/projects/AccountabilityPartnersTab.svelte';
 	import BudgetResourcesTab from '$lib/components/admin/projects/BudgetResourcesTab.svelte';
 	import CategoryProjectSelectionTab from '$lib/components/admin/projects/CategoryProjectSelectionTab.svelte';
 	import LocationBeneficiariesTab from '$lib/components/admin/projects/LocationBeneficiariesTab.svelte';
@@ -30,7 +29,6 @@
 		MapPin,
 		Save,
 		Target,
-		Users,
 		X
 	} from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
@@ -45,6 +43,7 @@
 	let description = $state('');
 	let selectedCategory = $state<CategoryKey | ''>('');
 	let selectedProjectType = $state<number | undefined>(undefined);
+	let implementingAgency = $state('');
 
 	// Tab 2: Location & Beneficiaries
 	let projectSitios = $state<Omit<ProjectSitio, 'project_id'>[]>([]);
@@ -52,46 +51,13 @@
 
 	// Tab 3: Performance Targets
 	let performanceTargets = $state<Omit<PerformanceTarget, 'id' | 'project_id'>[]>([]);
-	$inspect(performanceTargets);
 	let targetStartDate = $state<DateValue | undefined>(today(getLocalTimeZone()));
 	let targetEndDate = $state<DateValue | undefined>(undefined);
+	let durationInCalendarDays = $state('');
 	let totalBudget = $state('');
 	let directBeneficiariesMale = $state('');
 	let directBeneficiariesFemale = $state('');
-	let indirectBeneficiaries = $state('');
 	let employmentGenerated = $state('');
-
-	// Tab 4: Accountability & Partners
-	let projectManager = $state('');
-	let pmAgency = $state('');
-	let technicalLead = $state('');
-	let implementationPartners = $state<string[]>([]);
-	let lguCounterparts = $state<string[]>([]);
-	let provincialTeam = $state<string[]>([]);
-	let dilgRep = $state('');
-	let sectoralRep = $state('');
-	let sitioCoordinators = $state<
-		Array<{
-			sitio_id: number;
-			sitio_name: string;
-			barangay_captain: string;
-			sitio_leader: string;
-			volunteer_coordinator: string;
-			contact_numbers: string;
-		}>
-	>([]);
-
-	// Auto-generate sitio coordinators when sitios are added
-	$effect(() => {
-		sitioCoordinators = projectSitios.map((ps) => ({
-			sitio_id: ps.sitio_id,
-			sitio_name: ps.sitio_name,
-			barangay_captain: '',
-			sitio_leader: '',
-			volunteer_coordinator: '',
-			contact_numbers: ''
-		}));
-	});
 
 	// Tab 5: Budget & Resources
 	let fundingSources = $state<Omit<FundingSource, 'id' | 'project_id'>[]>([]);
@@ -106,7 +72,8 @@
 		title.trim() !== '' &&
 			description.trim() !== '' &&
 			selectedCategory !== '' &&
-			selectedProjectType !== undefined
+			selectedProjectType !== undefined &&
+			implementingAgency.trim() !== ''
 	);
 
 	const isTab2Valid = $derived(projectSitios.length > 0);
@@ -114,31 +81,62 @@
 	const isTab3Valid = $derived(
 		performanceTargets.length > 0 &&
 			targetStartDate !== undefined &&
-			targetEndDate !== undefined &&
+			durationInCalendarDays !== '' &&
+			Number(durationInCalendarDays) > 0 &&
 			totalBudget !== ''
 	);
 
-	const isTab4Valid = $derived(projectManager.trim() !== '' && pmAgency.trim() !== '');
+	const isTab4Valid = $derived(fundingSources.length > 0 && budgetComponents.length > 0);
 
-	const isTab5Valid = $derived(fundingSources.length > 0 && budgetComponents.length > 0);
-
-	const isTab6Valid = $derived(
+	const isTab5Valid = $derived(
 		monthlyPhysicalProgress.length > 0 &&
 			monthlyPhysicalProgress.every((mp) => mp.plan_percentage !== undefined) &&
 			monthlyReleaseSchedule.length > 0
 	);
 
-	const canSave = $derived(
-		isTab1Valid && isTab2Valid && isTab3Valid && isTab4Valid && isTab5Valid && isTab6Valid
-	);
+	const canSave = $derived(isTab1Valid && isTab2Valid && isTab3Valid && isTab4Valid && isTab5Valid);
 
 	// Tab navigation
-	const tabOrder = ['category', 'location', 'performance', 'accountability', 'budget', 'monthly'];
+	const tabOrder = ['category', 'location', 'performance', 'budget', 'monthly'];
 	const currentTabIndex = $derived(tabOrder.indexOf(activeTab));
 	const canGoNext = $derived(currentTabIndex < tabOrder.length - 1);
 	const canGoPrevious = $derived(currentTabIndex > 0);
+	const isLastTab = $derived(currentTabIndex === tabOrder.length - 1);
+
+	// Get validation state for current tab
+	const getCurrentTabValid = $derived(() => {
+		switch (activeTab) {
+			case 'category':
+				return isTab1Valid;
+			case 'location':
+				return isTab2Valid;
+			case 'performance':
+				return isTab3Valid;
+			case 'budget':
+				return isTab4Valid;
+			case 'monthly':
+				return isTab5Valid;
+			default:
+				return false;
+		}
+	});
+
+	// Check if a tab can be accessed (all previous tabs must be valid)
+	const canAccessTab = $derived((tabName: string) => {
+		const tabIndex = tabOrder.indexOf(tabName);
+		if (tabIndex === 0) return true; // First tab is always accessible
+		if (tabIndex === 1) return isTab1Valid;
+		if (tabIndex === 2) return isTab1Valid && isTab2Valid;
+		if (tabIndex === 3) return isTab1Valid && isTab2Valid && isTab3Valid;
+		if (tabIndex === 4) return isTab1Valid && isTab2Valid && isTab3Valid && isTab4Valid;
+		return false;
+	});
 
 	function nextTab() {
+		if (!getCurrentTabValid()) {
+			toast.error('Please complete all required fields before proceeding');
+			return;
+		}
 		if (canGoNext) {
 			activeTab = tabOrder[currentTabIndex + 1];
 		}
@@ -148,6 +146,25 @@
 		if (canGoPrevious) {
 			activeTab = tabOrder[currentTabIndex - 1];
 		}
+	}
+
+	function handleTabChange(newTab: string | undefined) {
+		if (!newTab) return;
+
+		// Allow going back to any previous tab
+		const newTabIndex = tabOrder.indexOf(newTab);
+		if (newTabIndex <= currentTabIndex) {
+			activeTab = newTab;
+			return;
+		}
+
+		// For going forward, check if we can access the tab
+		if (!canAccessTab(newTab)) {
+			toast.error('Please complete previous sections before accessing this tab');
+			return;
+		}
+
+		activeTab = newTab;
 	}
 
 	async function handleSave() {
@@ -167,6 +184,7 @@
 			description,
 			category_key: selectedCategory,
 			project_type_id: selectedProjectType,
+			implementing_agency: implementingAgency,
 			// Tab 2
 			project_sitios: projectSitios,
 			total_beneficiaries: projectSitios.reduce((sum, ps) => sum + ps.beneficiaries_target, 0),
@@ -175,27 +193,12 @@
 			end_date: targetEndDate?.toString(),
 			direct_beneficiaries_male: Number(directBeneficiariesMale),
 			direct_beneficiaries_female: Number(directBeneficiariesFemale),
-			indirect_beneficiaries: Number(indirectBeneficiaries),
 			employment_generated: Number(employmentGenerated),
 			// Tab 4
-			project_manager_team: {
-				project_manager: projectManager,
-				agency: pmAgency,
-				technical_lead: technicalLead,
-				implementation_partners: implementationPartners,
-				lgu_counterpart: lguCounterparts
-			},
-			sitio_coordinators: sitioCoordinators,
-			oversight_structure: {
-				provincial_team: provincialTeam,
-				dilg_rep: dilgRep,
-				sectoral_rep: sectoralRep
-			},
-			// Tab 5
 			budget: Number(totalBudget),
 			funding_sources: fundingSources,
 			budget_components: budgetComponents,
-			// Tab 6
+			// Tab 5
 			performance_targets: performanceTargets,
 			monthly_physical_progress: monthlyPhysicalProgress,
 			release_schedule: monthlyReleaseSchedule
@@ -249,11 +252,11 @@
 	<!-- Content -->
 	<div class="flex-1 p-6">
 		<div class="w-full">
-			<Tabs.Root bind:value={activeTab} class="w-full">
+			<Tabs.Root value={activeTab} onValueChange={handleTabChange} class="w-full">
 				<!-- Tabs List -->
 				<Card.Card class="mb-6 py-0">
 					<Card.CardContent class="p-3">
-						<Tabs.List class="grid w-full grid-cols-6 gap-1">
+						<Tabs.List class="grid w-full grid-cols-5 gap-1">
 							<Tabs.Trigger value="category" class="flex items-center gap-2 text-xs">
 								<FolderOpen class="size-4" />
 								<span class="hidden lg:inline">Category &</span> Type
@@ -261,38 +264,47 @@
 									<CircleAlert class="size-3 text-destructive" />
 								{/if}
 							</Tabs.Trigger>
-							<Tabs.Trigger value="location" class="flex items-center gap-2 text-xs">
+							<Tabs.Trigger
+								value="location"
+								disabled={!canAccessTab('location')}
+								class="flex items-center gap-2 text-xs"
+							>
 								<MapPin class="size-4" />
 								<span class="hidden lg:inline">Location &</span> Beneficiaries
 								{#if !isTab2Valid && activeTab !== 'location'}
 									<CircleAlert class="size-3 text-destructive" />
 								{/if}
 							</Tabs.Trigger>
-							<Tabs.Trigger value="performance" class="flex items-center gap-2 text-xs">
+							<Tabs.Trigger
+								value="performance"
+								disabled={!canAccessTab('performance')}
+								class="flex items-center gap-2 text-xs"
+							>
 								<Target class="size-4" />
 								<span class="hidden lg:inline">Performance</span> Targets
 								{#if !isTab3Valid && activeTab !== 'performance'}
 									<CircleAlert class="size-3 text-destructive" />
 								{/if}
 							</Tabs.Trigger>
-							<Tabs.Trigger value="accountability" class="flex items-center gap-2 text-xs">
-								<Users class="size-4" />
-								<span class="hidden lg:inline">Accountability &</span> Partners
-								{#if !isTab4Valid && activeTab !== 'accountability'}
-									<CircleAlert class="size-3 text-destructive" />
-								{/if}
-							</Tabs.Trigger>
-							<Tabs.Trigger value="budget" class="flex items-center gap-2 text-xs">
+							<Tabs.Trigger
+								value="budget"
+								disabled={!canAccessTab('budget')}
+								class="flex items-center gap-2 text-xs"
+							>
 								<Banknote class="size-4" />
 								<span class="hidden lg:inline">Budget &</span> Resources
-								{#if !isTab5Valid && activeTab !== 'budget'}
+								{#if !isTab4Valid && activeTab !== 'budget'}
 									<CircleAlert class="size-3 text-destructive" />
 								{/if}
 							</Tabs.Trigger>
-							<Tabs.Trigger value="monthly" class="flex items-center gap-2 text-xs">
+							<Tabs.Trigger
+								value="monthly"
+								disabled={!canAccessTab('monthly')}
+								class="flex items-center gap-2 text-xs"
+							>
 								<Calendar class="size-4" />
 								<span class="hidden lg:inline">Monthly</span> Planning
-								{#if !isTab6Valid && activeTab !== 'monthly'}
+								{#if !isTab5Valid && activeTab !== 'monthly'}
 									<CircleAlert class="size-3 text-destructive" />
 								{/if}
 							</Tabs.Trigger>
@@ -307,6 +319,7 @@
 						bind:description
 						bind:selectedCategory
 						bind:selectedProjectType
+						bind:implementingAgency
 					/>
 				</Tabs.Content>
 
@@ -320,25 +333,11 @@
 						bind:performanceTargets
 						bind:targetStartDate
 						bind:targetEndDate
+						bind:durationInCalendarDays
 						bind:totalBudget
 						bind:directBeneficiariesMale
 						bind:directBeneficiariesFemale
-						bind:indirectBeneficiaries
 						bind:employmentGenerated
-					/>
-				</Tabs.Content>
-
-				<Tabs.Content value="accountability">
-					<AccountabilityPartnersTab
-						bind:projectManager
-						bind:pmAgency
-						bind:technicalLead
-						bind:implementationPartners
-						bind:lguCounterparts
-						bind:provincialTeam
-						bind:dilgRep
-						bind:sectoralRep
-						{sitioCoordinators}
 					/>
 				</Tabs.Content>
 
@@ -373,10 +372,22 @@
 					<div class="flex items-center gap-2 text-sm text-muted-foreground">
 						Step {currentTabIndex + 1} of {tabOrder.length}
 					</div>
-					<Button variant="outline" onclick={nextTab} disabled={!canGoNext} class="gap-2">
-						Next
-						<ArrowRight class="size-4" />
-					</Button>
+					{#if isLastTab && canSave}
+						<Button onclick={handleSave} disabled={isSaving} class="gap-2">
+							<Save class="size-4" />
+							{isSaving ? 'Saving...' : 'Save Project'}
+						</Button>
+					{:else}
+						<Button
+							variant="outline"
+							onclick={nextTab}
+							disabled={!canGoNext || !getCurrentTabValid()}
+							class="gap-2"
+						>
+							Next
+							<ArrowRight class="size-4" />
+						</Button>
+					{/if}
 				</Card.CardContent>
 			</Card.Card>
 		</div>
