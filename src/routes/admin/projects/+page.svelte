@@ -139,6 +139,11 @@
 			downloadSingleProjectPDF(project, fileName);
 		}
 	}
+
+	function handleQuickEdit(projectId: number) {
+		// Navigate to quick edit - could open a dialog/drawer in the future
+		window.location.href = `/admin/projects/${projectId}/quick-edit`;
+	}
 </script>
 
 <svelte:head>
@@ -172,6 +177,7 @@
 			onRefresh={handleRefresh}
 			onDelete={handleDelete}
 			onDownloadPDF={handleDownloadPDF}
+			onQuickEdit={handleQuickEdit}
 			onPageChange={(page) => (currentPage = page)}
 		/>
 	</div>

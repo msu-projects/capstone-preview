@@ -28,6 +28,7 @@
 		onDelete: (id: number) => void;
 		onDownloadPDF: (id: number) => void;
 		onPageChange: (page: number) => void;
+		onQuickEdit: (id: number) => void;
 	}
 
 	let {
@@ -40,7 +41,8 @@
 		onToggleSort,
 		onRefresh,
 		onDelete,
-		onDownloadPDF
+		onDownloadPDF,
+		onQuickEdit
 	}: Props = $props();
 
 	function formatCurrency(amount: number): string {
@@ -258,44 +260,56 @@
 
 								<!-- Actions -->
 								<Table.TableCell class="text-right">
-									<DropdownMenu.Root>
-										<DropdownMenu.Trigger>
-											<Button variant="ghost" size="icon" onclick={(e) => e.stopPropagation()}>
-												<EllipsisVertical class="size-4" />
-											</Button>
-										</DropdownMenu.Trigger>
-										<DropdownMenu.Content align="end">
-											<DropdownMenu.Item
-												onclick={(e) => {
-													e.stopPropagation();
-													window.location.href = `/admin/projects/${project.id}/edit`;
-												}}
-											>
-												<SquarePen class="mr-2 size-4" />
-												Edit
-											</DropdownMenu.Item>
-											<DropdownMenu.Item
-												onclick={(e) => {
-													e.stopPropagation();
-													onDownloadPDF(project.id);
-												}}
-											>
-												<Download class="mr-2 size-4" />
-												Download PDF
-											</DropdownMenu.Item>
-											<DropdownMenu.Separator />
-											<DropdownMenu.Item
-												onclick={(e) => {
-													e.stopPropagation();
-													onDelete(project.id);
-												}}
-												class="text-destructive"
-											>
-												<Trash2 class="mr-2 size-4" />
-												Delete
-											</DropdownMenu.Item>
-										</DropdownMenu.Content>
-									</DropdownMenu.Root>
+									<div class="flex items-center justify-end gap-1">
+										<Button
+											variant="ghost"
+											size="icon"
+											onclick={(e) => {
+												e.stopPropagation();
+												onQuickEdit(project.id);
+											}}
+										>
+											<SquarePen class="size-4" />
+										</Button>
+										<DropdownMenu.Root>
+											<DropdownMenu.Trigger>
+												<Button variant="ghost" size="icon" onclick={(e) => e.stopPropagation()}>
+													<EllipsisVertical class="size-4" />
+												</Button>
+											</DropdownMenu.Trigger>
+											<DropdownMenu.Content align="end">
+												<DropdownMenu.Item
+													onclick={(e) => {
+														e.stopPropagation();
+														window.location.href = `/admin/projects/${project.id}/edit`;
+													}}
+												>
+													<SquarePen class="mr-2 size-4" />
+													Full Edit
+												</DropdownMenu.Item>
+												<DropdownMenu.Item
+													onclick={(e) => {
+														e.stopPropagation();
+														onDownloadPDF(project.id);
+													}}
+												>
+													<Download class="mr-2 size-4" />
+													Download PDF
+												</DropdownMenu.Item>
+												<DropdownMenu.Separator />
+												<DropdownMenu.Item
+													onclick={(e) => {
+														e.stopPropagation();
+														onDelete(project.id);
+													}}
+													class="text-destructive"
+												>
+													<Trash2 class="mr-2 size-4" />
+													Delete
+												</DropdownMenu.Item>
+											</DropdownMenu.Content>
+										</DropdownMenu.Root>
+									</div>
 								</Table.TableCell>
 							</Table.TableRow>
 						{/each}

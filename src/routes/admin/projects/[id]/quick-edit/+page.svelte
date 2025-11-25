@@ -1,0 +1,210 @@
+<script lang="ts">
+	import QuickUpdateForm from '$lib/components/admin/projects/QuickUpdateForm.svelte';
+	import * as AlertDialog from '$lib/components/ui/alert-dialog';
+	import { Badge } from '$lib/components/ui/badge';
+	import { Button } from '$lib/components/ui/button';
+	import * as Card from '$lib/components/ui/card';
+	import { refreshProjects } from '$lib/mock-data';
+	import {
+		applyQuickUpdateToProject,
+		getQuickUpdateWarnings,
+		projectToQuickUpdate,
+		validateQuickUpdateData
+	} from '$lib/utils/project-adapters';
+	import { updateProject } from '$lib/utils/storage';
+	import { Clock, List, Save, X, Zap } from '@lucide/svelte';
+	import { toast } from 'svelte-sonner';
+
+	const { data } = $props();
+
+	// Load projects from storage (includes both mock data and localStorage projects)
+	const allProjects = refreshProjects();
+
+	// Try to find project in all projects (including localStorage)
+	const existingProject = allProjects.find((p) => p.id === Number(data.id));
+
+	if (!existingProject) {
+		// Redirect if project not found
+		if (typeof window !== 'undefined') {
+			window.location.href = '/admin/projects';
+		}
+	}
+
+	// Form state
+	let isSaving = $state(false);
+	let cancelDialogOpen = $state(false);
+
+	// Quick Update form data (initialized from existing project)
+	let quickUpdateData = $state(projectToQuickUpdate(existingProject!));
+
+	async function handleSave() {
+		// Validate quick update data
+		const validation = validateQuickUpdateData(quickUpdateData);
+		if (!validation.isValid) {
+			toast.error('Please fix the following errors: ' + validation.errors.join(', '));
+			return;
+		}
+
+		// Show warnings if any
+		const warnings = getQuickUpdateWarnings(quickUpdateData);
+		warnings.forEach((warning) => {
+			if (warning.type === 'warning') {
+				toast.warning(warning.message, { duration: 5000 });
+			}
+		});
+
+		isSaving = true;
+
+		try {
+			// Apply quick update to project
+			const updatedProject = applyQuickUpdateToProject(quickUpdateData, existingProject!);
+
+			// Save to localStorage
+			const saved = updateProject(existingProject!.id, updatedProject);
+
+			if (!saved) {
+				throw new Error('Failed to save project to localStorage');
+			}
+
+			console.log('Quick Update - Updated project:', updatedProject);
+
+			isSaving = false;
+
+			// Success toast with continuation options
+			toast.success('Quick update saved successfully!', {
+				duration: 10000,
+				action: {
+					label: 'View Project',
+					onClick: () => {
+						window.location.href = `/admin/projects/${existingProject?.id}`;
+					}
+				}
+			});
+
+			// Show additional action options via separate toast
+			toast.info('What would you like to do next?', {
+				duration: 10000,
+				action: {
+					label: 'Back to List',
+					onClick: () => {
+						window.location.href = '/admin/projects';
+					}
+				}
+			});
+
+			// Auto-redirect to list after delay if no action taken
+			setTimeout(() => {
+				window.location.href = '/admin/projects';
+			}, 10000);
+		} catch (error) {
+			console.error('Error saving quick update:', error);
+			isSaving = false;
+			toast.error('Failed to save quick update. Please try again.');
+		}
+	}
+
+	function handleCancel() {
+		cancelDialogOpen = true;
+	}
+
+	function confirmCancel() {
+		window.location.href = '/admin/projects';
+	}
+
+	function switchToFullEdit() {
+		window.location.href = `/admin/projects/${existingProject?.id}/edit`;
+	}
+</script>
+
+<svelte:head>
+	<title>Quick Edit - {existingProject?.title ?? 'Project'} - Admin</title>
+</svelte:head>
+
+<div class="flex min-h-screen flex-col bg-muted/30">
+	<!-- Header -->
+	<div class="sticky top-0 z-10 border-b border-border bg-background shadow-sm">
+		<div class="flex items-center justify-between p-4">
+			<div>
+				<div class="flex items-center gap-3">
+					<h1 class="text-2xl font-bold">Quick Edit</h1>
+					<Badge variant="outline" class="gap-1.5">
+						<Clock class="size-3" />
+						ID: {existingProject?.id}
+					</Badge>
+					<Badge variant="default" class="gap-1.5 bg-primary">
+						<Zap class="size-3" />
+						Quick Update
+					</Badge>
+				</div>
+				<p class="mt-1 text-sm text-muted-foreground">
+					{existingProject?.title}
+				</p>
+			</div>
+			<div class="flex items-center gap-2">
+				<!-- Switch to Full Edit Button -->
+				<Button variant="outline" onclick={switchToFullEdit} disabled={isSaving} class="gap-2">
+					<List class="size-4" />
+					Switch to Full Edit
+				</Button>
+
+				<Button variant="outline" onclick={handleCancel} disabled={isSaving} class="gap-2">
+					<X class="size-4" />
+					Cancel
+				</Button>
+				<Button onclick={handleSave} disabled={isSaving} class="gap-2">
+					<Save class="size-4" />
+					{isSaving ? 'Saving...' : 'Save Changes'}
+				</Button>
+			</div>
+		</div>
+	</div>
+
+	<!-- Content -->
+	<div class="flex-1 p-6">
+		<div class="w-full">
+			<Card.Card class="p-0">
+				<Card.CardContent class="p-6">
+					<QuickUpdateForm
+						bind:status={quickUpdateData.status}
+						bind:physicalActual={quickUpdateData.physicalActual}
+						bind:statusStage={quickUpdateData.statusStage}
+						bind:statusIssues={quickUpdateData.statusIssues}
+						bind:statusRecommendations={quickUpdateData.statusRecommendations}
+						bind:catchUpPlan={quickUpdateData.catchUpPlan}
+						bind:maleEmployment={quickUpdateData.maleEmployment}
+						bind:femaleEmployment={quickUpdateData.femaleEmployment}
+						bind:totalBudget={quickUpdateData.totalBudget}
+						bind:budgetDisbursed={quickUpdateData.budgetDisbursed}
+						bind:startDate={quickUpdateData.startDate}
+						bind:targetEndDate={quickUpdateData.targetEndDate}
+						bind:extensionRequested={quickUpdateData.extensionRequested}
+						bind:extensionDays={quickUpdateData.extensionDays}
+						bind:targetBeneficiaries={quickUpdateData.targetBeneficiaries}
+						bind:currentBeneficiaries={quickUpdateData.currentBeneficiaries}
+						bind:householdsReached={quickUpdateData.householdsReached}
+						bind:plannedPercentage={quickUpdateData.plannedPercentage}
+						onSwitchToFull={switchToFullEdit}
+					/>
+				</Card.CardContent>
+			</Card.Card>
+		</div>
+	</div>
+</div>
+
+<!-- Cancel Confirmation Dialog -->
+<AlertDialog.Root bind:open={cancelDialogOpen}>
+	<AlertDialog.Content>
+		<AlertDialog.Header>
+			<AlertDialog.Title>Discard Changes</AlertDialog.Title>
+			<AlertDialog.Description>
+				Are you sure you want to cancel? Any unsaved changes will be lost.
+			</AlertDialog.Description>
+		</AlertDialog.Header>
+		<AlertDialog.Footer>
+			<AlertDialog.Cancel>Continue Editing</AlertDialog.Cancel>
+			<AlertDialog.Action onclick={confirmCancel} class="bg-destructive hover:bg-destructive/60">
+				Discard Changes
+			</AlertDialog.Action>
+		</AlertDialog.Footer>
+	</AlertDialog.Content>
+</AlertDialog.Root>

@@ -3,7 +3,6 @@
 	import CategoryProjectSelectionTab from '$lib/components/admin/projects/CategoryProjectSelectionTab.svelte';
 	import LocationBeneficiariesTab from '$lib/components/admin/projects/LocationBeneficiariesTab.svelte';
 	import PerformanceTargetsTab from '$lib/components/admin/projects/PerformanceTargetsTab.svelte';
-	import QuickUpdateForm from '$lib/components/admin/projects/QuickUpdateForm.svelte';
 	import MonthlyTargetsForm from '$lib/components/projects/MonthlyTargetsForm.svelte';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import { Badge } from '$lib/components/ui/badge';
@@ -11,7 +10,6 @@
 	import * as Card from '$lib/components/ui/card';
 	import * as Tabs from '$lib/components/ui/tabs';
 	import { refreshProjects } from '$lib/mock-data';
-	import { enhancedProjects } from '$lib/mock-data/enhanced-projects';
 	import type {
 		BudgetComponent,
 		CategoryKey,
@@ -23,12 +21,6 @@
 		ProjectSitio,
 		ProjectStatus
 	} from '$lib/types';
-	import {
-		applyQuickUpdateToProject,
-		getQuickUpdateWarnings,
-		projectToQuickUpdate,
-		validateQuickUpdateData
-	} from '$lib/utils/project-adapters';
 	import { updateProject } from '$lib/utils/storage';
 	import type { DateValue } from '@internationalized/date';
 	import { getLocalTimeZone, parseDate, today } from '@internationalized/date';
@@ -44,7 +36,6 @@
 		MapPin,
 		Save,
 		Target,
-		Users,
 		X,
 		Zap
 	} from '@lucide/svelte';
@@ -93,13 +84,6 @@
 	let isSaving = $state(false);
 	let activeTab = $state('category');
 	let cancelDialogOpen = $state(false);
-
-	// Edit mode: 'quick' for Quick Update, 'full' for comprehensive editing
-	type EditMode = 'quick' | 'full';
-	let editMode = $state<EditMode>('quick'); // Default to quick mode as per user preference
-
-	// Quick Update form data (initialized from existing project)
-	let quickUpdateData = $state(projectToQuickUpdate(existingProject!));
 
 	// Tab 1: Category & Project Selection
 	let title = $state(existingProject?.title ?? '');
@@ -298,9 +282,7 @@
 			monthlyReleaseSchedule.length > 0
 	);
 
-	const canSave = $derived(
-		isTab1Valid && isTab2Valid && isTab3Valid && isTab4Valid && isTab5Valid
-	);
+	const canSave = $derived(isTab1Valid && isTab2Valid && isTab3Valid && isTab4Valid && isTab5Valid);
 
 	// Tab navigation
 	const tabOrder = ['category', 'location', 'performance', 'budget', 'monthly'];
@@ -321,165 +303,100 @@
 	}
 
 	async function handleSave() {
-		// Quick mode vs Full mode handling
-		if (editMode === 'quick') {
-			// Validate quick update data
-			const validation = validateQuickUpdateData(quickUpdateData);
-			if (!validation.isValid) {
-				toast.error('Please fix the following errors: ' + validation.errors.join(', '));
-				return;
+		if (!canSave) {
+			toast.error('Please complete all required fields in all tabs');
+			return;
+		}
+
+		isSaving = true;
+
+		try {
+			// Get the first sitio info for legacy fields (required by Project type)
+			const firstSitio = projectSitios[0];
+			const totalBeneficiaries = projectSitios.reduce(
+				(sum, ps) => sum + ps.beneficiaries_target,
+				0
+			);
+
+			// Determine project status based on start date and completion
+			const startDateValue = targetStartDate?.toString() || existingProject?.start_date || '';
+			const today = new Date();
+			const projectStartDate = new Date(startDateValue);
+			let status: ProjectStatus = existingProject?.status || 'planning';
+
+			// Auto-update status based on dates if still in planning
+			if (status === 'planning' && projectStartDate <= today) {
+				status = 'in-progress';
 			}
 
-			// Show warnings if any
-			const warnings = getQuickUpdateWarnings(quickUpdateData);
-			warnings.forEach((warning) => {
-				if (warning.type === 'warning') {
-					toast.warning(warning.message, { duration: 5000 });
-				}
-			});
+			// Create the updated Project object
+			const updatedProjectData: Partial<Project> = {
+				// Tab 1
+				title,
+				description,
+				category: selectedCategory || '',
+				category_key: selectedCategory as any,
+				project_type_id: selectedProjectType,
+				// Legacy fields (using first sitio for backwards compatibility)
+				sitio_id: firstSitio?.sitio_id || existingProject?.sitio_id || 0,
+				sitio_name: firstSitio?.sitio_name || existingProject?.sitio_name || '',
+				municipality: firstSitio?.municipality || existingProject?.municipality || '',
+				status,
+				start_date: startDateValue,
+				end_date: targetEndDate?.toString() || existingProject?.end_date || '',
+				budget: Number(totalBudget),
+				beneficiaries: totalBeneficiaries,
+				// Tab 2
+				project_sitios: projectSitios.map((ps) => ({
+					...ps,
+					project_id: existingProject!.id
+				})),
+				// Tab 3
+				performance_targets: performanceTargets.map((pt) => ({
+					...pt,
+					id: 0,
+					project_id: existingProject!.id
+				})),
+				// Tab 4
+				funding_sources: fundingSources.map((fs) => ({
+					...fs,
+					id: 0,
+					project_id: existingProject!.id
+				})),
+				budget_components: budgetComponents.map((bc) => ({
+					...bc,
+					id: 0,
+					project_id: existingProject!.id
+				})),
+				// Tab 5
+				release_schedule: monthlyReleaseSchedule.map((mrs) => ({
+					...mrs,
+					id: 0,
+					project_id: existingProject!.id
+				})),
+				updated_at: new Date().toISOString()
+			};
 
-			isSaving = true;
+			// Save to localStorage
+			const saved = updateProject(existingProject!.id, updatedProjectData);
 
-			try {
-				// Apply quick update to project
-				const updatedProject = applyQuickUpdateToProject(quickUpdateData, existingProject!);
-
-				// Save to localStorage
-				const saved = updateProject(existingProject!.id, updatedProject);
-
-				if (!saved) {
-					throw new Error('Failed to save project to localStorage');
-				}
-
-				console.log('Quick Update - Updated project:', updatedProject);
-
-				isSaving = false;
-
-				// Success toast with continuation options
-				toast.success('Quick update saved successfully!', {
-					duration: 10000,
-					action: {
-						label: 'View Project',
-						onClick: () => {
-							window.location.href = `/admin/projects/${existingProject?.id}`;
-						}
-					}
-				});
-
-				// Show additional action options via separate toast
-				toast.info('What would you like to do next?', {
-					duration: 10000,
-					action: {
-						label: 'Back to List',
-						onClick: () => {
-							window.location.href = '/admin/projects';
-						}
-					}
-				});
-
-				// Auto-redirect to list after delay if no action taken
-				setTimeout(() => {
-					window.location.href = '/admin/projects';
-				}, 10000);
-			} catch (error) {
-				console.error('Error saving quick update:', error);
-				isSaving = false;
-				toast.error('Failed to save quick update. Please try again.');
-			}
-		} else {
-			// Full mode - existing validation and save logic
-			if (!canSave) {
-				toast.error('Please complete all required fields in all tabs');
-				return;
+			if (!saved) {
+				throw new Error('Failed to save project to localStorage');
 			}
 
-			isSaving = true;
+			console.log('Project updated successfully:', updatedProjectData);
 
-			try {
-				// Get the first sitio info for legacy fields (required by Project type)
-				const firstSitio = projectSitios[0];
-				const totalBeneficiaries = projectSitios.reduce((sum, ps) => sum + ps.beneficiaries_target, 0);
+			isSaving = false;
+			toast.success('Project updated successfully!');
 
-				// Determine project status based on start date and completion
-				const startDateValue = targetStartDate?.toString() || existingProject?.start_date || '';
-				const today = new Date();
-				const projectStartDate = new Date(startDateValue);
-				let status: ProjectStatus = existingProject?.status || 'planning';
-
-				// Auto-update status based on dates if still in planning
-				if (status === 'planning' && projectStartDate <= today) {
-					status = 'in-progress';
-				}
-
-				// Create the updated Project object
-				const updatedProjectData: Partial<Project> = {
-					// Tab 1
-					title,
-					description,
-					category: selectedCategory || '',
-					category_key: selectedCategory as any,
-					project_type_id: selectedProjectType,
-					// Legacy fields (using first sitio for backwards compatibility)
-					sitio_id: firstSitio?.sitio_id || existingProject?.sitio_id || 0,
-					sitio_name: firstSitio?.sitio_name || existingProject?.sitio_name || '',
-					municipality: firstSitio?.municipality || existingProject?.municipality || '',
-					status,
-					start_date: startDateValue,
-					end_date: targetEndDate?.toString() || existingProject?.end_date || '',
-					budget: Number(totalBudget),
-					beneficiaries: totalBeneficiaries,
-					// Tab 2
-					project_sitios: projectSitios.map((ps) => ({
-						...ps,
-						project_id: existingProject!.id
-					})),
-					// Tab 3
-					performance_targets: performanceTargets.map((pt) => ({
-						...pt,
-						id: 0,
-						project_id: existingProject!.id
-					})),
-					// Tab 4
-					funding_sources: fundingSources.map((fs) => ({
-						...fs,
-						id: 0,
-						project_id: existingProject!.id
-					})),
-					budget_components: budgetComponents.map((bc) => ({
-						...bc,
-						id: 0,
-						project_id: existingProject!.id
-					})),
-					// Tab 5
-					release_schedule: monthlyReleaseSchedule.map((mrs) => ({
-						...mrs,
-						id: 0,
-						project_id: existingProject!.id
-					})),
-					updated_at: new Date().toISOString()
-				};
-
-				// Save to localStorage
-				const saved = updateProject(existingProject!.id, updatedProjectData);
-
-				if (!saved) {
-					throw new Error('Failed to save project to localStorage');
-				}
-
-				console.log('Project updated successfully:', updatedProjectData);
-
-				isSaving = false;
-				toast.success('Project updated successfully!');
-
-				// Redirect after save
-				setTimeout(() => {
-					window.location.href = '/admin/projects';
-				}, 1000);
-			} catch (error) {
-				console.error('Error updating project:', error);
-				isSaving = false;
-				toast.error('Failed to update project. Please try again.');
-			}
+			// Redirect after save
+			setTimeout(() => {
+				window.location.href = '/admin/projects';
+			}, 1000);
+		} catch (error) {
+			console.error('Error updating project:', error);
+			isSaving = false;
+			toast.error('Failed to update project. Please try again.');
 		}
 	}
 
@@ -491,15 +408,8 @@
 		window.location.href = '/admin/projects';
 	}
 
-	// Mode switching
-	function switchToQuickMode() {
-		editMode = 'quick';
-		// Re-initialize quick update data from current state (if in full mode, preserve changes)
-		quickUpdateData = projectToQuickUpdate(existingProject!);
-	}
-
-	function switchToFullMode() {
-		editMode = 'full';
+	function switchToQuickEdit() {
+		window.location.href = `/admin/projects/${existingProject?.id}/quick-edit`;
 	}
 </script>
 
@@ -518,41 +428,26 @@
 						<Clock class="size-3" />
 						ID: {existingProject?.id}
 					</Badge>
-					<!-- Mode indicator -->
-					{#if editMode === 'quick'}
-						<Badge variant="default" class="gap-1.5 bg-primary">
-							<Zap class="size-3" />
-							Quick Update
-						</Badge>
-					{:else}
-						<Badge variant="secondary" class="gap-1.5">
-							<List class="size-3" />
-							Full Edit
-						</Badge>
-					{/if}
+					<Badge variant="secondary" class="gap-1.5">
+						<List class="size-3" />
+						Full Edit
+					</Badge>
 				</div>
 				<p class="mt-1 text-sm text-muted-foreground">
 					{existingProject?.title}
 				</p>
 			</div>
 			<div class="flex items-center gap-2">
-				<!-- Mode Toggle Button -->
-				{#if editMode === 'quick'}
-					<Button variant="outline" onclick={switchToFullMode} disabled={isSaving} class="gap-2">
-						<List class="size-4" />
-						Switch to Full Edit
-					</Button>
-				{:else}
-					<Button
-						variant="outline"
-						onclick={switchToQuickMode}
-						disabled={isSaving}
-						class="gap-2 border-primary text-primary hover:bg-primary/10"
-					>
-						<Zap class="size-4" />
-						Quick Update Mode
-					</Button>
-				{/if}
+				<!-- Switch to Quick Edit Button -->
+				<Button
+					variant="outline"
+					onclick={switchToQuickEdit}
+					disabled={isSaving}
+					class="gap-2 border-primary text-primary hover:bg-primary/10 hover:text-primary"
+				>
+					<Zap class="size-4" />
+					Switch to Quick Edit
+				</Button>
 
 				<Button variant="outline" onclick={handleCancel} disabled={isSaving} class="gap-2">
 					<X class="size-4" />
@@ -569,146 +464,117 @@
 	<!-- Content -->
 	<div class="flex-1 p-6">
 		<div class="w-full">
-			{#if editMode === 'quick'}
-				<!-- Quick Update Mode -->
-				<Card.Card class="p-0">
-					<Card.CardContent class="p-6">
-						<QuickUpdateForm
-							bind:status={quickUpdateData.status}
-							bind:physicalActual={quickUpdateData.physicalActual}
-							bind:statusStage={quickUpdateData.statusStage}
-							bind:statusIssues={quickUpdateData.statusIssues}
-							bind:statusRecommendations={quickUpdateData.statusRecommendations}
-							bind:catchUpPlan={quickUpdateData.catchUpPlan}
-							bind:maleEmployment={quickUpdateData.maleEmployment}
-							bind:femaleEmployment={quickUpdateData.femaleEmployment}
-							bind:totalBudget={quickUpdateData.totalBudget}
-							bind:budgetDisbursed={quickUpdateData.budgetDisbursed}
-							bind:startDate={quickUpdateData.startDate}
-							bind:targetEndDate={quickUpdateData.targetEndDate}
-							bind:extensionRequested={quickUpdateData.extensionRequested}
-							bind:extensionDays={quickUpdateData.extensionDays}
-							bind:targetBeneficiaries={quickUpdateData.targetBeneficiaries}
-							bind:currentBeneficiaries={quickUpdateData.currentBeneficiaries}
-							bind:householdsReached={quickUpdateData.householdsReached}
-							bind:plannedPercentage={quickUpdateData.plannedPercentage}
-							onSwitchToFull={switchToFullMode}
-						/>
+			<!-- Full Edit Mode -->
+			<Tabs.Root bind:value={activeTab} class="w-full">
+				<!-- Tabs List -->
+				<Card.Card class="mb-6 py-0">
+					<Card.CardContent class="p-3">
+						<Tabs.List class="grid w-full grid-cols-5 gap-1">
+							<Tabs.Trigger value="category" class="flex items-center gap-2 text-xs">
+								<FolderOpen class="size-4" />
+								<span class="hidden lg:inline">Category &</span> Type
+								{#if !isTab1Valid && activeTab !== 'category'}
+									<CircleAlert class="size-3 text-destructive" />
+								{/if}
+							</Tabs.Trigger>
+							<Tabs.Trigger value="location" class="flex items-center gap-2 text-xs">
+								<MapPin class="size-4" />
+								<span class="hidden lg:inline">Location &</span> Beneficiaries
+								{#if !isTab2Valid && activeTab !== 'location'}
+									<CircleAlert class="size-3 text-destructive" />
+								{/if}
+							</Tabs.Trigger>
+							<Tabs.Trigger value="performance" class="flex items-center gap-2 text-xs">
+								<Target class="size-4" />
+								<span class="hidden lg:inline">Performance</span> Targets
+								{#if !isTab3Valid && activeTab !== 'performance'}
+									<CircleAlert class="size-3 text-destructive" />
+								{/if}
+							</Tabs.Trigger>
+							<Tabs.Trigger value="budget" class="flex items-center gap-2 text-xs">
+								<Banknote class="size-4" />
+								<span class="hidden lg:inline">Budget &</span> Resources
+								{#if !isTab4Valid && activeTab !== 'budget'}
+									<CircleAlert class="size-3 text-destructive" />
+								{/if}
+							</Tabs.Trigger>
+							<Tabs.Trigger value="monthly" class="flex items-center gap-2 text-xs">
+								<Calendar class="size-4" />
+								<span class="hidden lg:inline">Monthly</span> Planning
+								{#if !isTab5Valid && activeTab !== 'monthly'}
+									<CircleAlert class="size-3 text-destructive" />
+								{/if}
+							</Tabs.Trigger>
+						</Tabs.List>
 					</Card.CardContent>
 				</Card.Card>
-			{:else}
-				<!-- Full Edit Mode -->
-				<Tabs.Root bind:value={activeTab} class="w-full">
-					<!-- Tabs List -->
-					<Card.Card class="mb-6 py-0">
-						<Card.CardContent class="p-3">
-							<Tabs.List class="grid w-full grid-cols-5 gap-1">
-								<Tabs.Trigger value="category" class="flex items-center gap-2 text-xs">
-									<FolderOpen class="size-4" />
-									<span class="hidden lg:inline">Category &</span> Type
-									{#if !isTab1Valid && activeTab !== 'category'}
-										<CircleAlert class="size-3 text-destructive" />
-									{/if}
-								</Tabs.Trigger>
-								<Tabs.Trigger value="location" class="flex items-center gap-2 text-xs">
-									<MapPin class="size-4" />
-									<span class="hidden lg:inline">Location &</span> Beneficiaries
-									{#if !isTab2Valid && activeTab !== 'location'}
-										<CircleAlert class="size-3 text-destructive" />
-									{/if}
-								</Tabs.Trigger>
-								<Tabs.Trigger value="performance" class="flex items-center gap-2 text-xs">
-									<Target class="size-4" />
-									<span class="hidden lg:inline">Performance</span> Targets
-									{#if !isTab3Valid && activeTab !== 'performance'}
-										<CircleAlert class="size-3 text-destructive" />
-									{/if}
-								</Tabs.Trigger>
-								<Tabs.Trigger value="budget" class="flex items-center gap-2 text-xs">
-									<Banknote class="size-4" />
-									<span class="hidden lg:inline">Budget &</span> Resources
-									{#if !isTab4Valid && activeTab !== 'budget'}
-										<CircleAlert class="size-3 text-destructive" />
-									{/if}
-								</Tabs.Trigger>
-								<Tabs.Trigger value="monthly" class="flex items-center gap-2 text-xs">
-									<Calendar class="size-4" />
-									<span class="hidden lg:inline">Monthly</span> Planning
-									{#if !isTab5Valid && activeTab !== 'monthly'}
-										<CircleAlert class="size-3 text-destructive" />
-									{/if}
-								</Tabs.Trigger>
-							</Tabs.List>
+
+				<!-- Tab Content -->
+				<Tabs.Content value="category">
+					<CategoryProjectSelectionTab
+						bind:title
+						bind:description
+						bind:selectedCategory
+						bind:selectedProjectType
+						bind:implementingAgency
+					/>
+				</Tabs.Content>
+
+				<Tabs.Content value="location">
+					<LocationBeneficiariesTab bind:projectSitios bind:showSitioSelection />
+				</Tabs.Content>
+
+				<Tabs.Content value="performance">
+					<PerformanceTargetsTab
+						selectedProjectTypeId={selectedProjectType}
+						bind:performanceTargets
+						bind:targetStartDate
+						bind:targetEndDate
+						bind:durationInCalendarDays
+						bind:totalBudget
+						bind:directBeneficiariesMale
+						bind:directBeneficiariesFemale
+						bind:employmentGenerated
+					/>
+				</Tabs.Content>
+
+				<Tabs.Content value="budget">
+					<BudgetResourcesTab {totalBudget} bind:fundingSources bind:budgetComponents />
+				</Tabs.Content>
+
+				<Tabs.Content value="monthly">
+					<Card.Card class="py-0">
+						<Card.CardContent class="p-6">
+							<MonthlyTargetsForm
+								startDate={targetStartDate?.toString() || ''}
+								endDate={targetEndDate?.toString() || ''}
+								totalBudget={Number(totalBudget)}
+								onUpdate={(data) => {
+									monthlyPhysicalProgress = data.physicalProgress;
+									monthlyReleaseSchedule = data.releaseSchedule;
+								}}
+							/>
 						</Card.CardContent>
 					</Card.Card>
+				</Tabs.Content>
+			</Tabs.Root>
 
-					<!-- Tab Content -->
-					<Tabs.Content value="category">
-						<CategoryProjectSelectionTab
-							bind:title
-							bind:description
-							bind:selectedCategory
-							bind:selectedProjectType
-							bind:implementingAgency
-						/>
-					</Tabs.Content>
-
-					<Tabs.Content value="location">
-						<LocationBeneficiariesTab bind:projectSitios bind:showSitioSelection />
-					</Tabs.Content>
-
-					<Tabs.Content value="performance">
-						<PerformanceTargetsTab
-							selectedProjectTypeId={selectedProjectType}
-							bind:performanceTargets
-							bind:targetStartDate
-							bind:targetEndDate
-							bind:durationInCalendarDays
-							bind:totalBudget
-							bind:directBeneficiariesMale
-							bind:directBeneficiariesFemale
-							bind:employmentGenerated
-						/>
-					</Tabs.Content>
-
-					<Tabs.Content value="budget">
-						<BudgetResourcesTab {totalBudget} bind:fundingSources bind:budgetComponents />
-					</Tabs.Content>
-
-					<Tabs.Content value="monthly">
-						<Card.Card class="py-0">
-							<Card.CardContent class="p-6">
-								<MonthlyTargetsForm
-									startDate={targetStartDate?.toString() || ''}
-									endDate={targetEndDate?.toString() || ''}
-									totalBudget={Number(totalBudget)}
-									onUpdate={(data) => {
-										monthlyPhysicalProgress = data.physicalProgress;
-										monthlyReleaseSchedule = data.releaseSchedule;
-									}}
-								/>
-							</Card.CardContent>
-						</Card.Card>
-					</Tabs.Content>
-				</Tabs.Root>
-
-				<!-- Navigation Buttons (Full Edit Mode only) -->
-				<Card.Card class="mt-6 p-0">
-					<Card.CardContent class="flex justify-between p-4">
-						<Button variant="outline" onclick={previousTab} disabled={!canGoPrevious} class="gap-2">
-							<ArrowLeft class="size-4" />
-							Previous
-						</Button>
-						<div class="flex items-center gap-2 text-sm text-muted-foreground">
-							Step {currentTabIndex + 1} of {tabOrder.length}
-						</div>
-						<Button variant="outline" onclick={nextTab} disabled={!canGoNext} class="gap-2">
-							Next
-							<ArrowRight class="size-4" />
-						</Button>
-					</Card.CardContent>
-				</Card.Card>
-			{/if}
+			<!-- Navigation Buttons -->
+			<Card.Card class="mt-6 p-0">
+				<Card.CardContent class="flex justify-between p-4">
+					<Button variant="outline" onclick={previousTab} disabled={!canGoPrevious} class="gap-2">
+						<ArrowLeft class="size-4" />
+						Previous
+					</Button>
+					<div class="flex items-center gap-2 text-sm text-muted-foreground">
+						Step {currentTabIndex + 1} of {tabOrder.length}
+					</div>
+					<Button variant="outline" onclick={nextTab} disabled={!canGoNext} class="gap-2">
+						Next
+						<ArrowRight class="size-4" />
+					</Button>
+				</Card.CardContent>
+			</Card.Card>
 		</div>
 	</div>
 </div>
