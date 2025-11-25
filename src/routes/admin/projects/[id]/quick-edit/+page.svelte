@@ -12,7 +12,7 @@
 		validateQuickUpdateData
 	} from '$lib/utils/project-adapters';
 	import { getCurrentMonth } from '$lib/utils/project-calculations';
-	import { updateProject } from '$lib/utils/storage';
+	import { addProject, getProjectById, updateProject } from '$lib/utils/storage';
 	import { AlertCircle, Clock, List, Save, X, Zap } from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
 
@@ -68,7 +68,11 @@
 			const updatedProject = applyQuickUpdateToProject(quickUpdateData, existingProject!);
 
 			// Save to localStorage
-			const saved = updateProject(existingProject!.id, updatedProject);
+			// If project doesn't exist in localStorage (it's from mock data), add it first
+			const existingInStorage = getProjectById(existingProject!.id);
+			const saved = existingInStorage
+				? updateProject(existingProject!.id, updatedProject)
+				: addProject(updatedProject);
 
 			if (!saved) {
 				throw new Error('Failed to save project to localStorage');
@@ -209,6 +213,7 @@
 						bind:currentBeneficiaries={quickUpdateData.currentBeneficiaries}
 						bind:householdsReached={quickUpdateData.householdsReached}
 						bind:plannedPercentage={quickUpdateData.plannedPercentage}
+						bind:photoDocumentation={quickUpdateData.photoDocumentation}
 						onSwitchToFull={switchToFullEdit}
 					/>
 				</Card.CardContent>

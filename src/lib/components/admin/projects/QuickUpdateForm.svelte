@@ -1,4 +1,5 @@
 <script lang="ts">
+	import ImageUploadGallery from '$lib/components/admin/projects/ImageUploadGallery.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';
 	import CurrencyInput from '$lib/components/ui/currency-input/currency-input.svelte';
@@ -6,7 +7,7 @@
 	import { Label } from '$lib/components/ui/label';
 	import * as Select from '$lib/components/ui/select';
 	import { Textarea } from '$lib/components/ui/textarea';
-	import type { ProjectStatus } from '$lib/types';
+	import type { PhotoDocumentation, ProjectStatus } from '$lib/types';
 	import { formatMonth } from '$lib/utils/monthly-planning';
 	import {
 		calculateBeneficiaryProgress,
@@ -21,6 +22,7 @@
 		Banknote,
 		Calendar,
 		CheckCircle,
+		ImageIcon,
 		Info,
 		TrendingDown,
 		TrendingUp,
@@ -53,6 +55,8 @@
 		householdsReached: string;
 		// New fields - Progress tracking
 		plannedPercentage: string;
+		// Photo Documentation
+		photoDocumentation: PhotoDocumentation[];
 		// Callback
 		onSwitchToFull: () => void;
 	}
@@ -77,6 +81,7 @@
 		currentBeneficiaries = $bindable(),
 		householdsReached = $bindable(),
 		plannedPercentage = $bindable(),
+		photoDocumentation = $bindable(),
 		onSwitchToFull
 	}: Props = $props();
 
@@ -235,14 +240,14 @@
 						class="font-medium opacity-75"
 					/>
 					{#if monthlyDisbursementAmount > 0}
-					<p class="text-xs text-muted-foreground">
-						Original: {formatCurrency(originalBudgetDisbursed)} + This month: {formatCurrency(
-							monthlyDisbursementAmount
-						)} = {formatCurrency(updatedBudgetDisbursed)}
-					</p>
-				{:else}
-					<p class="text-xs text-muted-foreground">Sum of all monthly disbursements until now</p>
-				{/if}
+						<p class="text-xs text-muted-foreground">
+							Original: {formatCurrency(originalBudgetDisbursed)} + This month: {formatCurrency(
+								monthlyDisbursementAmount
+							)} = {formatCurrency(updatedBudgetDisbursed)}
+						</p>
+					{:else}
+						<p class="text-xs text-muted-foreground">Sum of all monthly disbursements until now</p>
+					{/if}
 				</div>
 
 				<!-- Monthly Disbursement (Input for THIS month) -->
@@ -308,9 +313,9 @@
 						<p class="text-xs text-muted-foreground">
 							Original: {originalBudgetMetrics.utilizationPercentage.toFixed(2)}% → Updated: {budgetMetrics.utilizationPercentage.toFixed(
 								2
-							)}% (+{(budgetMetrics.utilizationPercentage - originalBudgetMetrics.utilizationPercentage).toFixed(
-								2
-							)}%)
+							)}% (+{(
+								budgetMetrics.utilizationPercentage - originalBudgetMetrics.utilizationPercentage
+							).toFixed(2)}%)
 						</p>
 					{/if}
 				</div>
@@ -748,6 +753,24 @@
 					/>
 				</div>
 			</div>
+		</Card.Content>
+	</Card.Root>
+
+	<!-- Progress Documentation Section -->
+	<Card.Root>
+		<Card.Header>
+			<div class="space-y-1.5">
+				<div class="flex items-center gap-2">
+					<ImageIcon class="size-4 text-primary" />
+					<Card.Title>Progress Documentation</Card.Title>
+				</div>
+				<Card.Description>
+					Upload photos showing project progress, activities, or milestones for {currentMonthFormatted}
+				</Card.Description>
+			</div>
+		</Card.Header>
+		<Card.Content>
+			<ImageUploadGallery bind:photoDocumentation />
 		</Card.Content>
 	</Card.Root>
 </div>

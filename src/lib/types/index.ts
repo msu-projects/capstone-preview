@@ -358,6 +358,20 @@ export interface PerformanceTarget {
 	monthly_actual_percentage?: Record<string, number>; // Cumulative actual progress % { '2025-01': 12, '2025-02': 30, ... }
 }
 
+export interface PhotoDocumentation {
+	id: string; // Unique identifier (nanoid or UUID)
+	filename: string; // Original filename
+	caption?: string; // Optional user-provided caption
+	file_size: number; // Size in bytes
+	mime_type: string; // e.g., 'image/jpeg'
+	width: number; // Image dimensions
+	height: number;
+	thumbnail_id?: string; // Reference to thumbnail in IndexedDB
+	uploaded_at: string; // ISO timestamp
+	storage_type: 'indexeddb' | 'server'; // For migration tracking
+	storage_ref: string; // IndexedDB key OR server URL
+}
+
 export interface MonthlyProgress {
 	id: number;
 	project_id: number;
@@ -366,7 +380,8 @@ export interface MonthlyProgress {
 	achieved_outputs: Record<string, number>; // { 'seedlings_distributed': 500, 'training_sessions': 3 }
 	beneficiaries_reached: number;
 	issues_encountered?: string;
-	photo_urls?: string[];
+	photo_urls?: string[]; // DEPRECATED - use photo_documentation instead
+	photo_documentation?: PhotoDocumentation[]; // NEW - replaces photo_urls
 	status: 'on-track' | 'delayed' | 'ahead';
 	created_at: string;
 	updated_at: string;

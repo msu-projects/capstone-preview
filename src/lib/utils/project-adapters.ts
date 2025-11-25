@@ -3,7 +3,7 @@
  * and enhanced project structures for backwards compatibility
  */
 
-import type { Project, MonitoringDetails } from '$lib/types';
+import type { Project, MonitoringDetails, PhotoDocumentation } from '$lib/types';
 import { getCurrentMonth } from './project-calculations';
 
 /**
@@ -34,6 +34,8 @@ export interface QuickUpdateFormData {
 	targetBeneficiaries: number;
 	currentBeneficiaries: string;
 	householdsReached: string;
+	// Photo Documentation
+	photoDocumentation: PhotoDocumentation[];
 }
 
 /**
@@ -102,7 +104,9 @@ export function projectToQuickUpdate(project: Project): QuickUpdateFormData {
 			latestMonthlyProgress?.beneficiaries_reached?.toString() ||
 			project.beneficiaries?.toString() ||
 			'0',
-		householdsReached: '0' // This could be enhanced to pull from sitio data
+		householdsReached: '0', // This could be enhanced to pull from sitio data
+		// Photo Documentation
+		photoDocumentation: latestMonthlyProgress?.photo_documentation || []
 	};
 }
 
@@ -230,6 +234,7 @@ export function applyQuickUpdateToProject(
 						...mp,
 						beneficiaries_reached: Number(formData.currentBeneficiaries || 0),
 						issues_encountered: formData.statusIssues,
+						photo_documentation: formData.photoDocumentation,
 						status:
 							slippage > 10 ? 'delayed' : slippage < -5 ? 'ahead' : ('on-track' as const),
 						updated_at: new Date().toISOString()
@@ -247,6 +252,7 @@ export function applyQuickUpdateToProject(
 			beneficiaries_reached: Number(formData.currentBeneficiaries || 0),
 			issues_encountered: formData.statusIssues,
 			photo_urls: [],
+			photo_documentation: formData.photoDocumentation,
 			status: slippage > 10 ? 'delayed' : slippage < -5 ? 'ahead' : ('on-track' as const),
 			created_at: new Date().toISOString(),
 			updated_at: new Date().toISOString()
