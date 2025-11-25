@@ -11,8 +11,9 @@
 		projectToQuickUpdate,
 		validateQuickUpdateData
 	} from '$lib/utils/project-adapters';
+	import { getCurrentMonth } from '$lib/utils/project-calculations';
 	import { updateProject } from '$lib/utils/storage';
-	import { Clock, List, Save, X, Zap } from '@lucide/svelte';
+	import { AlertCircle, Clock, List, Save, X, Zap } from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
 
 	const { data } = $props();
@@ -30,9 +31,16 @@
 		}
 	}
 
+	// Check if monthly update already exists for current month
+	const currentMonth = getCurrentMonth();
+	const existingMonthlyUpdate = existingProject?.monthly_progress?.find(
+		(mp) => mp.month_year === currentMonth
+	);
+
 	// Form state
 	let isSaving = $state(false);
 	let cancelDialogOpen = $state(false);
+	let existingUpdateDialogOpen = $state(!!existingMonthlyUpdate);
 
 	// Quick Update form data (initialized from existing project)
 	let quickUpdateData = $state(projectToQuickUpdate(existingProject!));
@@ -114,6 +122,23 @@
 	function switchToFullEdit() {
 		window.location.href = `/admin/projects/${existingProject?.id}/edit`;
 	}
+
+	function confirmEditExisting() {
+		existingUpdateDialogOpen = false;
+		// User confirmed they want to edit the existing update
+		toast.info('You are now editing the existing monthly update for ' + formatMonthYear(currentMonth));
+	}
+
+	function cancelEditExisting() {
+		// User doesn't want to edit, go back to project list
+		window.location.href = '/admin/projects';
+	}
+
+	function formatMonthYear(monthYear: string): string {
+		const [year, month] = monthYear.split('-');
+		const date = new Date(parseInt(year), parseInt(month) - 1);
+		return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+	}
 </script>
 
 <svelte:head>
@@ -190,6 +215,51 @@
 		</div>
 	</div>
 </div>
+
+<!-- Existing Monthly Update Warning Dialog -->
+<AlertDialog.Root bind:open={existingUpdateDialogOpen}>
+	<AlertDialog.Content>
+		<AlertDialog.Header>
+			<AlertDialog.Title class="flex items-center gap-2">
+				<AlertCircle class="size-5 text-warning" />
+				Monthly Update Already Exists
+			</AlertDialog.Title>
+			<AlertDialog.Description class="space-y-3">
+				<p>
+					A monthly update for <strong>{formatMonthYear(currentMonth)}</strong> already exists for
+					this project.
+				</p>
+				{#if existingMonthlyUpdate}
+					<div class="rounded-md bg-muted p-3 text-sm">
+						<div class="font-medium text-foreground">Current Update Details:</div>
+						<ul class="mt-2 space-y-1 text-muted-foreground">
+							<li>• Beneficiaries Reached: {existingMonthlyUpdate.beneficiaries_reached}</li>
+							<li>• Status: {existingMonthlyUpdate.status}</li>
+							<li>
+								• Last Updated: {new Date(existingMonthlyUpdate.updated_at).toLocaleDateString('en-US', {
+									month: 'short',
+									day: 'numeric',
+									year: 'numeric',
+									hour: '2-digit',
+									minute: '2-digit'
+								})}
+							</li>
+						</ul>
+					</div>
+				{/if}
+				<p class="text-foreground">
+					Would you like to continue and edit this existing monthly update?
+				</p>
+			</AlertDialog.Description>
+		</AlertDialog.Header>
+		<AlertDialog.Footer>
+			<AlertDialog.Cancel onclick={cancelEditExisting}>Cancel</AlertDialog.Cancel>
+			<AlertDialog.Action onclick={confirmEditExisting} class="bg-primary hover:bg-primary/90">
+				Continue Editing
+			</AlertDialog.Action>
+		</AlertDialog.Footer>
+	</AlertDialog.Content>
+</AlertDialog.Root>
 
 <!-- Cancel Confirmation Dialog -->
 <AlertDialog.Root bind:open={cancelDialogOpen}>

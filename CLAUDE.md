@@ -181,3 +181,4 @@ The `/sample/` directory contains the original vanilla HTML/CSS/JS prototype. Ke
 - Charts and analytics (Chart.js integration)
 - Backend API integration (currently using mock data)
 - Authentication/authorization
+- ignore the backend database for now. this project is just a prototype.
