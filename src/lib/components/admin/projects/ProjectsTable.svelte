@@ -109,7 +109,7 @@
 	}
 </script>
 
-<Card.Card class="shadow-sm">
+<Card.Card class="gap-4 shadow-sm">
 	<Card.CardHeader>
 		<div class="flex items-center justify-between">
 			<Card.CardTitle class="text-xl font-semibold">All Projects ({projects.length})</Card.CardTitle
