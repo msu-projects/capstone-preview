@@ -40,7 +40,8 @@
 		femaleEmployment: string;
 		// New fields - Financial
 		totalBudget: number;
-		budgetDisbursed: string;
+		budgetDisbursed: string; // Cumulative (read-only)
+		monthlyDisbursement: string; // This month only (editable)
 		// New fields - Timeline
 		startDate: string;
 		targetEndDate: string;
@@ -67,6 +68,7 @@
 		femaleEmployment = $bindable(),
 		totalBudget = $bindable(),
 		budgetDisbursed = $bindable(),
+		monthlyDisbursement = $bindable(),
 		startDate = $bindable(),
 		targetEndDate = $bindable(),
 		extensionRequested = $bindable(),
@@ -82,9 +84,16 @@
 	let totalEmployment = $derived(Number(maleEmployment || 0) + Number(femaleEmployment || 0));
 
 	// Derived computed values - Budget
-	let budgetMetrics = $derived(
-		calculateBudgetUtilization(totalBudget, Number(budgetDisbursed || 0))
+	// Calculate the new cumulative disbursement including this month's input
+	let originalBudgetDisbursed = $derived(Number(budgetDisbursed || 0));
+	let monthlyDisbursementAmount = $derived(Number(monthlyDisbursement || 0));
+	let updatedBudgetDisbursed = $derived(originalBudgetDisbursed + monthlyDisbursementAmount);
+
+	// Calculate both original and updated metrics for comparison
+	let originalBudgetMetrics = $derived(
+		calculateBudgetUtilization(totalBudget, originalBudgetDisbursed)
 	);
+	let budgetMetrics = $derived(calculateBudgetUtilization(totalBudget, updatedBudgetDisbursed));
 
 	// Derived computed values - Timeline
 	let timelineMetrics = $derived(calculateDaysRemaining(targetEndDate));
@@ -212,20 +221,54 @@
 					/>
 				</div>
 
-				<!-- Budget Disbursed -->
+				<!-- Cumulative Budget Disbursed (Read-only) -->
 				<div class="space-y-2">
-					<Label for="budget-disbursed">Budget Disbursed</Label>
+					<Label for="cumulative-disbursed" class="flex items-center gap-1.5">
+						Total Disbursed (Cumulative)
+						<Info class="size-3.5 text-muted-foreground" />
+					</Label>
+					<Input
+						id="cumulative-disbursed"
+						type="text"
+						value={formatCurrency(updatedBudgetDisbursed)}
+						disabled
+						class="font-medium opacity-75"
+					/>
+					{#if monthlyDisbursementAmount > 0}
+					<p class="text-xs text-muted-foreground">
+						Original: {formatCurrency(originalBudgetDisbursed)} + This month: {formatCurrency(
+							monthlyDisbursementAmount
+						)} = {formatCurrency(updatedBudgetDisbursed)}
+					</p>
+				{:else}
+					<p class="text-xs text-muted-foreground">Sum of all monthly disbursements until now</p>
+				{/if}
+				</div>
+
+				<!-- Monthly Disbursement (Input for THIS month) -->
+				<div class="space-y-2 md:col-span-2">
+					<Label for="monthly-disbursement" class="flex items-center gap-2">
+						<Badge variant="default" class="gap-1.5">
+							<Calendar class="size-3" />
+							{currentMonthFormatted}
+						</Badge>
+						Amount Disbursed This Month
+					</Label>
 					<div class="relative">
 						<CurrencyInput
-							id="budget-disbursed"
+							id="monthly-disbursement"
 							min={0}
-							bind:value={budgetDisbursed}
+							bind:value={monthlyDisbursement}
 							placeholder="₱0"
 						/>
 						<span class="pointer-events-none absolute top-2.5 right-3 text-sm text-muted-foreground"
 							>PHP</span
 						>
 					</div>
+					<p class="text-xs text-muted-foreground">
+						Enter only the amount disbursed for {currentMonthFormatted}. This field resets to ₱0
+						every month.
+					</p>
 				</div>
 
 				<!-- Auto-calculated: Balance Remaining -->
@@ -261,6 +304,15 @@
 							>%</span
 						>
 					</div>
+					{#if monthlyDisbursementAmount > 0}
+						<p class="text-xs text-muted-foreground">
+							Original: {originalBudgetMetrics.utilizationPercentage.toFixed(2)}% → Updated: {budgetMetrics.utilizationPercentage.toFixed(
+								2
+							)}% (+{(budgetMetrics.utilizationPercentage - originalBudgetMetrics.utilizationPercentage).toFixed(
+								2
+							)}%)
+						</p>
+					{/if}
 				</div>
 			</div>
 

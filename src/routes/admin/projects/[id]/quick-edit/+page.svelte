@@ -200,6 +200,7 @@
 						bind:femaleEmployment={quickUpdateData.femaleEmployment}
 						bind:totalBudget={quickUpdateData.totalBudget}
 						bind:budgetDisbursed={quickUpdateData.budgetDisbursed}
+						bind:monthlyDisbursement={quickUpdateData.monthlyDisbursement}
 						bind:startDate={quickUpdateData.startDate}
 						bind:targetEndDate={quickUpdateData.targetEndDate}
 						bind:extensionRequested={quickUpdateData.extensionRequested}

@@ -23,7 +23,8 @@ export interface QuickUpdateFormData {
 	femaleEmployment: string;
 	// Financial
 	totalBudget: number;
-	budgetDisbursed: string;
+	budgetDisbursed: string; // Cumulative (read-only, for display)
+	monthlyDisbursement: string; // Amount disbursed THIS month only
 	// Timeline
 	startDate: string;
 	targetEndDate: string;
@@ -47,19 +48,24 @@ export function projectToQuickUpdate(project: Project): QuickUpdateFormData {
 		(mp) => mp.month_year === currentMonth
 	);
 
-	// Get latest budget utilization
+	// Get latest budget utilization for current month
 	const latestBudgetUtil = project.monthly_budget?.find((mb) => mb.month_year === currentMonth);
 
 	// Get planned percentage from performance targets (if available)
 	const performanceTarget = project.performance_targets?.[0];
 	const plannedPercentage = performanceTarget?.monthly_plan_percentage?.[currentMonth];
 
-	// Get disbursed amount from monitoring or monthly budget
-	const disbursed =
-		latestBudgetUtil?.actual_expenses ||
-		project.monitoring?.allotment?.released ||
-		project.monitoring?.expenditure?.obligations ||
-		0;
+	// Calculate cumulative disbursed amount (sum of all monthly expenses up to current month)
+	const cumulativeDisbursed = project.monthly_budget?.reduce((sum, mb) => {
+		// Only sum expenses up to and including current month
+		if (mb.month_year <= currentMonth) {
+			return sum + (mb.actual_expenses || 0);
+		}
+		return sum;
+	}, 0) || project.monitoring?.allotment?.released || project.monitoring?.expenditure?.obligations || 0;
+
+	// Get THIS month's disbursement only (not cumulative)
+	const monthlyDisbursement = latestBudgetUtil?.actual_expenses || 0;
 
 	return {
 		// Progress & Status
@@ -75,7 +81,8 @@ export function projectToQuickUpdate(project: Project): QuickUpdateFormData {
 		femaleEmployment: project.monitoring?.employment?.female?.toString() || '0',
 		// Financial
 		totalBudget: project.budget || 0,
-		budgetDisbursed: disbursed.toString(),
+		budgetDisbursed: cumulativeDisbursed.toString(), // Cumulative total
+		monthlyDisbursement: monthlyDisbursement.toString(), // This month only
 		// Timeline
 		startDate: project.start_date || '',
 		targetEndDate: project.end_date || '',
@@ -171,15 +178,25 @@ export function applyQuickUpdateToProject(
 		(mb) => mb.month_year === currentMonth
 	);
 
+	// Calculate cumulative disbursed (sum of all months except current, then add new monthly amount)
+	const previousMonthsTotal = updatedMonthlyBudget
+		.filter((mb) => mb.month_year !== currentMonth && mb.month_year < currentMonth)
+		.reduce((sum, mb) => sum + (mb.actual_expenses || 0), 0);
+
+	const monthlyAmount = Number(formData.monthlyDisbursement || 0);
+	const cumulativeTotal = previousMonthsTotal + monthlyAmount;
+	const remainingBalance = project.budget - cumulativeTotal;
+
 	if (existingBudgetIndex >= 0) {
-		// Update existing record
+		// Update existing record for current month
 		updatedMonthlyBudget = updatedMonthlyBudget.map((mb) =>
 			mb.month_year === currentMonth
 				? {
 						...mb,
-						budget_released: Number(formData.budgetDisbursed || 0),
-						actual_expenses: Number(formData.budgetDisbursed || 0),
-						remaining_balance: project.budget - Number(formData.budgetDisbursed || 0),
+						budget_released: monthlyAmount, // This month's amount
+						actual_expenses: monthlyAmount, // This month's expenses only
+						obligations: monthlyAmount,
+						remaining_balance: remainingBalance, // Balance after cumulative total
 						updated_at: new Date().toISOString()
 					}
 				: mb
@@ -190,10 +207,10 @@ export function applyQuickUpdateToProject(
 			id: Date.now(), // Temporary ID
 			project_id: project.id,
 			month_year: currentMonth,
-			budget_released: Number(formData.budgetDisbursed || 0),
-			actual_expenses: Number(formData.budgetDisbursed || 0),
-			obligations: Number(formData.budgetDisbursed || 0),
-			remaining_balance: project.budget - Number(formData.budgetDisbursed || 0),
+			budget_released: monthlyAmount, // This month's amount
+			actual_expenses: monthlyAmount, // This month's expenses only
+			obligations: monthlyAmount,
+			remaining_balance: remainingBalance, // Balance after cumulative total
 			created_at: new Date().toISOString(),
 			updated_at: new Date().toISOString()
 		});
@@ -282,9 +299,14 @@ export function validateQuickUpdateData(
 	}
 
 	// Validate budget
-	const disbursed = Number(formData.budgetDisbursed || 0);
-	if (disbursed < 0) {
-		errors.push('Budget disbursed cannot be negative');
+	const monthlyDisbursement = Number(formData.monthlyDisbursement || 0);
+	if (monthlyDisbursement < 0) {
+		errors.push('Monthly disbursement cannot be negative');
+	}
+
+	// Validate that monthly disbursement doesn't exceed total budget
+	if (monthlyDisbursement > formData.totalBudget) {
+		errors.push('Monthly disbursement cannot exceed total project budget');
 	}
 
 	// Validate employment
