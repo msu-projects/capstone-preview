@@ -65,9 +65,7 @@
 <Card.Root>
 	<Card.Header>
 		<Card.Title>Infrastructure & Housing</Card.Title>
-		<Card.Description>
-			Water, sanitation, electricity, and housing conditions
-		</Card.Description>
+		<Card.Description>Water, sanitation, electricity, and housing conditions</Card.Description>
 	</Card.Header>
 	<Card.Content class="space-y-6">
 		<!-- Water Systems -->
@@ -163,7 +161,7 @@
 							? 'Yes'
 							: waste_segregation_practice === false
 								? 'No'
-								: 'Select...'}
+								: 'Unknown'}
 					</Select.Trigger>
 					<Select.Content>
 						<Select.Item value="yes">Yes</Select.Item>
