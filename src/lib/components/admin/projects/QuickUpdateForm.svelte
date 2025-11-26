@@ -270,10 +270,7 @@
 							>PHP</span
 						>
 					</div>
-					<p class="text-xs text-muted-foreground">
-						Enter only the amount disbursed for {currentMonthFormatted}. This field resets to ₱0
-						every month.
-					</p>
+					<p class="text-xs text-muted-foreground"></p>
 				</div>
 
 				<!-- Auto-calculated: Balance Remaining -->

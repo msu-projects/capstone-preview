@@ -14,6 +14,7 @@
 	import { getCurrentMonth } from '$lib/utils/project-calculations';
 	import { addProject, getProjectById, updateProject } from '$lib/utils/storage';
 	import { AlertCircle, Clock, List, Save, X, Zap } from '@lucide/svelte';
+	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
 
 	const { data } = $props();
@@ -41,6 +42,14 @@
 	let isSaving = $state(false);
 	let cancelDialogOpen = $state(false);
 	let existingUpdateDialogOpen = $state(!!existingMonthlyUpdate);
+
+	onMount(() => {
+		if (!!existingMonthlyUpdate) {
+			quickUpdateData.budgetDisbursed = String(
+				Number(quickUpdateData.budgetDisbursed) - Number(quickUpdateData.monthlyDisbursement)
+			);
+		}
+	});
 
 	// Quick Update form data (initialized from existing project)
 	let quickUpdateData = $state(projectToQuickUpdate(existingProject!));
@@ -130,7 +139,9 @@
 	function confirmEditExisting() {
 		existingUpdateDialogOpen = false;
 		// User confirmed they want to edit the existing update
-		toast.info('You are now editing the existing monthly update for ' + formatMonthYear(currentMonth));
+		toast.info(
+			'You are now editing the existing monthly update for ' + formatMonthYear(currentMonth)
+		);
 	}
 
 	function cancelEditExisting() {
@@ -232,8 +243,8 @@
 			</AlertDialog.Title>
 			<AlertDialog.Description class="space-y-3">
 				<p>
-					A monthly update for <strong>{formatMonthYear(currentMonth)}</strong> already exists for
-					this project.
+					A monthly update for <strong>{formatMonthYear(currentMonth)}</strong> already exists for this
+					project.
 				</p>
 				{#if existingMonthlyUpdate}
 					<div class="rounded-md bg-muted p-3 text-sm">
@@ -242,13 +253,16 @@
 							<li>• Beneficiaries Reached: {existingMonthlyUpdate.beneficiaries_reached}</li>
 							<li>• Status: {existingMonthlyUpdate.status}</li>
 							<li>
-								• Last Updated: {new Date(existingMonthlyUpdate.updated_at).toLocaleDateString('en-US', {
-									month: 'short',
-									day: 'numeric',
-									year: 'numeric',
-									hour: '2-digit',
-									minute: '2-digit'
-								})}
+								• Last Updated: {new Date(existingMonthlyUpdate.updated_at).toLocaleDateString(
+									'en-US',
+									{
+										month: 'short',
+										day: 'numeric',
+										year: 'numeric',
+										hour: '2-digit',
+										minute: '2-digit'
+									}
+								)}
 							</li>
 						</ul>
 					</div>
