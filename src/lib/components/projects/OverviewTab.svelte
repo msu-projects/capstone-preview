@@ -12,6 +12,7 @@
 		MapPin,
 		Users
 	} from '@lucide/svelte';
+	import ProjectSitiosMap from './ProjectSitiosMap.svelte';
 
 	interface Props {
 		project: Project;
@@ -282,6 +283,22 @@
 								)} Days
 							</span>
 						</div>
+					</div>
+				</Card.Content>
+			</Card.Root>
+
+			<Card.Root class="shadow-sm">
+				<Card.Header class="pb-4">
+					<div class="flex items-center gap-2">
+						<div class="rounded-lg bg-blue-50 p-1.5">
+							<MapPin class="size-4 text-blue-600" />
+						</div>
+						<h3 class="text-lg font-semibold text-slate-800">Sitio Locations</h3>
+					</div>
+				</Card.Header>
+				<Card.Content class="pt-0">
+					<div class="h-[400px] w-full">
+						<ProjectSitiosMap {project} />
 					</div>
 				</Card.Content>
 			</Card.Root>
