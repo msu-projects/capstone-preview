@@ -201,9 +201,7 @@
 
 		if (success) {
 			toast.success('Sitio created successfully!');
-			setTimeout(() => {
-				window.location.href = '/admin/sitios';
-			}, 1000);
+			window.location.href = '/admin/sitios';
 		} else {
 			toast.error('Failed to save sitio. Storage may be full.');
 		}

@@ -105,8 +105,8 @@ export interface Sitio {
 
 	// Housing
 	housing?: {
-		quality_types: string[]; // Concrete, Wood, Half-Concrete, Makeshift, Others
-		ownership_types: string[]; // Owned, Rented, Protected Land, Informal Settler, Owner Consent
+		quality_types: Array<{ type: string; count: number }>; // Concrete, Wood, Half-Concrete, Makeshift, Others
+		ownership_types: Array<{ type: string; count: number }>; // Owned, Rented, Protected Land, Informal Settler, Owner Consent
 	};
 
 	// Domestic animals

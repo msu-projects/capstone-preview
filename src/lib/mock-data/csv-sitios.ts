@@ -65,8 +65,15 @@ export const csvSitiosData: Sitio[] = [
 			common_garden_commodities: ['Vegetables']
 		},
 		housing: {
-			quality_types: ['Concrete', 'Wood', 'Half-Concrete'],
-			ownership_types: ['Owned', 'Informal Settler']
+			quality_types: [
+				{ type: 'Concrete', count: 0 },
+				{ type: 'Wood', count: 0 },
+				{ type: 'Half-Concrete', count: 0 }
+			],
+			ownership_types: [
+				{ type: 'Owned', count: 0 },
+				{ type: 'Informal Settler', count: 0 }
+			]
 		},
 		domestic_animals: {
 			total_count: 91,
