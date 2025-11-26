@@ -1,21 +1,24 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import SitiosTable from '$lib/components/admin/sitios/SitiosTable.svelte';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
 	import * as Select from '$lib/components/ui/select';
-	import * as Table from '$lib/components/ui/table';
 	import type { Sitio } from '$lib/types';
 	import { deleteSitio, loadSitios } from '$lib/utils/storage';
-	import { MapPin, Pencil, Plus, Search, Trash2, Upload } from '@lucide/svelte';
+	import { MapPin, Plus, Search, Upload } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 
 	let sitios = $state<Sitio[]>([]);
-	let filteredSitios = $state<Sitio[]>([]);
 	let searchTerm = $state('');
 	let selectedMunicipality = $state<string>('all');
 	let selectedBarangay = $state<string>('all');
+	let currentPage = $state(1);
+	let sortBy = $state<'name' | 'municipality' | 'barangay' | 'population' | 'households'>('name');
+	let sortOrder = $state<'asc' | 'desc'>('asc');
+	const itemsPerPage = 10;
 	let deleteDialogOpen = $state(false);
 	let sitioToDelete = $state<Sitio | null>(null);
 
@@ -27,9 +30,7 @@
 		Array.from(
 			new Set(
 				sitios
-					.filter(
-						(s) => selectedMunicipality === 'all' || s.municipality === selectedMunicipality
-					)
+					.filter((s) => selectedMunicipality === 'all' || s.municipality === selectedMunicipality)
 					.map((s) => s.barangay)
 			)
 		).sort()
@@ -41,11 +42,11 @@
 
 	function loadData() {
 		sitios = loadSitios();
-		filterSitios();
 	}
 
-	function filterSitios() {
-		filteredSitios = sitios.filter((s) => {
+	// Filter and sort sitios
+	const filteredSitios = $derived.by(() => {
+		const filtered = sitios.filter((s) => {
 			// Municipality filter
 			if (selectedMunicipality !== 'all' && s.municipality !== selectedMunicipality) {
 				return false;
@@ -68,14 +69,38 @@
 
 			return true;
 		});
-	}
 
-	$effect(() => {
-		searchTerm;
-		selectedMunicipality;
-		selectedBarangay;
-		filterSitios();
+		// Sort sitios
+		return filtered.sort((a, b) => {
+			let comparison = 0;
+			switch (sortBy) {
+				case 'name':
+					comparison = a.name.localeCompare(b.name);
+					break;
+				case 'municipality':
+					comparison = a.municipality.localeCompare(b.municipality);
+					break;
+				case 'barangay':
+					comparison = a.barangay.localeCompare(b.barangay);
+					break;
+				case 'population':
+					comparison = (a.population || 0) - (b.population || 0);
+					break;
+				case 'households':
+					comparison = (a.households || 0) - (b.households || 0);
+					break;
+			}
+			return sortOrder === 'asc' ? comparison : -comparison;
+		});
 	});
+
+	// Paginate
+	const paginatedSitios = $derived.by(() => {
+		const start = (currentPage - 1) * itemsPerPage;
+		return filteredSitios.slice(start, start + itemsPerPage);
+	});
+
+	const totalPages = $derived(Math.ceil(filteredSitios.length / itemsPerPage));
 
 	// Reset barangay filter when municipality changes
 	$effect(() => {
@@ -92,12 +117,22 @@
 		}
 	});
 
-	function handleEdit(sitio: Sitio) {
-		goto(`/admin/sitios/${sitio.id}/edit`);
+	function toggleSort(column: typeof sortBy) {
+		if (sortBy === column) {
+			sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+		} else {
+			sortBy = column;
+			sortOrder = 'asc';
+		}
 	}
 
-	function confirmDelete(sitio: Sitio) {
-		sitioToDelete = sitio;
+	function handleEdit(sitioId: number) {
+		goto(`/admin/sitios/${sitioId}/edit`);
+	}
+
+	function confirmDelete(sitioId: number) {
+		const sitio = sitios.find((s) => s.id === sitioId);
+		sitioToDelete = sitio || null;
 		deleteDialogOpen = true;
 	}
 
@@ -112,6 +147,19 @@
 		}
 		deleteDialogOpen = false;
 		sitioToDelete = null;
+	}
+
+	function handleDownloadPDF(sitioId: number) {
+		const sitio = sitios.find((s) => s.id === sitioId);
+		if (sitio) {
+			console.log('Download PDF for sitio:', sitio.name);
+			// TODO: Implement PDF download functionality
+			alert(`PDF download for ${sitio.name} will be implemented soon.`);
+		}
+	}
+
+	function handleRefresh() {
+		loadData();
 	}
 </script>
 
@@ -224,76 +272,20 @@
 	</Card.Root>
 
 	<!-- Sitios Table -->
-	<Card.Root class="p-2">
-		<Card.Content class="p-0">
-			{#if filteredSitios.length > 0}
-				<Table.Root class="">
-					<Table.Header>
-						<Table.Row>
-							<Table.Head class="">Sitio</Table.Head>
-							<Table.Head>Barangay</Table.Head>
-							<Table.Head>Municipality</Table.Head>
-							<Table.Head class="text-right">Population</Table.Head>
-							<Table.Head class="text-right">Households</Table.Head>
-							<Table.Head class="text-right">Actions</Table.Head>
-						</Table.Row>
-					</Table.Header>
-					<Table.Body>
-						{#each filteredSitios as sitio}
-							<Table.Row>
-								<Table.Cell class="font-medium">{sitio.name}</Table.Cell>
-								<Table.Cell>{sitio.barangay}</Table.Cell>
-								<Table.Cell>{sitio.municipality}</Table.Cell>
-								<Table.Cell class="text-right">
-									{sitio.population?.toLocaleString() || '-'}
-								</Table.Cell>
-								<Table.Cell class="text-right">
-									{sitio.households?.toLocaleString() || '-'}
-								</Table.Cell>
-								<Table.Cell class="text-right">
-									<div class="flex justify-end gap-2">
-										<Button variant="ghost" size="sm" onclick={() => handleEdit(sitio)}>
-											<Pencil class="size-4" />
-										</Button>
-										<Button
-											variant="ghost"
-											size="sm"
-											onclick={() => confirmDelete(sitio)}
-											class="text-destructive hover:text-destructive"
-										>
-											<Trash2 class="size-4" />
-										</Button>
-									</div>
-								</Table.Cell>
-							</Table.Row>
-						{/each}
-					</Table.Body>
-				</Table.Root>
-			{:else}
-				<div class="flex flex-col items-center justify-center py-12">
-					<MapPin class="mb-4 size-12 text-muted-foreground" />
-					<h3 class="mb-2 text-lg font-semibold">No sitios found</h3>
-					<p class="mb-4 text-sm text-muted-foreground">
-						{searchTerm
-							? 'Try adjusting your search'
-							: 'Get started by adding a new sitio or importing data'}
-					</p>
-					{#if !searchTerm}
-						<div class="flex gap-2">
-							<Button variant="outline" onclick={() => goto('/admin/import')}>
-								<Upload class="mr-2 size-4" />
-								Import Data
-							</Button>
-							<Button onclick={() => goto('/admin/sitios/new')}>
-								<Plus class="mr-2 size-4" />
-								Add Sitio
-							</Button>
-						</div>
-					{/if}
-				</div>
-			{/if}
-		</Card.Content>
-	</Card.Root>
+	<SitiosTable
+		sitios={paginatedSitios}
+		bind:currentPage
+		{itemsPerPage}
+		{totalPages}
+		{sortBy}
+		{sortOrder}
+		onToggleSort={toggleSort}
+		onRefresh={handleRefresh}
+		onDelete={confirmDelete}
+		onDownloadPDF={handleDownloadPDF}
+		onEdit={handleEdit}
+		onPageChange={(page) => (currentPage = page)}
+	/>
 </div>
 
 <!-- Delete Confirmation Dialog -->
