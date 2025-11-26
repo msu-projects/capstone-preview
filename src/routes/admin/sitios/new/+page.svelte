@@ -58,8 +58,8 @@
 
 	// Tab 4: Economic
 	let economic_condition = $state({
-		top_employments: ['', '', ''],
-		top_income_brackets: ['', '', '']
+		employments: [],
+		income_brackets: []
 	});
 
 	// Tab 5: Agriculture
@@ -310,8 +310,8 @@
 
 				<Tabs.Content value="livelihoods">
 					<LivelihoodsEconomyTab
-						bind:top_employments={economic_condition.top_employments}
-						bind:top_income_brackets={economic_condition.top_income_brackets}
+						bind:employments={economic_condition.employments}
+						bind:income_brackets={economic_condition.income_brackets}
 						bind:farmers_count={agriculture.farmers_count}
 						bind:farmer_associations={agriculture.farmer_associations}
 						bind:farm_area_hectares={agriculture.farm_area_hectares}

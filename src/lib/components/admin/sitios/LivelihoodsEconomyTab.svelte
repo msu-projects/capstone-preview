@@ -1,12 +1,15 @@
 <script lang="ts">
+	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { NumberInput } from '$lib/components/ui/number-input';
+	import * as Select from '$lib/components/ui/select';
+	import { Plus, Trash2 } from '@lucide/svelte';
 
 	let {
-		top_employments = $bindable(['', '', '']),
-		top_income_brackets = $bindable(['', '', '']),
+		employments = $bindable([]),
+		income_brackets = $bindable([]),
 		farmers_count = $bindable(0),
 		farmer_associations = $bindable(0),
 		farm_area_hectares = $bindable(0),
@@ -21,8 +24,8 @@
 		households_with_backyard_garden = $bindable(0),
 		common_garden_commodities = $bindable(['', '', ''])
 	}: {
-		top_employments: string[];
-		top_income_brackets: string[];
+		employments: Array<{ type: string; count: number }>;
+		income_brackets: Array<{ bracket: string; households: number }>;
 		farmers_count: number;
 		farmer_associations: number;
 		farm_area_hectares: number;
@@ -37,6 +40,50 @@
 		households_with_backyard_garden: number;
 		common_garden_commodities: string[];
 	} = $props();
+
+	// Employment types (predefined options)
+	const employmentTypes = [
+		'Vendor',
+		'Laborer',
+		'Farmer',
+		'Tricycle Driver',
+		'Construction Worker',
+		'Charcoal Maker'
+	];
+
+	// Income brackets (daily income in PHP) - static
+	const incomeBrackets = [
+		{ label: '≤100', value: '<=100' },
+		{ label: '100-300', value: '100-300' },
+		{ label: '300-500', value: '300-500' },
+		{ label: '≥500', value: '>=500' }
+	];
+
+	// Initialize income_brackets if empty
+	$effect(() => {
+		if (income_brackets.length === 0) {
+			income_brackets = incomeBrackets.map((b) => ({ bracket: b.value, households: 0 }));
+		}
+	});
+
+	// Helper functions for employment management
+	function addEmployment() {
+		employments.push({ type: '', count: 0 });
+		employments = employments;
+	}
+
+	function removeEmployment(index: number) {
+		employments.splice(index, 1);
+		employments = employments;
+	}
+
+	// Get available employment types for a specific index (excluding already selected ones)
+	function getAvailableEmploymentTypes(currentIndex: number) {
+		const selectedTypes = employments
+			.map((e, i) => (i !== currentIndex && e.type ? e.type : null))
+			.filter((t): t is string => t !== null && t !== '');
+		return employmentTypes.filter((type) => !selectedTypes.includes(type));
+	}
 </script>
 
 <Card.Root>
@@ -50,25 +97,132 @@
 		<!-- Employment & Income -->
 		<div class="space-y-4">
 			<h3 class="text-lg font-semibold">Employment & Income</h3>
-			<div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-				<div class="space-y-3">
-					<Label>Top Employment Types</Label>
-					{#each top_employments as employment, i}
-						<Input
-							id={`employment_${i}`}
-							bind:value={top_employments[i]}
-							placeholder="e.g., Farming, Teaching, Construction"
-						/>
-					{/each}
+
+			<!-- Employment Types -->
+			<div class="space-y-3">
+				<div class="flex items-center justify-between">
+					<Label>Employment Types</Label>
+					<Button type="button" variant="outline" size="sm" onclick={addEmployment}>
+						<Plus class="mr-2 size-4" />
+						Add Employment
+					</Button>
 				</div>
+
+				{#if employments.length === 0}
+					<div
+						class="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground"
+					>
+						No employments added. Click "Add Employment" to get started.
+					</div>
+				{:else}
+					<div class="space-y-2">
+						<!-- Column Headers -->
+						<div class="flex items-center gap-2">
+							<div class="flex-1">
+								<Label>Type</Label>
+							</div>
+							<div class="w-32">
+								<Label>Count</Label>
+							</div>
+							<div class="w-10"></div>
+						</div>
+
+						<!-- Employment Rows -->
+						{#each employments as employment, i}
+							<div class="flex items-center gap-2">
+								<div class="flex-1">
+									<Select.Root
+										type="single"
+										value={employment.type}
+										onValueChange={(val) => {
+											if (val) {
+												// Check if this type is already used by another employment
+												const isDuplicate = employments.some(
+													(e, idx) => idx !== i && e.type === val
+												);
+												if (!isDuplicate) {
+													employment.type = val;
+												}
+											}
+										}}
+									>
+										<Select.Trigger id="employment_type_{i}" class="w-full">
+											{employment.type || 'Select employment type'}
+										</Select.Trigger>
+										<Select.Content>
+											{#each getAvailableEmploymentTypes(i) as type}
+												<Select.Item value={type}>{type}</Select.Item>
+											{/each}
+											<Select.Separator />
+											<div class="p-2">
+												<Label for="custom_employment_{i}" class="text-xs">Custom Employment</Label>
+												<Input
+													id="custom_employment_{i}"
+													bind:value={employment.type}
+													placeholder="Enter custom employment"
+													class="mt-1"
+													onblur={() => {
+														// Check for duplicate on blur
+														const isDuplicate = employments.some(
+															(e, idx) =>
+																idx !== i && e.type === employment.type && employment.type !== ''
+														);
+														if (isDuplicate) {
+															employment.type = '';
+														}
+													}}
+												/>
+											</div>
+										</Select.Content>
+									</Select.Root>
+								</div>
+
+								<div class="w-40">
+									<NumberInput
+										id="employment_count_{i}"
+										bind:value={employment.count}
+										placeholder="0"
+										min={0}
+									/>
+								</div>
+
+								<Button
+									type="button"
+									variant="destructive"
+									size="icon"
+									class="size-10"
+									onclick={() => removeEmployment(i)}
+								>
+									<Trash2 class="size-4" />
+								</Button>
+							</div>
+						{/each}
+					</div>
+				{/if}
+			</div>
+
+			<!-- Income Brackets -->
+			<div class="space-y-3">
+				<Label>Income Brackets (Daily Income in PHP)</Label>
 				<div class="space-y-3">
-					<Label>Top Income Brackets</Label>
-					{#each top_income_brackets as bracket, i}
-						<Input
-							id={`bracket_${i}`}
-							bind:value={top_income_brackets[i]}
-							placeholder="e.g., Below 10k, 10k-20k, Above 20k"
-						/>
+					{#each income_brackets as bracket, i}
+						<div class="flex items-center gap-3">
+							<div class="w-32">
+								<div
+									class="flex h-10 items-center rounded-md border border-input bg-muted px-3 text-sm"
+								>
+									{bracket.bracket}
+								</div>
+							</div>
+							<div class="flex-1">
+								<NumberInput
+									id="bracket_households_{i}"
+									bind:value={income_brackets[i].households}
+									placeholder="Number of households"
+									min={0}
+								/>
+							</div>
+						</div>
 					{/each}
 				</div>
 			</div>

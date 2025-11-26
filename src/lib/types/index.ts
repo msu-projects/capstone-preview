@@ -65,8 +65,8 @@ export interface Sitio {
 
 	// Economic condition
 	economic_condition?: {
-		top_employments: string[]; // Array of top 3
-		top_income_brackets: string[]; // Array of top 3
+		employments: Array<{ type: string; count: number }>; // e.g., [{ type: 'Farmer', count: 150 }, { type: 'Vendor', count: 80 }]
+		income_brackets: Array<{ bracket: string; households: number }>; // bracket options: '<=100', '100-300', '300-500', '>=500' (daily income in PHP)
 	};
 
 	// Agriculture
