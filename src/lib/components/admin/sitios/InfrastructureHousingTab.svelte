@@ -26,14 +26,14 @@
 		waste_segregation_practice: boolean | null;
 		households_with_electricity: number;
 		alternative_electricity_sources: string[];
-		quality_types: string[];
-		ownership_types: string[];
+		quality_types: Array<{ type: string; count: number }>;
+		ownership_types: Array<{ type: string; count: number }>;
 	} = $props();
 
 	const toiletFacilityTypes = ['Water Sealed', 'Open Pit', 'Pour Flush', 'Composting'];
 	const alternativeElectricitySources = ['Solar', 'Generator', 'Battery'];
-	const housingQualityTypes = ['Concrete', 'Wood', 'Half-Concrete', 'Makeshift', 'Others'];
-	const housingOwnershipTypes = [
+	const housingQualityOptions = ['Concrete', 'Wood', 'Half-Concrete', 'Makeshift'];
+	const housingOwnershipOptions = [
 		'Owned',
 		'Rented',
 		'Protected Land',
@@ -41,12 +41,46 @@
 		'Owner Consent'
 	];
 
+	// Initialize quality_types with default values if empty
+	$effect(() => {
+		if (quality_types.length === 0) {
+			quality_types = housingQualityOptions.map((type) => ({ type, count: 0 }));
+		}
+	});
+
+	// Initialize ownership_types with default values if empty
+	$effect(() => {
+		if (ownership_types.length === 0) {
+			ownership_types = housingOwnershipOptions.map((type) => ({ type, count: 0 }));
+		}
+	});
+
 	function addWaterSource() {
 		water_sources = [...water_sources, { source: '', condition: '' }];
 	}
 
 	function removeWaterSource(index: number) {
 		water_sources = water_sources.filter((_, i) => i !== index);
+	}
+
+	function addQualityType() {
+		quality_types.push({ type: '', count: 0 });
+		quality_types = quality_types;
+	}
+
+	function removeQualityType(index: number) {
+		quality_types.splice(index, 1);
+		quality_types = quality_types;
+	}
+
+	function addOwnershipType() {
+		ownership_types.push({ type: '', count: 0 });
+		ownership_types = ownership_types;
+	}
+
+	function removeOwnershipType(index: number) {
+		ownership_types.splice(index, 1);
+		ownership_types = ownership_types;
 	}
 
 	function toggleItem(arr: string[], item: string) {
@@ -208,39 +242,177 @@
 		<!-- Housing -->
 		<div class="space-y-4">
 			<h3 class="text-lg font-semibold">Housing</h3>
+
+			<!-- Housing Quality Types -->
 			<div class="space-y-3">
-				<Label>Housing Quality Types</Label>
-				<div class="grid grid-cols-2 gap-3">
-					{#each housingQualityTypes as type}
-						<div class="flex items-center space-x-2">
-							<Checkbox
-								id={`quality_${type}`}
-								checked={quality_types.includes(type)}
-								onCheckedChange={() => {
-									quality_types = toggleItem(quality_types, type);
-								}}
-							/>
-							<Label for={`quality_${type}`} class="cursor-pointer font-normal">{type}</Label>
-						</div>
-					{/each}
+				<div class="flex items-center justify-between">
+					<Label>Housing Quality Types</Label>
+					<Button type="button" variant="outline" size="sm" onclick={addQualityType}>
+						<Plus class="mr-2 size-4" />
+						Add Quality Type
+					</Button>
 				</div>
+
+				{#if quality_types.length === 0}
+					<div
+						class="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground"
+					>
+						No quality types added. Click "Add Quality Type" to get started.
+					</div>
+				{:else}
+					<div class="space-y-2">
+						<!-- Column Headers -->
+						<div class="flex items-center gap-2">
+							<div class="flex-1">
+								<Label>Type</Label>
+							</div>
+							<div class="w-32">
+								<Label>Count</Label>
+							</div>
+							<div class="w-10"></div>
+						</div>
+
+						<!-- Quality Type Rows -->
+						{#each quality_types as quality, i}
+							<div class="flex items-center gap-2">
+								<div class="flex-1">
+									<Select.Root
+										type="single"
+										value={quality.type}
+										onValueChange={(val) => {
+											if (val) quality.type = val;
+										}}
+									>
+										<Select.Trigger id="quality_type_{i}" class="w-full">
+											{quality.type || 'Select quality type'}
+										</Select.Trigger>
+										<Select.Content>
+											{#each housingQualityOptions as type}
+												<Select.Item value={type}>{type}</Select.Item>
+											{/each}
+											<Select.Separator />
+											<div class="p-2">
+												<Label for="custom_quality_{i}" class="text-xs">Custom Quality Type</Label>
+												<Input
+													id="custom_quality_{i}"
+													bind:value={quality.type}
+													placeholder="Enter custom quality type"
+													class="mt-1"
+												/>
+											</div>
+										</Select.Content>
+									</Select.Root>
+								</div>
+
+								<div class="w-40">
+									<NumberInput
+										id="quality_count_{i}"
+										bind:value={quality.count}
+										placeholder="0"
+										min={0}
+									/>
+								</div>
+
+								<Button
+									type="button"
+									variant="destructive"
+									size="icon"
+									class="size-10"
+									onclick={() => removeQualityType(i)}
+								>
+									<Trash2 class="size-4" />
+								</Button>
+							</div>
+						{/each}
+					</div>
+				{/if}
 			</div>
+
+			<!-- Housing Ownership Types -->
 			<div class="space-y-3">
-				<Label>Housing Ownership Types</Label>
-				<div class="grid grid-cols-2 gap-3">
-					{#each housingOwnershipTypes as type}
-						<div class="flex items-center space-x-2">
-							<Checkbox
-								id={`ownership_${type}`}
-								checked={ownership_types.includes(type)}
-								onCheckedChange={() => {
-									ownership_types = toggleItem(ownership_types, type);
-								}}
-							/>
-							<Label for={`ownership_${type}`} class="cursor-pointer font-normal">{type}</Label>
-						</div>
-					{/each}
+				<div class="flex items-center justify-between">
+					<Label>Housing Ownership Types</Label>
+					<Button type="button" variant="outline" size="sm" onclick={addOwnershipType}>
+						<Plus class="mr-2 size-4" />
+						Add Ownership Type
+					</Button>
 				</div>
+
+				{#if ownership_types.length === 0}
+					<div
+						class="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground"
+					>
+						No ownership types added. Click "Add Ownership Type" to get started.
+					</div>
+				{:else}
+					<div class="space-y-2">
+						<!-- Column Headers -->
+						<div class="flex items-center gap-2">
+							<div class="flex-1">
+								<Label>Type</Label>
+							</div>
+							<div class="w-32">
+								<Label>Count</Label>
+							</div>
+							<div class="w-10"></div>
+						</div>
+
+						<!-- Ownership Type Rows -->
+						{#each ownership_types as ownership, i}
+							<div class="flex items-center gap-2">
+								<div class="flex-1">
+									<Select.Root
+										type="single"
+										value={ownership.type}
+										onValueChange={(val) => {
+											if (val) ownership.type = val;
+										}}
+									>
+										<Select.Trigger id="ownership_type_{i}" class="w-full">
+											{ownership.type || 'Select ownership type'}
+										</Select.Trigger>
+										<Select.Content>
+											{#each housingOwnershipOptions as type}
+												<Select.Item value={type}>{type}</Select.Item>
+											{/each}
+											<Select.Separator />
+											<div class="p-2">
+												<Label for="custom_ownership_{i}" class="text-xs"
+													>Custom Ownership Type</Label
+												>
+												<Input
+													id="custom_ownership_{i}"
+													bind:value={ownership.type}
+													placeholder="Enter custom ownership type"
+													class="mt-1"
+												/>
+											</div>
+										</Select.Content>
+									</Select.Root>
+								</div>
+
+								<div class="w-40">
+									<NumberInput
+										id="ownership_count_{i}"
+										bind:value={ownership.count}
+										placeholder="0"
+										min={0}
+									/>
+								</div>
+
+								<Button
+									type="button"
+									variant="destructive"
+									size="icon"
+									class="size-10"
+									onclick={() => removeOwnershipType(i)}
+								>
+									<Trash2 class="size-4" />
+								</Button>
+							</div>
+						{/each}
+					</div>
+				{/if}
 			</div>
 		</div>
 	</Card.Content>
