@@ -1,26 +1,32 @@
 ```ts
+import React, { useState } from 'react';
 import {
-    Activity,
-    AlertTriangle,
-    ArrowLeft,
-    Banknote,
-    Briefcase,
-    Building2,
-    Calendar,
-    Camera,
-    Clock,
-    FastForward,
-    FileText,
-    Image as ImageIcon,
-    Lightbulb,
-    MapPin,
-    Maximize2,
-    PieChart,
-    TrendingUp,
-    Users,
-    X
+  ArrowLeft,
+  Calendar,
+  MapPin,
+  Users,
+  Briefcase,
+  TrendingUp,
+  Banknote,
+  PieChart,
+  Activity,
+  CheckCircle2,
+  AlertCircle,
+  Clock,
+  Building2,
+  FileText,
+  ChevronDown,
+  ChevronUp,
+  Camera,
+  Image as ImageIcon,
+  X,
+  Maximize2,
+  AlertTriangle,
+  Lightbulb,
+  FastForward,
+  Wallet,
+  PiggyBank
 } from 'lucide-react';
-import { useState } from 'react';
 
 // --- MOCK DATA BASED ON YOUR PLAN ---
 const PROJECT_DATA = {
@@ -330,66 +336,144 @@ const LocationsTab = ({ sites }) => (
 const FinancialsTab = ({ data }) => {
     const formatCurrency = (amount) => new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(amount);
 
+    // Mock calculated values based on previous hardcoded values
+    const utilized = 5625000;
+    const remaining = data.budget - utilized;
+    const utilizationRate = (utilized / data.budget) * 100;
+
     return (
         <div className="space-y-6">
-            {/* Top Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card className="p-6 bg-linear-to-br from-blue-600 to-blue-700 text-white border-none">
-                    <div className="flex items-center gap-3 mb-2 opacity-90">
-                        <Banknote className="w-5 h-5" />
-                        <span className="font-medium">Total Allocation</span>
-                    </div>
-                    <div className="text-3xl font-bold tracking-tight">{formatCurrency(data.budget)}</div>
-                    <div className="mt-4 pt-4 border-t border-blue-500/30 flex gap-4 text-sm opacity-90">
+            {/* 1. Key Metrics Row */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Total Budget */}
+                <Card className="p-5 border-l-4 border-l-blue-600 bg-white">
+                    <div className="flex justify-between items-start">
                         <div>
-                            <span className="block text-blue-200 text-xs">Utilized</span>
-                            <span className="font-semibold">₱5,625,000</span>
+                           <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Allocation</p>
+                           <h3 className="text-2xl font-bold text-slate-900 mt-1">{formatCurrency(data.budget)}</h3>
                         </div>
+                        <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
+                            <Banknote className="w-5 h-5" />
+                        </div>
+                    </div>
+                    <div className="mt-4 text-xs text-slate-500">
+                        100% Funded
+                    </div>
+                </Card>
+
+                {/* Utilized */}
+                <Card className="p-5 border-l-4 border-l-emerald-500 bg-white">
+                    <div className="flex justify-between items-start">
                         <div>
-                            <span className="block text-blue-200 text-xs">Remaining</span>
-                            <span className="font-semibold">₱6,875,000</span>
+                           <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Utilized Budget</p>
+                           <h3 className="text-2xl font-bold text-slate-900 mt-1">{formatCurrency(utilized)}</h3>
+                        </div>
+                        <div className="p-2 bg-emerald-50 rounded-lg text-emerald-600">
+                            <TrendingUp className="w-5 h-5" />
+                        </div>
+                    </div>
+                    <div className="mt-4">
+                        <div className="flex justify-between text-xs mb-1">
+                            <span className="text-slate-500">Utilization Rate</span>
+                            <span className="font-medium text-emerald-700">{utilizationRate.toFixed(1)}%</span>
+                        </div>
+                        <div className="w-full bg-slate-100 rounded-full h-1.5">
+                            <div className="bg-emerald-500 h-1.5 rounded-full" style={{ width: `${utilizationRate}%` }}></div>
                         </div>
                     </div>
                 </Card>
 
-                <Card className="p-6">
-                    <SectionTitle icon={PieChart} title="Funding Sources" />
-                    <div className="space-y-4">
-                        {data.funding_sources.map((source, idx) => (
-                            <div key={idx} className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <div className={`w-2 h-2 rounded-full ${source.type === 'National' ? 'bg-indigo-500' : 'bg-emerald-500'}`}></div>
-                                    <div>
-                                        <div className="text-sm font-medium text-slate-900">{source.source_name}</div>
-                                        <div className="text-xs text-slate-500">{source.type} Gov't</div>
-                                    </div>
-                                </div>
-                                <div className="text-right">
-                                    <div className="text-sm font-semibold text-slate-900">{formatCurrency(source.amount)}</div>
-                                    <div className="text-xs text-slate-500">{source.percentage}%</div>
-                                </div>
-                            </div>
-                        ))}
+                {/* Remaining */}
+                <Card className="p-5 border-l-4 border-l-amber-500 bg-white">
+                    <div className="flex justify-between items-start">
+                        <div>
+                           <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Remaining Balance</p>
+                           <h3 className="text-2xl font-bold text-slate-900 mt-1">{formatCurrency(remaining)}</h3>
+                        </div>
+                        <div className="p-2 bg-amber-50 rounded-lg text-amber-600">
+                            <PieChart className="w-5 h-5" />
+                        </div>
+                    </div>
+                    <div className="mt-4 text-xs text-slate-500">
+                        Available for disbursement
                     </div>
                 </Card>
             </div>
 
-            <Card className="p-6">
-                <SectionTitle icon={TrendingUp} title="Budget Breakdown" />
-                <div className="space-y-5">
-                    {data.budget_components.map((comp, idx) => (
-                         <div key={idx}>
-                            <div className="flex justify-between items-end mb-1">
-                                <span className="text-sm font-medium text-slate-700">{comp.component_name}</span>
-                                <span className="text-sm text-slate-600">{formatCurrency(comp.amount)} <span className="text-xs text-slate-400">({comp.percentage}%)</span></span>
+            {/* 2. Breakdown Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Funding Sources */}
+                <Card className="flex flex-col h-[500px]">
+                    <div className="p-6 border-b border-slate-100 flex justify-between items-center">
+                         <div className="flex items-center gap-2">
+                            <div className="p-1.5 bg-blue-50 rounded-lg">
+                                <Wallet className="w-4 h-4 text-blue-600" />
                             </div>
-                            <div className="w-full bg-slate-100 rounded-full h-2">
-                                <div className="h-2 rounded-full bg-slate-600" style={{ width: `${comp.percentage}%` }}></div>
-                            </div>
+                            <h3 className="text-lg font-semibold text-slate-800">Funding Sources</h3>
                          </div>
-                    ))}
-                </div>
-            </Card>
+                         <Badge type="neutral">{data.funding_sources.length} Sources</Badge>
+                    </div>
+                    <div className="p-6 overflow-y-auto flex-1">
+                         <div className="space-y-3">
+                            {data.funding_sources.map((source, idx) => (
+                                <div key={idx} className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 hover:border-blue-200 transition-colors group">
+                                    <div className="flex justify-between items-start mb-2">
+                                        <div className="flex items-center gap-2">
+                                            <div className={`w-2 h-2 rounded-full ${source.type === 'National' ? 'bg-indigo-500' : 'bg-emerald-500'}`}></div>
+                                            <span className="font-semibold text-slate-900">{source.source_name}</span>
+                                        </div>
+                                        <span className="text-xs font-medium px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-500">
+                                            {source.type}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-end justify-between">
+                                        <div className="text-xs text-slate-500">Contribution</div>
+                                        <div className="text-right">
+                                            <div className="text-lg font-bold text-slate-800">{formatCurrency(source.amount)}</div>
+                                            <div className="text-xs text-slate-500 font-medium">{source.percentage}% of total</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </Card>
+
+                {/* Budget Breakdown */}
+                 <Card className="flex flex-col h-[500px]">
+                    <div className="p-6 border-b border-slate-100 flex items-center gap-2">
+                         <div className="p-1.5 bg-blue-50 rounded-lg">
+                            <PiggyBank className="w-4 h-4 text-blue-600" />
+                         </div>
+                         <h3 className="text-lg font-semibold text-slate-800">Budget Breakdown</h3>
+                    </div>
+                    <div className="p-6 overflow-y-auto flex-1">
+                        <div className="space-y-6">
+                            {data.budget_components.map((comp, idx) => (
+                                 <div key={idx}>
+                                    <div className="flex justify-between items-center mb-2">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 font-bold text-xs">
+                                                {comp.percentage}%
+                                            </div>
+                                            <div>
+                                                <div className="text-sm font-semibold text-slate-900">{comp.component_name}</div>
+                                                <div className="text-xs text-slate-500">Planned Allocation</div>
+                                            </div>
+                                        </div>
+                                        <div className="text-right">
+                                            <div className="text-sm font-bold text-slate-900">{formatCurrency(comp.amount)}</div>
+                                        </div>
+                                    </div>
+                                    <div className="w-full bg-slate-100 rounded-full h-1.5 pl-11">
+                                        <div className="h-1.5 rounded-full bg-slate-400" style={{ width: `${comp.percentage}%` }}></div>
+                                    </div>
+                                 </div>
+                            ))}
+                        </div>
+                    </div>
+                </Card>
+            </div>
         </div>
     );
 };
@@ -558,35 +642,38 @@ const MonitoringTab = ({ data }) => {
 
                         {/* Status Summary (New Added Section) */}
                         { (selectedReport.issues || selectedReport.recommendations || selectedReport.catch_up_plan) && (
-                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                           <div className="bg-slate-50/50 rounded-xl border border-slate-200 divide-y divide-slate-200/60">
                               {/* Issues */}
-                              <div className="p-4 bg-rose-50 rounded-xl border border-rose-100">
-                                  <h4 className="text-sm font-semibold text-rose-800 mb-2 flex items-center gap-2">
-                                      <AlertTriangle className="w-4 h-4" /> Issues Encountered
-                                  </h4>
-                                  <p className="text-xs text-rose-700 leading-relaxed">
-                                      {selectedReport.issues || "No issues reported for this period."}
-                                  </p>
+                              <div className="p-4 flex gap-4 items-start">
+                                  <AlertTriangle className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
+                                  <div className="space-y-1">
+                                      <h4 className="text-sm font-medium text-slate-900">Issues Encountered</h4>
+                                      <p className="text-sm text-slate-600 leading-relaxed">
+                                          {selectedReport.issues || <span className="text-slate-400 italic">None reported</span>}
+                                      </p>
+                                  </div>
                               </div>
 
                               {/* Recommendations */}
-                              <div className="p-4 bg-amber-50 rounded-xl border border-amber-100">
-                                  <h4 className="text-sm font-semibold text-amber-800 mb-2 flex items-center gap-2">
-                                      <Lightbulb className="w-4 h-4" /> Recommendations
-                                  </h4>
-                                  <p className="text-xs text-amber-700 leading-relaxed">
-                                      {selectedReport.recommendations || "No recommendations for this period."}
-                                  </p>
+                              <div className="p-4 flex gap-4 items-start">
+                                  <Lightbulb className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
+                                  <div className="space-y-1">
+                                      <h4 className="text-sm font-medium text-slate-900">Recommendations</h4>
+                                      <p className="text-sm text-slate-600 leading-relaxed">
+                                          {selectedReport.recommendations || <span className="text-slate-400 italic">None</span>}
+                                      </p>
+                                  </div>
                               </div>
 
                               {/* Catch-up Plan */}
-                              <div className="p-4 bg-blue-50 rounded-xl border border-blue-100">
-                                  <h4 className="text-sm font-semibold text-blue-800 mb-2 flex items-center gap-2">
-                                      <FastForward className="w-4 h-4" /> Catch-up Plan
-                                  </h4>
-                                  <p className="text-xs text-blue-700 leading-relaxed">
-                                      {selectedReport.catch_up_plan || "No catch-up plan required."}
-                                  </p>
+                              <div className="p-4 flex gap-4 items-start">
+                                  <FastForward className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
+                                  <div className="space-y-1">
+                                      <h4 className="text-sm font-medium text-slate-900">Catch-up Plan</h4>
+                                      <p className="text-sm text-slate-600 leading-relaxed">
+                                          {selectedReport.catch_up_plan || <span className="text-slate-400 italic">Not required</span>}
+                                      </p>
+                                  </div>
                               </div>
                            </div>
                         )}

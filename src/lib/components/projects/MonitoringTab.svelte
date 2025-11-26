@@ -96,7 +96,7 @@
 
 				<!-- Content Card -->
 				<Card.Root
-					class="relative ml-2 cursor-pointer overflow-hidden shadow-sm transition-all hover:border-blue-300"
+					class="relative ml-2 cursor-pointer overflow-hidden py-0 shadow-sm transition-all hover:border-blue-300"
 					onclick={() => onReportClick(report)}
 				>
 					<Card.Content class="p-5">

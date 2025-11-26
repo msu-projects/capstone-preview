@@ -16,7 +16,7 @@
 </script>
 
 <!-- Locations Tab -->
-<Card.Root class="overflow-hidden py-0 shadow-sm">
+<Card.Root class="gap-0 overflow-hidden py-0 shadow-sm">
 	<div class="flex items-center justify-between border-b border-slate-100 p-6">
 		<div class="flex items-center gap-2">
 			<div class="rounded-lg bg-blue-50 p-1.5">
@@ -42,7 +42,6 @@
 					<th class="px-6 py-3 font-semibold">Location</th>
 					<th class="px-6 py-3 text-center font-semibold">Beneficiaries</th>
 					<th class="px-6 py-3 font-semibold">Focal Person</th>
-					<th class="px-6 py-3 text-center font-semibold">Priority</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -65,19 +64,11 @@
 								</span>
 							</td>
 							<td class="px-6 py-4 text-slate-600">{sitio.focal_person || 'N/A'}</td>
-							<td class="px-6 py-4 text-center">
-								<Badge
-									variant={sitio.priority_level === 'high' ? 'destructive' : 'outline'}
-									class={sitio.priority_level === 'medium' ? 'bg-amber-100 text-amber-700' : ''}
-								>
-									{sitio.priority_level.charAt(0).toUpperCase() + sitio.priority_level.slice(1)}
-								</Badge>
-							</td>
 						</tr>
 					{/each}
 				{:else}
 					<tr>
-						<td colspan="5" class="px-6 py-4 text-center text-slate-500">
+						<td colspan="4" class="px-6 py-4 text-center text-slate-500">
 							No sitios specified for this project
 						</td>
 					</tr>
