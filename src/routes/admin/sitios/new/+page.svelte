@@ -1,12 +1,9 @@
 <script lang="ts">
-	import AdditionalInfoTab from '$lib/components/admin/sitios/AdditionalInfoTab.svelte';
-	import AgricultureTab from '$lib/components/admin/sitios/AgricultureTab.svelte';
 	import BasicInfoTab from '$lib/components/admin/sitios/BasicInfoTab.svelte';
-	import DemographicsTab from '$lib/components/admin/sitios/DemographicsTab.svelte';
-	import EconomicTab from '$lib/components/admin/sitios/EconomicTab.svelte';
-	import LivestockTab from '$lib/components/admin/sitios/LivestockTab.svelte';
-	import SocialServicesTab from '$lib/components/admin/sitios/SocialServicesTab.svelte';
-	import WaterSanitationTab from '$lib/components/admin/sitios/WaterSanitationTab.svelte';
+	import CommunityServicesTab from '$lib/components/admin/sitios/CommunityServicesTab.svelte';
+	import DemographicsSocialTab from '$lib/components/admin/sitios/DemographicsSocialTab.svelte';
+	import InfrastructureHousingTab from '$lib/components/admin/sitios/InfrastructureHousingTab.svelte';
+	import LivelihoodsEconomyTab from '$lib/components/admin/sitios/LivelihoodsEconomyTab.svelte';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
@@ -17,10 +14,9 @@
 	import {
 		ArrowLeft,
 		ArrowRight,
-		Briefcase,
+		Building,
 		CircleAlert,
-		Droplet,
-		Heart,
+		HandHelping,
 		MapPin,
 		Save,
 		Sprout,
@@ -132,16 +128,7 @@
 	const canSave = $derived(isTab1Valid);
 
 	// Tab navigation
-	const tabOrder = [
-		'basic',
-		'demographics',
-		'social',
-		'economic',
-		'agriculture',
-		'water',
-		'livestock',
-		'additional'
-	];
+	const tabOrder = ['basic', 'demographics-social', 'livelihoods', 'infrastructure', 'community'];
 	const currentTabIndex = $derived(tabOrder.indexOf(activeTab));
 	const canGoNext = $derived(currentTabIndex < tabOrder.length - 1);
 	const canGoPrevious = $derived(currentTabIndex > 0);
@@ -263,41 +250,29 @@
 				<!-- Tabs List -->
 				<Card.Card class="mb-6 py-0">
 					<Card.CardContent class="p-3">
-						<Tabs.List class="grid w-full grid-cols-4 gap-1 lg:grid-cols-8">
+						<Tabs.List class="grid w-full grid-cols-2 gap-1 lg:grid-cols-5">
 							<Tabs.Trigger value="basic" class="flex items-center gap-2 text-xs">
 								<MapPin class="size-4" />
-								<span class="hidden lg:inline">Basic</span>
+								<span class="hidden lg:inline">Basic Info</span>
 								{#if !isTab1Valid && activeTab !== 'basic'}
 									<CircleAlert class="size-3 text-destructive" />
 								{/if}
 							</Tabs.Trigger>
-							<Tabs.Trigger value="demographics" class="flex items-center gap-2 text-xs">
+							<Tabs.Trigger value="demographics-social" class="flex items-center gap-2 text-xs">
 								<Users class="size-4" />
-								<span class="hidden lg:inline">Demographics</span>
+								<span class="hidden lg:inline">Demographics & Social</span>
 							</Tabs.Trigger>
-							<Tabs.Trigger value="social" class="flex items-center gap-2 text-xs">
-								<Heart class="size-4" />
-								<span class="hidden lg:inline">Social</span>
-							</Tabs.Trigger>
-							<Tabs.Trigger value="economic" class="flex items-center gap-2 text-xs">
-								<Briefcase class="size-4" />
-								<span class="hidden lg:inline">Economic</span>
-							</Tabs.Trigger>
-							<Tabs.Trigger value="agriculture" class="flex items-center gap-2 text-xs">
+							<Tabs.Trigger value="livelihoods" class="flex items-center gap-2 text-xs">
 								<Sprout class="size-4" />
-								<span class="hidden lg:inline">Agriculture</span>
+								<span class="hidden lg:inline">Livelihoods & Economy</span>
 							</Tabs.Trigger>
-							<Tabs.Trigger value="water" class="flex items-center gap-2 text-xs">
-								<Droplet class="size-4" />
-								<span class="hidden lg:inline">Water</span>
+							<Tabs.Trigger value="infrastructure" class="flex items-center gap-2 text-xs">
+								<Building class="size-4" />
+								<span class="hidden lg:inline">Infrastructure & Housing</span>
 							</Tabs.Trigger>
-							<Tabs.Trigger value="livestock" class="flex items-center gap-2 text-xs">
-								<Sprout class="size-4" />
-								<span class="hidden lg:inline">Livestock</span>
-							</Tabs.Trigger>
-							<Tabs.Trigger value="additional" class="flex items-center gap-2 text-xs">
-								<CircleAlert class="size-4" />
-								<span class="hidden lg:inline">Additional</span>
+							<Tabs.Trigger value="community" class="flex items-center gap-2 text-xs">
+								<HandHelping class="size-4" />
+								<span class="hidden lg:inline">Community Services</span>
 							</Tabs.Trigger>
 						</Tabs.List>
 					</Card.CardContent>
@@ -318,54 +293,29 @@
 					/>
 				</Tabs.Content>
 
-				<Tabs.Content value="demographics">
-					<DemographicsTab
+				<Tabs.Content value="demographics-social">
+					<DemographicsSocialTab
 						bind:male={demographics.male}
 						bind:female={demographics.female}
 						bind:total={demographics.total}
 						bind:age_0_14={demographics.age_0_14}
 						bind:age_15_64={demographics.age_15_64}
 						bind:age_65_above={demographics.age_65_above}
+						bind:registered_voters={social_services.registered_voters}
+						bind:philhealth_beneficiaries={social_services.philhealth_beneficiaries}
+						bind:fourps_beneficiaries={social_services.fourps_beneficiaries}
 						{population}
 					/>
 				</Tabs.Content>
 
-				<Tabs.Content value="social">
-					<SocialServicesTab
-						bind:registered_voters={social_services.registered_voters}
-						bind:philhealth_beneficiaries={social_services.philhealth_beneficiaries}
-						bind:fourps_beneficiaries={social_services.fourps_beneficiaries}
-					/>
-				</Tabs.Content>
-
-				<Tabs.Content value="economic">
-					<EconomicTab
+				<Tabs.Content value="livelihoods">
+					<LivelihoodsEconomyTab
 						bind:top_employments={economic_condition.top_employments}
 						bind:top_income_brackets={economic_condition.top_income_brackets}
-					/>
-				</Tabs.Content>
-
-				<Tabs.Content value="agriculture">
-					<AgricultureTab
 						bind:farmers_count={agriculture.farmers_count}
 						bind:farmer_associations={agriculture.farmer_associations}
 						bind:farm_area_hectares={agriculture.farm_area_hectares}
 						bind:top_crops={agriculture.top_crops}
-					/>
-				</Tabs.Content>
-
-				<Tabs.Content value="water">
-					<WaterSanitationTab
-						bind:water_systems_count={water_sanitation.water_systems_count}
-						bind:water_sources={water_sanitation.water_sources}
-						bind:households_without_toilet={water_sanitation.households_without_toilet}
-						bind:toilet_facility_types={water_sanitation.toilet_facility_types}
-						bind:waste_segregation_practice={water_sanitation.waste_segregation_practice}
-					/>
-				</Tabs.Content>
-
-				<Tabs.Content value="livestock">
-					<LivestockTab
 						bind:pigs={livestock_poultry.pigs}
 						bind:cows={livestock_poultry.cows}
 						bind:carabaos={livestock_poultry.carabaos}
@@ -373,25 +323,35 @@
 						bind:goats={livestock_poultry.goats}
 						bind:chickens={livestock_poultry.chickens}
 						bind:ducks={livestock_poultry.ducks}
+						bind:households_with_backyard_garden={food_security.households_with_backyard_garden}
+						bind:common_garden_commodities={food_security.common_garden_commodities}
 					/>
 				</Tabs.Content>
 
-				<Tabs.Content value="additional">
-					<AdditionalInfoTab
+				<Tabs.Content value="infrastructure">
+					<InfrastructureHousingTab
+						bind:water_systems_count={water_sanitation.water_systems_count}
+						bind:water_sources={water_sanitation.water_sources}
+						bind:households_without_toilet={water_sanitation.households_without_toilet}
+						bind:toilet_facility_types={water_sanitation.toilet_facility_types}
+						bind:waste_segregation_practice={water_sanitation.waste_segregation_practice}
 						bind:households_with_electricity={utilities.households_with_electricity}
 						bind:alternative_electricity_sources={utilities.alternative_electricity_sources}
+						bind:quality_types={housing.quality_types}
+						bind:ownership_types={housing.ownership_types}
+					/>
+				</Tabs.Content>
+
+				<Tabs.Content value="community">
+					<CommunityServicesTab
 						bind:sectoral_organizations={community_empowerment.sectoral_organizations}
 						bind:info_dissemination_methods={community_empowerment.info_dissemination_methods}
 						bind:transportation_methods={community_empowerment.transportation_methods}
-						bind:quality_types={housing.quality_types}
-						bind:ownership_types={housing.ownership_types}
 						bind:total_count={domestic_animals.total_count}
 						bind:dogs={domestic_animals.dogs}
 						bind:cats={domestic_animals.cats}
 						bind:dogs_vaccinated={domestic_animals.dogs_vaccinated}
 						bind:cats_vaccinated={domestic_animals.cats_vaccinated}
-						bind:households_with_backyard_garden={food_security.households_with_backyard_garden}
-						bind:common_garden_commodities={food_security.common_garden_commodities}
 					/>
 				</Tabs.Content>
 			</Tabs.Root>

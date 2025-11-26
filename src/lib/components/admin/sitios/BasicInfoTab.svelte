@@ -193,7 +193,8 @@
 			<!-- Sitio Name -->
 			<div class="space-y-2">
 				<Label for="sitio">
-					Sitio/Purok <span class="text-destructive">*</span>
+					Sitio
+					<span class="text-destructive">*</span>
 				</Label>
 				<Input id="sitio" bind:value={name} placeholder="Enter sitio/purok name" />
 			</div>
@@ -203,6 +204,11 @@
 				<Label for="province">Province</Label>
 				<Input id="province" bind:value={province} placeholder="Enter province" />
 			</div> -->
+
+			<div class="space-y-2">
+				<Label for="coding_code">Coding Code</Label>
+				<Input id="coding_code" bind:value={coding.code} placeholder="Enter coding code" />
+			</div>
 
 			<!-- Population -->
 			<div class="space-y-2">
@@ -246,21 +252,6 @@
 				{municipality}
 				{barangay}
 			/>
-		</div>
-
-		<!-- Coding Section -->
-		<div class="space-y-4">
-			<h3 class="text-lg font-semibold">Coding Information</h3>
-			<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-				<div class="space-y-2">
-					<Label for="coding_number">Coding Number</Label>
-					<Input id="coding_number" bind:value={coding.number} placeholder="Enter coding number" />
-				</div>
-				<div class="space-y-2">
-					<Label for="coding_code">Coding Code</Label>
-					<Input id="coding_code" bind:value={coding.code} placeholder="Enter coding code" />
-				</div>
-			</div>
 		</div>
 	</Card.Content>
 </Card.Root>
