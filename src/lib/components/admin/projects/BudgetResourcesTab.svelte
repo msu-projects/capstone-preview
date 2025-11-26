@@ -26,10 +26,14 @@
 		'provincial'
 	);
 	let newSourceAmount = $state('');
+	let isCustomSourceName = $state(false);
+	let selectedSourceNameOption = $state('');
 
 	// Budget Component Form
 	let newComponentName = $state('');
 	let newComponentAmount = $state('');
+	let isCustomComponentName = $state(false);
+	let selectedComponentNameOption = $state('');
 
 	const totalBudgetAmount = $derived(Number(totalBudget) || 0);
 
@@ -51,8 +55,41 @@
 		{ value: 'lgu_counterpart', label: 'LGU Counterpart' }
 	];
 
+	const sourceNameOptions = [
+		{ value: 'Provincial Local Development Fund (LDF)', label: 'Provincial LDF' },
+		{ value: 'National Government Allocation', label: 'National Government Allocation' },
+		{ value: 'Partner Organization Funding', label: 'Partner Organization Funding' },
+		{ value: 'LGU Counterpart', label: 'LGU Counterpart' },
+		{ value: 'custom', label: 'Custom...' }
+	];
+
+	const componentNameOptions = [
+		{ value: 'Contract Cost', label: 'Contract Cost' },
+		{ value: 'Materials/Supplies', label: 'Materials/Supplies' },
+		{ value: 'Labor/Services', label: 'Labor/Services' },
+		{ value: 'Equipment Rental', label: 'Equipment Rental' },
+		{ value: 'Training/Capacity Building', label: 'Training/Capacity Building' },
+		{ value: 'Administrative Costs', label: 'Administrative Costs' },
+		{ value: 'Contingency', label: 'Contingency' },
+		{ value: 'custom', label: 'Custom...' }
+	];
+
 	const sourceTypeLabel = $derived(
 		sourceTypeOptions.find((opt) => opt.value === newSourceType)?.label ?? 'Select Type'
+	);
+
+	const sourceNameLabel = $derived(
+		isCustomSourceName
+			? 'Custom...'
+			: sourceNameOptions.find((opt) => opt.value === selectedSourceNameOption)?.label ??
+				'Select Source'
+	);
+
+	const componentNameLabel = $derived(
+		isCustomComponentName
+			? 'Custom...'
+			: componentNameOptions.find((opt) => opt.value === selectedComponentNameOption)?.label ??
+				'Select Component'
 	);
 
 	function addFundingSource() {
@@ -74,6 +111,8 @@
 		newSourceName = '';
 		newSourceAmount = '';
 		newSourceType = 'provincial';
+		isCustomSourceName = false;
+		selectedSourceNameOption = '';
 	}
 
 	function removeFundingSource(index: number) {
@@ -97,10 +136,34 @@
 
 		newComponentName = '';
 		newComponentAmount = '';
+		isCustomComponentName = false;
+		selectedComponentNameOption = '';
 	}
 
 	function removeBudgetComponent(index: number) {
 		budgetComponents = budgetComponents.filter((_: BudgetComponent, i: number) => i !== index);
+	}
+
+	function handleSourceNameChange(value: string) {
+		selectedSourceNameOption = value;
+		if (value === 'custom') {
+			isCustomSourceName = true;
+			newSourceName = '';
+		} else {
+			isCustomSourceName = false;
+			newSourceName = value;
+		}
+	}
+
+	function handleComponentNameChange(value: string) {
+		selectedComponentNameOption = value;
+		if (value === 'custom') {
+			isCustomComponentName = true;
+			newComponentName = '';
+		} else {
+			isCustomComponentName = false;
+			newComponentName = value;
+		}
 	}
 
 	function getSourceTypeLabel(type: string): string {
@@ -238,12 +301,32 @@
 			<div class="grid gap-3 md:grid-cols-4">
 				<div class="space-y-2">
 					<Label for="source-name" class="text-xs">Source Name</Label>
-					<Input
-						id="source-name"
-						bind:value={newSourceName}
-						placeholder="e.g., Provincial LDF"
-						class="h-9"
-					/>
+					{#if isCustomSourceName}
+						<Input
+							id="source-name"
+							bind:value={newSourceName}
+							placeholder="Enter custom source name"
+							class="h-9"
+						/>
+					{:else}
+						<Select.Root
+							type="single"
+							name="source-name"
+							value={selectedSourceNameOption}
+							onValueChange={handleSourceNameChange}
+						>
+							<Select.Trigger class="h-9 w-full">
+								{sourceNameLabel}
+							</Select.Trigger>
+							<Select.Content>
+								{#each sourceNameOptions as option (option.value)}
+									<Select.Item value={option.value} label={option.label}>
+										{option.label}
+									</Select.Item>
+								{/each}
+							</Select.Content>
+						</Select.Root>
+					{/if}
 				</div>
 				<div class="space-y-2">
 					<Label for="source-type" class="text-xs">Type</Label>
@@ -371,12 +454,32 @@
 			<div class="grid gap-3 md:grid-cols-3">
 				<div class="space-y-2">
 					<Label for="component-name" class="text-xs">Component Name</Label>
-					<Input
-						id="component-name"
-						bind:value={newComponentName}
-						placeholder="e.g., Materials & Supplies"
-						class="h-9"
-					/>
+					{#if isCustomComponentName}
+						<Input
+							id="component-name"
+							bind:value={newComponentName}
+							placeholder="Enter custom component name"
+							class="h-9"
+						/>
+					{:else}
+						<Select.Root
+							type="single"
+							name="component-name"
+							value={selectedComponentNameOption}
+							onValueChange={handleComponentNameChange}
+						>
+							<Select.Trigger class="h-9 w-full">
+								{componentNameLabel}
+							</Select.Trigger>
+							<Select.Content>
+								{#each componentNameOptions as option (option.value)}
+									<Select.Item value={option.value} label={option.label}>
+										{option.label}
+									</Select.Item>
+								{/each}
+							</Select.Content>
+						</Select.Root>
+					{/if}
 				</div>
 				<div class="space-y-2">
 					<Label for="component-amount" class="text-xs">Amount (PHP)</Label>
