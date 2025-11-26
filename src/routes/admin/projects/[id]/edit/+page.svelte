@@ -377,6 +377,9 @@
 					male: Number(employmentMale) || 0,
 					female: Number(employmentFemale) || 0
 				},
+				project_manager_team: {
+					agency: implementingAgency
+				},
 				updated_at: new Date().toISOString()
 			};
 
