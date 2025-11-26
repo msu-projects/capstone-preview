@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { onMount, onDestroy } from 'svelte';
 	import type { Project } from '$lib/types';
 	import { MapPin } from '@lucide/svelte';
+	import { onDestroy, onMount } from 'svelte';
 
 	interface Props {
 		project: Project;
@@ -9,7 +9,7 @@
 
 	const { project }: Props = $props();
 
-	let mapContainer: HTMLDivElement;
+	let mapContainer = $state();
 	let map: any;
 	let L: any;
 

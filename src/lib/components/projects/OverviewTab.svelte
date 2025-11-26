@@ -214,7 +214,7 @@
 
 		<!-- Right Column: Key Metrics -->
 		<div class="space-y-6">
-			<Card.Root class="shadow-sm">
+			<Card.Root class="gap-2 shadow-sm">
 				<Card.Header class="pb-4">
 					<div class="flex items-center gap-2">
 						<div class="rounded-lg bg-blue-50 p-1.5">
@@ -253,7 +253,7 @@
 				</Card.Content>
 			</Card.Root>
 
-			<Card.Root class="shadow-sm">
+			<Card.Root class="gap-2 shadow-sm">
 				<Card.Header class="pb-4">
 					<div class="flex items-center gap-2">
 						<div class="rounded-lg bg-blue-50 p-1.5">
@@ -287,7 +287,7 @@
 				</Card.Content>
 			</Card.Root>
 
-			<Card.Root class="shadow-sm">
+			<Card.Root class="gap-2 shadow-sm">
 				<Card.Header class="pb-4">
 					<div class="flex items-center gap-2">
 						<div class="rounded-lg bg-blue-50 p-1.5">
