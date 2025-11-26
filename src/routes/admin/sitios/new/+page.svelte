@@ -9,8 +9,8 @@
 	import * as Card from '$lib/components/ui/card';
 	import * as Tabs from '$lib/components/ui/tabs';
 	import type { Sitio } from '$lib/types';
-	import { loadSitios, saveSitios } from '$lib/utils/storage';
 	import { validateDemographics } from '$lib/utils/demographic-validation';
+	import { loadSitios, saveSitios } from '$lib/utils/storage';
 	import {
 		ArrowLeft,
 		ArrowRight,
@@ -67,7 +67,7 @@
 		farmers_count: 0,
 		farmer_associations: 0,
 		farm_area_hectares: 0,
-		top_crops: ['', '', '', '', '']
+		top_crops: ['']
 	});
 
 	// Tab 6: Water & Sanitation

@@ -13,7 +13,7 @@
 		farmers_count = $bindable(0),
 		farmer_associations = $bindable(0),
 		farm_area_hectares = $bindable(0),
-		top_crops = $bindable(['', '', '', '', '']),
+		top_crops = $bindable(['']),
 		pigs = $bindable(0),
 		cows = $bindable(0),
 		carabaos = $bindable(0),
@@ -77,12 +77,15 @@
 		employments = employments;
 	}
 
-	// Get available employment types for a specific index (excluding already selected ones)
-	function getAvailableEmploymentTypes(currentIndex: number) {
-		const selectedTypes = employments
-			.map((e, i) => (i !== currentIndex && e.type ? e.type : null))
-			.filter((t): t is string => t !== null && t !== '');
-		return employmentTypes.filter((type) => !selectedTypes.includes(type));
+	// Helper functions for top crops management
+	function addCrop() {
+		top_crops.push('');
+		top_crops = top_crops;
+	}
+
+	function removeCrop(index: number) {
+		top_crops.splice(index, 1);
+		top_crops = top_crops;
 	}
 </script>
 
@@ -135,22 +138,14 @@
 										type="single"
 										value={employment.type}
 										onValueChange={(val) => {
-											if (val) {
-												// Check if this type is already used by another employment
-												const isDuplicate = employments.some(
-													(e, idx) => idx !== i && e.type === val
-												);
-												if (!isDuplicate) {
-													employment.type = val;
-												}
-											}
+											if (val) employment.type = val;
 										}}
 									>
 										<Select.Trigger id="employment_type_{i}" class="w-full">
 											{employment.type || 'Select employment type'}
 										</Select.Trigger>
 										<Select.Content>
-											{#each getAvailableEmploymentTypes(i) as type}
+											{#each employmentTypes as type}
 												<Select.Item value={type}>{type}</Select.Item>
 											{/each}
 											<Select.Separator />
@@ -161,16 +156,6 @@
 													bind:value={employment.type}
 													placeholder="Enter custom employment"
 													class="mt-1"
-													onblur={() => {
-														// Check for duplicate on blur
-														const isDuplicate = employments.some(
-															(e, idx) =>
-																idx !== i && e.type === employment.type && employment.type !== ''
-														);
-														if (isDuplicate) {
-															employment.type = '';
-														}
-													}}
 												/>
 											</div>
 										</Select.Content>
@@ -257,50 +242,161 @@
 				</div>
 			</div>
 			<div class="space-y-3">
-				<Label>Top Crops (up to 5)</Label>
-				<div class="grid grid-cols-1 gap-3 md:grid-cols-2">
-					{#each top_crops as crop, i}
-						<Input
-							id={`crop_${i}`}
-							bind:value={top_crops[i]}
-							placeholder="e.g., Rice, Corn, Vegetables"
-						/>
-					{/each}
+				<div class="flex items-center justify-between">
+					<Label>Top Crops</Label>
+					<Button type="button" variant="outline" size="sm" onclick={addCrop}>
+						<Plus class="mr-2 size-4" />
+						Add Crop
+					</Button>
 				</div>
+
+				{#if top_crops.length === 0}
+					<div
+						class="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground"
+					>
+						No crops added. Click "Add Crop" to get started.
+					</div>
+				{:else}
+					<div class="space-y-2">
+						<!-- Column Header -->
+						<div class="flex items-center gap-2">
+							<div class="flex-1">
+								<Label>Crop Name</Label>
+							</div>
+							<div class="w-10"></div>
+						</div>
+
+						<!-- Crop Rows -->
+						{#each top_crops as crop, i}
+							<div class="flex items-center gap-2">
+								<div class="flex-1">
+									<Input
+										id={`crop_${i}`}
+										bind:value={top_crops[i]}
+										placeholder="e.g., Rice, Corn, Vegetables"
+									/>
+								</div>
+
+								<Button
+									type="button"
+									variant="destructive"
+									size="icon"
+									class="size-10"
+									onclick={() => removeCrop(i)}
+								>
+									<Trash2 class="size-4" />
+								</Button>
+							</div>
+						{/each}
+					</div>
+				{/if}
 			</div>
 		</div>
 
 		<!-- Livestock & Poultry -->
 		<div class="space-y-4">
 			<h3 class="text-lg font-semibold">Livestock & Poultry</h3>
-			<div class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-				<div class="space-y-2">
-					<Label for="pigs">Pigs</Label>
-					<NumberInput id="pigs" bind:value={pigs} placeholder="0" min={0} />
+			<div class="space-y-2">
+				<!-- Column Headers -->
+				<div class="flex items-center gap-2">
+					<div class="flex-1">
+						<Label>Type</Label>
+					</div>
+					<div class="w-32">
+						<Label>Count</Label>
+					</div>
 				</div>
-				<div class="space-y-2">
-					<Label for="cows">Cows</Label>
-					<NumberInput id="cows" bind:value={cows} placeholder="0" min={0} />
+
+				<!-- Livestock Rows -->
+				<div class="flex items-center gap-2">
+					<div class="flex-1">
+						<div
+							class="flex h-10 items-center rounded-md border border-input bg-muted px-3 text-sm"
+						>
+							Pigs
+						</div>
+					</div>
+					<div class="w-32">
+						<NumberInput id="pigs" bind:value={pigs} placeholder="0" min={0} />
+					</div>
 				</div>
-				<div class="space-y-2">
-					<Label for="carabaos">Carabaos</Label>
-					<NumberInput id="carabaos" bind:value={carabaos} placeholder="0" min={0} />
+
+				<div class="flex items-center gap-2">
+					<div class="flex-1">
+						<div
+							class="flex h-10 items-center rounded-md border border-input bg-muted px-3 text-sm"
+						>
+							Cows
+						</div>
+					</div>
+					<div class="w-32">
+						<NumberInput id="cows" bind:value={cows} placeholder="0" min={0} />
+					</div>
 				</div>
-				<div class="space-y-2">
-					<Label for="horses">Horses</Label>
-					<NumberInput id="horses" bind:value={horses} placeholder="0" min={0} />
+
+				<div class="flex items-center gap-2">
+					<div class="flex-1">
+						<div
+							class="flex h-10 items-center rounded-md border border-input bg-muted px-3 text-sm"
+						>
+							Carabaos
+						</div>
+					</div>
+					<div class="w-32">
+						<NumberInput id="carabaos" bind:value={carabaos} placeholder="0" min={0} />
+					</div>
 				</div>
-				<div class="space-y-2">
-					<Label for="goats">Goats</Label>
-					<NumberInput id="goats" bind:value={goats} placeholder="0" min={0} />
+
+				<div class="flex items-center gap-2">
+					<div class="flex-1">
+						<div
+							class="flex h-10 items-center rounded-md border border-input bg-muted px-3 text-sm"
+						>
+							Horses
+						</div>
+					</div>
+					<div class="w-32">
+						<NumberInput id="horses" bind:value={horses} placeholder="0" min={0} />
+					</div>
 				</div>
-				<div class="space-y-2">
-					<Label for="chickens">Chickens</Label>
-					<NumberInput id="chickens" bind:value={chickens} placeholder="0" min={0} />
+
+				<div class="flex items-center gap-2">
+					<div class="flex-1">
+						<div
+							class="flex h-10 items-center rounded-md border border-input bg-muted px-3 text-sm"
+						>
+							Goats
+						</div>
+					</div>
+					<div class="w-32">
+						<NumberInput id="goats" bind:value={goats} placeholder="0" min={0} />
+					</div>
 				</div>
-				<div class="space-y-2">
-					<Label for="ducks">Ducks</Label>
-					<NumberInput id="ducks" bind:value={ducks} placeholder="0" min={0} />
+
+				<div class="flex items-center gap-2">
+					<div class="flex-1">
+						<div
+							class="flex h-10 items-center rounded-md border border-input bg-muted px-3 text-sm"
+						>
+							Chickens
+						</div>
+					</div>
+					<div class="w-32">
+						<NumberInput id="chickens" bind:value={chickens} placeholder="0" min={0} />
+					</div>
+				</div>
+
+				<div class="flex items-center gap-2">
+					<div class="flex-1">
+						<div
+							class="flex h-10 items-center rounded-md border border-input bg-muted px-3 text-sm"
+						>
+							Ducks
+						</div>
+					</div>
+					<div class="w-32">
+						<NumberInput id="ducks" bind:value={ducks} placeholder="0" min={0} />
+					</div>
 				</div>
 			</div>
 		</div>
