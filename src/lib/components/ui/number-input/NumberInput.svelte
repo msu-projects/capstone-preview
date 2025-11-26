@@ -17,9 +17,23 @@
 		...restProps
 	}: Props = $props();
 
+	let displayValue = $state(formatNumber(value));
+
+	// Format number with commas
+	function formatNumber(num: number): string {
+		return num.toLocaleString('en-US');
+	}
+
+	// Remove commas and parse number
+	function parseNumber(str: string): number {
+		const cleaned = str.replace(/,/g, '');
+		return parseFloat(cleaned);
+	}
+
 	function handleFocus(e: FocusEvent & { currentTarget: HTMLInputElement }) {
 		const input = e.currentTarget;
-		if (clearZeroOnFocus && input.value === '0') {
+		if (clearZeroOnFocus && value === 0) {
+			displayValue = '';
 			input.value = '';
 		}
 		onfocus?.(e);
@@ -29,27 +43,49 @@
 		const input = e.currentTarget;
 		if (input.value === '' || input.value === '-') {
 			value = 0;
-			input.value = '0';
+			displayValue = '0';
+		} else {
+			// Reformat with commas on blur
+			displayValue = formatNumber(value);
 		}
 		onblur?.(e);
 	}
 
 	function handleInput(e: Event & { currentTarget: HTMLInputElement }) {
 		const input = e.currentTarget;
-		const numValue = parseFloat(input.value);
+		const rawValue = input.value;
+
+		// Allow only numbers, commas, minus sign, and decimal point
+		const filtered = rawValue.replace(/[^\d,.-]/g, '');
+
+		if (filtered !== rawValue) {
+			input.value = filtered;
+			displayValue = filtered;
+			return;
+		}
+
+		displayValue = filtered;
+		const numValue = parseNumber(filtered);
+
 		if (!isNaN(numValue)) {
 			value = numValue;
-		} else if (input.value === '' || input.value === '-') {
+		} else if (filtered === '' || filtered === '-') {
 			// Allow empty or just minus sign during typing
 			value = 0;
 		}
+
 		oninput?.(e);
 	}
+
+	// Update display value when value prop changes externally
+	$effect(() => {
+		displayValue = formatNumber(value);
+	});
 </script>
 
 <Input
-	type="number"
-	{value}
+	type="text"
+	value={displayValue}
 	onfocus={handleFocus}
 	onblur={handleBlur}
 	oninput={handleInput}

@@ -55,7 +55,7 @@ export const csvSitiosData: Sitio[] = [
 		},
 		water_sanitation: {
 			water_systems_count: 0,
-			water_sources: [{ source: 'DEEP WELL' }],
+			water_sources: [{ source: 'DEEP WELL', status: 'Good' }],
 			households_without_toilet: 12,
 			toilet_facility_types: ['Water Sealed'],
 			waste_segregation_practice: true

@@ -60,12 +60,14 @@
 					{#if isGenderValid}
 						<div class="flex items-center gap-2 text-sm text-success">
 							<CheckCircle2 class="size-4" />
-							<span>Matches population ({genderTotal})</span>
+							<span>Matches population ({genderTotal.toLocaleString()})</span>
 						</div>
 					{:else}
 						<div class="flex items-center gap-2 text-sm text-destructive">
 							<AlertCircle class="size-4" />
-							<span>Must equal {population} (currently {genderTotal})</span>
+							<span
+								>Must equal {population.toLocaleString()} (currently {genderTotal.toLocaleString()})</span
+							>
 						</div>
 					{/if}
 				{/if}
@@ -87,12 +89,12 @@
 			{#if hasGenderData && hasPopulation && !isGenderValid}
 				<div class="rounded-md border border-destructive/50 bg-destructive/10 p-3">
 					<div class="flex gap-2">
-						<AlertCircle class="size-4 shrink-0 text-destructive mt-0.5" />
+						<AlertCircle class="mt-0.5 size-4 shrink-0 text-destructive" />
 						<div class="text-sm">
 							<p class="font-medium text-destructive">
 								Gender distribution must equal total population
 							</p>
-							<p class="text-muted-foreground mt-1">
+							<p class="mt-1 text-muted-foreground">
 								Male ({male}) + Female ({female}) = {genderTotal}, but Population is {population}
 							</p>
 						</div>
@@ -109,12 +111,14 @@
 					{#if isAgeValid}
 						<div class="flex items-center gap-2 text-sm text-success">
 							<CheckCircle2 class="size-4" />
-							<span>Matches population ({ageTotal})</span>
+							<span>Matches population ({ageTotal.toLocaleString()})</span>
 						</div>
 					{:else}
 						<div class="flex items-center gap-2 text-sm text-destructive">
 							<AlertCircle class="size-4" />
-							<span>Must equal {population} (currently {ageTotal})</span>
+							<span
+								>Must equal {population.toLocaleString()} (currently {ageTotal.toLocaleString()})</span
+							>
 						</div>
 					{/if}
 				{/if}
@@ -134,14 +138,14 @@
 				</div>
 			</div>
 			{#if hasAgeData && hasPopulation && !isAgeValid}
-				<div class="rounded-md border border-destructive/50 bg-destructive/10 p-3">
+				<div class="hidden rounded-md border border-destructive/50 bg-destructive/10 p-3">
 					<div class="flex gap-2">
-						<AlertCircle class="size-4 shrink-0 text-destructive mt-0.5" />
+						<AlertCircle class="mt-0.5 size-4 shrink-0 text-destructive" />
 						<div class="text-sm">
 							<p class="font-medium text-destructive">
 								Age distribution must equal total population
 							</p>
-							<p class="text-muted-foreground mt-1">
+							<p class="mt-1 text-muted-foreground">
 								Age 0-14 ({age_0_14}) + Age 15-64 ({age_15_64}) + Age 65+ ({age_65_above}) =
 								{ageTotal}, but Population is {population}
 							</p>

@@ -80,7 +80,7 @@ export interface Sitio {
 	// Water and sanitation
 	water_sanitation?: {
 		water_systems_count: number;
-		water_sources: Array<{ source: string; condition?: string }>;
+		water_sources: Array<{ source: string; status: string }>;
 		households_without_toilet: number;
 		toilet_facility_types: string[];
 		waste_segregation_practice: boolean | null;

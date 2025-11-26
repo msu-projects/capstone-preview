@@ -10,7 +10,7 @@
 
 	let {
 		water_systems_count = $bindable(0),
-		water_sources = $bindable([{ source: '', condition: '' }]),
+		water_sources = $bindable([{ source: '', status: '' }]),
 		households_without_toilet = $bindable(0),
 		toilet_facility_types = $bindable([]),
 		waste_segregation_practice = $bindable(null),
@@ -20,7 +20,7 @@
 		ownership_types = $bindable([])
 	}: {
 		water_systems_count: number;
-		water_sources: Array<{ source: string; condition: string }>;
+		water_sources: Array<{ source: string; status: string }>;
 		households_without_toilet: number;
 		toilet_facility_types: string[];
 		waste_segregation_practice: boolean | null;
@@ -40,6 +40,17 @@
 		'Informal Settler',
 		'Owner Consent'
 	];
+	const waterStatusOptions = [
+		'Good',
+		'Needs Repair',
+		'Rehabilitation',
+		'Not Functioning',
+		'Private'
+	];
+
+	// Track which water sources are using custom status
+	let customStatuses = $state<Record<number, boolean>>({});
+	let customInputValues = $state<Record<number, string>>({});
 
 	// Initialize quality_types with default values if empty
 	$effect(() => {
@@ -55,12 +66,49 @@
 		}
 	});
 
+	// Initialize custom status tracking for existing water sources
+	$effect(() => {
+		water_sources.forEach((source, i) => {
+			if (source.status && !waterStatusOptions.includes(source.status)) {
+				customStatuses[i] = true;
+				customInputValues[i] = source.status;
+			}
+		});
+	});
+
 	function addWaterSource() {
-		water_sources = [...water_sources, { source: '', condition: '' }];
+		water_sources = [...water_sources, { source: '', status: '' }];
 	}
 
 	function removeWaterSource(index: number) {
 		water_sources = water_sources.filter((_, i) => i !== index);
+		// Clean up tracking objects
+		const newCustomStatuses: Record<number, boolean> = {};
+		const newCustomInputValues: Record<number, string> = {};
+		Object.keys(customStatuses).forEach((key) => {
+			const idx = parseInt(key);
+			if (idx < index) {
+				newCustomStatuses[idx] = customStatuses[idx];
+				newCustomInputValues[idx] = customInputValues[idx];
+			} else if (idx > index) {
+				newCustomStatuses[idx - 1] = customStatuses[idx];
+				newCustomInputValues[idx - 1] = customInputValues[idx];
+			}
+		});
+		customStatuses = newCustomStatuses;
+		customInputValues = newCustomInputValues;
+	}
+
+	function handleStatusChange(index: number, value: string | undefined) {
+		if (value) {
+			customStatuses[index] = false;
+			water_sources[index].status = value;
+		}
+	}
+
+	function handleCustomStatusInput(index: number, value: string) {
+		customInputValues[index] = value;
+		water_sources[index].status = value;
 	}
 
 	function addQualityType() {
@@ -119,29 +167,94 @@
 		<!-- Water Sources -->
 		<div class="space-y-4">
 			<div class="flex items-center justify-between">
-				<h3 class="text-lg font-semibold">Water Sources</h3>
+				<Label>Water Sources</Label>
 				<Button type="button" variant="outline" size="sm" onclick={addWaterSource}>
 					<Plus class="mr-2 size-4" />
 					Add Source
 				</Button>
 			</div>
-			<div class="space-y-3">
-				{#each water_sources as source, i}
-					<div class="flex gap-2">
-						<div class="flex-1 space-y-2">
-							<Input bind:value={source.source} placeholder="e.g., Deep Well, Spring, River" />
+
+			{#if water_sources.length === 0}
+				<div class="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">
+					No water sources added. Click "Add Source" to get started.
+				</div>
+			{:else}
+				<div class="space-y-2">
+					<!-- Column Headers -->
+					<div class="flex items-center gap-2">
+						<div class="flex-1">
+							<Label>Source</Label>
 						</div>
-						<div class="flex-1 space-y-2">
-							<Input bind:value={source.condition} placeholder="e.g., Good, Fair, Poor" />
+						<div class="w-50">
+							<Label>Condition</Label>
 						</div>
-						{#if water_sources.length > 1}
-							<Button type="button" variant="ghost" size="sm" onclick={() => removeWaterSource(i)}>
+						<div class="w-10"></div>
+					</div>
+
+					<!-- Water Source Rows -->
+					{#each water_sources as source, i (i)}
+						<div class="flex items-center gap-2">
+							<div class="flex-1">
+								<Input
+									id={`source_${i}`}
+									bind:value={source.source}
+									placeholder="e.g., Deep Well, Spring, River"
+								/>
+							</div>
+
+							<div class="w-50">
+								{#if customStatuses[i]}
+									<Input
+										id={`status_${i}`}
+										value={customInputValues[i] || ''}
+										oninput={(e) => handleCustomStatusInput(i, e.currentTarget.value)}
+										placeholder="Enter custom status"
+									/>
+								{:else}
+									<Select.Root
+										type="single"
+										value={waterStatusOptions.includes(source.status) ? source.status : undefined}
+										onValueChange={(v) => handleStatusChange(i, v)}
+									>
+										<Select.Trigger id={`status_${i}`} class="w-full">
+											{source.status || 'Select status...'}
+										</Select.Trigger>
+										<Select.Content>
+											{#each waterStatusOptions as option (option)}
+												<Select.Item value={option}>{option}</Select.Item>
+											{/each}
+											<Select.Separator />
+											<div class="p-2">
+												<Label for="custom_status_{i}" class="text-xs">Custom Status</Label>
+												<Input
+													id="custom_status_{i}"
+													value={customInputValues[i] || ''}
+													oninput={(e) => {
+														handleCustomStatusInput(i, e.currentTarget.value);
+														customStatuses[i] = true;
+													}}
+													placeholder="Enter custom status"
+													class="mt-1"
+												/>
+											</div>
+										</Select.Content>
+									</Select.Root>
+								{/if}
+							</div>
+
+							<Button
+								type="button"
+								variant="destructive"
+								size="icon"
+								class="size-10"
+								onclick={() => removeWaterSource(i)}
+							>
 								<Trash2 class="size-4" />
 							</Button>
-						{/if}
-					</div>
-				{/each}
-			</div>
+						</div>
+					{/each}
+				</div>
+			{/if}
 		</div>
 
 		<!-- Sanitation -->

@@ -73,7 +73,7 @@
 	// Tab 6: Water & Sanitation
 	let water_sanitation = $state({
 		water_systems_count: 0,
-		water_sources: [{ source: '', condition: '' }],
+		water_sources: [{ source: '', status: '' }],
 		households_without_toilet: 0,
 		toilet_facility_types: [],
 		waste_segregation_practice: null
@@ -347,7 +347,6 @@
 						bind:sectoral_organizations={community_empowerment.sectoral_organizations}
 						bind:info_dissemination_methods={community_empowerment.info_dissemination_methods}
 						bind:transportation_methods={community_empowerment.transportation_methods}
-						bind:total_count={domestic_animals.total_count}
 						bind:dogs={domestic_animals.dogs}
 						bind:cats={domestic_animals.cats}
 						bind:dogs_vaccinated={domestic_animals.dogs_vaccinated}
