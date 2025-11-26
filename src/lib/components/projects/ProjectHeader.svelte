@@ -1,0 +1,49 @@
+<script lang="ts">
+	import { Badge } from '$lib/components/ui/badge';
+	import type { Project } from '$lib/types';
+
+	interface Props {
+		project: Project;
+	}
+
+	const { project }: Props = $props();
+
+	function formatCurrency(amount: number): string {
+		return new Intl.NumberFormat('en-PH', {
+			style: 'currency',
+			currency: 'PHP',
+			minimumFractionDigits: 0,
+			maximumFractionDigits: 2
+		}).format(amount);
+	}
+</script>
+
+<!-- Project Header Block -->
+<div class="mb-8 flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+	<div class="flex-1 space-y-3">
+		<div class="flex flex-wrap items-center gap-2">
+			<Badge
+				variant={project.status === 'in-progress' ? 'default' : 'secondary'}
+				class={project.status === 'in-progress'
+					? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100/80'
+					: ''}
+			>
+				{project.status === 'in-progress'
+					? 'Ongoing'
+					: project.status.charAt(0).toUpperCase() + project.status.slice(1)}
+			</Badge>
+			<Badge variant="outline" class="bg-blue-50 text-blue-700">
+				{project.project_type_name || project.category}
+			</Badge>
+		</div>
+		<h1 class="text-3xl font-bold leading-tight tracking-tight text-slate-900">
+			{project.title}
+		</h1>
+	</div>
+	<div
+		class="flex flex-col items-start gap-1 rounded-lg border border-slate-200 bg-slate-50 px-6 py-4 md:items-end md:min-w-[200px]"
+	>
+		<span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Total Budget</span>
+		<span class="text-2xl font-bold text-slate-900">{formatCurrency(project.budget)}</span>
+	</div>
+</div>

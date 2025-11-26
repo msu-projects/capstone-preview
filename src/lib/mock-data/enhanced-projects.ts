@@ -410,6 +410,10 @@ export const enhancedProjects: Project[] = [
 			dilg_rep: 'LGOO Maria Santos',
 			sectoral_rep: 'Federation of Farmers Associations - South Cotabato'
 		},
+		employment_generated: {
+			male: 18,
+			female: 12
+		},
 		created_at: '2025-01-10',
 		updated_at: '2025-11-11'
 	},
@@ -602,6 +606,10 @@ export const enhancedProjects: Project[] = [
 			provincial_team: ['Provincial Engineer', 'PPDO Infrastructure Monitoring Team'],
 			dilg_rep: 'LGOO Ricardo Tan',
 			sectoral_rep: 'Water District Representative'
+		},
+		employment_generated: {
+			male: 45,
+			female: 12
 		},
 		created_at: '2025-02-15',
 		updated_at: '2025-11-11'
