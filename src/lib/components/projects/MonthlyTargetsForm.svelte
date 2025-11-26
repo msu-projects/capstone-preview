@@ -4,7 +4,6 @@
 	import * as Card from '$lib/components/ui/card';
 	import { CurrencyInput } from '$lib/components/ui/currency-input';
 	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
 	import type { MonthlyPhysicalProgress, MonthlyReleaseSchedule } from '$lib/types';
 	import {
 		formatMonth,
@@ -13,14 +12,7 @@
 		generateMonthlyTemplate,
 		validateCumulativePercentage
 	} from '$lib/utils/monthly-planning';
-	import {
-		Banknote,
-		Calendar,
-		CircleAlert,
-		CircleCheck,
-		Sparkles,
-		TrendingUp
-	} from '@lucide/svelte';
+	import { Banknote, Calendar, CircleAlert, CircleCheck, TrendingUp } from '@lucide/svelte';
 
 	interface Props {
 		startDate: string;
@@ -188,14 +180,14 @@
 			</Alert.Description>
 		</Alert.Root>
 	{:else}
-		<Alert.Root>
+		<!-- <Alert.Root>
 			<Sparkles class="size-4" />
 			<Alert.Title>Auto-Generated Templates</Alert.Title>
 			<Alert.Description>
 				Monthly targets are automatically distributed evenly across all project months. Physical
 				progress reaches 100% by the final month. Adjust individual months as needed.
 			</Alert.Description>
-		</Alert.Root>
+		</Alert.Root> -->
 	{/if}
 
 	<!-- Physical Progress Tracker -->
@@ -279,48 +271,66 @@
 			Budget Release Schedule
 		</h4>
 
-		{#snippet budgetCard()}
+		<Card.Root>
 			{@const budgetValidation = getBudgetValidationStatus()}
-			<Card.Root>
-				<Card.Header class="pb-3">
-					<div class="flex items-start justify-between">
-						<div class="flex-1">
-							<Card.Title class="text-sm">Monthly Budget Releases</Card.Title>
-							<div class="mt-1 flex items-center gap-2">
-								<span class="text-xs text-muted-foreground">
-									Total Budget: ₱{totalBudget.toLocaleString()}
-								</span>
-								<Badge variant={budgetValidation.variant} class="text-xs">
-									{budgetValidation.message}
-								</Badge>
-							</div>
+			<Card.Header class="pb-3">
+				<div class="flex items-start justify-between">
+					<div class="flex-1">
+						<Card.Title class="text-sm">Monthly Budget Releases</Card.Title>
+						<div class="mt-1 flex items-center gap-2">
+							<span class="text-xs text-muted-foreground">
+								Total Budget: ₱{totalBudget.toLocaleString()}
+							</span>
+							<Badge variant={budgetValidation.variant} class="text-xs">
+								{budgetValidation.message}
+							</Badge>
 						</div>
 					</div>
-				</Card.Header>
+				</div>
+			</Card.Header>
 
-				<Card.Content>
-					<div class="grid grid-cols-3 gap-3">
-						{#each releaseSchedule as schedule, index (schedule.month_year)}
-							{@const budgetInputId = `budget-${schedule.month_year}`}
-							<div class="space-y-1.5">
-								<Label for={budgetInputId} class="text-xs">
-									{formatMonth(schedule.month_year)}
-								</Label>
+			<Card.Content>
+				<div class="space-y-4">
+					<!-- Header Row -->
+					<div
+						class="grid grid-cols-2 gap-2 border-b pb-2 text-xs font-semibold text-muted-foreground"
+					>
+						<div>Month</div>
+						<div>Planned Release</div>
+					</div>
+
+					<!-- Data Rows -->
+					{#each releaseSchedule as schedule, index (schedule.month_year)}
+						<div class="grid grid-cols-2 items-center gap-2">
+							<div class="text-xs font-medium">{formatMonth(schedule.month_year)}</div>
+							<div>
 								<CurrencyInput
-									id={budgetInputId}
+									id={`budget-${schedule.month_year}`}
 									bind:value={releaseSchedule[index].planned_release}
 									class="h-8 text-sm"
 									placeholder="₱ 0"
 									min={0}
 								/>
 							</div>
-						{/each}
-					</div>
-				</Card.Content>
-			</Card.Root>
-		{/snippet}
+						</div>
+					{/each}
 
-		{@render budgetCard()}
+					<!-- Summary Row -->
+					{#if releaseSchedule.length > 0}
+						{@const totalReleased = releaseSchedule.reduce(
+							(sum, item) => sum + item.planned_release,
+							0
+						)}
+						<div class="grid grid-cols-2 gap-2 border-t pt-2 text-sm font-semibold">
+							<div>Total Planned</div>
+							<div class={totalReleased === totalBudget ? 'text-green-600' : 'text-destructive'}>
+								₱{totalReleased.toLocaleString()}
+							</div>
+						</div>
+					{/if}
+				</div>
+			</Card.Content>
+		</Card.Root>
 	</div>
 
 	<!-- Validation Summary -->

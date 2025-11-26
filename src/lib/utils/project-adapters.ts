@@ -53,9 +53,17 @@ export function projectToQuickUpdate(project: Project): QuickUpdateFormData {
 	// Get latest budget utilization for current month
 	const latestBudgetUtil = project.monthly_budget?.find((mb) => mb.month_year === currentMonth);
 
-	// Get planned percentage from performance targets (if available)
+	// Get planned percentage from multiple sources (priority order):
+	// 1. monthly_physical_progress (preferred, from Monthly Planning tab)
+	// 2. performance_targets.monthly_plan_percentage (from performance targets)
+	// 3. monitoring.physical.plan (legacy fallback)
+	const monthlyPhysicalProgress = project.monthly_physical_progress?.find(
+		(mp) => mp.month_year === currentMonth
+	);
 	const performanceTarget = project.performance_targets?.[0];
-	const plannedPercentage = performanceTarget?.monthly_plan_percentage?.[currentMonth];
+	const plannedPercentage =
+		monthlyPhysicalProgress?.plan_percentage ??
+		performanceTarget?.monthly_plan_percentage?.[currentMonth];
 
 	// Calculate cumulative disbursed amount (sum of all monthly expenses up to current month)
 	const cumulativeDisbursed = project.monthly_budget?.reduce((sum, mb) => {
@@ -78,9 +86,15 @@ export function projectToQuickUpdate(project: Project): QuickUpdateFormData {
 		statusIssues: project.monitoring?.statusSummary?.issues || '',
 		statusRecommendations: project.monitoring?.statusSummary?.recommendations || '',
 		catchUpPlan: project.monitoring?.catchUpPlan || '',
-		// Employment
-		maleEmployment: project.monitoring?.employment?.male?.toString() || '0',
-		femaleEmployment: project.monitoring?.employment?.female?.toString() || '0',
+		// Employment - check employment_generated first (new field), then fallback to monitoring.employment (legacy)
+		maleEmployment:
+			project.employment_generated?.male?.toString() ||
+			project.monitoring?.employment?.male?.toString() ||
+			'0',
+		femaleEmployment:
+			project.employment_generated?.female?.toString() ||
+			project.monitoring?.employment?.female?.toString() ||
+			'0',
 		// Financial
 		totalBudget: project.budget || 0,
 		budgetDisbursed: cumulativeDisbursed.toString(), // Cumulative total
@@ -279,6 +293,10 @@ export function applyQuickUpdateToProject(
 		monthly_budget: updatedMonthlyBudget,
 		monthly_progress: updatedMonthlyProgress,
 		performance_targets: updatedPerformanceTargets,
+		employment_generated: {
+			male: Number(formData.maleEmployment || 0),
+			female: Number(formData.femaleEmployment || 0)
+		},
 		updated_at: new Date().toISOString()
 	};
 }

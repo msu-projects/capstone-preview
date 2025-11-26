@@ -507,6 +507,7 @@ export interface Project {
 	funding_sources?: FundingSource[]; // Multi-source funding
 	budget_components?: BudgetComponent[]; // Budget breakdown
 	release_schedule?: MonthlyReleaseSchedule[]; // Monthly releases
+	monthly_physical_progress?: MonthlyPhysicalProgress[]; // Monthly planned/actual progress
 	employment_generated?: {
 		male: number;
 		female: number;

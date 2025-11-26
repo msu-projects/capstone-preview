@@ -373,6 +373,7 @@
 					id: 0,
 					project_id: existingProject!.id
 				})),
+				monthly_physical_progress: monthlyPhysicalProgress,
 				employment_generated: {
 					male: Number(employmentMale) || 0,
 					female: Number(employmentFemale) || 0

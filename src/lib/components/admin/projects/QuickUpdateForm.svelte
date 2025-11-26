@@ -456,7 +456,7 @@
 			{/if}
 		</Card.Header>
 		<Card.Content class="space-y-4">
-			<div class="grid gap-4 md:grid-cols-3">
+			<div class="grid gap-4 md:grid-cols-2">
 				<!-- Target Beneficiaries (Read-only) -->
 				<div class="space-y-2">
 					<Label for="target-beneficiaries">Target Beneficiaries</Label>
@@ -482,7 +482,7 @@
 				</div>
 
 				<!-- Households Reached -->
-				<div class="space-y-2">
+				<!-- <div class="space-y-2">
 					<Label for="households-reached">Households Reached</Label>
 					<Input
 						id="households-reached"
@@ -491,7 +491,7 @@
 						bind:value={householdsReached}
 						placeholder="0"
 					/>
-				</div>
+				</div> -->
 
 				<!-- Auto-calculated: Remaining -->
 				<div class="space-y-2 md:col-span-3">
