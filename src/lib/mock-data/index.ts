@@ -148,6 +148,10 @@ const enhancedProjectsWithMonitoring = enhancedProjects.map((project) => {
 
 	return {
 		...project,
+		employment_generated: {
+			male: maleEmployment,
+			female: femaleEmployment
+		},
 		monitoring: createMonitoringDetails({
 			location: `${project.municipality}`,
 			fiscalYear: project.project_year,
@@ -231,16 +235,18 @@ function initializeProjects(): Project[] {
 			const projectWithMonitoring: Project = {
 				...storedProject,
 				// Add monitoring details if not present
-				monitoring: storedProject.monitoring || createMonitoringDetails({
-					location: storedProject.municipality || '',
-					fiscalYear: storedProject.project_year,
-					allotment: {
-						allocated: storedProject.budget,
-						supplemental: 0,
-						total: storedProject.budget,
-						released: 0
-					}
-				})
+				monitoring:
+					storedProject.monitoring ||
+					createMonitoringDetails({
+						location: storedProject.municipality || '',
+						fiscalYear: storedProject.project_year,
+						allotment: {
+							allocated: storedProject.budget,
+							supplemental: 0,
+							total: storedProject.budget,
+							released: 0
+						}
+					})
 			};
 			mockProjectsMap.set(storedProject.id, projectWithMonitoring);
 		});
@@ -269,16 +275,18 @@ export function refreshProjects(): Project[] {
 	storedProjects.forEach((storedProject) => {
 		const projectWithMonitoring: Project = {
 			...storedProject,
-			monitoring: storedProject.monitoring || createMonitoringDetails({
-				location: storedProject.municipality || '',
-				fiscalYear: storedProject.project_year,
-				allotment: {
-					allocated: storedProject.budget,
-					supplemental: 0,
-					total: storedProject.budget,
-					released: 0
-				}
-			})
+			monitoring:
+				storedProject.monitoring ||
+				createMonitoringDetails({
+					location: storedProject.municipality || '',
+					fiscalYear: storedProject.project_year,
+					allotment: {
+						allocated: storedProject.budget,
+						supplemental: 0,
+						total: storedProject.budget,
+						released: 0
+					}
+				})
 		};
 		mockProjectsMap.set(storedProject.id, projectWithMonitoring);
 	});
@@ -911,6 +919,10 @@ for (let i = 6; i <= 20; i++) {
 		completion_percentage: Math.round(actual),
 		beneficiaries: sitio.population,
 		project_year: 2024,
+		employment_generated: {
+			male: maleEmployment,
+			female: femaleEmployment
+		},
 		timeline: [
 			{
 				date: `2024-0${(i % 9) + 1}-01`,

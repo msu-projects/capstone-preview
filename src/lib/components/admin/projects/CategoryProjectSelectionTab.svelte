@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
@@ -246,22 +245,6 @@
 						{/each}
 					</Select.Content>
 				</Select.Root>
-				{#if selectedProjectTypeData}
-					<p class="flex items-start gap-1.5 text-sm text-muted-foreground">
-						<Info class="mt-0.5 size-4 shrink-0" />
-						{selectedProjectTypeData.description}
-					</p>
-					<div class="mt-3 rounded-lg border border-border bg-muted/30 p-4">
-						<p class="mb-2 text-sm font-medium">Default Performance Indicators:</p>
-						<div class="flex flex-wrap gap-2">
-							{#each selectedProjectTypeData.default_indicators as indicator}
-								<Badge variant="secondary" class="text-xs">
-									{indicator.name} ({indicator.unit})
-								</Badge>
-							{/each}
-						</div>
-					</div>
-				{/if}
 			</div>
 		{/if}
 

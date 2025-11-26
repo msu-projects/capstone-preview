@@ -154,9 +154,8 @@
 	let totalBudget = $state(existingProject?.budget?.toString() ?? '');
 	let directBeneficiariesMale = $state('');
 	let directBeneficiariesFemale = $state('');
-	let employmentGenerated = $state('');
-
-	// Tab 4: Accountability & Partners
+	let employmentMale = $state(existingProject?.employment_generated?.male?.toString() ?? '');
+	let employmentFemale = $state(existingProject?.employment_generated?.female?.toString() ?? ''); // Tab 4: Accountability & Partners
 	let projectManager = $state(
 		existingProject?.project_manager_team?.project_manager ??
 			existingProject?.accountability?.project_manager ??
@@ -374,6 +373,10 @@
 					id: 0,
 					project_id: existingProject!.id
 				})),
+				employment_generated: {
+					male: Number(employmentMale) || 0,
+					female: Number(employmentFemale) || 0
+				},
 				updated_at: new Date().toISOString()
 			};
 
@@ -534,7 +537,8 @@
 						bind:totalBudget
 						bind:directBeneficiariesMale
 						bind:directBeneficiariesFemale
-						bind:employmentGenerated
+						bind:employmentMale
+						bind:employmentFemale
 					/>
 				</Tabs.Content>
 

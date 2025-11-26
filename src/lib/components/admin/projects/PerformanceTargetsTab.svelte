@@ -21,7 +21,8 @@
 		totalBudget = $bindable(''),
 		directBeneficiariesMale = $bindable(''),
 		directBeneficiariesFemale = $bindable(''),
-		employmentGenerated = $bindable('')
+		employmentMale = $bindable(''),
+		employmentFemale = $bindable('')
 	} = $props<{
 		selectedProjectTypeId: number | undefined;
 		performanceTargets: Omit<PerformanceTarget, 'id' | 'project_id'>[];
@@ -31,7 +32,8 @@
 		totalBudget: string;
 		directBeneficiariesMale: string;
 		directBeneficiariesFemale: string;
-		employmentGenerated: string;
+		employmentMale: string;
+		employmentFemale: string;
 	}>();
 
 	const projectType = $derived(
@@ -117,7 +119,7 @@
 		</Card.Card>
 	{:else}
 		<!-- Category-Specific Deliverables -->
-		<Card.Card>
+		<Card.Card class="hidden">
 			<Card.CardHeader>
 				<Card.CardTitle>Performance Deliverables</Card.CardTitle>
 				<Card.CardDescription>
@@ -223,7 +225,7 @@
 				</div>
 
 				<!-- Direct Beneficiaries -->
-				<div>
+				<div class="hidden">
 					<Label class="mb-3 flex items-center gap-2">
 						<Users class="size-4" />
 						Direct Beneficiaries (Male/Female Breakdown)
@@ -257,20 +259,44 @@
 				</div>
 
 				<!-- Employment Generation -->
-				<div class="space-y-2">
-					<Label for="employment" class="flex items-center gap-2">
+				<div>
+					<Label class="mb-3 flex items-center gap-2">
 						<Briefcase class="size-4" />
-						Employment to Generate
+						Employment to Generate (Male/Female Breakdown)
 					</Label>
-					<Input
-						id="employment"
-						type="number"
-						bind:value={employmentGenerated}
-						placeholder="Person-days of employment"
-						min="0"
-					/>
-					<p class="text-xs text-muted-foreground">
-						Total person-days of employment expected to be generated
+					<div class="grid gap-4 md:grid-cols-3">
+						<div class="space-y-2">
+							<Label for="male-employment" class="text-sm">Male</Label>
+							<Input
+								id="male-employment"
+								type="number"
+								bind:value={employmentMale}
+								placeholder="Male employment"
+								min="0"
+							/>
+						</div>
+						<div class="space-y-2">
+							<Label for="female-employment" class="text-sm">Female</Label>
+							<Input
+								id="female-employment"
+								type="number"
+								bind:value={employmentFemale}
+								placeholder="Female employment"
+								min="0"
+							/>
+						</div>
+						<div class="space-y-2">
+							<Label class="text-sm">Total Employment</Label>
+							<Input
+								type="number"
+								value={(Number(employmentMale) || 0) + (Number(employmentFemale) || 0)}
+								disabled
+								class="bg-muted"
+							/>
+						</div>
+					</div>
+					<p class="mt-2 text-xs text-muted-foreground">
+						Total number of people expected to be employed by the project
 					</p>
 				</div>
 			</Card.CardContent>

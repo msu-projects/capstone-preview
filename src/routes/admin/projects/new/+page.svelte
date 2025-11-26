@@ -15,8 +15,11 @@
 		MonthlyPhysicalProgress,
 		MonthlyReleaseSchedule,
 		PerformanceTarget,
-		ProjectSitio
+		Project,
+		ProjectSitio,
+		ProjectStatus
 	} from '$lib/types';
+	import { addProject, getNextProjectId } from '$lib/utils/storage';
 	import type { DateValue } from '@internationalized/date';
 	import { getLocalTimeZone, today } from '@internationalized/date';
 	import {
@@ -32,8 +35,6 @@
 		X
 	} from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
-	import { addProject, getNextProjectId } from '$lib/utils/storage';
-	import type { Project, ProjectStatus } from '$lib/types';
 
 	// Form state
 	let isSaving = $state(false);
@@ -59,7 +60,8 @@
 	let totalBudget = $state('');
 	let directBeneficiariesMale = $state('');
 	let directBeneficiariesFemale = $state('');
-	let employmentGenerated = $state('');
+	let employmentMale = $state('');
+	let employmentFemale = $state('');
 
 	// Tab 5: Budget & Resources
 	let fundingSources = $state<Omit<FundingSource, 'id' | 'project_id'>[]>([]);
@@ -183,7 +185,10 @@
 
 			// Get the first sitio info for legacy fields (required by Project type)
 			const firstSitio = projectSitios[0];
-			const totalBeneficiaries = projectSitios.reduce((sum, ps) => sum + ps.beneficiaries_target, 0);
+			const totalBeneficiaries = projectSitios.reduce(
+				(sum, ps) => sum + ps.beneficiaries_target,
+				0
+			);
 
 			// Determine project status based on start date
 			const startDateValue = targetStartDate?.toString() || '';
@@ -242,6 +247,10 @@
 					id: 0,
 					project_id: nextId
 				})),
+				employment_generated: {
+					male: Number(employmentMale) || 0,
+					female: Number(employmentFemale) || 0
+				},
 				created_at: new Date().toISOString(),
 				updated_at: new Date().toISOString()
 			};
@@ -391,7 +400,8 @@
 						bind:totalBudget
 						bind:directBeneficiariesMale
 						bind:directBeneficiariesFemale
-						bind:employmentGenerated
+						bind:employmentMale
+						bind:employmentFemale
 					/>
 				</Tabs.Content>
 
