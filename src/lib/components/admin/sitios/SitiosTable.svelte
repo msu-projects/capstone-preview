@@ -8,10 +8,12 @@
 		ArrowDownUp,
 		Download,
 		EllipsisVertical,
+		Eye,
 		RefreshCw,
 		SquarePen,
 		Trash2
 	} from '@lucide/svelte';
+	import { goto } from '$app/navigation';
 
 	interface Props {
 		sitios: Sitio[];
@@ -152,7 +154,7 @@
 						{#each sitios as sitio (sitio.id)}
 							<Table.TableRow
 								class="cursor-pointer hover:bg-accent/10"
-								onclick={() => onEdit(sitio.id)}
+								onclick={() => goto(`/admin/sitios/${sitio.id}`)}
 							>
 								<!-- Sitio Name -->
 								<Table.TableCell>
@@ -202,13 +204,31 @@
 												<DropdownMenu.Item
 													onclick={(e) => {
 														e.stopPropagation();
+														goto(`/admin/sitios/${sitio.id}`);
+													}}
+												>
+													<Eye class="mr-2 size-4" />
+													View Details
+												</DropdownMenu.Item>
+												<DropdownMenu.Item
+													onclick={(e) => {
+														e.stopPropagation();
+														onEdit(sitio.id);
+													}}
+												>
+													<SquarePen class="mr-2 size-4" />
+													Edit Sitio
+												</DropdownMenu.Item>
+												<DropdownMenu.Separator />
+												<DropdownMenu.Item
+													onclick={(e) => {
+														e.stopPropagation();
 														onDownloadPDF(sitio.id);
 													}}
 												>
 													<Download class="mr-2 size-4" />
 													Download PDF
 												</DropdownMenu.Item>
-												<DropdownMenu.Separator />
 												<DropdownMenu.Item
 													onclick={(e) => {
 														e.stopPropagation();
