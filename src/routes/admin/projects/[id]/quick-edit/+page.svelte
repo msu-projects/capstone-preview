@@ -93,30 +93,12 @@
 
 			// Success toast with continuation options
 			toast.success('Quick update saved successfully!', {
-				duration: 10000,
-				action: {
-					label: 'View Project',
-					onClick: () => {
-						window.location.href = `/admin/projects/${existingProject?.id}`;
-					}
-				}
-			});
-
-			// Show additional action options via separate toast
-			toast.info('What would you like to do next?', {
-				duration: 10000,
-				action: {
-					label: 'Back to List',
-					onClick: () => {
-						window.location.href = '/admin/projects';
-					}
-				}
+				duration: 5000
 			});
 
 			// Auto-redirect to list after delay if no action taken
-			setTimeout(() => {
-				window.location.href = '/admin/projects';
-			}, 10000);
+			// window.location.href = '/admin/projects';
+			history.back();
 		} catch (error) {
 			console.error('Error saving quick update:', error);
 			isSaving = false;
