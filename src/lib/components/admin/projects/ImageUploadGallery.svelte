@@ -1,8 +1,8 @@
 <script lang="ts">
+	import ImagePreviewCard from '$lib/components/admin/projects/ImagePreviewCard.svelte';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import { Button } from '$lib/components/ui/button';
 	import * as Dialog from '$lib/components/ui/dialog';
-	import ImagePreviewCard from '$lib/components/admin/projects/ImagePreviewCard.svelte';
 	import type { PhotoDocumentation } from '$lib/types';
 	import {
 		compressImage,
@@ -21,9 +21,19 @@
 		revokeImagePreviewURL,
 		validateImageFile
 	} from '$lib/utils/image-utils';
-	import { AlertTriangle, ChevronLeft, ChevronRight, Download, Image as ImageIcon, Loader2, Upload, X } from '@lucide/svelte';
+	import {
+		AlertTriangle,
+		ChevronLeft,
+		ChevronRight,
+		Download,
+		Image as ImageIcon,
+		Loader2,
+		Upload,
+		X
+	} from '@lucide/svelte';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
+	import { SvelteMap } from 'svelte/reactivity';
 
 	interface Props {
 		photoDocumentation?: PhotoDocumentation[];
@@ -43,8 +53,8 @@
 	let isDragging = $state(false);
 	let isUploading = $state(false);
 	let uploadProgress = $state(0);
-	let thumbnailCache = $state<Map<string, string>>(new Map());
-	let fullSizeCache = $state<Map<string, string>>(new Map());
+	let thumbnailCache = new SvelteMap<string, string>();
+	let fullSizeCache = new SvelteMap<string, string>();
 	let deleteDialogOpen = $state(false);
 	let photoToDelete: PhotoDocumentation | null = $state(null);
 	let fullSizeDialogOpen = $state(false);
@@ -55,16 +65,19 @@
 		// Initialize IndexedDB
 		await initImageDatabase();
 
-		// Load thumbnails for existing photos
-		await loadThumbnails();
-
 		// Check storage usage
 		await checkStorageUsage();
+
+		await loadThumbnails();
 	});
 
 	async function loadThumbnails() {
 		for (const photo of photoDocumentation) {
-			if (photo.storage_type === 'indexeddb' && photo.thumbnail_id) {
+			if (
+				photo.storage_type === 'indexeddb' &&
+				photo.thumbnail_id &&
+				!thumbnailCache.has(photo.id)
+			) {
 				try {
 					const blob = await getImage(photo.thumbnail_id);
 					if (blob) {
@@ -140,7 +153,9 @@
 		// Check storage after upload
 		await checkStorageUsage();
 
-		toast.success(`Successfully uploaded ${processedFiles} photo${processedFiles !== 1 ? 's' : ''}`);
+		toast.success(
+			`Successfully uploaded ${processedFiles} photo${processedFiles !== 1 ? 's' : ''}`
+		);
 	}
 
 	async function processFile(file: File) {
@@ -239,9 +254,7 @@
 	}
 
 	function handleCaptionChange(photo: PhotoDocumentation, caption: string) {
-		photoDocumentation = photoDocumentation.map((p) =>
-			p.id === photo.id ? { ...p, caption } : p
-		);
+		photoDocumentation = photoDocumentation.map((p) => (p.id === photo.id ? { ...p, caption } : p));
 	}
 
 	async function handleViewFullSize(index: number) {
@@ -266,7 +279,8 @@
 
 	function navigateFullSize(direction: 'prev' | 'next') {
 		if (direction === 'prev') {
-			fullSizePhotoIndex = (fullSizePhotoIndex - 1 + photoDocumentation.length) % photoDocumentation.length;
+			fullSizePhotoIndex =
+				(fullSizePhotoIndex - 1 + photoDocumentation.length) % photoDocumentation.length;
 		} else {
 			fullSizePhotoIndex = (fullSizePhotoIndex + 1) % photoDocumentation.length;
 		}
@@ -347,10 +361,7 @@
 			<Loader2 class="mx-auto mb-3 size-12 animate-spin text-primary" />
 			<p class="mb-2 text-sm font-semibold">Uploading photos...</p>
 			<div class="mx-auto h-2 w-64 overflow-hidden rounded-full bg-muted">
-				<div
-					class="h-full bg-primary transition-all"
-					style="width: {uploadProgress}%"
-				></div>
+				<div class="h-full bg-primary transition-all" style="width: {uploadProgress}%"></div>
 			</div>
 			<p class="mt-2 text-xs text-muted-foreground">{Math.round(uploadProgress)}%</p>
 		</div>
@@ -404,7 +415,10 @@
 
 		<div class="relative">
 			<!-- Image -->
-			<div class="flex items-center justify-center bg-muted/30 rounded-lg" style="min-height: 400px;">
+			<div
+				class="flex items-center justify-center rounded-lg bg-muted/30"
+				style="min-height: 400px;"
+			>
 				{#if currentFullSizeUrl}
 					<img
 						src={currentFullSizeUrl}
