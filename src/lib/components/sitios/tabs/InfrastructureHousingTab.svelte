@@ -1,10 +1,10 @@
 <script lang="ts">
-	import * as Card from '$lib/components/ui/card';
+	import DemographicDonutChart from '$lib/components/charts/DemographicDonutChart.svelte';
 	import { Badge } from '$lib/components/ui/badge';
+	import * as Card from '$lib/components/ui/card';
 	import { Progress } from '$lib/components/ui/progress';
 	import type { Sitio } from '$lib/types';
-	import DemographicDonutChart from '$lib/components/charts/DemographicDonutChart.svelte';
-	import { Home, Droplets, Zap, Bath } from '@lucide/svelte';
+	import { Bath, Droplets, Home, Zap } from '@lucide/svelte';
 
 	interface Props {
 		sitio: Sitio;
@@ -59,9 +59,8 @@
 
 	const toiletCoverage = $derived(
 		sitio.water_sanitation && sitio.households > 0
-			? ((sitio.households - sitio.water_sanitation.households_without_toilet) /
-					sitio.households) *
-				100
+			? ((sitio.households - sitio.water_sanitation.households_without_toilet) / sitio.households) *
+					100
 			: 0
 	);
 </script>
@@ -205,9 +204,8 @@
 						</div>
 						<Progress value={toiletCoverage} class="h-2" />
 						<div class="mt-1 text-xs text-slate-500">
-							{formatNumber(sitio.households - sitio.water_sanitation.households_without_toilet)} of {formatNumber(
-								sitio.households
-							)} households
+							{formatNumber(sitio.households - sitio.water_sanitation.households_without_toilet)} of
+							{formatNumber(sitio.households)} households
 						</div>
 					</div>
 
@@ -316,7 +314,9 @@
 							{((electricityCoverage + toiletCoverage) / 2).toFixed(0)}%
 						</span>
 					</div>
-					<div class="mt-1 text-xs text-slate-500">Based on electricity and sanitation coverage</div>
+					<div class="mt-1 text-xs text-slate-500">
+						Based on electricity and sanitation coverage
+					</div>
 				</div>
 			</Card.Content>
 		</Card.Root>

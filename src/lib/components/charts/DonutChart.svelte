@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { PieChart } from 'layerchart';
 	import { sum } from 'd3-array';
+	import { PieChart } from 'layerchart';
 
 	export interface DonutChartData {
 		label: string;
@@ -16,13 +16,7 @@
 		showLegend?: boolean;
 	}
 
-	let {
-		data,
-		centerLabel,
-		centerValue,
-		height = 300,
-		showLegend = true
-	}: Props = $props();
+	let { data, centerLabel, centerValue, height = 300, showLegend = true }: Props = $props();
 
 	// Calculate total
 	const total = $derived(sum(data, (d) => d.value));
