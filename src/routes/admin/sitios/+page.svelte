@@ -4,6 +4,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
+	import * as Select from '$lib/components/ui/select';
 	import * as Table from '$lib/components/ui/table';
 	import type { Sitio } from '$lib/types';
 	import { deleteSitio, loadSitios } from '$lib/utils/storage';
@@ -13,8 +14,26 @@
 	let sitios = $state<Sitio[]>([]);
 	let filteredSitios = $state<Sitio[]>([]);
 	let searchTerm = $state('');
+	let selectedMunicipality = $state<string>('all');
+	let selectedBarangay = $state<string>('all');
 	let deleteDialogOpen = $state(false);
 	let sitioToDelete = $state<Sitio | null>(null);
+
+	// Derived values for filter options
+	let uniqueMunicipalities = $derived(
+		Array.from(new Set(sitios.map((s) => s.municipality))).sort()
+	);
+	let uniqueBarangays = $derived(
+		Array.from(
+			new Set(
+				sitios
+					.filter(
+						(s) => selectedMunicipality === 'all' || s.municipality === selectedMunicipality
+					)
+					.map((s) => s.barangay)
+			)
+		).sort()
+	);
 
 	onMount(() => {
 		loadData();
@@ -26,23 +45,51 @@
 	}
 
 	function filterSitios() {
-		if (!searchTerm) {
-			filteredSitios = sitios;
-			return;
-		}
+		filteredSitios = sitios.filter((s) => {
+			// Municipality filter
+			if (selectedMunicipality !== 'all' && s.municipality !== selectedMunicipality) {
+				return false;
+			}
 
-		const term = searchTerm.toLowerCase();
-		filteredSitios = sitios.filter(
-			(s) =>
-				s.name.toLowerCase().includes(term) ||
-				s.municipality.toLowerCase().includes(term) ||
-				s.barangay.toLowerCase().includes(term)
-		);
+			// Barangay filter
+			if (selectedBarangay !== 'all' && s.barangay !== selectedBarangay) {
+				return false;
+			}
+
+			// Search term filter
+			if (searchTerm) {
+				const term = searchTerm.toLowerCase();
+				return (
+					s.name.toLowerCase().includes(term) ||
+					s.municipality.toLowerCase().includes(term) ||
+					s.barangay.toLowerCase().includes(term)
+				);
+			}
+
+			return true;
+		});
 	}
 
 	$effect(() => {
 		searchTerm;
+		selectedMunicipality;
+		selectedBarangay;
 		filterSitios();
+	});
+
+	// Reset barangay filter when municipality changes
+	$effect(() => {
+		selectedMunicipality;
+		if (selectedBarangay !== 'all') {
+			const barangayExists = sitios.some(
+				(s) =>
+					s.barangay === selectedBarangay &&
+					(selectedMunicipality === 'all' || s.municipality === selectedMunicipality)
+			);
+			if (!barangayExists) {
+				selectedBarangay = 'all';
+			}
+		}
 	});
 
 	function handleEdit(sitio: Sitio) {
@@ -138,7 +185,7 @@
 	<!-- Search and Filters -->
 	<Card.Root>
 		<Card.Content class="">
-			<div class="flex items-center gap-4">
+			<div class="flex flex-col gap-4 md:flex-row md:items-center">
 				<div class="relative flex-1">
 					<Search class="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
 					<Input
@@ -146,6 +193,31 @@
 						placeholder="Search by sitio, municipality, or barangay..."
 						class="pl-10"
 					/>
+				</div>
+				<div class="flex gap-2">
+					<Select.Root type="single" bind:value={selectedMunicipality}>
+						<Select.Trigger class="w-[200px]">
+							{selectedMunicipality === 'all' ? 'All Municipalities' : selectedMunicipality}
+						</Select.Trigger>
+						<Select.Content>
+							<Select.Item value="all">All Municipalities</Select.Item>
+							{#each uniqueMunicipalities as municipality}
+								<Select.Item value={municipality}>{municipality}</Select.Item>
+							{/each}
+						</Select.Content>
+					</Select.Root>
+
+					<Select.Root type="single" bind:value={selectedBarangay}>
+						<Select.Trigger class="w-[200px]">
+							{selectedBarangay === 'all' ? 'All Barangays' : selectedBarangay}
+						</Select.Trigger>
+						<Select.Content>
+							<Select.Item value="all">All Barangays</Select.Item>
+							{#each uniqueBarangays as barangay}
+								<Select.Item value={barangay}>{barangay}</Select.Item>
+							{/each}
+						</Select.Content>
+					</Select.Root>
 				</div>
 			</div>
 		</Card.Content>
@@ -158,9 +230,9 @@
 				<Table.Root class="">
 					<Table.Header>
 						<Table.Row>
-							<Table.Head>Municipality</Table.Head>
-							<Table.Head>Barangay</Table.Head>
 							<Table.Head class="">Sitio</Table.Head>
+							<Table.Head>Barangay</Table.Head>
+							<Table.Head>Municipality</Table.Head>
 							<Table.Head class="text-right">Population</Table.Head>
 							<Table.Head class="text-right">Households</Table.Head>
 							<Table.Head class="text-right">Actions</Table.Head>
@@ -169,9 +241,9 @@
 					<Table.Body>
 						{#each filteredSitios as sitio}
 							<Table.Row>
-								<Table.Cell>{sitio.municipality}</Table.Cell>
-								<Table.Cell>{sitio.barangay}</Table.Cell>
 								<Table.Cell class="font-medium">{sitio.name}</Table.Cell>
+								<Table.Cell>{sitio.barangay}</Table.Cell>
+								<Table.Cell>{sitio.municipality}</Table.Cell>
 								<Table.Cell class="text-right">
 									{sitio.population?.toLocaleString() || '-'}
 								</Table.Cell>
