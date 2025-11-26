@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { sum } from 'd3-array';
-	import { PieChart } from 'layerchart';
+	import { Chart } from '@flowbite-svelte-plugins/chart';
+	import type { ApexOptions } from 'apexcharts';
 
 	export interface DonutChartData {
 		label: string;
@@ -19,9 +19,14 @@
 	let { data, centerLabel, centerValue, height = 300, showLegend = true }: Props = $props();
 
 	// Calculate total
-	const total = $derived(sum(data, (d) => d.value));
+	const total = $derived(data.reduce((sum, d) => sum + d.value, 0));
 
-	// Transform data with colors
+	// Calculate percentage for each item
+	function getPercentage(value: number): string {
+		return ((value / total) * 100).toFixed(1);
+	}
+
+	// Prepare chart data with colors
 	const chartData = $derived(
 		data.map((d, i) => ({
 			...d,
@@ -29,68 +34,72 @@
 		}))
 	);
 
-	// Calculate percentage for each item
-	function getPercentage(value: number): string {
-		return ((value / total) * 100).toFixed(1);
-	}
-
-	// Tooltip state
-	let tooltipData = $state<{
-		label: string;
-		value: number;
-		percentage: string;
-		color: string;
-		x: number;
-		y: number;
-	} | null>(null);
-
-	function handleMouseEnter(event: MouseEvent, arcData: DonutChartData) {
-		const rect = (event.target as SVGElement).getBoundingClientRect();
-		tooltipData = {
-			label: arcData.label,
-			value: arcData.value,
-			percentage: getPercentage(arcData.value),
-			color: arcData.color || 'hsl(var(--chart-1))',
-			x: rect.left + rect.width / 2,
-			y: rect.top
-		};
-	}
-
-	function handleMouseLeave() {
-		tooltipData = null;
-	}
+	// Prepare chart options
+	const options = $derived<ApexOptions>({
+		chart: {
+			type: 'donut',
+			height: height,
+			fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif',
+			toolbar: {
+				show: false
+			}
+		},
+		series: chartData.map((d) => d.value),
+		labels: chartData.map((d) => d.label),
+		colors: chartData.map((d) => d.color),
+		plotOptions: {
+			pie: {
+				donut: {
+					size: '70%',
+					labels: {
+						show: !!(centerLabel && centerValue),
+						name: {
+							show: true,
+							fontSize: '14px',
+							fontWeight: 500,
+							color: '#64748b'
+						},
+						value: {
+							show: true,
+							fontSize: '28px',
+							fontWeight: 700,
+							color: '#0f172a',
+							formatter: () => centerValue || ''
+						},
+						total: {
+							show: true,
+							label: centerLabel || '',
+							fontSize: '14px',
+							fontWeight: 500,
+							color: '#64748b',
+							formatter: () => centerValue || ''
+						}
+					}
+				}
+			}
+		},
+		dataLabels: {
+			enabled: false
+		},
+		legend: {
+			show: false
+		},
+		tooltip: {
+			enabled: true,
+			y: {
+				formatter: (val) => val.toLocaleString()
+			}
+		},
+		stroke: {
+			width: 2,
+			colors: ['#ffffff']
+		}
+	});
 </script>
 
 <div class="w-full">
 	<div class="relative flex justify-center" style="height: {height}px;">
-		<PieChart
-			data={chartData}
-			key="label"
-			value="value"
-			c="label"
-			cRange={chartData.map((d) => d.color)}
-			innerRadius={-25}
-			cornerRadius={6}
-			padAngle={0.02}
-			props={{
-				arc: {
-					strokeWidth: 0,
-					class: 'origin-center transition-all duration-200 hover:scale-105 hover:opacity-95 cursor-pointer',
-					onmouseenter: (e: any) => {
-						if (e.detail) {
-							handleMouseEnter(e.detail.event, e.detail.data);
-						}
-					},
-					onmouseleave: handleMouseLeave
-				}
-			}}
-		/>
-		{#if centerLabel && centerValue}
-			<div class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-				<div class="text-sm text-slate-500">{centerLabel}</div>
-				<div class="text-3xl font-bold text-slate-900">{centerValue}</div>
-			</div>
-		{/if}
+		<Chart {options} />
 	</div>
 
 	{#if showLegend}
@@ -106,28 +115,3 @@
 		</div>
 	{/if}
 </div>
-
-<!-- Tooltip Portal -->
-{#if tooltipData}
-	<div
-		class="pointer-events-none fixed z-50 -translate-x-1/2 -translate-y-full"
-		style="left: {tooltipData.x}px; top: {tooltipData.y - 8}px;"
-	>
-		<div
-			class="animate-in fade-in zoom-in-95 rounded-lg border border-slate-200 bg-white/95 px-3 py-2 shadow-lg backdrop-blur-sm duration-150"
-		>
-			<div class="flex items-center gap-2">
-				<div class="size-3 rounded-sm" style="background-color: {tooltipData.color}"></div>
-				<div class="flex flex-col">
-					<span class="text-xs font-semibold text-slate-900">{tooltipData.label}</span>
-					<div class="flex items-baseline gap-2">
-						<span class="text-sm font-bold text-slate-700">
-							{tooltipData.value.toLocaleString()}
-						</span>
-						<span class="text-xs text-slate-500">({tooltipData.percentage}%)</span>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-{/if}
