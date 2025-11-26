@@ -1,11 +1,11 @@
 <script lang="ts">
-	import * as Card from '$lib/components/ui/card';
-	import * as Table from '$lib/components/ui/table';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
-	import type { Sitio } from '$lib/types';
+	import * as Card from '$lib/components/ui/card';
+	import * as Table from '$lib/components/ui/table';
 	import { projects } from '$lib/mock-data';
-	import { FolderKanban, DollarSign, Users, TrendingUp, ExternalLink } from '@lucide/svelte';
+	import type { Sitio } from '$lib/types';
+	import { Banknote, ExternalLink, FolderKanban, TrendingUp, Users } from '@lucide/svelte';
 
 	interface Props {
 		sitio: Sitio;
@@ -57,15 +57,16 @@
 			// Check legacy sitio_id field
 			if (p.sitio_id === sitio.id) return true;
 			// Check new project_sitios array
-			if (p.project_sitios && p.project_sitios.some((ps) => ps.sitio_id === sitio.id))
-				return true;
+			if (p.project_sitios && p.project_sitios.some((ps) => ps.sitio_id === sitio.id)) return true;
 			return false;
 		})
 	);
 
 	const totalBudget = $derived(relatedProjects.reduce((sum, p) => sum + p.budget, 0));
 	const activeProjects = $derived(relatedProjects.filter((p) => p.status === 'in-progress').length);
-	const completedProjects = $derived(relatedProjects.filter((p) => p.status === 'completed').length);
+	const completedProjects = $derived(
+		relatedProjects.filter((p) => p.status === 'completed').length
+	);
 
 	// Calculate total beneficiaries targeted for this sitio
 	const beneficiariesTargeted = $derived(
@@ -112,7 +113,7 @@
 			<Card.Content class="p-4">
 				<div class="flex items-center gap-3">
 					<div class="rounded-lg bg-amber-50 p-2">
-						<DollarSign class="size-5 text-amber-600" />
+						<Banknote class="size-5 text-amber-600" />
 					</div>
 					<div>
 						<div class="text-xs font-medium text-slate-500">Total Investment</div>
@@ -213,16 +214,14 @@
 		<!-- Empty State -->
 		<Card.Root class="shadow-sm">
 			<Card.Content class="py-12 text-center">
-				<div class="mx-auto w-24 h-24 rounded-full bg-slate-100 flex items-center justify-center mb-4">
+				<div
+					class="mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-full bg-slate-100"
+				>
 					<FolderKanban class="size-12 text-slate-400" />
 				</div>
-				<h3 class="text-lg font-semibold text-slate-900 mb-2">No Projects Yet</h3>
-				<p class="text-slate-500 mb-4">
-					This sitio doesn't have any projects assigned yet.
-				</p>
-				<Button variant="outline" href="/admin/projects">
-					Browse All Projects
-				</Button>
+				<h3 class="mb-2 text-lg font-semibold text-slate-900">No Projects Yet</h3>
+				<p class="mb-4 text-slate-500">This sitio doesn't have any projects assigned yet.</p>
+				<Button variant="outline" href="/admin/projects">Browse All Projects</Button>
 			</Card.Content>
 		</Card.Root>
 	{/if}

@@ -3,12 +3,12 @@
 	import SitioBreadcrumb from './SitioBreadcrumb.svelte';
 	import SitioHeader from './SitioHeader.svelte';
 	import SitioTabNavigation from './SitioTabNavigation.svelte';
-	import OverviewTab from './tabs/OverviewTab.svelte';
 	import DemographicsTab from './tabs/DemographicsTab.svelte';
 	import EconomicLivelihoodsTab from './tabs/EconomicLivelihoodsTab.svelte';
 	import InfrastructureHousingTab from './tabs/InfrastructureHousingTab.svelte';
-	import SocialServicesTab from './tabs/SocialServicesTab.svelte';
+	import OverviewTab from './tabs/OverviewTab.svelte';
 	import RelatedProjectsTab from './tabs/RelatedProjectsTab.svelte';
+	import SocialServicesTab from './tabs/SocialServicesTab.svelte';
 
 	interface Props {
 		sitio: Sitio;
@@ -24,7 +24,7 @@
 	<SitioBreadcrumb {sitio} {isAdminView} />
 
 	<!-- Main Content Area -->
-	<main class="w-full px-4 py-6 sm:px-6 lg:px-8">
+	<main class="w-full px-4 py-8 sm:px-6 lg:px-8">
 		<SitioHeader {sitio} />
 		<SitioTabNavigation {activeTab} onTabChange={(tab) => (activeTab = tab)} />
 

@@ -4,7 +4,7 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';
 	import type { Sitio } from '$lib/types';
-	import { Beef, Briefcase, DollarSign, Sprout } from '@lucide/svelte';
+	import { Banknote, Beef, Briefcase, Sprout } from '@lucide/svelte';
 
 	interface Props {
 		sitio: Sitio;
@@ -114,7 +114,7 @@
 			<Card.Header>
 				<div class="flex items-center gap-2">
 					<div class="rounded-lg bg-emerald-50 p-1.5">
-						<DollarSign class="size-4 text-emerald-600" />
+						<Banknote class="size-4 text-emerald-600" />
 					</div>
 					<h3 class="text-lg font-semibold text-slate-800">Income Distribution</h3>
 				</div>
@@ -131,7 +131,7 @@
 				{:else}
 					<div class="flex h-[300px] items-center justify-center">
 						<div class="text-center">
-							<DollarSign class="mx-auto size-12 text-slate-300" />
+							<Banknote class="mx-auto size-12 text-slate-300" />
 							<p class="mt-2 text-sm text-slate-500">No income data recorded</p>
 						</div>
 					</div>

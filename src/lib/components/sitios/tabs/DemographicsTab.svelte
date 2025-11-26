@@ -56,7 +56,7 @@
 	);
 
 	// Calculate dependency ratio
-	const dependencyRatio = $derived(() => {
+	const dependencyRatio = $derived.by(() => {
 		const working = sitio.demographics.age_15_64;
 		const dependent = sitio.demographics.age_0_14 + sitio.demographics.age_65_above;
 		return working > 0 ? ((dependent / working) * 100).toFixed(1) : '0';
@@ -180,7 +180,7 @@
 			</Card.Header>
 			<Card.Content class="pt-0">
 				<div class="text-center">
-					<div class="text-4xl font-bold text-amber-600">{dependencyRatio()}%</div>
+					<div class="text-4xl font-bold text-amber-600">{dependencyRatio}%</div>
 					<div class="mt-2 text-xs text-slate-500">
 						Ratio of dependents (children + seniors) to working-age population
 					</div>
@@ -188,9 +188,9 @@
 				<div class="mt-4 rounded bg-amber-50 p-3">
 					<div class="text-xs font-medium text-amber-800">Interpretation:</div>
 					<div class="mt-1 text-xs text-amber-700">
-						{#if Number(dependencyRatio()) < 50}
+						{#if Number(dependencyRatio) < 50}
 							Low dependency - Strong working-age population
-						{:else if Number(dependencyRatio()) < 75}
+						{:else if Number(dependencyRatio) < 75}
 							Moderate dependency - Balanced population structure
 						{:else}
 							High dependency - Many dependents per working adult
