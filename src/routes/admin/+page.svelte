@@ -1,4 +1,5 @@
 <script lang="ts">
+	import AdminHeader from '$lib/components/admin/AdminHeader.svelte';
 	import ActivityFeed from '$lib/components/admin/dashboard/ActivityFeed.svelte';
 	import BudgetTab from '$lib/components/admin/dashboard/BudgetTab.svelte';
 	import DashboardStats from '$lib/components/admin/dashboard/DashboardStats.svelte';
@@ -7,7 +8,6 @@
 	import OverviewTab from '$lib/components/admin/dashboard/OverviewTab.svelte';
 	import RecentProjectsTable from '$lib/components/admin/dashboard/RecentProjectsTable.svelte';
 	import SitiosTab from '$lib/components/admin/dashboard/SitiosTab.svelte';
-	import AdminHeader from '$lib/components/admin/AdminHeader.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import { Skeleton } from '$lib/components/ui/skeleton';
@@ -15,7 +15,7 @@
 	import { activities, chartData, projects, sitios, stats } from '$lib/mock-data';
 	import toTitleCase from '$lib/utils/common';
 	import { downloadProjectMonitoringPDF } from '$lib/utils/pdf-generator';
-	import { BarChart3, Download, Plus } from '@lucide/svelte';
+	import { ChartColumn, Download, Plus } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 
 	// Loading state for async data simulation
@@ -234,7 +234,7 @@
 						>
 					</div>
 					<div class="rounded-full bg-primary/10 p-2">
-						<BarChart3 class="size-5 text-primary" />
+						<ChartColumn class="size-5 text-primary" />
 					</div>
 				</div>
 			</Card.CardHeader>
