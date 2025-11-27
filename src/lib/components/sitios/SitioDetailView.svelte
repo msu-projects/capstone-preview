@@ -29,8 +29,8 @@
 		<SitioHeader {sitio} />
 
 		<!-- Tabs Component -->
-		<Tabs bind:value={activeTab} class="mb-8">
-			<TabsList class="w-full justify-start overflow-x-auto">
+		<Tabs bind:value={activeTab}>
+			<TabsList class="mb-3 w-full justify-start overflow-x-auto">
 				<TabsTrigger value="overview" class="gap-2">
 					<FileText class="size-4" />
 					Overview

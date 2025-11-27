@@ -81,13 +81,12 @@
 			</Card.Header>
 			<Card.Content class="pt-0">
 				{#if housingQualityData.length > 0}
-					<div style="height: 300px;">
+					<div style="height: 360px;">
 						<DonutChart
 							data={housingQualityData}
 							centerValue={formatNumber(sitio.households)}
 							centerLabel="Households"
-							height={300}
-							showLegend={false}
+							height={360}
 						/>
 					</div>
 				{:else}
@@ -113,8 +112,8 @@
 			</Card.Header>
 			<Card.Content class="pt-0">
 				{#if housingOwnershipData.length > 0}
-					<div style="height: 300px;">
-						<DonutChart data={housingOwnershipData} height={300} showLegend={false} />
+					<div style="height: 360px;">
+						<DonutChart data={housingOwnershipData} height={360} />
 					</div>
 				{:else}
 					<div class="flex h-[300px] items-center justify-center">

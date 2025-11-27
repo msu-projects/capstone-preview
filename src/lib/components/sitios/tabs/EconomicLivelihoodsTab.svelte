@@ -121,13 +121,12 @@
 			</Card.Header>
 			<Card.Content class="pt-0">
 				{#if incomeData.length > 0}
-					<div style="height: 300px;">
+					<div style="height: 360px;">
 						<DonutChart
 							data={incomeData}
 							centerValue={formatNumber(sitio.households)}
 							centerLabel="Households"
-							height={300}
-							showLegend={false}
+							height={360}
 						/>
 					</div>
 				{:else}

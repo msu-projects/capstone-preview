@@ -82,7 +82,29 @@
 			enabled: false
 		},
 		legend: {
-			show: false
+			show: showLegend,
+			position: 'bottom',
+			horizontalAlign: 'center',
+			fontSize: '12px',
+			fontWeight: 500,
+			labels: {
+				colors: '#64748b'
+			},
+			markers: {
+				size: 6,
+				shape: 'square' as const,
+				offsetX: 0,
+				offsetY: 0
+			},
+			itemMargin: {
+				horizontal: 12,
+				vertical: 4
+			},
+			formatter: (seriesName, opts) => {
+				const value = opts.w.globals.series[opts.seriesIndex];
+				const percentage = ((value / total) * 100).toFixed(1);
+				return `${seriesName}: ${value.toLocaleString()} (${percentage}%)`;
+			}
 		},
 		tooltip: {
 			enabled: true,
@@ -98,20 +120,5 @@
 </script>
 
 <div class="w-full">
-	<div class="relative flex justify-center" style="height: {height}px;">
-		<Chart {options} />
-	</div>
-
-	{#if showLegend}
-		<div class="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-2">
-			{#each chartData as item (item.label)}
-				<div class="flex items-center gap-2">
-					<div class="size-3 rounded-sm" style="background-color: {item.color}"></div>
-					<span class="text-xs text-slate-600">
-						{item.label}: {item.value.toLocaleString()} ({getPercentage(item.value)}%)
-					</span>
-				</div>
-			{/each}
-		</div>
-	{/if}
+	<Chart {options} />
 </div>
