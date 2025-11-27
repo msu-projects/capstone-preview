@@ -192,6 +192,19 @@ export interface PhotoDocumentation {
 	storage_ref: string; // IndexedDB key OR server URL
 }
 
+// Monthly report for display in monitoring timeline (transformed from MonthlyProgress + MonthlyTarget)
+export interface MonthlyReport {
+	month: string; // Display format: 'Jan 2024'
+	month_year: string; // Original format: 'YYYY-MM' for sorting
+	plan_physical: number;
+	actual_physical: number | null;
+	plan_financial: number;
+	actual_financial: number | null;
+	status: string; // 'On Track' | 'Delayed' | 'Ahead of Schedule' | 'Not Started'
+	remarks: string;
+	photos: PhotoDocumentation[];
+}
+
 export interface MonthlyProgress {
 	id: number;
 	project_id: number;
@@ -266,13 +279,6 @@ export interface Project {
 		female: number;
 	};
 	implementing_agency?: string;
-	sitios_affected?: Array<{
-		sitio_id: number;
-		barangay_captain?: string;
-		sitio_leader?: string;
-		volunteer_coordinator?: string;
-		contact_numbers?: string[];
-	}>;
 	created_at: string;
 	updated_at: string;
 }

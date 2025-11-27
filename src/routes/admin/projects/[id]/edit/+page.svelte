@@ -120,19 +120,14 @@
 
 	// Auto-generate/load sitio coordinators
 	let sitioCoordinators = $state<SitioCoordinatorFormData[]>(
-		existingProject?.sitios_affected?.map((sa) => {
-			// Find the sitio from existing data
-			const sitio = existingProject?.project_sitios?.find((ps) => ps.sitio_id === sa.sitio_id);
-
-			return {
-				sitio_id: sa.sitio_id,
-				sitio_name: sitio?.sitio_name ?? '',
-				barangay_captain: sa.barangay_captain ?? '',
-				sitio_leader: sa.sitio_leader ?? '',
-				volunteer_coordinator: sa.volunteer_coordinator ?? '',
-				contact_numbers: sa.contact_numbers?.join(', ') ?? ''
-			};
-		}) ?? []
+		existingProject?.project_sitios?.map((ps) => ({
+			sitio_id: ps.sitio_id,
+			sitio_name: ps.sitio_name ?? '',
+			barangay_captain: '',
+			sitio_leader: '',
+			volunteer_coordinator: '',
+			contact_numbers: ''
+		})) ?? []
 	);
 
 	// Sync sitio coordinators when projectSitios changes

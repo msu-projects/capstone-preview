@@ -3,7 +3,13 @@
  * and form structures for UI interaction
  */
 
-import type { MonthlyProgress, MonthlyTarget, PhotoDocumentation, Project } from '$lib/types';
+import type {
+	MonthlyProgress,
+	MonthlyReport,
+	MonthlyTarget,
+	PhotoDocumentation,
+	Project
+} from '$lib/types';
 import { getCompletionPercentage, getCurrentMonth } from './project-calculations';
 
 /**
@@ -316,4 +322,91 @@ export function getQuickUpdateWarnings(
 	}
 
 	return warnings;
+}
+
+/**
+ * Month name mapping for display formatting
+ */
+const MONTH_NAMES = [
+	'Jan',
+	'Feb',
+	'Mar',
+	'Apr',
+	'May',
+	'Jun',
+	'Jul',
+	'Aug',
+	'Sep',
+	'Oct',
+	'Nov',
+	'Dec'
+];
+
+/**
+ * Format month_year string to display format
+ * @example '2024-01' -> 'Jan 2024'
+ */
+export function formatMonthYear(monthYear: string): string {
+	const [year, month] = monthYear.split('-');
+	const monthIndex = parseInt(month, 10) - 1;
+	return `${MONTH_NAMES[monthIndex]} ${year}`;
+}
+
+/**
+ * Map MonthlyProgress status to display status
+ */
+export function mapProgressStatus(status: MonthlyProgress['status']): string {
+	switch (status) {
+		case 'on-track':
+			return 'On Track';
+		case 'delayed':
+			return 'Delayed';
+		case 'ahead':
+			return 'Ahead of Schedule';
+		default:
+			return 'Unknown';
+	}
+}
+
+/**
+ * Transform MonthlyProgress[] + MonthlyTarget[] into MonthlyReport[] for display
+ * Sorted by month_year descending (newest first)
+ */
+export function transformToMonthlyReports(
+	monthlyProgress: MonthlyProgress[] | undefined,
+	monthlyTargets: MonthlyTarget[] | undefined
+): MonthlyReport[] {
+	if (!monthlyProgress || monthlyProgress.length === 0) {
+		return [];
+	}
+
+	// Create a map of targets for quick lookup
+	const targetMap = new Map<string, MonthlyTarget>();
+	if (monthlyTargets) {
+		for (const target of monthlyTargets) {
+			targetMap.set(target.month_year, target);
+		}
+	}
+
+	// Transform each progress entry to a MonthlyReport
+	const reports: MonthlyReport[] = monthlyProgress.map((progress) => {
+		const target = targetMap.get(progress.month_year);
+
+		return {
+			month: formatMonthYear(progress.month_year),
+			month_year: progress.month_year,
+			plan_physical: target?.planned_physical_progress ?? 0,
+			actual_physical: progress.physical_progress_percentage,
+			plan_financial: target?.planned_budget ?? 0,
+			actual_financial: progress.budget_utilized,
+			status: mapProgressStatus(progress.status),
+			remarks: progress.issues_encountered || '',
+			photos: progress.photo_documentation || []
+		};
+	});
+
+	// Sort by month_year descending (newest first)
+	reports.sort((a, b) => b.month_year.localeCompare(a.month_year));
+
+	return reports;
 }

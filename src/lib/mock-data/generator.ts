@@ -411,6 +411,7 @@ function generateMonthlyProgress(
 			},
 			beneficiaries_reached: cumulativeBeneficiaries,
 			issues_encountered: rng.next() > 0.7 ? 'Minor delays due to weather' : undefined,
+			photo_documentation: [], // Empty array - photos are uploaded via Quick Update form
 			status: rng.pick(['on-track', 'delayed', 'ahead'] as const),
 			created_at: date.toISOString(),
 			updated_at: date.toISOString()

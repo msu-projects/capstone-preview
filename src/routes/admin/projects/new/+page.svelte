@@ -214,7 +214,6 @@
 					...ps,
 					project_id: nextId
 				})),
-				sitios_affected: [],
 				funding_sources: fundingSources.map((fs) => ({
 					...fs,
 					id: 0,
