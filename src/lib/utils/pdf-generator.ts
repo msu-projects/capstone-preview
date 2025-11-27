@@ -2,6 +2,7 @@ import type { Project } from '$lib/types';
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
 import type { TDocumentDefinitions } from 'pdfmake/interfaces';
+import { logAuditAction } from './audit';
 
 // Initialize pdfMake with fonts
 if (pdfFonts && pdfFonts.vfs) {
@@ -419,7 +420,17 @@ export function downloadProjectMonitoringPDF(
 ) {
 	const pdf = generateProjectMonitoringPDF(projects, quarter);
 	const defaultFileName = `Project_Monitoring_Report_Q${quarter}_${new Date().getFullYear()}.pdf`;
-	pdf.download(fileName || defaultFileName);
+	const finalFileName = fileName || defaultFileName;
+	pdf.download(finalFileName);
+
+	// Log the export action
+	logAuditAction(
+		'export',
+		'project',
+		undefined,
+		finalFileName,
+		`Exported ${projects.length} project(s) to PDF: ${finalFileName}`
+	);
 }
 
 /**
@@ -428,6 +439,15 @@ export function downloadProjectMonitoringPDF(
 export function openProjectMonitoringPDF(projects: Project[], quarter: string = '3rd') {
 	const pdf = generateProjectMonitoringPDF(projects, quarter);
 	pdf.open();
+
+	// Log the export action
+	logAuditAction(
+		'export',
+		'project',
+		undefined,
+		'PDF Preview',
+		`Previewed ${projects.length} project(s) monitoring report`
+	);
 }
 
 /**

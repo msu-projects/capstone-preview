@@ -267,49 +267,10 @@ export function refreshProjects(): Project[] {
 }
 
 // ===== USERS DATA =====
-
-export const users: User[] = [
-	{
-		id: 1,
-		name: 'Juan Dela Cruz',
-		email: 'juan.delacruz@southcotabato.gov.ph',
-		role: 'Admin',
-		department: 'DILG',
-		status: 'active',
-		last_login: '2024-11-15 09:30:00',
-		created_at: '2024-01-10'
-	},
-	{
-		id: 2,
-		name: 'Maria Santos',
-		email: 'maria.santos@southcotabato.gov.ph',
-		role: 'Editor',
-		department: 'DPWH',
-		status: 'active',
-		last_login: '2024-11-14 14:20:00',
-		created_at: '2024-01-15'
-	},
-	{
-		id: 3,
-		name: 'Pedro Reyes',
-		email: 'pedro.reyes@southcotabato.gov.ph',
-		role: 'Viewer',
-		department: 'DepEd',
-		status: 'active',
-		last_login: '2024-11-13 11:00:00',
-		created_at: '2024-02-01'
-	},
-	{
-		id: 4,
-		name: 'Ana Garcia',
-		email: 'ana.garcia@southcotabato.gov.ph',
-		role: 'Editor',
-		department: 'DA',
-		status: 'active',
-		last_login: '2024-11-12 08:45:00',
-		created_at: '2024-02-10'
-	}
-];
+// Note: User management is now handled by src/lib/utils/user-storage.ts
+// This export is kept for backward compatibility but uses the new storage
+import { loadUsers } from '$lib/utils/user-storage';
+export const users: User[] = loadUsers();
 
 // ===== ACTIVITY LOG =====
 

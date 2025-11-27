@@ -9,6 +9,7 @@
 	import * as Card from '$lib/components/ui/card';
 	import * as Tabs from '$lib/components/ui/tabs';
 	import type { Sitio } from '$lib/types';
+	import { logAuditAction } from '$lib/utils/audit';
 	import { validateDemographics } from '$lib/utils/demographic-validation';
 	import { loadSitios, saveSitios } from '$lib/utils/storage';
 	import {
@@ -200,6 +201,13 @@
 		isSaving = false;
 
 		if (success) {
+			logAuditAction(
+				'create',
+				'sitio',
+				newSitio.id,
+				newSitio.name,
+				`Created sitio in ${newSitio.barangay}, ${newSitio.municipality}`
+			);
 			toast.success('Sitio created successfully!');
 			window.location.href = '/admin/sitios';
 		} else {

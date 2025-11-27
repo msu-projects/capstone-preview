@@ -1,6 +1,7 @@
 import type { Project, Sitio } from '$lib/types';
 import type { SitioYearlySnapshot } from '$lib/types/sitio-yearly';
 import { createSnapshotFromSitio } from '$lib/types/sitio-yearly';
+import { logAuditAction } from './audit';
 
 const SITIOS_STORAGE_KEY = 'sccdp_sitios';
 const PROJECTS_STORAGE_KEY = 'sccdp_projects';
@@ -83,7 +84,17 @@ export function isSitiosStorageNearLimit(): boolean {
 export function addSitio(sitio: Sitio): boolean {
 	const sitios = loadSitios();
 	sitios.push(sitio);
-	return saveSitios(sitios);
+	const success = saveSitios(sitios);
+	if (success) {
+		logAuditAction(
+			'create',
+			'sitio',
+			sitio.id,
+			sitio.name,
+			`Created sitio in ${sitio.barangay}, ${sitio.municipality}`
+		);
+	}
+	return success;
 }
 
 /**
@@ -101,13 +112,18 @@ export function updateSitio(id: number, updates: Partial<Sitio>): boolean {
 		return false;
 	}
 
+	const sitioName = updates.name || sitios[index].name;
 	sitios[index] = {
 		...sitios[index],
 		...updates,
 		updated_at: new Date().toISOString()
 	};
 
-	return saveSitios(sitios);
+	const success = saveSitios(sitios);
+	if (success) {
+		logAuditAction('update', 'sitio', id, sitioName, `Updated sitio information`);
+	}
+	return success;
 }
 
 /**
@@ -117,6 +133,7 @@ export function updateSitio(id: number, updates: Partial<Sitio>): boolean {
  */
 export function deleteSitio(id: number): boolean {
 	const sitios = loadSitios();
+	const sitioToDelete = sitios.find((s) => s.id === id);
 	const filteredSitios = sitios.filter((s) => s.id !== id);
 
 	if (filteredSitios.length === sitios.length) {
@@ -124,7 +141,17 @@ export function deleteSitio(id: number): boolean {
 		return false;
 	}
 
-	return saveSitios(filteredSitios);
+	const success = saveSitios(filteredSitios);
+	if (success && sitioToDelete) {
+		logAuditAction(
+			'delete',
+			'sitio',
+			id,
+			sitioToDelete.name,
+			`Deleted sitio from ${sitioToDelete.municipality}`
+		);
+	}
+	return success;
 }
 
 /**
@@ -206,7 +233,17 @@ export function getProjectsStorageSize(): number {
 export function addProject(project: Project): boolean {
 	const projects = loadProjects();
 	projects.push(project);
-	return saveProjects(projects);
+	const success = saveProjects(projects);
+	if (success) {
+		logAuditAction(
+			'create',
+			'project',
+			project.id,
+			project.title,
+			`Created project: ${project.category} - Budget: ₱${project.budget.toLocaleString()}`
+		);
+	}
+	return success;
 }
 
 /**
@@ -224,13 +261,25 @@ export function updateProject(id: number, updates: Partial<Project>): boolean {
 		return false;
 	}
 
+	const projectTitle = updates.title || projects[index].title;
+	const oldStatus = projects[index].status;
+	const newStatus = updates.status || oldStatus;
+
 	projects[index] = {
 		...projects[index],
 		...updates,
 		updated_at: new Date().toISOString()
 	};
 
-	return saveProjects(projects);
+	const success = saveProjects(projects);
+	if (success) {
+		const details =
+			oldStatus !== newStatus
+				? `Status changed: ${oldStatus} → ${newStatus}`
+				: `Updated project information`;
+		logAuditAction('update', 'project', id, projectTitle, details);
+	}
+	return success;
 }
 
 /**
@@ -240,6 +289,7 @@ export function updateProject(id: number, updates: Partial<Project>): boolean {
  */
 export function deleteProject(id: number): boolean {
 	const projects = loadProjects();
+	const projectToDelete = projects.find((p) => p.id === id);
 	const filteredProjects = projects.filter((p) => p.id !== id);
 
 	if (filteredProjects.length === projects.length) {
@@ -247,7 +297,17 @@ export function deleteProject(id: number): boolean {
 		return false;
 	}
 
-	return saveProjects(filteredProjects);
+	const success = saveProjects(filteredProjects);
+	if (success && projectToDelete) {
+		logAuditAction(
+			'delete',
+			'project',
+			id,
+			projectToDelete.title,
+			`Deleted project: ${projectToDelete.category}`
+		);
+	}
+	return success;
 }
 
 /**

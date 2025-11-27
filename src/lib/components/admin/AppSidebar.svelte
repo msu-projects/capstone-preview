@@ -1,16 +1,22 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import * as Avatar from '$lib/components/ui/avatar';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import * as Sidebar from '$lib/components/ui/sidebar';
+	import { authStore } from '$lib/stores/auth.svelte';
 	import {
 		CloudUpload,
 		Database,
 		ExternalLink,
+		FileText,
 		Folder,
 		LayoutDashboard,
 		LogOut,
 		MapPin,
+		Shield,
+		ShieldCheck,
+		User as UserIcon,
 		Users
 	} from '@lucide/svelte';
 	import type { Component, ComponentProps } from 'svelte';
@@ -21,6 +27,8 @@
 		title: string;
 		url: string;
 		icon: Component;
+		requiresSuperadmin?: boolean;
+		requiresAdmin?: boolean;
 	}
 
 	interface NavGroup {
@@ -44,24 +52,46 @@
 		{
 			title: 'System',
 			items: [
-				{ title: 'Users', url: '/admin/users', icon: Users },
+				{ title: 'Users', url: '/admin/users', icon: Users, requiresSuperadmin: true },
+				{ title: 'Audit Logs', url: '/admin/audit', icon: FileText, requiresAdmin: true },
 				{ title: 'View Public Portal', url: '/', icon: ExternalLink }
 			]
 		}
 	];
 
-	const user = {
-		name: 'Admin User',
-		email: 'admin@example.com',
-		initials: 'A'
-	};
+	// Get current user from auth store
+	const currentUser = $derived(authStore.currentUser);
+	const userDisplay = $derived({
+		name: currentUser?.name || 'Guest',
+		email: currentUser?.email || '',
+		initials: currentUser?.name?.charAt(0).toUpperCase() || 'G',
+		role: currentUser?.role || 'viewer'
+	});
 
 	function handleLogout() {
-		console.log('Logout clicked');
+		authStore.logout();
+		goto('/login');
 	}
 
 	function isActive(url: string): boolean {
 		return page.url.pathname === url;
+	}
+
+	function canViewItem(item: NavItem): boolean {
+		if (item.requiresSuperadmin && !authStore.isSuperadmin) return false;
+		if (item.requiresAdmin && !authStore.isAdmin) return false;
+		return true;
+	}
+
+	function getRoleIcon(role: string) {
+		switch (role) {
+			case 'superadmin':
+				return ShieldCheck;
+			case 'admin':
+				return Shield;
+			default:
+				return UserIcon;
+		}
 	}
 </script>
 
@@ -92,17 +122,19 @@
 				<Sidebar.GroupLabel>{group.title}</Sidebar.GroupLabel>
 				<Sidebar.Menu>
 					{#each group.items as item}
-						{@const active = isActive(item.url)}
-						<Sidebar.MenuItem>
-							<Sidebar.MenuButton tooltipContent={item.title} isActive={active}>
-								{#snippet child({ props })}
-									<a href={item.url} {...props}>
-										<item.icon class="size-4" />
-										<span>{item.title}</span>
-									</a>
-								{/snippet}
-							</Sidebar.MenuButton>
-						</Sidebar.MenuItem>
+						{#if canViewItem(item)}
+							{@const active = isActive(item.url)}
+							<Sidebar.MenuItem>
+								<Sidebar.MenuButton tooltipContent={item.title} isActive={active}>
+									{#snippet child({ props })}
+										<a href={item.url} {...props}>
+											<item.icon class="size-4" />
+											<span>{item.title}</span>
+										</a>
+									{/snippet}
+								</Sidebar.MenuButton>
+							</Sidebar.MenuItem>
+						{/if}
 					{/each}
 				</Sidebar.Menu>
 			</Sidebar.Group>
@@ -122,12 +154,12 @@
 							>
 								<Avatar.Root class="size-8 rounded-lg">
 									<Avatar.Fallback class="rounded-lg bg-blue-600 text-white">
-										{user.initials}
+										{userDisplay.initials}
 									</Avatar.Fallback>
 								</Avatar.Root>
 								<div class="grid flex-1 text-left text-sm leading-tight">
-									<span class="truncate font-medium">{user.name}</span>
-									<span class="truncate text-xs">{user.email}</span>
+									<span class="truncate font-medium">{userDisplay.name}</span>
+									<span class="truncate text-xs">{userDisplay.email}</span>
 								</div>
 							</Sidebar.MenuButton>
 						{/snippet}
@@ -137,12 +169,14 @@
 							<div class="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
 								<Avatar.Root class="size-8 rounded-lg">
 									<Avatar.Fallback class="rounded-lg bg-blue-600 text-white">
-										{user.initials}
+										{userDisplay.initials}
 									</Avatar.Fallback>
 								</Avatar.Root>
 								<div class="grid flex-1 text-left text-sm leading-tight">
-									<span class="truncate font-medium">{user.name}</span>
-									<span class="truncate text-xs">{user.email}</span>
+									<span class="truncate font-medium">{userDisplay.name}</span>
+									<div class="flex items-center gap-1">
+										<span class="truncate text-xs">{userDisplay.email}</span>
+									</div>
 								</div>
 							</div>
 						</DropdownMenu.Label>

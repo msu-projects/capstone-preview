@@ -338,15 +338,62 @@ export interface Project {
 	updated_at: string;
 }
 
+// ===== USER MANAGEMENT & AUTH TYPES =====
+
+export type UserRole = 'superadmin' | 'admin' | 'viewer';
+
+export interface ResourcePermissions {
+	read: boolean;
+	write: boolean;
+	delete: boolean;
+}
+
+export interface UserPermissions {
+	sitios: ResourcePermissions;
+	projects: ResourcePermissions;
+	users: ResourcePermissions;
+	audit_logs: ResourcePermissions;
+}
+
 export interface User {
 	id: number;
 	name: string;
 	email: string;
-	role: string;
+	password_hash: string; // For prototype, plain text comparison
+	role: UserRole;
+	permissions: UserPermissions;
 	department: string;
-	status: string;
+	is_active: boolean;
 	last_login: string;
 	created_at: string;
+	updated_at?: string;
+}
+
+// ===== AUDIT LOG TYPES =====
+
+export type AuditAction =
+	| 'login'
+	| 'logout'
+	| 'create'
+	| 'update'
+	| 'delete'
+	| 'view'
+	| 'export'
+	| 'import';
+
+export type AuditResourceType = 'user' | 'sitio' | 'project' | 'system';
+
+export interface AuditLog {
+	id: string;
+	user_id: number;
+	user_name: string;
+	action: AuditAction;
+	resource_type: AuditResourceType;
+	resource_id?: number | string;
+	resource_name?: string;
+	details?: string;
+	ip_address?: string;
+	timestamp: string;
 }
 
 export interface Activity {

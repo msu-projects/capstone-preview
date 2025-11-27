@@ -7,6 +7,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import type { ColumnMapping, DuplicateSitio, ImportedRow, Sitio } from '$lib/types';
+	import { logAuditAction } from '$lib/utils/audit';
 	import { autoMapColumns, transformRowToSitio } from '$lib/utils/column-mapper';
 	import { parseFile } from '$lib/utils/import-parser';
 	import { findDuplicates, validateBatch } from '$lib/utils/import-validator';
@@ -160,6 +161,15 @@
 					replaced
 				};
 				step = 'complete';
+
+				// Log the import action
+				logAuditAction(
+					'import',
+					'sitio',
+					undefined,
+					uploadedFile?.name,
+					`Imported ${added} sitios (${skipped} skipped, ${replaced} replaced) from ${uploadedFile?.name || 'file'}`
+				);
 			} else {
 				alert('Failed to save sitios to storage. Storage may be full.');
 			}
