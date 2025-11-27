@@ -16,7 +16,7 @@
 	let categoryFilter = $state<string>('');
 	let currentPage = $state(1);
 	let sortBy = $state<'title' | 'budget' | 'progress' | 'status' | 'updated'>('updated');
-	let sortOrder = $state<'asc' | 'desc'>('asc');
+	let sortOrder = $state<'asc' | 'desc'>('desc');
 	const itemsPerPage = 10;
 	let deleteDialogOpen = $state(false);
 	let projectToDelete = $state<number | null>(null);
@@ -177,7 +177,7 @@
 		<!-- Table -->
 		<ProjectsTable
 			projects={paginatedProjects}
-			totalProjects={projects.length}
+			totalProjects={filteredProjects.length}
 			bind:currentPage
 			{itemsPerPage}
 			{totalPages}

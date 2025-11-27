@@ -1,5 +1,6 @@
 <script lang="ts">
 	import AdminHeader from '$lib/components/admin/AdminHeader.svelte';
+	import AuditLogDetailDialog from '$lib/components/admin/AuditLogDetailDialog.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
@@ -34,6 +35,15 @@
 	let userFilter = $state<string>('all');
 	let currentPage = $state(1);
 	const perPage = 20;
+
+	// Dialog state
+	let selectedLog = $state<AuditLog | null>(null);
+	let dialogOpen = $state(false);
+
+	function openLogDetail(log: AuditLog) {
+		selectedLog = log;
+		dialogOpen = true;
+	}
 
 	// Stats
 	let stats = $state({
@@ -361,7 +371,10 @@
 					</Table.Header>
 					<Table.Body>
 						{#each paginatedLogs as log (log.id)}
-							<Table.Row>
+							<Table.Row
+								class="cursor-pointer transition-colors hover:bg-muted/50"
+								onclick={() => openLogDetail(log)}
+							>
 								<Table.Cell class="text-sm text-muted-foreground">
 									<div class="flex items-center gap-2">
 										<Calendar class="h-4 w-4" />
@@ -445,3 +458,5 @@
 		</Card.Root>
 	</div>
 </div>
+
+<AuditLogDetailDialog log={selectedLog} bind:open={dialogOpen} />

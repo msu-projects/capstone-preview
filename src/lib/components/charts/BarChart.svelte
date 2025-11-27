@@ -18,8 +18,6 @@
 
 	let { data, orientation = 'vertical', height = 300, showGrid = true, title }: Props = $props();
 
-	$inspect(data);
-
 	// Default color palette for fallback
 	const defaultColors = [
 		'hsl(217, 91%, 60%)', // blue

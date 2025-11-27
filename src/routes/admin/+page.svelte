@@ -13,7 +13,9 @@
 	import { Skeleton } from '$lib/components/ui/skeleton';
 	import * as Tabs from '$lib/components/ui/tabs';
 	import { categories } from '$lib/config/project-categories';
-	import { activities, chartData, projects, sitios, stats } from '$lib/mock-data';
+	import { chartData, projects, sitios, stats } from '$lib/mock-data';
+	import type { AuditLog } from '$lib/types';
+	import { loadAuditLogs } from '$lib/utils/audit';
 	import toTitleCase from '$lib/utils/common';
 	import { downloadProjectMonitoringPDF } from '$lib/utils/pdf-generator';
 	import { ChartColumn, Download, Plus } from '@lucide/svelte';
@@ -21,13 +23,11 @@
 
 	// Loading state for async data simulation
 	let isLoading = $state(false);
+	let activities = $state<AuditLog[]>([]);
 
 	onMount(() => {
-		// Simulate loading for future API integration
-		// const timer = setTimeout(() => {
-		// 	isLoading = false;
-		// }, 800);
-		// return () => clearTimeout(timer);
+		// Load recent audit logs (most recent first, limited to 10)
+		activities = loadAuditLogs().reverse().slice(0, 10);
 	});
 
 	const recentProjects = projects.slice(0, 5);

@@ -227,7 +227,7 @@
 		<!-- Sitios Table -->
 		<SitiosTable
 			sitios={paginatedSitios}
-			totalSitios={sitios.length}
+			totalSitios={filteredSitios.length}
 			bind:currentPage
 			{itemsPerPage}
 			{totalPages}

@@ -1,24 +1,39 @@
 <script lang="ts">
+	import AuditLogDetailDialog from '$lib/components/admin/AuditLogDetailDialog.svelte';
+	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';
 	import { Skeleton } from '$lib/components/ui/skeleton';
-	import type { Activity as ActivityType } from '$lib/types';
+	import type { AuditAction, AuditLog, AuditResourceType } from '$lib/types';
+	import toTitleCase from '$lib/utils/common';
 	import {
 		Activity,
-		CirclePlus,
+		Download,
 		FileText,
-		MapPin,
-		SquarePen,
+		LogIn,
+		LogOut,
+		Pencil,
+		Plus,
+		Trash,
 		Upload,
+		User,
 		type IconProps
 	} from '@lucide/svelte';
 	import type { Component } from 'svelte';
 
 	interface Props {
-		activities: ActivityType[];
+		activities: AuditLog[];
 		isLoading?: boolean;
 	}
 
 	let { activities, isLoading = false }: Props = $props();
+
+	let selectedLog = $state<AuditLog | null>(null);
+	let dialogOpen = $state(false);
+
+	function openLogDetail(log: AuditLog) {
+		selectedLog = log;
+		dialogOpen = true;
+	}
 
 	function formatActivityTime(timestamp: string): string {
 		const date = new Date(timestamp);
@@ -28,20 +43,59 @@
 		const diffHours = Math.floor(diffMs / 3600000);
 		const diffDays = Math.floor(diffMs / 86400000);
 
-		if (diffMins < 60) return `${diffMins} minutes ago`;
-		if (diffHours < 24) return `${diffHours} hours ago`;
-		return `${diffDays} days ago`;
+		if (diffMins < 1) return 'Just now';
+		if (diffMins < 60) return `${diffMins}m ago`;
+		if (diffHours < 24) return `${diffHours}h ago`;
+		if (diffDays < 7) return `${diffDays}d ago`;
+
+		return date.toLocaleDateString('en-US', {
+			month: 'short',
+			day: 'numeric',
+			hour: '2-digit',
+			minute: '2-digit'
+		});
 	}
 
-	function getActivityIcon(iconName: string): Component<IconProps> {
-		const iconMap: Record<string, Component<IconProps>> = {
-			'plus-circle': CirclePlus,
-			edit: SquarePen,
-			'map-pin': MapPin,
-			upload: Upload,
-			'file-text': FileText
+	function getActionIcon(action: AuditAction): Component<IconProps> {
+		const iconMap: Record<AuditAction, Component<IconProps>> = {
+			login: LogIn,
+			logout: LogOut,
+			create: Plus,
+			update: Pencil,
+			delete: Trash,
+			view: FileText,
+			export: Download,
+			import: Upload
 		};
-		return iconMap[iconName] || Activity;
+		return iconMap[action] || Activity;
+	}
+
+	function getActionBadgeVariant(
+		action: AuditAction
+	): 'default' | 'secondary' | 'destructive' | 'outline' {
+		switch (action) {
+			case 'delete':
+				return 'destructive';
+			case 'create':
+				return 'default';
+			case 'update':
+				return 'secondary';
+			default:
+				return 'outline';
+		}
+	}
+
+	function getResourceBadgeVariant(
+		resource: AuditResourceType
+	): 'default' | 'secondary' | 'outline' {
+		switch (resource) {
+			case 'user':
+				return 'default';
+			case 'project':
+				return 'secondary';
+			default:
+				return 'outline';
+		}
 	}
 </script>
 
@@ -64,27 +118,51 @@
 				{/each}
 			</div>
 		{:else}
-			<div class="space-y-6">
+			<div class="space-y-4">
 				{#each activities as activity}
-					{@const ActivityIcon = getActivityIcon(activity.icon)}
-					<div class="flex gap-3">
-						<div
-							class="flex size-10 shrink-0 items-center justify-center rounded-full border-2 border-border bg-card"
-						>
-							<ActivityIcon class="size-4" />
+					{@const ActionIcon = getActionIcon(activity.action)}
+					<button
+						type="button"
+						class="flex w-full gap-3 rounded-lg p-2 text-left transition-colors hover:bg-muted/50"
+						onclick={() => openLogDetail(activity)}
+					>
+						<div class="flex size-8 shrink-0 items-center justify-center rounded-full bg-slate-100">
+							<User class="size-4 text-slate-600" />
 						</div>
-						<div class="flex-1 space-y-1">
-							<p class="text-sm font-semibold">{activity.user}</p>
-							<p class="text-sm text-muted-foreground">
-								{activity.action}: {activity.target}
-							</p>
-							<p class="text-xs text-muted-foreground">
-								{formatActivityTime(activity.timestamp)}
-							</p>
+						<div class="min-w-0 flex-1 space-y-1">
+							<div class="flex items-center gap-2">
+								<p class="text-sm font-medium">{activity.user_name}</p>
+								<span class="text-xs text-muted-foreground">
+									{formatActivityTime(activity.timestamp)}
+								</span>
+							</div>
+							<div class="flex flex-wrap items-center gap-1.5">
+								<Badge variant={getActionBadgeVariant(activity.action)} class="text-xs">
+									<ActionIcon class="mr-1 h-3 w-3" />
+									{toTitleCase(activity.action)}
+								</Badge>
+								<Badge variant={getResourceBadgeVariant(activity.resource_type)} class="text-xs">
+									{toTitleCase(activity.resource_type)}
+								</Badge>
+								{#if activity.resource_name}
+									<span class="truncate text-xs text-muted-foreground">
+										{activity.resource_name}
+									</span>
+								{/if}
+							</div>
+							{#if activity.details}
+								<p class="truncate text-xs text-muted-foreground">
+									{activity.details}
+								</p>
+							{/if}
 						</div>
-					</div>
+					</button>
+				{:else}
+					<p class="py-4 text-center text-sm text-muted-foreground">No recent activity</p>
 				{/each}
 			</div>
 		{/if}
 	</Card.CardContent>
 </Card.Card>
+
+<AuditLogDetailDialog log={selectedLog} bind:open={dialogOpen} />
