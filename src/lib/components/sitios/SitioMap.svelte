@@ -1,15 +1,17 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { cn } from '$lib/utils';
 	import type { Map as LeafletMap } from 'leaflet';
+	import { onMount } from 'svelte';
 
 	interface Props {
 		latitude: number;
 		longitude: number;
 		sitioName: string;
 		height?: string;
+		class?: string;
 	}
 
-	let { latitude, longitude, sitioName, height = '300px' }: Props = $props();
+	let { latitude, longitude, sitioName, height = '300px', class: className }: Props = $props();
 
 	let mapContainer: HTMLDivElement;
 	let map: LeafletMap | null = null;
@@ -36,8 +38,7 @@
 			const customIcon = L.icon({
 				iconUrl:
 					'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-				shadowUrl:
-					'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+				shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
 				iconSize: [25, 41],
 				iconAnchor: [12, 41],
 				popupAnchor: [1, -34],
@@ -63,7 +64,11 @@
 	});
 </script>
 
-<div bind:this={mapContainer} style="height: {height}; width: 100%;" class="rounded-lg"></div>
+<div
+	bind:this={mapContainer}
+	style="height: {height}; width: 100%;"
+	class={cn('rounded-lg', className)}
+></div>
 
 <style>
 	:global(.leaflet-container) {

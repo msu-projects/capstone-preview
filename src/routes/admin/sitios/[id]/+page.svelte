@@ -1,5 +1,5 @@
 <script lang="ts">
-	import SitioDetailView from '$lib/components/sitios/SitioDetailView.svelte';
+	import { SitioProfileView } from '$lib/components/sitios/profile';
 	import { Button } from '$lib/components/ui/button';
 	import { loadSitios } from '$lib/utils/storage';
 	import { ArrowLeft } from '@lucide/svelte';
@@ -25,5 +25,5 @@
 		</div>
 	</div>
 {:else}
-	<SitioDetailView {sitio} isAdminView={true} />
+	<SitioProfileView {sitio} isAdminView={true} />
 {/if}

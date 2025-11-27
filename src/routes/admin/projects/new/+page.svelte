@@ -83,8 +83,7 @@
 	const isTab2Valid = $derived(projectSitios.length > 0);
 
 	const isTab3Valid = $derived(
-		performanceTargets.length > 0 &&
-			targetStartDate !== undefined &&
+		targetStartDate !== undefined &&
 			durationInCalendarDays !== '' &&
 			Number(durationInCalendarDays) > 0 &&
 			totalBudget !== ''
