@@ -163,8 +163,8 @@
 	<!-- Top Row: Map and Location Info -->
 	<div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
 		<!-- Map Card (Takes 2 columns) -->
-		<Card.Root class="relative z-0 gap-0 overflow-hidden pb-0 shadow-sm lg:col-span-2">
-			<Card.Header class="border-b bg-slate-50/50 pb-4">
+		<Card.Root class="relative z-0 gap-0 overflow-hidden py-0 shadow-sm lg:col-span-2">
+			<Card.Header class="border-b bg-slate-50/50 py-6">
 				<div class="flex items-center justify-between">
 					<div class="flex items-center gap-2">
 						<div class="rounded-lg bg-blue-100 p-1.5">
@@ -193,8 +193,8 @@
 		</Card.Root>
 
 		<!-- Location Details Card -->
-		<Card.Root class="shadow-sm">
-			<Card.Header class="border-b bg-slate-50/50 pb-4">
+		<Card.Root class="gap-0 py-0 shadow-sm">
+			<Card.Header class="border-b bg-slate-50/50 py-6">
 				<div class="flex items-center gap-2">
 					<div class="rounded-lg bg-indigo-100 p-1.5">
 						<Building2 class="size-4 text-indigo-600" />
@@ -202,7 +202,7 @@
 					<Card.Title class="text-lg">Location Details</Card.Title>
 				</div>
 			</Card.Header>
-			<Card.Content class="space-y-4 pt-4">
+			<Card.Content class="space-y-4 py-6">
 				<div class="space-y-3">
 					<div class="rounded-lg bg-slate-50 p-3">
 						<div class="text-xs font-medium tracking-wider text-slate-400 uppercase">
@@ -257,8 +257,8 @@
 	</div>
 
 	<!-- Middle Row: Community Snapshot -->
-	<Card.Root class="shadow-sm">
-		<Card.Header class="border-b bg-slate-50/50 pb-4">
+	<Card.Root class="gap-0 py-0 shadow-sm">
+		<Card.Header class="border-b bg-slate-50/50 py-6">
 			<div class="flex items-center gap-2">
 				<div class="rounded-lg bg-violet-100 p-1.5">
 					<Sparkles class="size-4 text-violet-600" />
@@ -267,7 +267,7 @@
 			</div>
 			<Card.Description>Key social coverage indicators at a glance</Card.Description>
 		</Card.Header>
-		<Card.Content class="pt-4">
+		<Card.Content class="py-6">
 			<div class="grid grid-cols-1 gap-6 md:grid-cols-3">
 				{#each communitySnapshot as stat}
 					{@const colorMap = {
@@ -301,8 +301,8 @@
 	<!-- Bottom Row: Projects Summary and Additional Info -->
 	<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
 		<!-- Projects Summary Card -->
-		<Card.Root class="shadow-sm">
-			<Card.Header class="border-b bg-slate-50/50 pb-4">
+		<Card.Root class="gap-0 py-0 shadow-sm">
+			<Card.Header class="border-b bg-slate-50/50 py-6">
 				<div class="flex items-center justify-between">
 					<div class="flex items-center gap-2">
 						<div class="rounded-lg bg-blue-100 p-1.5">
@@ -315,7 +315,7 @@
 					</Badge>
 				</div>
 			</Card.Header>
-			<Card.Content class="pt-4">
+			<Card.Content class="py-6">
 				<div class="grid grid-cols-3 gap-4">
 					<div class="rounded-xl bg-emerald-50 p-4 text-center ring-1 ring-emerald-100">
 						<div class="text-3xl font-bold text-emerald-700">{activeProjects}</div>
@@ -352,8 +352,8 @@
 		</Card.Root>
 
 		<!-- Agriculture & Environment Quick View -->
-		<Card.Root class="shadow-sm">
-			<Card.Header class="border-b bg-slate-50/50 pb-4">
+		<Card.Root class="gap-0 py-0 shadow-sm">
+			<Card.Header class="border-b bg-slate-50/50 py-6">
 				<div class="flex items-center gap-2">
 					<div class="rounded-lg bg-green-100 p-1.5">
 						<Leaf class="size-4 text-green-600" />
@@ -361,7 +361,7 @@
 					<Card.Title class="text-lg">Agriculture Overview</Card.Title>
 				</div>
 			</Card.Header>
-			<Card.Content class="pt-4">
+			<Card.Content class="py-6">
 				{#if sitio.agriculture}
 					<div class="grid grid-cols-2 gap-4">
 						<div class="rounded-xl bg-green-50 p-4 ring-1 ring-green-100">

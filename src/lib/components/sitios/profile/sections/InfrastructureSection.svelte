@@ -74,18 +74,25 @@
 <div class="space-y-6">
 	<!-- Key Infrastructure Indicators -->
 	<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-		<Card.Root class="relative overflow-hidden shadow-sm">
+		<Card.Root
+			class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50"
+		>
 			<div
 				class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-amber-50 opacity-50"
 			></div>
-			<Card.Content class="relative p-5">
-				<div class="flex items-center gap-4">
-					<div class="rounded-xl bg-amber-100 p-3 ring-1 ring-amber-200">
-						<Zap class="size-6 text-amber-600" />
+			<div
+				class="absolute inset-0 bg-amber-50 opacity-0 transition-opacity group-hover:opacity-30"
+			></div>
+			<Card.Content class="relative p-4 sm:p-5">
+				<div class="flex items-center gap-3 sm:gap-4">
+					<div class="rounded-xl bg-amber-50 p-2.5 ring-1 ring-black/5 sm:p-3">
+						<Zap class="size-5 text-amber-700 sm:size-6" />
 					</div>
-					<div>
-						<p class="text-sm font-medium text-slate-500">Electricity Access</p>
-						<p class="text-2xl font-bold tracking-tight text-slate-900">
+					<div class="min-w-0 flex-1">
+						<p class="truncate text-xs font-medium text-slate-500 sm:text-sm">Electricity Access</p>
+						<p
+							class="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl"
+						>
 							{electricityCoverage.toFixed(0)}%
 						</p>
 					</div>
@@ -93,18 +100,25 @@
 			</Card.Content>
 		</Card.Root>
 
-		<Card.Root class="relative overflow-hidden shadow-sm">
+		<Card.Root
+			class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50"
+		>
 			<div
 				class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-cyan-50 opacity-50"
 			></div>
-			<Card.Content class="relative p-5">
-				<div class="flex items-center gap-4">
-					<div class="rounded-xl bg-cyan-100 p-3 ring-1 ring-cyan-200">
-						<Droplets class="size-6 text-cyan-600" />
+			<div
+				class="absolute inset-0 bg-cyan-50 opacity-0 transition-opacity group-hover:opacity-30"
+			></div>
+			<Card.Content class="relative p-4 sm:p-5">
+				<div class="flex items-center gap-3 sm:gap-4">
+					<div class="rounded-xl bg-cyan-50 p-2.5 ring-1 ring-black/5 sm:p-3">
+						<Droplets class="size-5 text-cyan-700 sm:size-6" />
 					</div>
-					<div>
-						<p class="text-sm font-medium text-slate-500">Water Systems</p>
-						<p class="text-2xl font-bold tracking-tight text-slate-900">
+					<div class="min-w-0 flex-1">
+						<p class="truncate text-xs font-medium text-slate-500 sm:text-sm">Water Systems</p>
+						<p
+							class="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl"
+						>
 							{sitio.water_sanitation?.water_systems_count || 0}
 						</p>
 					</div>
@@ -112,18 +126,25 @@
 			</Card.Content>
 		</Card.Root>
 
-		<Card.Root class="relative overflow-hidden shadow-sm">
+		<Card.Root
+			class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50"
+		>
 			<div
 				class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-purple-50 opacity-50"
 			></div>
-			<Card.Content class="relative p-5">
-				<div class="flex items-center gap-4">
-					<div class="rounded-xl bg-purple-100 p-3 ring-1 ring-purple-200">
-						<Bath class="size-6 text-purple-600" />
+			<div
+				class="absolute inset-0 bg-purple-50 opacity-0 transition-opacity group-hover:opacity-30"
+			></div>
+			<Card.Content class="relative p-4 sm:p-5">
+				<div class="flex items-center gap-3 sm:gap-4">
+					<div class="rounded-xl bg-purple-50 p-2.5 ring-1 ring-black/5 sm:p-3">
+						<Bath class="size-5 text-purple-700 sm:size-6" />
 					</div>
-					<div>
-						<p class="text-sm font-medium text-slate-500">Toilet Coverage</p>
-						<p class="text-2xl font-bold tracking-tight text-slate-900">
+					<div class="min-w-0 flex-1">
+						<p class="truncate text-xs font-medium text-slate-500 sm:text-sm">Toilet Coverage</p>
+						<p
+							class="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl"
+						>
 							{toiletCoverage.toFixed(0)}%
 						</p>
 					</div>
@@ -131,18 +152,25 @@
 			</Card.Content>
 		</Card.Root>
 
-		<Card.Root class="relative overflow-hidden shadow-sm">
+		<Card.Root
+			class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50"
+		>
 			<div
 				class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-emerald-50 opacity-50"
 			></div>
-			<Card.Content class="relative p-5">
-				<div class="flex items-center gap-4">
-					<div class="rounded-xl bg-emerald-100 p-3 ring-1 ring-emerald-200">
-						<Home class="size-6 text-emerald-600" />
+			<div
+				class="absolute inset-0 bg-emerald-50 opacity-0 transition-opacity group-hover:opacity-30"
+			></div>
+			<Card.Content class="relative p-4 sm:p-5">
+				<div class="flex items-center gap-3 sm:gap-4">
+					<div class="rounded-xl bg-emerald-50 p-2.5 ring-1 ring-black/5 sm:p-3">
+						<Home class="size-5 text-emerald-700 sm:size-6" />
 					</div>
-					<div>
-						<p class="text-sm font-medium text-slate-500">Households</p>
-						<p class="text-2xl font-bold tracking-tight text-slate-900">
+					<div class="min-w-0 flex-1">
+						<p class="truncate text-xs font-medium text-slate-500 sm:text-sm">Households</p>
+						<p
+							class="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl"
+						>
 							{formatNumber(sitio.households)}
 						</p>
 					</div>
@@ -154,8 +182,8 @@
 	<!-- Housing Charts -->
 	<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
 		<!-- Housing Quality -->
-		<Card.Root class="shadow-sm">
-			<Card.Header class="border-b bg-slate-50/50 pb-4">
+		<Card.Root class="gap-0 py-0 shadow-sm">
+			<Card.Header class="border-b bg-slate-50/50 py-6">
 				<div class="flex items-center gap-2">
 					<div class="rounded-lg bg-blue-100 p-1.5">
 						<Building class="size-4 text-blue-600" />
@@ -164,7 +192,7 @@
 				</div>
 				<Card.Description>Distribution of housing materials</Card.Description>
 			</Card.Header>
-			<Card.Content class="pt-4">
+			<Card.Content class="py-6">
 				{#if housingQualityData.length > 0}
 					<div style="height: 280px;">
 						<DonutChart
@@ -194,8 +222,8 @@
 		</Card.Root>
 
 		<!-- Housing Ownership -->
-		<Card.Root class="shadow-sm">
-			<Card.Header class="border-b bg-slate-50/50 pb-4">
+		<Card.Root class="gap-0 py-0 shadow-sm">
+			<Card.Header class="border-b bg-slate-50/50 py-6">
 				<div class="flex items-center gap-2">
 					<div class="rounded-lg bg-emerald-100 p-1.5">
 						<Home class="size-4 text-emerald-600" />
@@ -204,7 +232,7 @@
 				</div>
 				<Card.Description>Land and housing tenure status</Card.Description>
 			</Card.Header>
-			<Card.Content class="pt-4">
+			<Card.Content class="py-6">
 				{#if housingOwnershipData.length > 0}
 					<div style="height: 280px;">
 						<DonutChart data={housingOwnershipData} height={280} />
@@ -232,8 +260,8 @@
 	<!-- Utilities Section -->
 	<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
 		<!-- Electricity -->
-		<Card.Root class="shadow-sm">
-			<Card.Header class="border-b bg-amber-50/50 pb-4">
+		<Card.Root class="gap-0 py-0 shadow-sm">
+			<Card.Header class="border-b bg-amber-50/50 py-6">
 				<div class="flex items-center gap-2">
 					<div class="rounded-lg bg-amber-100 p-1.5">
 						<Zap class="size-4 text-amber-600" />
@@ -241,7 +269,7 @@
 					<Card.Title class="text-lg">Electricity Access</Card.Title>
 				</div>
 			</Card.Header>
-			<Card.Content class="pt-4">
+			<Card.Content class="py-6">
 				{#if sitio.utilities}
 					<div class="space-y-4">
 						<!-- Coverage Bar -->
@@ -300,8 +328,8 @@
 		</Card.Root>
 
 		<!-- Water & Sanitation -->
-		<Card.Root class="shadow-sm">
-			<Card.Header class="border-b bg-cyan-50/50 pb-4">
+		<Card.Root class="gap-0 py-0 shadow-sm">
+			<Card.Header class="border-b bg-cyan-50/50 py-6">
 				<div class="flex items-center gap-2">
 					<div class="rounded-lg bg-cyan-100 p-1.5">
 						<Droplets class="size-4 text-cyan-600" />
@@ -309,7 +337,7 @@
 					<Card.Title class="text-lg">Water & Sanitation</Card.Title>
 				</div>
 			</Card.Header>
-			<Card.Content class="pt-4">
+			<Card.Content class="py-6">
 				{#if sitio.water_sanitation}
 					<div class="space-y-4">
 						<!-- Water Systems -->

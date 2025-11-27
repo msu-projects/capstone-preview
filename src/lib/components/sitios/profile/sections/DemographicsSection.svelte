@@ -86,18 +86,25 @@
 	<!-- Population Overview Cards -->
 	<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
 		<!-- Total Population -->
-		<Card.Root class="relative overflow-hidden shadow-sm">
+		<Card.Root
+			class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50"
+		>
 			<div
 				class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-blue-50 opacity-50"
 			></div>
-			<Card.Content class="relative p-5">
-				<div class="flex items-center gap-4">
-					<div class="rounded-xl bg-blue-100 p-3 ring-1 ring-blue-200">
-						<Users class="size-6 text-blue-600" />
+			<div
+				class="absolute inset-0 bg-blue-50 opacity-0 transition-opacity group-hover:opacity-30"
+			></div>
+			<Card.Content class="relative p-4 sm:p-5">
+				<div class="flex items-center gap-3 sm:gap-4">
+					<div class="rounded-xl bg-blue-50 p-2.5 ring-1 ring-black/5 sm:p-3">
+						<Users class="size-5 text-blue-700 sm:size-6" />
 					</div>
-					<div>
-						<p class="text-sm font-medium text-slate-500">Total Population</p>
-						<p class="text-2xl font-bold tracking-tight text-slate-900">
+					<div class="min-w-0 flex-1">
+						<p class="truncate text-xs font-medium text-slate-500 sm:text-sm">Total Population</p>
+						<p
+							class="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl"
+						>
 							{formatNumber(sitio.population)}
 						</p>
 					</div>
@@ -106,18 +113,25 @@
 		</Card.Root>
 
 		<!-- Households -->
-		<Card.Root class="relative overflow-hidden shadow-sm">
+		<Card.Root
+			class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50"
+		>
 			<div
 				class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-emerald-50 opacity-50"
 			></div>
-			<Card.Content class="relative p-5">
-				<div class="flex items-center gap-4">
-					<div class="rounded-xl bg-emerald-100 p-3 ring-1 ring-emerald-200">
-						<Home class="size-6 text-emerald-600" />
+			<div
+				class="absolute inset-0 bg-emerald-50 opacity-0 transition-opacity group-hover:opacity-30"
+			></div>
+			<Card.Content class="relative p-4 sm:p-5">
+				<div class="flex items-center gap-3 sm:gap-4">
+					<div class="rounded-xl bg-emerald-50 p-2.5 ring-1 ring-black/5 sm:p-3">
+						<Home class="size-5 text-emerald-700 sm:size-6" />
 					</div>
-					<div>
-						<p class="text-sm font-medium text-slate-500">Households</p>
-						<p class="text-2xl font-bold tracking-tight text-slate-900">
+					<div class="min-w-0 flex-1">
+						<p class="truncate text-xs font-medium text-slate-500 sm:text-sm">Households</p>
+						<p
+							class="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl"
+						>
 							{formatNumber(sitio.households)}
 						</p>
 					</div>
@@ -126,18 +140,27 @@
 		</Card.Root>
 
 		<!-- Avg Household Size -->
-		<Card.Root class="relative overflow-hidden shadow-sm">
+		<Card.Root
+			class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50"
+		>
 			<div
 				class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-violet-50 opacity-50"
 			></div>
-			<Card.Content class="relative p-5">
-				<div class="flex items-center gap-4">
-					<div class="rounded-xl bg-violet-100 p-3 ring-1 ring-violet-200">
-						<PersonStanding class="size-6 text-violet-600" />
+			<div
+				class="absolute inset-0 bg-violet-50 opacity-0 transition-opacity group-hover:opacity-30"
+			></div>
+			<Card.Content class="relative p-4 sm:p-5">
+				<div class="flex items-center gap-3 sm:gap-4">
+					<div class="rounded-xl bg-violet-50 p-2.5 ring-1 ring-black/5 sm:p-3">
+						<PersonStanding class="size-5 text-violet-700 sm:size-6" />
 					</div>
-					<div>
-						<p class="text-sm font-medium text-slate-500">Avg. Household Size</p>
-						<p class="text-2xl font-bold tracking-tight text-slate-900">
+					<div class="min-w-0 flex-1">
+						<p class="truncate text-xs font-medium text-slate-500 sm:text-sm">
+							Avg. Household Size
+						</p>
+						<p
+							class="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl"
+						>
 							{avgHouseholdSize.toFixed(1)}
 						</p>
 					</div>
@@ -146,18 +169,25 @@
 		</Card.Root>
 
 		<!-- Working Age Population -->
-		<Card.Root class="relative overflow-hidden shadow-sm">
+		<Card.Root
+			class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50"
+		>
 			<div
 				class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-amber-50 opacity-50"
 			></div>
-			<Card.Content class="relative p-5">
-				<div class="flex items-center gap-4">
-					<div class="rounded-xl bg-amber-100 p-3 ring-1 ring-amber-200">
-						<Briefcase class="size-6 text-amber-600" />
+			<div
+				class="absolute inset-0 bg-amber-50 opacity-0 transition-opacity group-hover:opacity-30"
+			></div>
+			<Card.Content class="relative p-4 sm:p-5">
+				<div class="flex items-center gap-3 sm:gap-4">
+					<div class="rounded-xl bg-amber-50 p-2.5 ring-1 ring-black/5 sm:p-3">
+						<Briefcase class="size-5 text-amber-700 sm:size-6" />
 					</div>
-					<div>
-						<p class="text-sm font-medium text-slate-500">Working Age</p>
-						<p class="text-2xl font-bold tracking-tight text-slate-900">
+					<div class="min-w-0 flex-1">
+						<p class="truncate text-xs font-medium text-slate-500 sm:text-sm">Working Age</p>
+						<p
+							class="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl"
+						>
 							{workingAgePercentage.toFixed(0)}%
 						</p>
 					</div>
@@ -169,8 +199,8 @@
 	<!-- Charts Row -->
 	<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
 		<!-- Gender Distribution -->
-		<Card.Root class="shadow-sm">
-			<Card.Header class="border-b bg-slate-50/50 pb-4">
+		<Card.Root class="gap-0 py-0 shadow-sm">
+			<Card.Header class="border-b bg-slate-50/50 py-6">
 				<div class="flex items-center justify-between">
 					<div class="flex items-center gap-2">
 						<div class="rounded-lg bg-indigo-100 p-1.5">
@@ -180,7 +210,7 @@
 					</div>
 				</div>
 			</Card.Header>
-			<Card.Content class="pt-4">
+			<Card.Content class="py-6">
 				<!-- Visual Gender Bar -->
 				<div class="mb-6">
 					<div class="flex h-4 overflow-hidden rounded-full">
@@ -226,8 +256,8 @@
 		</Card.Root>
 
 		<!-- Age Distribution -->
-		<Card.Root class="shadow-sm">
-			<Card.Header class="border-b bg-slate-50/50 pb-4">
+		<Card.Root class="gap-0 py-0 shadow-sm">
+			<Card.Header class="border-b bg-slate-50/50 py-6">
 				<div class="flex items-center gap-2">
 					<div class="rounded-lg bg-emerald-100 p-1.5">
 						<Activity class="size-4 text-emerald-600" />
@@ -235,7 +265,7 @@
 					<Card.Title class="text-lg">Age Distribution</Card.Title>
 				</div>
 			</Card.Header>
-			<Card.Content class="pt-4">
+			<Card.Content class="py-6">
 				<div style="height: 220px;">
 					<DonutChart
 						data={ageChartData}
@@ -275,8 +305,8 @@
 	</div>
 
 	<!-- Dependency Ratio Analysis -->
-	<Card.Root class="shadow-sm">
-		<Card.Header class="border-b bg-slate-50/50 pb-4">
+	<Card.Root class="gap-0 py-0 shadow-sm">
+		<Card.Header class="border-b bg-slate-50/50 py-6">
 			<div class="flex items-center justify-between">
 				<div class="flex items-center gap-2">
 					<div class="rounded-lg bg-purple-100 p-1.5">
@@ -301,7 +331,7 @@
 				</Badge>
 			</div>
 		</Card.Header>
-		<Card.Content class="pt-4">
+		<Card.Content class="py-6">
 			<div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
 				<!-- Dependency Ratio Display -->
 				<div

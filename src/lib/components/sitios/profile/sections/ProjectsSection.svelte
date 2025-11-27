@@ -126,18 +126,25 @@
 <div class="space-y-6">
 	<!-- Summary Cards -->
 	<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-		<Card.Root class="relative overflow-hidden shadow-sm">
+		<Card.Root
+			class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50"
+		>
 			<div
 				class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-blue-50 opacity-50"
 			></div>
-			<Card.Content class="relative p-5">
-				<div class="flex items-center gap-4">
-					<div class="rounded-xl bg-blue-100 p-3 ring-1 ring-blue-200">
-						<FolderKanban class="size-6 text-blue-600" />
+			<div
+				class="absolute inset-0 bg-blue-50 opacity-0 transition-opacity group-hover:opacity-30"
+			></div>
+			<Card.Content class="relative p-4 sm:p-5">
+				<div class="flex items-center gap-3 sm:gap-4">
+					<div class="rounded-xl bg-blue-50 p-2.5 ring-1 ring-black/5 sm:p-3">
+						<FolderKanban class="size-5 text-blue-700 sm:size-6" />
 					</div>
-					<div>
-						<p class="text-sm font-medium text-slate-500">Total Projects</p>
-						<p class="text-2xl font-bold tracking-tight text-slate-900">
+					<div class="min-w-0 flex-1">
+						<p class="truncate text-xs font-medium text-slate-500 sm:text-sm">Total Projects</p>
+						<p
+							class="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl"
+						>
 							{relatedProjects.length}
 						</p>
 					</div>
@@ -145,18 +152,25 @@
 			</Card.Content>
 		</Card.Root>
 
-		<Card.Root class="relative overflow-hidden shadow-sm">
+		<Card.Root
+			class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50"
+		>
 			<div
 				class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-emerald-50 opacity-50"
 			></div>
-			<Card.Content class="relative p-5">
-				<div class="flex items-center gap-4">
-					<div class="rounded-xl bg-emerald-100 p-3 ring-1 ring-emerald-200">
-						<TrendingUp class="size-6 text-emerald-600" />
+			<div
+				class="absolute inset-0 bg-emerald-50 opacity-0 transition-opacity group-hover:opacity-30"
+			></div>
+			<Card.Content class="relative p-4 sm:p-5">
+				<div class="flex items-center gap-3 sm:gap-4">
+					<div class="rounded-xl bg-emerald-50 p-2.5 ring-1 ring-black/5 sm:p-3">
+						<TrendingUp class="size-5 text-emerald-700 sm:size-6" />
 					</div>
-					<div>
-						<p class="text-sm font-medium text-slate-500">Active Projects</p>
-						<p class="text-2xl font-bold tracking-tight text-emerald-600">
+					<div class="min-w-0 flex-1">
+						<p class="truncate text-xs font-medium text-slate-500 sm:text-sm">Active Projects</p>
+						<p
+							class="truncate text-lg font-bold tracking-tight text-emerald-700 sm:text-xl lg:text-2xl"
+						>
 							{activeProjects.length}
 						</p>
 					</div>
@@ -164,18 +178,25 @@
 			</Card.Content>
 		</Card.Root>
 
-		<Card.Root class="relative overflow-hidden shadow-sm">
+		<Card.Root
+			class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50"
+		>
 			<div
 				class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-amber-50 opacity-50"
 			></div>
-			<Card.Content class="relative p-5">
-				<div class="flex items-center gap-4">
-					<div class="rounded-xl bg-amber-100 p-3 ring-1 ring-amber-200">
-						<Banknote class="size-6 text-amber-600" />
+			<div
+				class="absolute inset-0 bg-amber-50 opacity-0 transition-opacity group-hover:opacity-30"
+			></div>
+			<Card.Content class="relative p-4 sm:p-5">
+				<div class="flex items-center gap-3 sm:gap-4">
+					<div class="rounded-xl bg-amber-50 p-2.5 ring-1 ring-black/5 sm:p-3">
+						<Banknote class="size-5 text-amber-700 sm:size-6" />
 					</div>
-					<div>
-						<p class="text-sm font-medium text-slate-500">Total Investment</p>
-						<p class="text-lg font-bold tracking-tight text-slate-900">
+					<div class="min-w-0 flex-1">
+						<p class="truncate text-xs font-medium text-slate-500 sm:text-sm">Total Investment</p>
+						<p
+							class="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl"
+						>
 							{formatCurrency(totalBudget)}
 						</p>
 					</div>
@@ -183,18 +204,25 @@
 			</Card.Content>
 		</Card.Root>
 
-		<Card.Root class="relative overflow-hidden shadow-sm">
+		<Card.Root
+			class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50"
+		>
 			<div
 				class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-purple-50 opacity-50"
 			></div>
-			<Card.Content class="relative p-5">
-				<div class="flex items-center gap-4">
-					<div class="rounded-xl bg-purple-100 p-3 ring-1 ring-purple-200">
-						<Users class="size-6 text-purple-600" />
+			<div
+				class="absolute inset-0 bg-purple-50 opacity-0 transition-opacity group-hover:opacity-30"
+			></div>
+			<Card.Content class="relative p-4 sm:p-5">
+				<div class="flex items-center gap-3 sm:gap-4">
+					<div class="rounded-xl bg-purple-50 p-2.5 ring-1 ring-black/5 sm:p-3">
+						<Users class="size-5 text-purple-700 sm:size-6" />
 					</div>
-					<div>
-						<p class="text-sm font-medium text-slate-500">Beneficiaries</p>
-						<p class="text-2xl font-bold tracking-tight text-slate-900">
+					<div class="min-w-0 flex-1">
+						<p class="truncate text-xs font-medium text-slate-500 sm:text-sm">Beneficiaries</p>
+						<p
+							class="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl"
+						>
 							{formatNumber(totalBeneficiaries)}
 						</p>
 					</div>
@@ -204,8 +232,8 @@
 	</div>
 
 	<!-- Status Breakdown -->
-	<Card.Root class="shadow-sm">
-		<Card.Header class="border-b bg-slate-50/50 pb-4">
+	<Card.Root class="gap-0 py-0 shadow-sm">
+		<Card.Header class="border-b bg-slate-50/50 py-6">
 			<div class="flex items-center gap-2">
 				<div class="rounded-lg bg-slate-100 p-1.5">
 					<FolderKanban class="size-4 text-slate-600" />
@@ -213,7 +241,7 @@
 				<Card.Title class="text-lg">Project Status Breakdown</Card.Title>
 			</div>
 		</Card.Header>
-		<Card.Content class="pt-4">
+		<Card.Content class="py-6">
 			<div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
 				<div class="rounded-xl bg-emerald-50 p-4 text-center ring-1 ring-emerald-100">
 					<TrendingUp class="mx-auto size-6 text-emerald-600" />
@@ -251,8 +279,8 @@
 
 	<!-- Projects List -->
 	{#if relatedProjects.length > 0}
-		<Card.Root class="shadow-sm">
-			<Card.Header class="border-b bg-slate-50/50 pb-4">
+		<Card.Root class="gap-0 py-0 shadow-sm">
+			<Card.Header class="border-b bg-slate-50/50 py-6">
 				<div class="flex items-center justify-between">
 					<div class="flex items-center gap-2">
 						<div class="rounded-lg bg-blue-100 p-1.5">

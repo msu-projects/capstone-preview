@@ -100,18 +100,25 @@
 <div class="space-y-6">
 	<!-- Key Economic Indicators -->
 	<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-		<Card.Root class="relative overflow-hidden shadow-sm">
+		<Card.Root
+			class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50"
+		>
 			<div
 				class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-blue-50 opacity-50"
 			></div>
-			<Card.Content class="relative p-5">
-				<div class="flex items-center gap-4">
-					<div class="rounded-xl bg-blue-100 p-3 ring-1 ring-blue-200">
-						<Briefcase class="size-6 text-blue-600" />
+			<div
+				class="absolute inset-0 bg-blue-50 opacity-0 transition-opacity group-hover:opacity-30"
+			></div>
+			<Card.Content class="relative p-4 sm:p-5">
+				<div class="flex items-center gap-3 sm:gap-4">
+					<div class="rounded-xl bg-blue-50 p-2.5 ring-1 ring-black/5 sm:p-3">
+						<Briefcase class="size-5 text-blue-700 sm:size-6" />
 					</div>
-					<div>
-						<p class="text-sm font-medium text-slate-500">Total Employed</p>
-						<p class="text-2xl font-bold tracking-tight text-slate-900">
+					<div class="min-w-0 flex-1">
+						<p class="truncate text-xs font-medium text-slate-500 sm:text-sm">Total Employed</p>
+						<p
+							class="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl"
+						>
 							{formatNumber(totalEmployed)}
 						</p>
 					</div>
@@ -119,18 +126,25 @@
 			</Card.Content>
 		</Card.Root>
 
-		<Card.Root class="relative overflow-hidden shadow-sm">
+		<Card.Root
+			class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50"
+		>
 			<div
 				class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-emerald-50 opacity-50"
 			></div>
-			<Card.Content class="relative p-5">
-				<div class="flex items-center gap-4">
-					<div class="rounded-xl bg-emerald-100 p-3 ring-1 ring-emerald-200">
-						<TrendingUp class="size-6 text-emerald-600" />
+			<div
+				class="absolute inset-0 bg-emerald-50 opacity-0 transition-opacity group-hover:opacity-30"
+			></div>
+			<Card.Content class="relative p-4 sm:p-5">
+				<div class="flex items-center gap-3 sm:gap-4">
+					<div class="rounded-xl bg-emerald-50 p-2.5 ring-1 ring-black/5 sm:p-3">
+						<TrendingUp class="size-5 text-emerald-700 sm:size-6" />
 					</div>
-					<div>
-						<p class="text-sm font-medium text-slate-500">Top Employment</p>
-						<p class="max-w-[120px] truncate text-lg font-bold tracking-tight text-slate-900">
+					<div class="min-w-0 flex-1">
+						<p class="truncate text-xs font-medium text-slate-500 sm:text-sm">Top Employment</p>
+						<p
+							class="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl"
+						>
 							{topEmployment}
 						</p>
 					</div>
@@ -138,18 +152,25 @@
 			</Card.Content>
 		</Card.Root>
 
-		<Card.Root class="relative overflow-hidden shadow-sm">
+		<Card.Root
+			class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50"
+		>
 			<div
 				class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-green-50 opacity-50"
 			></div>
-			<Card.Content class="relative p-5">
-				<div class="flex items-center gap-4">
-					<div class="rounded-xl bg-green-100 p-3 ring-1 ring-green-200">
-						<Sprout class="size-6 text-green-600" />
+			<div
+				class="absolute inset-0 bg-green-50 opacity-0 transition-opacity group-hover:opacity-30"
+			></div>
+			<Card.Content class="relative p-4 sm:p-5">
+				<div class="flex items-center gap-3 sm:gap-4">
+					<div class="rounded-xl bg-green-50 p-2.5 ring-1 ring-black/5 sm:p-3">
+						<Sprout class="size-5 text-green-700 sm:size-6" />
 					</div>
-					<div>
-						<p class="text-sm font-medium text-slate-500">Farmers</p>
-						<p class="text-2xl font-bold tracking-tight text-slate-900">
+					<div class="min-w-0 flex-1">
+						<p class="truncate text-xs font-medium text-slate-500 sm:text-sm">Farmers</p>
+						<p
+							class="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl"
+						>
 							{formatNumber(sitio.agriculture?.farmers_count || 0)}
 						</p>
 					</div>
@@ -157,18 +178,25 @@
 			</Card.Content>
 		</Card.Root>
 
-		<Card.Root class="relative overflow-hidden shadow-sm">
+		<Card.Root
+			class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50"
+		>
 			<div
 				class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-amber-50 opacity-50"
 			></div>
-			<Card.Content class="relative p-5">
-				<div class="flex items-center gap-4">
-					<div class="rounded-xl bg-amber-100 p-3 ring-1 ring-amber-200">
-						<Beef class="size-6 text-amber-600" />
+			<div
+				class="absolute inset-0 bg-amber-50 opacity-0 transition-opacity group-hover:opacity-30"
+			></div>
+			<Card.Content class="relative p-4 sm:p-5">
+				<div class="flex items-center gap-3 sm:gap-4">
+					<div class="rounded-xl bg-amber-50 p-2.5 ring-1 ring-black/5 sm:p-3">
+						<Beef class="size-5 text-amber-700 sm:size-6" />
 					</div>
-					<div>
-						<p class="text-sm font-medium text-slate-500">Livestock</p>
-						<p class="text-2xl font-bold tracking-tight text-slate-900">
+					<div class="min-w-0 flex-1">
+						<p class="truncate text-xs font-medium text-slate-500 sm:text-sm">Livestock</p>
+						<p
+							class="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl"
+						>
 							{formatNumber(totalLivestock)}
 						</p>
 					</div>
@@ -180,8 +208,8 @@
 	<!-- Employment and Income Charts -->
 	<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
 		<!-- Employment Types -->
-		<Card.Root class="shadow-sm">
-			<Card.Header class="border-b bg-slate-50/50 pb-4">
+		<Card.Root class="gap-0 py-0 shadow-sm">
+			<Card.Header class="border-b bg-slate-50/50 py-6">
 				<div class="flex items-center justify-between">
 					<div class="flex items-center gap-2">
 						<div class="rounded-lg bg-blue-100 p-1.5">
@@ -196,7 +224,7 @@
 					{/if}
 				</div>
 			</Card.Header>
-			<Card.Content class="pt-4">
+			<Card.Content class="py-6">
 				{#if employmentData.length > 0}
 					<div style="height: 300px;">
 						<BarChart data={employmentData} orientation="horizontal" height={300} />
@@ -211,8 +239,8 @@
 		</Card.Root>
 
 		<!-- Income Distribution -->
-		<Card.Root class="shadow-sm">
-			<Card.Header class="border-b bg-slate-50/50 pb-4">
+		<Card.Root class="gap-0 py-0 shadow-sm">
+			<Card.Header class="border-b bg-slate-50/50 py-6">
 				<div class="flex items-center gap-2">
 					<div class="rounded-lg bg-emerald-100 p-1.5">
 						<Banknote class="size-4 text-emerald-600" />
@@ -221,7 +249,7 @@
 				</div>
 				<Card.Description>Daily income brackets by household</Card.Description>
 			</Card.Header>
-			<Card.Content class="pt-4">
+			<Card.Content class="py-6">
 				{#if incomeData.length > 0}
 					<div style="height: 280px;">
 						<DonutChart
@@ -252,8 +280,8 @@
 	</div>
 
 	<!-- Agriculture Profile -->
-	<Card.Root class="overflow-hidden shadow-sm">
-		<Card.Header class="border-b bg-green-50/50 pb-4">
+	<Card.Root class="gap-0 overflow-hidden py-0 shadow-sm">
+		<Card.Header class="border-b bg-green-50/50 py-6">
 			<div class="flex items-center justify-between">
 				<div class="flex items-center gap-2">
 					<div class="rounded-lg bg-green-100 p-1.5">
@@ -266,7 +294,7 @@
 				</div>
 			</div>
 		</Card.Header>
-		<Card.Content class="pt-4">
+		<Card.Content class="py-6">
 			{#if sitio.agriculture}
 				<div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
 					<!-- Stats -->
@@ -336,8 +364,8 @@
 	</Card.Root>
 
 	<!-- Livestock Census -->
-	<Card.Root class="shadow-sm">
-		<Card.Header class="border-b bg-slate-50/50 pb-4">
+	<Card.Root class="gap-0 py-0 shadow-sm">
+		<Card.Header class="border-b bg-slate-50/50 py-6">
 			<div class="flex items-center justify-between">
 				<div class="flex items-center gap-2">
 					<div class="rounded-lg bg-amber-100 p-1.5">
@@ -352,7 +380,7 @@
 				{/if}
 			</div>
 		</Card.Header>
-		<Card.Content class="pt-4">
+		<Card.Content class="py-6">
 			{#if livestockData.length > 0}
 				<div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
 					{#each livestockData as animal}
