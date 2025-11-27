@@ -210,10 +210,6 @@
 				category: selectedCategory || '',
 				category_key: selectedCategory as any,
 				project_type_id: selectedProjectType,
-				// Legacy fields (using first sitio for backwards compatibility)
-				sitio_id: firstSitio?.sitio_id || 0,
-				sitio_name: firstSitio?.sitio_name || '',
-				municipality: firstSitio?.municipality || '',
 				status,
 				start_date: startDateValue,
 				end_date: targetEndDate?.toString() || '',

@@ -39,12 +39,7 @@
 						)
 					: false;
 
-				// Fallback to legacy fields
-				const legacyMatch =
-					project.sitio_name.toLowerCase().includes(query) ||
-					project.municipality.toLowerCase().includes(query);
-
-				matchesSearch = titleMatch || sitioMatch || legacyMatch;
+				matchesSearch = titleMatch || sitioMatch;
 			}
 
 			const matchesStatus = !statusFilter || project.status === statusFilter;

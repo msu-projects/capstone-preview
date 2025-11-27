@@ -3,7 +3,7 @@
  * and enhanced project structures for backwards compatibility
  */
 
-import type { Project, MonitoringDetails, PhotoDocumentation } from '$lib/types';
+import type { MonitoringDetails, PhotoDocumentation, Project } from '$lib/types';
 import { getCurrentMonth } from './project-calculations';
 
 /**
@@ -66,13 +66,17 @@ export function projectToQuickUpdate(project: Project): QuickUpdateFormData {
 		performanceTarget?.monthly_plan_percentage?.[currentMonth];
 
 	// Calculate cumulative disbursed amount (sum of all monthly expenses up to current month)
-	const cumulativeDisbursed = project.monthly_budget?.reduce((sum, mb) => {
-		// Only sum expenses up to and including current month
-		if (mb.month_year <= currentMonth) {
-			return sum + (mb.actual_expenses || 0);
-		}
-		return sum;
-	}, 0) || project.monitoring?.allotment?.released || project.monitoring?.expenditure?.obligations || 0;
+	const cumulativeDisbursed =
+		project.monthly_budget?.reduce((sum, mb) => {
+			// Only sum expenses up to and including current month
+			if (mb.month_year <= currentMonth) {
+				return sum + (mb.actual_expenses || 0);
+			}
+			return sum;
+		}, 0) ||
+		project.monitoring?.allotment?.released ||
+		project.monitoring?.expenditure?.obligations ||
+		0;
 
 	// Get THIS month's disbursement only (not cumulative)
 	const monthlyDisbursement = latestBudgetUtil?.actual_expenses || 0;
@@ -81,7 +85,8 @@ export function projectToQuickUpdate(project: Project): QuickUpdateFormData {
 		// Progress & Status
 		status: project.status,
 		physicalActual: project.completion_percentage?.toString() || '0',
-		plannedPercentage: plannedPercentage?.toString() || project.monitoring?.physical?.plan?.toString() || '0',
+		plannedPercentage:
+			plannedPercentage?.toString() || project.monitoring?.physical?.plan?.toString() || '0',
 		statusStage: project.monitoring?.statusSummary?.stage || '',
 		statusIssues: project.monitoring?.statusSummary?.issues || '',
 		statusRecommendations: project.monitoring?.statusSummary?.recommendations || '',
@@ -145,7 +150,7 @@ export function applyQuickUpdateToProject(
 		fundSource: project.monitoring?.fundSource || '',
 		fiscalYear: project.monitoring?.fiscalYear || project.project_year || new Date().getFullYear(),
 		implementingUnit: project.monitoring?.implementingUnit || '',
-		location: project.monitoring?.location || project.sitio_name || '',
+		location: project.monitoring?.location || project.project_sitios?.[0]?.sitio_name || '',
 		allotment: {
 			...project.monitoring?.allotment,
 			allocated: project.budget || 0,
@@ -249,8 +254,7 @@ export function applyQuickUpdateToProject(
 						beneficiaries_reached: Number(formData.currentBeneficiaries || 0),
 						issues_encountered: formData.statusIssues,
 						photo_documentation: formData.photoDocumentation,
-						status:
-							slippage > 10 ? 'delayed' : slippage < -5 ? 'ahead' : ('on-track' as const),
+						status: slippage > 10 ? 'delayed' : slippage < -5 ? 'ahead' : ('on-track' as const),
 						updated_at: new Date().toISOString()
 					}
 				: mp
@@ -305,9 +309,10 @@ export function applyQuickUpdateToProject(
  * Validates Quick Update form data
  * Returns validation errors if any
  */
-export function validateQuickUpdateData(
-	formData: QuickUpdateFormData
-): { isValid: boolean; errors: string[] } {
+export function validateQuickUpdateData(formData: QuickUpdateFormData): {
+	isValid: boolean;
+	errors: string[];
+} {
 	const errors: string[] = [];
 
 	// Validate progress percentages

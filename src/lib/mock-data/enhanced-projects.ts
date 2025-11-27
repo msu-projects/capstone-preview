@@ -17,10 +17,6 @@ export const enhancedProjects: Project[] = [
 		category_key: 'agriculture',
 		project_type_id: 9,
 		project_type_name: 'Seedling Distribution Program',
-		// Legacy fields (deprecated - for backward compatibility only)
-		sitio_id: 0,
-		sitio_name: '',
-		municipality: '',
 		status: 'in-progress',
 		start_date: '2025-01-15',
 		end_date: '2025-06-30',

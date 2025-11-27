@@ -25,8 +25,12 @@
 			const matchesSearch =
 				!searchQuery ||
 				project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-				project.sitio_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-				project.municipality.toLowerCase().includes(searchQuery.toLowerCase());
+				(project.project_sitios?.some(
+					(s) =>
+						s.sitio_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+						s.municipality.toLowerCase().includes(searchQuery.toLowerCase())
+				) ??
+					false);
 
 			const matchesStatus = !statusFilter || project.status === statusFilter;
 			const matchesCategory = !categoryFilter || project.category === categoryFilter;
@@ -204,7 +208,16 @@
 							<div class="space-y-2 text-sm">
 								<div class="flex justify-between">
 									<span class="text-muted-foreground">Location</span>
-									<span class="font-medium">{project.municipality}</span>
+									<span class="font-medium">
+										{#if project.project_sitios && project.project_sitios.length > 0}
+											{project.project_sitios[0].municipality}
+											{#if project.project_sitios.length > 1}
+												+{project.project_sitios.length - 1} more
+											{/if}
+										{:else}
+											N/A
+										{/if}
+									</span>
 								</div>
 								<div class="flex justify-between">
 									<span class="text-muted-foreground">Budget</span>

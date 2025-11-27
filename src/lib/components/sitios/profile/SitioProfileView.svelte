@@ -69,9 +69,7 @@
 	// Get related projects for this sitio
 	const relatedProjects = $derived<Project[]>(
 		projects.filter((p) => {
-			if (p.sitio_id === sitio.id) return true;
-			if (p.project_sitios?.some((ps) => ps.sitio_id === sitio.id)) return true;
-			return false;
+			return p.project_sitios?.some((ps) => ps.sitio_id === sitio.id) ?? false;
 		})
 	);
 

@@ -126,7 +126,7 @@ const enhancedProjectsWithMonitoring = enhancedProjects.map((project) => {
 			female: femaleEmployment
 		},
 		monitoring: createMonitoringDetails({
-			location: `${project.municipality}`,
+			location: project.project_sitios?.[0]?.municipality || '',
 			fiscalYear: project.project_year,
 			allotment: {
 				allocated,
@@ -211,7 +211,7 @@ function initializeProjects(): Project[] {
 				monitoring:
 					storedProject.monitoring ||
 					createMonitoringDetails({
-						location: storedProject.municipality || '',
+						location: storedProject.project_sitios?.[0]?.municipality || '',
 						fiscalYear: storedProject.project_year,
 						allotment: {
 							allocated: storedProject.budget,
@@ -251,7 +251,7 @@ export function refreshProjects(): Project[] {
 			monitoring:
 				storedProject.monitoring ||
 				createMonitoringDetails({
-					location: storedProject.municipality || '',
+					location: storedProject.project_sitios?.[0]?.municipality || '',
 					fiscalYear: storedProject.project_year,
 					allotment: {
 						allocated: storedProject.budget,
@@ -386,13 +386,20 @@ export const chartData = {
 		{ status: 'Completed', count: stats.completed_projects },
 		{ status: 'Suspended', count: stats.suspended_projects }
 	] as ChartDataItem[],
-	projectsByMunicipality: [...new Set(projects.map((p) => p.municipality))].map(
-		(mun) =>
-			({
-				municipality: mun,
-				count: projects.filter((p) => p.municipality === mun).length
-			}) as ChartDataItem
-	),
+	projectsByMunicipality: (() => {
+		const allMunicipalities = projects.flatMap(
+			(p) => p.project_sitios?.map((s) => s.municipality) || []
+		);
+		const uniqueMunicipalities = [...new Set(allMunicipalities)];
+		return uniqueMunicipalities.map(
+			(mun) =>
+				({
+					municipality: mun,
+					count: projects.filter((p) => p.project_sitios?.some((s) => s.municipality === mun))
+						.length
+				}) as ChartDataItem
+		);
+	})(),
 	monthlyProgress: [
 		{ month: 'Jan', completed: 2 },
 		{ month: 'Feb', completed: 3 },
@@ -420,11 +427,8 @@ export function getProjectById(id: number): Project | undefined {
 
 export function getProjectsBySitio(sitioId: number): Project[] {
 	return projects.filter((p) => {
-		// Check legacy sitio_id field
-		if (p.sitio_id === sitioId) return true;
-		// Check new project_sitios array for multi-sitio projects
-		if (p.project_sitios && p.project_sitios.some((ps) => ps.sitio_id === sitioId)) return true;
-		return false;
+		// Check project_sitios array for multi-sitio projects
+		return p.project_sitios?.some((ps) => ps.sitio_id === sitioId) ?? false;
 	});
 }
 
@@ -444,12 +448,17 @@ export function filterProjects(filters: ProjectFilters): Project[] {
 	return projects.filter((project) => {
 		if (filters.category && project.category !== filters.category) return false;
 		if (filters.status && project.status !== filters.status) return false;
-		if (filters.municipality && project.municipality !== filters.municipality) return false;
+		if (filters.municipality) {
+			const hasMatchingMunicipality = project.project_sitios?.some(
+				(s) => s.municipality === filters.municipality
+			);
+			if (!hasMatchingMunicipality) return false;
+		}
 		if (filters.year && project.project_year !== filters.year) return false;
 		if (filters.search) {
 			const searchTerm = filters.search.toLowerCase();
-			const searchableText =
-				`${project.title} ${project.description} ${project.sitio_name}`.toLowerCase();
+			const sitioNames = project.project_sitios?.map((s) => s.sitio_name).join(' ') || '';
+			const searchableText = `${project.title} ${project.description} ${sitioNames}`.toLowerCase();
 			if (!searchableText.includes(searchTerm)) return false;
 		}
 		return true;

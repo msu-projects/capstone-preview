@@ -316,12 +316,6 @@ export interface Project {
 	category_key?: CategoryKey;
 	project_type_id?: number;
 	project_type_name?: string;
-	/** @deprecated Use project_sitios instead for multi-sitio support */
-	sitio_id: number;
-	/** @deprecated Use project_sitios instead for multi-sitio support */
-	sitio_name: string;
-	/** @deprecated Use project_sitios instead for multi-sitio support */
-	municipality: string;
 	status: ProjectStatus;
 	start_date: string;
 	end_date: string;

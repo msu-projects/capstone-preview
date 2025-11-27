@@ -1,7 +1,7 @@
+import type { Project } from '$lib/types';
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
-import type { Project } from '$lib/types';
-import type { TDocumentDefinitions, Content } from 'pdfmake/interfaces';
+import type { TDocumentDefinitions } from 'pdfmake/interfaces';
 
 // Initialize pdfMake with fonts
 if (pdfFonts && pdfFonts.vfs) {
@@ -25,194 +25,195 @@ export function generateProjectMonitoringPDF(projects: Project[], quarter: strin
 		.filter((project) => project.monitoring !== undefined)
 		.map((project) => {
 			const monitoring = project.monitoring!;
+			const municipalities = project.project_sitios?.map((s) => s.municipality).join(', ') || 'N/A';
 
 			return [
-			// Name of Projects column
-			{
-				text: [
-					{ text: `${project.title}\n`, bold: true, fontSize: 9 },
-					{
-						text: `Location: ${monitoring.location}\n`,
-						fontSize: 8,
-						italics: true
-					},
-					{
-						text: `Municipality: ${project.municipality}\n`,
-						fontSize: 8
-					},
-					{
-						text: `Date Started: ${project.start_date}\n`,
-						fontSize: 8
-					},
-					{
-						text: `Target Completion: ${project.end_date}`,
-						fontSize: 8
-					}
-				],
-				margin: [2, 4, 2, 4] as [number, number, number, number]
-			},
-			// Allotted Budget
-			{
-				text: monitoring.allotment.allocated.toLocaleString('en-PH', {
-					style: 'currency',
-					currency: 'PHP',
-					minimumFractionDigits: 2
-				}),
-				alignment: 'right' as const,
-				fontSize: 8,
-				margin: [2, 4, 2, 4] as [number, number, number, number]
-			},
-			// Supplemental Budget
-			{
-				text: monitoring.allotment.supplemental.toLocaleString('en-PH', {
-					style: 'currency',
-					currency: 'PHP',
-					minimumFractionDigits: 2
-				}),
-				alignment: 'right' as const,
-				fontSize: 8,
-				margin: [2, 4, 2, 4] as [number, number, number, number]
-			},
-			// Total Allocated Budget
-			{
-				text: monitoring.allotment.total.toLocaleString('en-PH', {
-					style: 'currency',
-					currency: 'PHP',
-					minimumFractionDigits: 2
-				}),
-				alignment: 'right' as const,
-				fontSize: 8,
-				margin: [2, 4, 2, 4] as [number, number, number, number]
-			},
-			// Allotment Release
-			{
-				text: monitoring.allotment.released.toLocaleString('en-PH', {
-					style: 'currency',
-					currency: 'PHP',
-					minimumFractionDigits: 2
-				}),
-				alignment: 'right' as const,
-				fontSize: 8,
-				margin: [2, 4, 2, 4] as [number, number, number, number]
-			},
-			// Obligations Incurred
-			{
-				text: monitoring.expenditure.obligations.toLocaleString('en-PH', {
-					style: 'currency',
-					currency: 'PHP',
-					minimumFractionDigits: 2
-				}),
-				alignment: 'right' as const,
-				fontSize: 8,
-				margin: [2, 4, 2, 4] as [number, number, number, number]
-			},
-			// Contract Cost
-			{
-				text: monitoring.expenditure.contractCost.toLocaleString('en-PH', {
-					style: 'currency',
-					currency: 'PHP',
-					minimumFractionDigits: 2
-				}),
-				alignment: 'right' as const,
-				fontSize: 8,
-				margin: [2, 4, 2, 4] as [number, number, number, number]
-			},
-			// Plan %
-			{
-				text: `${monitoring.physical.plan.toFixed(2)}%`,
-				alignment: 'center' as const,
-				fontSize: 8,
-				margin: [2, 4, 2, 4] as [number, number, number, number]
-			},
-			// Actual %
-			{
-				text: `${monitoring.physical.actual.toFixed(2)}%`,
-				alignment: 'center' as const,
-				fontSize: 8,
-				margin: [2, 4, 2, 4] as [number, number, number, number]
-			},
-			// Slippage %
-			{
-				text: `${monitoring.physical.slippage.toFixed(2)}%`,
-				alignment: 'center' as const,
-				fontSize: 8,
-				margin: [2, 4, 2, 4] as [number, number, number, number],
-				color: monitoring.physical.slippage < 0 ? 'red' : 'black'
-			},
-			// Male Employment
-			{
-				text: monitoring.employment.male.toString(),
-				alignment: 'center' as const,
-				fontSize: 8,
-				margin: [2, 4, 2, 4] as [number, number, number, number]
-			},
-			// Female Employment
-			{
-				text: monitoring.employment.female.toString(),
-				alignment: 'center' as const,
-				fontSize: 8,
-				margin: [2, 4, 2, 4] as [number, number, number, number]
-			},
-			// Contract Time
-			{
-				text: monitoring.contract.duration,
-				alignment: 'center' as const,
-				fontSize: 8,
-				margin: [2, 4, 2, 4] as [number, number, number, number]
-			},
-			// Delivery Time
-			{
-				text: monitoring.contract.delivery,
-				alignment: 'center' as const,
-				fontSize: 8,
-				margin: [2, 4, 2, 4] as [number, number, number, number]
-			},
-			// Extension
-			{
-				text: monitoring.contract.extension || 'None',
-				alignment: 'center' as const,
-				fontSize: 8,
-				margin: [2, 4, 2, 4] as [number, number, number, number]
-			},
-			// Project Status
-			{
-				text: monitoring.statusSummary.stage,
-				alignment: 'center' as const,
-				fontSize: 8,
-				margin: [2, 4, 2, 4] as [number, number, number, number]
-			},
-			// Remarks/Justification
-			{
-				text: [
-					{
-						text: 'Issues: ',
-						bold: true,
-						fontSize: 7
-					},
-					{
-						text: `${monitoring.statusSummary.issues}\n\n`,
-						fontSize: 7
-					},
-					{
-						text: 'Recommendations: ',
-						bold: true,
-						fontSize: 7
-					},
-					{
-						text: monitoring.statusSummary.recommendations,
-						fontSize: 7
-					}
-				],
-				margin: [2, 4, 2, 4] as [number, number, number, number]
-			},
-			// CATCH-UP Plans
-			{
-				text: monitoring.catchUpPlan,
-				fontSize: 7,
-				margin: [2, 4, 2, 4] as [number, number, number, number]
-			}
-		];
-	});
+				// Name of Projects column
+				{
+					text: [
+						{ text: `${project.title}\n`, bold: true, fontSize: 9 },
+						{
+							text: `Location: ${monitoring.location}\n`,
+							fontSize: 8,
+							italics: true
+						},
+						{
+							text: `Municipality: ${municipalities}\n`,
+							fontSize: 8
+						},
+						{
+							text: `Date Started: ${project.start_date}\n`,
+							fontSize: 8
+						},
+						{
+							text: `Target Completion: ${project.end_date}`,
+							fontSize: 8
+						}
+					],
+					margin: [2, 4, 2, 4] as [number, number, number, number]
+				},
+				// Allotted Budget
+				{
+					text: monitoring.allotment.allocated.toLocaleString('en-PH', {
+						style: 'currency',
+						currency: 'PHP',
+						minimumFractionDigits: 2
+					}),
+					alignment: 'right' as const,
+					fontSize: 8,
+					margin: [2, 4, 2, 4] as [number, number, number, number]
+				},
+				// Supplemental Budget
+				{
+					text: monitoring.allotment.supplemental.toLocaleString('en-PH', {
+						style: 'currency',
+						currency: 'PHP',
+						minimumFractionDigits: 2
+					}),
+					alignment: 'right' as const,
+					fontSize: 8,
+					margin: [2, 4, 2, 4] as [number, number, number, number]
+				},
+				// Total Allocated Budget
+				{
+					text: monitoring.allotment.total.toLocaleString('en-PH', {
+						style: 'currency',
+						currency: 'PHP',
+						minimumFractionDigits: 2
+					}),
+					alignment: 'right' as const,
+					fontSize: 8,
+					margin: [2, 4, 2, 4] as [number, number, number, number]
+				},
+				// Allotment Release
+				{
+					text: monitoring.allotment.released.toLocaleString('en-PH', {
+						style: 'currency',
+						currency: 'PHP',
+						minimumFractionDigits: 2
+					}),
+					alignment: 'right' as const,
+					fontSize: 8,
+					margin: [2, 4, 2, 4] as [number, number, number, number]
+				},
+				// Obligations Incurred
+				{
+					text: monitoring.expenditure.obligations.toLocaleString('en-PH', {
+						style: 'currency',
+						currency: 'PHP',
+						minimumFractionDigits: 2
+					}),
+					alignment: 'right' as const,
+					fontSize: 8,
+					margin: [2, 4, 2, 4] as [number, number, number, number]
+				},
+				// Contract Cost
+				{
+					text: monitoring.expenditure.contractCost.toLocaleString('en-PH', {
+						style: 'currency',
+						currency: 'PHP',
+						minimumFractionDigits: 2
+					}),
+					alignment: 'right' as const,
+					fontSize: 8,
+					margin: [2, 4, 2, 4] as [number, number, number, number]
+				},
+				// Plan %
+				{
+					text: `${monitoring.physical.plan.toFixed(2)}%`,
+					alignment: 'center' as const,
+					fontSize: 8,
+					margin: [2, 4, 2, 4] as [number, number, number, number]
+				},
+				// Actual %
+				{
+					text: `${monitoring.physical.actual.toFixed(2)}%`,
+					alignment: 'center' as const,
+					fontSize: 8,
+					margin: [2, 4, 2, 4] as [number, number, number, number]
+				},
+				// Slippage %
+				{
+					text: `${monitoring.physical.slippage.toFixed(2)}%`,
+					alignment: 'center' as const,
+					fontSize: 8,
+					margin: [2, 4, 2, 4] as [number, number, number, number],
+					color: monitoring.physical.slippage < 0 ? 'red' : 'black'
+				},
+				// Male Employment
+				{
+					text: monitoring.employment.male.toString(),
+					alignment: 'center' as const,
+					fontSize: 8,
+					margin: [2, 4, 2, 4] as [number, number, number, number]
+				},
+				// Female Employment
+				{
+					text: monitoring.employment.female.toString(),
+					alignment: 'center' as const,
+					fontSize: 8,
+					margin: [2, 4, 2, 4] as [number, number, number, number]
+				},
+				// Contract Time
+				{
+					text: monitoring.contract.duration,
+					alignment: 'center' as const,
+					fontSize: 8,
+					margin: [2, 4, 2, 4] as [number, number, number, number]
+				},
+				// Delivery Time
+				{
+					text: monitoring.contract.delivery,
+					alignment: 'center' as const,
+					fontSize: 8,
+					margin: [2, 4, 2, 4] as [number, number, number, number]
+				},
+				// Extension
+				{
+					text: monitoring.contract.extension || 'None',
+					alignment: 'center' as const,
+					fontSize: 8,
+					margin: [2, 4, 2, 4] as [number, number, number, number]
+				},
+				// Project Status
+				{
+					text: monitoring.statusSummary.stage,
+					alignment: 'center' as const,
+					fontSize: 8,
+					margin: [2, 4, 2, 4] as [number, number, number, number]
+				},
+				// Remarks/Justification
+				{
+					text: [
+						{
+							text: 'Issues: ',
+							bold: true,
+							fontSize: 7
+						},
+						{
+							text: `${monitoring.statusSummary.issues}\n\n`,
+							fontSize: 7
+						},
+						{
+							text: 'Recommendations: ',
+							bold: true,
+							fontSize: 7
+						},
+						{
+							text: monitoring.statusSummary.recommendations,
+							fontSize: 7
+						}
+					],
+					margin: [2, 4, 2, 4] as [number, number, number, number]
+				},
+				// CATCH-UP Plans
+				{
+					text: monitoring.catchUpPlan,
+					fontSize: 7,
+					margin: [2, 4, 2, 4] as [number, number, number, number]
+				}
+			];
+		});
 
 	const docDefinition: TDocumentDefinitions = {
 		pageOrientation: 'landscape',
@@ -278,7 +279,7 @@ export function generateProjectMonitoringPDF(projects: Project[], quarter: strin
 						// First header row - Grouped headers
 						[
 							{
-								text: 'IMPLEMENTER: Provincial Governor\'s Office\nPROVINCE: South Cotabato\n\nNAME OF PROJECTS\n(All on-going projects implemented by an office under the 20% LDF in priority areas and supplemental target)',
+								text: "IMPLEMENTER: Provincial Governor's Office\nPROVINCE: South Cotabato\n\nNAME OF PROJECTS\n(All on-going projects implemented by an office under the 20% LDF in priority areas and supplemental target)",
 								style: 'tableHeader',
 								rowSpan: 2
 							},

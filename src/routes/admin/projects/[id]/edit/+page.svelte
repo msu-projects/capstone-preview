@@ -103,21 +103,7 @@
 			priority_level: ps.priority_level,
 			focal_person: ps.focal_person,
 			focal_contact: ps.focal_contact
-		})) ??
-			(existingProject?.sitio_id
-				? [
-						{
-							sitio_id: existingProject.sitio_id,
-							sitio_name: existingProject.sitio_name,
-							municipality: existingProject.municipality,
-							barangay: '',
-							beneficiaries_target: existingProject.beneficiaries,
-							priority_level: 'medium' as const,
-							focal_person: undefined,
-							focal_contact: undefined
-						}
-					]
-				: [])
+		})) ?? []
 	);
 	let showSitioSelection = $state(false);
 
@@ -168,14 +154,7 @@
 	let sitioCoordinators = $state(
 		existingProject?.sitio_coordinators?.map((sc) => {
 			// Find the sitio from existing data
-			const sitio =
-				existingProject?.project_sitios?.find((ps) => ps.sitio_id === sc.sitio_id) ??
-				(existingProject?.sitio_id === sc.sitio_id
-					? {
-							sitio_id: existingProject.sitio_id,
-							sitio_name: existingProject.sitio_name
-						}
-					: null);
+			const sitio = existingProject?.project_sitios?.find((ps) => ps.sitio_id === sc.sitio_id);
 
 			return {
 				sitio_id: sc.sitio_id,
@@ -320,10 +299,6 @@
 				category: selectedCategory || '',
 				category_key: selectedCategory as any,
 				project_type_id: selectedProjectType,
-				// Legacy fields (using first sitio for backwards compatibility)
-				sitio_id: firstSitio?.sitio_id || existingProject?.sitio_id || 0,
-				sitio_name: firstSitio?.sitio_name || existingProject?.sitio_name || '',
-				municipality: firstSitio?.municipality || existingProject?.municipality || '',
 				status,
 				start_date: startDateValue,
 				end_date: targetEndDate?.toString() || existingProject?.end_date || '',

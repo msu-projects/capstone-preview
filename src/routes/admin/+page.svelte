@@ -235,7 +235,7 @@
 											{#if project.project_sitios && project.project_sitios.length > 0}
 												<SitioList sitios={project.project_sitios} maxVisible={1} />
 											{:else}
-												<div class="text-sm">{project.sitio_name}</div>
+												<div class="text-sm text-muted-foreground">No sitios</div>
 											{/if}
 										</Table.TableCell>
 										<Table.TableCell>

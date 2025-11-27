@@ -34,18 +34,18 @@
 
 	// Extract unique municipalities and barangays from project_sitios
 	const uniqueMunicipalities = $derived(
-		project.project_sitios
+		project.project_sitios && project.project_sitios.length > 0
 			? [...new Set(project.project_sitios.map((s) => s.municipality))].join(', ')
-			: project.municipality || 'Not specified'
+			: 'Not specified'
 	);
 
 	const uniqueBarangays = $derived(
-		project.project_sitios
+		project.project_sitios && project.project_sitios.length > 0
 			? [...new Set(project.project_sitios.map((s) => s.barangay))].join(', ')
 			: 'Not specified'
 	);
 
-	const totalSitios = $derived(project.project_sitios?.length || 1);
+	const totalSitios = $derived(project.project_sitios?.length || 0);
 </script>
 
 <!-- Overview Tab -->
