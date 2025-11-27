@@ -1,4 +1,5 @@
 <script lang="ts">
+	import AdminHeader from '$lib/components/admin/AdminHeader.svelte';
 	import BudgetResourcesTab from '$lib/components/admin/projects/BudgetResourcesTab.svelte';
 	import CategoryProjectSelectionTab from '$lib/components/admin/projects/CategoryProjectSelectionTab.svelte';
 	import LocationBeneficiariesTab from '$lib/components/admin/projects/LocationBeneficiariesTab.svelte';
@@ -283,24 +284,22 @@
 
 <div class="flex min-h-screen flex-col bg-muted/30">
 	<!-- Header -->
-	<div class="sticky top-0 z-10 border-b border-border bg-background shadow-sm">
-		<div class="flex items-center justify-between p-4">
-			<div>
-				<h1 class="text-2xl font-bold">Create New Project</h1>
-				<p class="text-sm text-muted-foreground">Enhanced multi-sitio project tracking system</p>
-			</div>
-			<div class="flex items-center gap-2">
-				<Button variant="outline" onclick={handleCancel} disabled={isSaving} class="gap-2">
-					<X class="size-4" />
-					Cancel
-				</Button>
-				<Button onclick={handleSave} disabled={!canSave || isSaving} class="gap-2">
-					<Save class="size-4" />
-					{isSaving ? 'Saving...' : 'Save Project'}
-				</Button>
-			</div>
-		</div>
-	</div>
+	<AdminHeader
+		sticky
+		title="Create New Project"
+		description="Enhanced multi-sitio project tracking system"
+	>
+		{#snippet actions()}
+			<Button variant="outline" onclick={handleCancel} disabled={isSaving} class="gap-2">
+				<X class="size-4" />
+				Cancel
+			</Button>
+			<Button onclick={handleSave} disabled={!canSave || isSaving} class="gap-2">
+				<Save class="size-4" />
+				{isSaving ? 'Saving...' : 'Save Project'}
+			</Button>
+		{/snippet}
+	</AdminHeader>
 
 	<!-- Content -->
 	<div class="flex-1 p-6">

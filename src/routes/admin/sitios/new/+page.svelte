@@ -1,4 +1,5 @@
 <script lang="ts">
+	import AdminHeader from '$lib/components/admin/AdminHeader.svelte';
 	import BasicInfoTab from '$lib/components/admin/sitios/BasicInfoTab.svelte';
 	import CommunityServicesTab from '$lib/components/admin/sitios/CommunityServicesTab.svelte';
 	import DemographicsSocialTab from '$lib/components/admin/sitios/DemographicsSocialTab.svelte';
@@ -230,24 +231,18 @@
 
 <div class="flex min-h-screen flex-col bg-muted/30">
 	<!-- Header -->
-	<div class="sticky top-0 z-10 border-b border-border bg-background shadow-sm">
-		<div class="flex items-center justify-between p-4">
-			<div>
-				<h1 class="text-2xl font-bold">Create New Sitio</h1>
-				<p class="text-sm text-muted-foreground">Enter sitio data step by step</p>
-			</div>
-			<div class="flex items-center gap-2">
-				<Button variant="outline" onclick={handleCancel} disabled={isSaving} class="gap-2">
-					<X class="size-4" />
-					Cancel
-				</Button>
-				<Button onclick={handleSave} disabled={!canSave || isSaving} class="gap-2">
-					<Save class="size-4" />
-					{isSaving ? 'Saving...' : 'Create Sitio'}
-				</Button>
-			</div>
-		</div>
-	</div>
+	<AdminHeader sticky title="Create New Sitio" description="Enter sitio data step by step">
+		{#snippet actions()}
+			<Button variant="outline" onclick={handleCancel} disabled={isSaving} class="gap-2">
+				<X class="size-4" />
+				Cancel
+			</Button>
+			<Button onclick={handleSave} disabled={!canSave || isSaving} class="gap-2">
+				<Save class="size-4" />
+				{isSaving ? 'Saving...' : 'Create Sitio'}
+			</Button>
+		{/snippet}
+	</AdminHeader>
 
 	<!-- Content -->
 	<div class="flex-1 p-6">

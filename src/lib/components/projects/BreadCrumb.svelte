@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
+	import { Separator } from '$lib/components/ui/separator';
+	import * as Sidebar from '$lib/components/ui/sidebar';
 	import type { Project } from '$lib/types';
 	import { ArrowLeft } from '@lucide/svelte';
 
@@ -15,6 +17,8 @@
 <div class="sticky top-0 z-10 border-b border-slate-200 bg-white">
 	<div class="w-full px-4 sm:px-6 lg:px-8">
 		<div class="flex h-16 items-center gap-4">
+			<Sidebar.Trigger class="-ml-1" />
+			<Separator orientation="vertical" class="mr-2 h-6" />
 			<Button
 				variant="ghost"
 				size="icon"

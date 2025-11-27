@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import AdminHeader from '$lib/components/admin/AdminHeader.svelte';
 	import BasicInfoTab from '$lib/components/admin/sitios/BasicInfoTab.svelte';
 	import CommunityServicesTab from '$lib/components/admin/sitios/CommunityServicesTab.svelte';
 	import DemographicsSocialTab from '$lib/components/admin/sitios/DemographicsSocialTab.svelte';
@@ -384,26 +385,22 @@
 {:else}
 	<div class="flex min-h-screen flex-col bg-muted/30">
 		<!-- Header -->
-		<div class="sticky top-0 z-10 border-b border-border bg-background shadow-sm">
-			<div class="flex items-center justify-between p-4">
-				<div>
-					<h1 class="text-2xl font-bold">Edit Sitio</h1>
-					<p class="text-sm text-muted-foreground">
-						Update information for {name || 'this sitio'}
-					</p>
-				</div>
-				<div class="flex items-center gap-2">
-					<Button variant="outline" onclick={handleCancel} disabled={isSaving} class="gap-2">
-						<X class="size-4" />
-						Cancel
-					</Button>
-					<Button onclick={handleSave} disabled={!canSave || isSaving} class="gap-2">
-						<Save class="size-4" />
-						{isSaving ? 'Saving...' : 'Update Sitio'}
-					</Button>
-				</div>
-			</div>
-		</div>
+		<AdminHeader
+			sticky
+			title="Edit Sitio"
+			description="Update information for {name || 'this sitio'}"
+		>
+			{#snippet actions()}
+				<Button variant="outline" onclick={handleCancel} disabled={isSaving} class="gap-2">
+					<X class="size-4" />
+					Cancel
+				</Button>
+				<Button onclick={handleSave} disabled={!canSave || isSaving} class="gap-2">
+					<Save class="size-4" />
+					{isSaving ? 'Saving...' : 'Update Sitio'}
+				</Button>
+			{/snippet}
+		</AdminHeader>
 
 		<!-- Content -->
 		<div class="flex-1 p-6">

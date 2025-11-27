@@ -1,4 +1,5 @@
 <script lang="ts">
+	import AdminHeader from '$lib/components/admin/AdminHeader.svelte';
 	import SitioList from '$lib/components/projects/SitioList.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
@@ -110,21 +111,18 @@
 
 <div class="flex min-h-screen flex-col bg-muted/30">
 	<!-- Header -->
-	<header class="border-b bg-card">
-		<div class="flex items-center justify-between p-6">
-			<h1 class="text-3xl font-bold">Dashboard</h1>
-			<div class="flex gap-2">
-				<Button variant="outline" size="sm" onclick={handleExportReport}>
-					<Download class="mr-2" />
-					Export Report
-				</Button>
-				<Button size="sm" href="/admin/projects/new">
-					<Plus class="mr-2" />
-					New Project
-				</Button>
-			</div>
-		</div>
-	</header>
+	<AdminHeader title="Dashboard" description="Overview of projects, sitios, and activities">
+		{#snippet actions()}
+			<Button variant="outline" size="sm" onclick={handleExportReport}>
+				<Download class="mr-2" />
+				Export Report
+			</Button>
+			<Button size="sm" href="/admin/projects/new">
+				<Plus class="mr-2" />
+				New Project
+			</Button>
+		{/snippet}
+	</AdminHeader>
 
 	<!-- Content -->
 	<div class="flex-1 space-y-6 p-6">

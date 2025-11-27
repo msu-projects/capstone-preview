@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { Separator } from '$lib/components/ui/separator';
+	import * as Sidebar from '$lib/components/ui/sidebar';
 	import * as Tabs from '$lib/components/ui/tabs';
 	import { projects } from '$lib/mock-data';
 	import type { Project, Sitio } from '$lib/types';
@@ -108,9 +110,11 @@
 
 <div class="min-h-screen bg-linear-to-b from-slate-50 to-white">
 	<!-- Breadcrumb Navigation -->
-	<div class="border-b bg-white/80 backdrop-blur-sm">
+	<div class="sticky top-0 z-10 border-b bg-white/80 backdrop-blur-sm">
 		<div class="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
 			<nav class="flex items-center gap-2 text-sm">
+				<Sidebar.Trigger class="-ml-1" />
+				<Separator orientation="vertical" class="mr-2 h-6" />
 				<a
 					href={isAdminView ? '/admin' : '/'}
 					class="text-slate-500 transition-colors hover:text-slate-700"

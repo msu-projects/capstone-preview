@@ -1,4 +1,5 @@
 <script lang="ts">
+	import AdminHeader from '$lib/components/admin/AdminHeader.svelte';
 	import QuickUpdateForm from '$lib/components/admin/projects/QuickUpdateForm.svelte';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import { Badge } from '$lib/components/ui/badge';
@@ -144,42 +145,34 @@
 
 <div class="flex min-h-screen flex-col bg-muted/30">
 	<!-- Header -->
-	<div class="sticky top-0 z-10 border-b border-border bg-background shadow-sm">
-		<div class="flex items-center justify-between p-4">
-			<div>
-				<div class="flex items-center gap-3">
-					<h1 class="text-2xl font-bold">Quick Edit</h1>
-					<Badge variant="outline" class="gap-1.5">
-						<Clock class="size-3" />
-						ID: {existingProject?.id}
-					</Badge>
-					<Badge variant="default" class="gap-1.5 bg-primary">
-						<Zap class="size-3" />
-						Quick Update
-					</Badge>
-				</div>
-				<p class="mt-1 text-sm text-muted-foreground">
-					{existingProject?.title}
-				</p>
-			</div>
-			<div class="flex items-center gap-2">
-				<!-- Switch to Full Edit Button -->
-				<Button variant="outline" onclick={switchToFullEdit} disabled={isSaving} class="gap-2">
-					<List class="size-4" />
-					Switch to Full Edit
-				</Button>
+	<AdminHeader sticky title="Quick Edit" description={existingProject?.title}>
+		{#snippet badges()}
+			<Badge variant="outline" class="gap-1.5">
+				<Clock class="size-3" />
+				ID: {existingProject?.id}
+			</Badge>
+			<Badge variant="default" class="gap-1.5 bg-primary">
+				<Zap class="size-3" />
+				Quick Update
+			</Badge>
+		{/snippet}
+		{#snippet actions()}
+			<!-- Switch to Full Edit Button -->
+			<Button variant="outline" onclick={switchToFullEdit} disabled={isSaving} class="gap-2">
+				<List class="size-4" />
+				Switch to Full Edit
+			</Button>
 
-				<Button variant="outline" onclick={handleCancel} disabled={isSaving} class="gap-2">
-					<X class="size-4" />
-					Cancel
-				</Button>
-				<Button onclick={handleSave} disabled={isSaving} class="gap-2">
-					<Save class="size-4" />
-					{isSaving ? 'Saving...' : 'Save Changes'}
-				</Button>
-			</div>
-		</div>
-	</div>
+			<Button variant="outline" onclick={handleCancel} disabled={isSaving} class="gap-2">
+				<X class="size-4" />
+				Cancel
+			</Button>
+			<Button onclick={handleSave} disabled={isSaving} class="gap-2">
+				<Save class="size-4" />
+				{isSaving ? 'Saving...' : 'Save Changes'}
+			</Button>
+		{/snippet}
+	</AdminHeader>
 
 	<!-- Content -->
 	<div class="flex-1 p-6">

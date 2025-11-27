@@ -1,10 +1,12 @@
 <script lang="ts">
+	import AdminHeader from '$lib/components/admin/AdminHeader.svelte';
 	import DeleteProjectDialog from '$lib/components/admin/projects/DeleteProjectDialog.svelte';
 	import ProjectsFilters from '$lib/components/admin/projects/ProjectsFilters.svelte';
-	import ProjectsHeader from '$lib/components/admin/projects/ProjectsHeader.svelte';
 	import ProjectsTable from '$lib/components/admin/projects/ProjectsTable.svelte';
+	import { Button } from '$lib/components/ui/button';
 	import { projects } from '$lib/mock-data';
 	import { downloadProjectMonitoringPDF, downloadSingleProjectPDF } from '$lib/utils/pdf-generator';
+	import { Download, Plus } from '@lucide/svelte';
 
 	// State
 	let searchQuery = $state('');
@@ -147,7 +149,18 @@
 
 <div class="flex min-h-screen flex-col bg-muted/30">
 	<!-- Header -->
-	<ProjectsHeader onExport={handleExport} />
+	<AdminHeader title="Project Management" description="Manage and monitor all projects">
+		{#snippet actions()}
+			<Button variant="outline" size="sm" onclick={handleExport}>
+				<Download class="mr-2" />
+				Export
+			</Button>
+			<Button size="sm" href="/admin/projects/new">
+				<Plus class="mr-2" />
+				Add Project
+			</Button>
+		{/snippet}
+	</AdminHeader>
 
 	<!-- Content -->
 	<div class="flex-1 space-y-6 p-6">

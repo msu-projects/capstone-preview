@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import AdminHeader from '$lib/components/admin/AdminHeader.svelte';
 	import SitiosTable from '$lib/components/admin/sitios/SitiosTable.svelte';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import { Button } from '$lib/components/ui/button';
@@ -163,14 +164,10 @@
 	}
 </script>
 
-<div class="container mx-auto space-y-6 p-6">
+<div class="flex min-h-screen flex-col bg-muted/30">
 	<!-- Header -->
-	<div class="flex items-center justify-between">
-		<div>
-			<h1 class="text-3xl font-bold">Sitios</h1>
-			<p class="text-muted-foreground">Manage sitio data and demographics</p>
-		</div>
-		<div class="flex gap-2">
+	<AdminHeader title="Sitios" description="Manage sitio data and demographics">
+		{#snippet actions()}
 			<Button variant="outline" onclick={() => goto('/admin/import')}>
 				<Upload class="mr-2 size-4" />
 				Import Data
@@ -179,113 +176,116 @@
 				<Plus class="mr-2 size-4" />
 				Add Sitio
 			</Button>
-		</div>
-	</div>
+		{/snippet}
+	</AdminHeader>
 
-	<!-- Stats Cards -->
-	<div class="grid grid-cols-1 gap-4 md:grid-cols-4">
+	<!-- Content -->
+	<div class="flex-1 space-y-6 p-6">
+		<!-- Stats Cards -->
+		<div class="grid grid-cols-1 gap-4 md:grid-cols-4">
+			<Card.Root>
+				<Card.Content class="">
+					<div class="flex items-center gap-2">
+						<MapPin class="size-5 text-primary" />
+						<div>
+							<p class="text-2xl font-bold">{sitios.length}</p>
+							<p class="text-sm text-muted-foreground">Total Sitios</p>
+						</div>
+					</div>
+				</Card.Content>
+			</Card.Root>
+
+			<Card.Root>
+				<Card.Content class="">
+					<div>
+						<p class="text-2xl font-bold">
+							{sitios.reduce((sum, s) => sum + (s.population || 0), 0).toLocaleString()}
+						</p>
+						<p class="text-sm text-muted-foreground">Total Population</p>
+					</div>
+				</Card.Content>
+			</Card.Root>
+
+			<Card.Root>
+				<Card.Content class="">
+					<div>
+						<p class="text-2xl font-bold">
+							{sitios.reduce((sum, s) => sum + (s.households || 0), 0).toLocaleString()}
+						</p>
+						<p class="text-sm text-muted-foreground">Total Households</p>
+					</div>
+				</Card.Content>
+			</Card.Root>
+
+			<Card.Root>
+				<Card.Content class="">
+					<div>
+						<p class="text-2xl font-bold">
+							{new Set(sitios.map((s) => s.municipality)).size}
+						</p>
+						<p class="text-sm text-muted-foreground">Municipalities</p>
+					</div>
+				</Card.Content>
+			</Card.Root>
+		</div>
+
+		<!-- Search and Filters -->
 		<Card.Root>
 			<Card.Content class="">
-				<div class="flex items-center gap-2">
-					<MapPin class="size-5 text-primary" />
-					<div>
-						<p class="text-2xl font-bold">{sitios.length}</p>
-						<p class="text-sm text-muted-foreground">Total Sitios</p>
+				<div class="flex flex-col gap-4 md:flex-row md:items-center">
+					<div class="relative flex-1">
+						<Search class="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+						<Input
+							bind:value={searchTerm}
+							placeholder="Search by sitio, municipality, or barangay..."
+							class="pl-10"
+						/>
+					</div>
+					<div class="flex gap-2">
+						<Select.Root type="single" bind:value={selectedMunicipality}>
+							<Select.Trigger class="w-[200px]">
+								{selectedMunicipality === 'all' ? 'All Municipalities' : selectedMunicipality}
+							</Select.Trigger>
+							<Select.Content>
+								<Select.Item value="all">All Municipalities</Select.Item>
+								{#each uniqueMunicipalities as municipality}
+									<Select.Item value={municipality}>{municipality}</Select.Item>
+								{/each}
+							</Select.Content>
+						</Select.Root>
+
+						<Select.Root type="single" bind:value={selectedBarangay}>
+							<Select.Trigger class="w-[200px]">
+								{selectedBarangay === 'all' ? 'All Barangays' : selectedBarangay}
+							</Select.Trigger>
+							<Select.Content>
+								<Select.Item value="all">All Barangays</Select.Item>
+								{#each uniqueBarangays as barangay}
+									<Select.Item value={barangay}>{barangay}</Select.Item>
+								{/each}
+							</Select.Content>
+						</Select.Root>
 					</div>
 				</div>
 			</Card.Content>
 		</Card.Root>
 
-		<Card.Root>
-			<Card.Content class="">
-				<div>
-					<p class="text-2xl font-bold">
-						{sitios.reduce((sum, s) => sum + (s.population || 0), 0).toLocaleString()}
-					</p>
-					<p class="text-sm text-muted-foreground">Total Population</p>
-				</div>
-			</Card.Content>
-		</Card.Root>
-
-		<Card.Root>
-			<Card.Content class="">
-				<div>
-					<p class="text-2xl font-bold">
-						{sitios.reduce((sum, s) => sum + (s.households || 0), 0).toLocaleString()}
-					</p>
-					<p class="text-sm text-muted-foreground">Total Households</p>
-				</div>
-			</Card.Content>
-		</Card.Root>
-
-		<Card.Root>
-			<Card.Content class="">
-				<div>
-					<p class="text-2xl font-bold">
-						{new Set(sitios.map((s) => s.municipality)).size}
-					</p>
-					<p class="text-sm text-muted-foreground">Municipalities</p>
-				</div>
-			</Card.Content>
-		</Card.Root>
+		<!-- Sitios Table -->
+		<SitiosTable
+			sitios={paginatedSitios}
+			bind:currentPage
+			{itemsPerPage}
+			{totalPages}
+			{sortBy}
+			{sortOrder}
+			onToggleSort={toggleSort}
+			onRefresh={handleRefresh}
+			onDelete={confirmDelete}
+			onDownloadPDF={handleDownloadPDF}
+			onEdit={handleEdit}
+			onPageChange={(page) => (currentPage = page)}
+		/>
 	</div>
-
-	<!-- Search and Filters -->
-	<Card.Root>
-		<Card.Content class="">
-			<div class="flex flex-col gap-4 md:flex-row md:items-center">
-				<div class="relative flex-1">
-					<Search class="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-					<Input
-						bind:value={searchTerm}
-						placeholder="Search by sitio, municipality, or barangay..."
-						class="pl-10"
-					/>
-				</div>
-				<div class="flex gap-2">
-					<Select.Root type="single" bind:value={selectedMunicipality}>
-						<Select.Trigger class="w-[200px]">
-							{selectedMunicipality === 'all' ? 'All Municipalities' : selectedMunicipality}
-						</Select.Trigger>
-						<Select.Content>
-							<Select.Item value="all">All Municipalities</Select.Item>
-							{#each uniqueMunicipalities as municipality}
-								<Select.Item value={municipality}>{municipality}</Select.Item>
-							{/each}
-						</Select.Content>
-					</Select.Root>
-
-					<Select.Root type="single" bind:value={selectedBarangay}>
-						<Select.Trigger class="w-[200px]">
-							{selectedBarangay === 'all' ? 'All Barangays' : selectedBarangay}
-						</Select.Trigger>
-						<Select.Content>
-							<Select.Item value="all">All Barangays</Select.Item>
-							{#each uniqueBarangays as barangay}
-								<Select.Item value={barangay}>{barangay}</Select.Item>
-							{/each}
-						</Select.Content>
-					</Select.Root>
-				</div>
-			</div>
-		</Card.Content>
-	</Card.Root>
-
-	<!-- Sitios Table -->
-	<SitiosTable
-		sitios={paginatedSitios}
-		bind:currentPage
-		{itemsPerPage}
-		{totalPages}
-		{sortBy}
-		{sortOrder}
-		onToggleSort={toggleSort}
-		onRefresh={handleRefresh}
-		onDelete={confirmDelete}
-		onDownloadPDF={handleDownloadPDF}
-		onEdit={handleEdit}
-		onPageChange={(page) => (currentPage = page)}
-	/>
 </div>
 
 <!-- Delete Confirmation Dialog -->

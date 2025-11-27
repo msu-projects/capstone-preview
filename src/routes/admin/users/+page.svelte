@@ -1,4 +1,5 @@
 <script lang="ts">
+	import AdminHeader from '$lib/components/admin/AdminHeader.svelte';
 	import * as Alert from '$lib/components/ui/alert';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import { Badge } from '$lib/components/ui/badge';
@@ -259,164 +260,169 @@
 	<title>User Management - South Cotabato Data Bank</title>
 </svelte:head>
 
-<div class="container mx-auto space-y-6 p-6">
+<div class="flex min-h-screen flex-col bg-muted/30">
 	<!-- Header -->
-	<div class="flex items-center justify-between">
-		<div>
-			<h1 class="text-3xl font-bold tracking-tight">User Management</h1>
-			<p class="text-muted-foreground">Manage user accounts and permissions</p>
-		</div>
-		{#if canManageUsers}
-			<Button onclick={openCreateDialog}>
-				<Plus class="mr-2 h-4 w-4" />
-				Add User
-			</Button>
+	<AdminHeader title="User Management" description="Manage user accounts and permissions">
+		{#snippet actions()}
+			{#if canManageUsers}
+				<Button onclick={openCreateDialog}>
+					<Plus class="mr-2 h-4 w-4" />
+					Add User
+				</Button>
+			{/if}
+		{/snippet}
+	</AdminHeader>
+
+	<!-- Content -->
+	<div class="flex-1 space-y-6 p-6">
+		{#if !canManageUsers}
+			<Alert.Root variant="destructive">
+				<AlertCircle class="h-4 w-4" />
+				<Alert.Title>Access Restricted</Alert.Title>
+				<Alert.Description>
+					Only superadmins can manage users. You can view the user list but cannot make changes.
+				</Alert.Description>
+			</Alert.Root>
 		{/if}
-	</div>
 
-	{#if !canManageUsers}
-		<Alert.Root variant="destructive">
-			<AlertCircle class="h-4 w-4" />
-			<Alert.Title>Access Restricted</Alert.Title>
-			<Alert.Description>
-				Only superadmins can manage users. You can view the user list but cannot make changes.
-			</Alert.Description>
-		</Alert.Root>
-	{/if}
-
-	<!-- Filters -->
-	<Card.Root>
-		<Card.Content class="">
-			<div class="flex flex-col gap-4 md:flex-row md:items-center">
-				<div class="relative flex-1">
-					<Search class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-					<Input placeholder="Search users..." bind:value={searchQuery} class="pl-10" />
+		<!-- Filters -->
+		<Card.Root>
+			<Card.Content class="">
+				<div class="flex flex-col gap-4 md:flex-row md:items-center">
+					<div class="relative flex-1">
+						<Search
+							class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+						/>
+						<Input placeholder="Search users..." bind:value={searchQuery} class="pl-10" />
+					</div>
+					<div class="flex gap-2">
+						<Select.Root type="single" bind:value={roleFilter}>
+							<Select.Trigger class="w-[140px]">
+								{roleFilter === 'all'
+									? 'All Roles'
+									: roleFilter.charAt(0).toUpperCase() + roleFilter.slice(1)}
+							</Select.Trigger>
+							<Select.Content>
+								<Select.Item value="all">All Roles</Select.Item>
+								<Select.Item value="superadmin">Superadmin</Select.Item>
+								<Select.Item value="admin">Admin</Select.Item>
+								<Select.Item value="viewer">Viewer</Select.Item>
+							</Select.Content>
+						</Select.Root>
+						<Select.Root type="single" bind:value={statusFilter}>
+							<Select.Trigger class="w-[140px]">
+								{statusFilter === 'all'
+									? 'All Status'
+									: statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}
+							</Select.Trigger>
+							<Select.Content>
+								<Select.Item value="all">All Status</Select.Item>
+								<Select.Item value="active">Active</Select.Item>
+								<Select.Item value="inactive">Inactive</Select.Item>
+							</Select.Content>
+						</Select.Root>
+						<Button variant="outline" size="icon" onclick={refreshUsers}>
+							<RefreshCw class="h-4 w-4" />
+						</Button>
+					</div>
 				</div>
-				<div class="flex gap-2">
-					<Select.Root type="single" bind:value={roleFilter}>
-						<Select.Trigger class="w-[140px]">
-							{roleFilter === 'all'
-								? 'All Roles'
-								: roleFilter.charAt(0).toUpperCase() + roleFilter.slice(1)}
-						</Select.Trigger>
-						<Select.Content>
-							<Select.Item value="all">All Roles</Select.Item>
-							<Select.Item value="superadmin">Superadmin</Select.Item>
-							<Select.Item value="admin">Admin</Select.Item>
-							<Select.Item value="viewer">Viewer</Select.Item>
-						</Select.Content>
-					</Select.Root>
-					<Select.Root type="single" bind:value={statusFilter}>
-						<Select.Trigger class="w-[140px]">
-							{statusFilter === 'all'
-								? 'All Status'
-								: statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}
-						</Select.Trigger>
-						<Select.Content>
-							<Select.Item value="all">All Status</Select.Item>
-							<Select.Item value="active">Active</Select.Item>
-							<Select.Item value="inactive">Inactive</Select.Item>
-						</Select.Content>
-					</Select.Root>
-					<Button variant="outline" size="icon" onclick={refreshUsers}>
-						<RefreshCw class="h-4 w-4" />
-					</Button>
-				</div>
-			</div>
-		</Card.Content>
-	</Card.Root>
+			</Card.Content>
+		</Card.Root>
 
-	<!-- Users Table -->
-	<Card.Root>
-		<Card.Header>
-			<Card.Title class="flex items-center gap-2">
-				<Users class="h-5 w-5" />
-				Users ({filteredUsers.length})
-			</Card.Title>
-		</Card.Header>
-		<Card.Content>
-			<Table.Root>
-				<Table.Header>
-					<Table.Row>
-						<Table.Head>User</Table.Head>
-						<Table.Head>Role</Table.Head>
-						<Table.Head>Department</Table.Head>
-						<Table.Head>Status</Table.Head>
-						<Table.Head>Last Login</Table.Head>
-						{#if canManageUsers}
-							<Table.Head class="text-right">Actions</Table.Head>
-						{/if}
-					</Table.Row>
-				</Table.Header>
-				<Table.Body>
-					{#each filteredUsers as user (user.id)}
-						{@const RoleIcon = getRoleIcon(user.role)}
+		<!-- Users Table -->
+		<Card.Root>
+			<Card.Header>
+				<Card.Title class="flex items-center gap-2">
+					<Users class="h-5 w-5" />
+					Users ({filteredUsers.length})
+				</Card.Title>
+			</Card.Header>
+			<Card.Content>
+				<Table.Root>
+					<Table.Header>
 						<Table.Row>
-							<Table.Cell>
-								<div class="flex items-center gap-3">
-									<div class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100">
-										<RoleIcon class="h-5 w-5 text-slate-600" />
-									</div>
-									<div>
-										<div class="font-medium">{user.name}</div>
-										<div class="text-sm text-muted-foreground">{user.email}</div>
-									</div>
-								</div>
-							</Table.Cell>
-							<Table.Cell>
-								<Badge variant={getRoleBadgeVariant(user.role)}>
-									{toTitleCase(user.role)}
-								</Badge>
-							</Table.Cell>
-							<Table.Cell>{user.department}</Table.Cell>
-							<Table.Cell>
-								{#if user.is_active}
-									<Badge variant="outline" class="border-green-200 bg-green-50 text-green-700">
-										Active
-									</Badge>
-								{:else}
-									<Badge variant="outline" class="border-red-200 bg-red-50 text-red-700">
-										Inactive
-									</Badge>
-								{/if}
-							</Table.Cell>
-							<Table.Cell class="text-sm text-muted-foreground">
-								{user.last_login ? formatDate(user.last_login) : 'Never'}
-							</Table.Cell>
+							<Table.Head>User</Table.Head>
+							<Table.Head>Role</Table.Head>
+							<Table.Head>Department</Table.Head>
+							<Table.Head>Status</Table.Head>
+							<Table.Head>Last Login</Table.Head>
 							{#if canManageUsers}
-								<Table.Cell class="text-right">
-									<div class="flex justify-end gap-2">
-										<Button variant="ghost" size="icon" onclick={() => openEditDialog(user)}>
-											<Edit class="h-4 w-4" />
-										</Button>
-										{#if user.role !== 'superadmin' || users.filter((u) => u.role === 'superadmin').length > 1}
-											<Button
-												variant="ghost"
-												size="icon"
-												class="text-destructive hover:text-destructive"
-												onclick={() => openDeleteDialog(user)}
-											>
-												<Trash2 class="h-4 w-4" />
-											</Button>
-										{/if}
-									</div>
-								</Table.Cell>
+								<Table.Head class="text-right">Actions</Table.Head>
 							{/if}
 						</Table.Row>
-					{:else}
-						<Table.Row>
-							<Table.Cell
-								colspan={canManageUsers ? 6 : 5}
-								class="text-center py-8 text-muted-foreground"
-							>
-								No users found
-							</Table.Cell>
-						</Table.Row>
-					{/each}
-				</Table.Body>
-			</Table.Root>
-		</Card.Content>
-	</Card.Root>
+					</Table.Header>
+					<Table.Body>
+						{#each filteredUsers as user (user.id)}
+							{@const RoleIcon = getRoleIcon(user.role)}
+							<Table.Row>
+								<Table.Cell>
+									<div class="flex items-center gap-3">
+										<div
+											class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100"
+										>
+											<RoleIcon class="h-5 w-5 text-slate-600" />
+										</div>
+										<div>
+											<div class="font-medium">{user.name}</div>
+											<div class="text-sm text-muted-foreground">{user.email}</div>
+										</div>
+									</div>
+								</Table.Cell>
+								<Table.Cell>
+									<Badge variant={getRoleBadgeVariant(user.role)}>
+										{toTitleCase(user.role)}
+									</Badge>
+								</Table.Cell>
+								<Table.Cell>{user.department}</Table.Cell>
+								<Table.Cell>
+									{#if user.is_active}
+										<Badge variant="outline" class="border-green-200 bg-green-50 text-green-700">
+											Active
+										</Badge>
+									{:else}
+										<Badge variant="outline" class="border-red-200 bg-red-50 text-red-700">
+											Inactive
+										</Badge>
+									{/if}
+								</Table.Cell>
+								<Table.Cell class="text-sm text-muted-foreground">
+									{user.last_login ? formatDate(user.last_login) : 'Never'}
+								</Table.Cell>
+								{#if canManageUsers}
+									<Table.Cell class="text-right">
+										<div class="flex justify-end gap-2">
+											<Button variant="ghost" size="icon" onclick={() => openEditDialog(user)}>
+												<Edit class="h-4 w-4" />
+											</Button>
+											{#if user.role !== 'superadmin' || users.filter((u) => u.role === 'superadmin').length > 1}
+												<Button
+													variant="ghost"
+													size="icon"
+													class="text-destructive hover:text-destructive"
+													onclick={() => openDeleteDialog(user)}
+												>
+													<Trash2 class="h-4 w-4" />
+												</Button>
+											{/if}
+										</div>
+									</Table.Cell>
+								{/if}
+							</Table.Row>
+						{:else}
+							<Table.Row>
+								<Table.Cell
+									colspan={canManageUsers ? 6 : 5}
+									class="text-center py-8 text-muted-foreground"
+								>
+									No users found
+								</Table.Cell>
+							</Table.Row>
+						{/each}
+					</Table.Body>
+				</Table.Root>
+			</Card.Content>
+		</Card.Root>
+	</div>
 </div>
 
 <!-- Create User Dialog -->

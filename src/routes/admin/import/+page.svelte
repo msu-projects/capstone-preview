@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import AdminHeader from '$lib/components/admin/AdminHeader.svelte';
 	import ColumnMapper from '$lib/components/admin/ColumnMapper.svelte';
 	import DuplicateResolver from '$lib/components/admin/DuplicateResolver.svelte';
 	import FileUpload from '$lib/components/admin/FileUpload.svelte';
@@ -198,147 +199,157 @@
 	}
 </script>
 
-<div class="container mx-auto max-w-6xl py-8">
-	<div class="mb-8">
-		<h1 class="mb-2 text-3xl font-bold">Import Sitio Data</h1>
-		<p class="text-muted-foreground">
-			Upload a CSV or Excel file to import multiple sitios at once
-		</p>
-	</div>
+<div class="flex min-h-screen flex-col bg-muted/30">
+	<!-- Header -->
+	<AdminHeader
+		title="Import Sitio Data"
+		description="Upload a CSV or Excel file to import multiple sitios at once"
+	/>
 
-	<!-- Progress Steps -->
-	<div class="mb-8 flex items-center justify-between">
-		<div class="flex items-center gap-2">
-			<div
-				class="flex size-10 items-center justify-center rounded-full"
-				class:bg-primary={step !== 'upload'}
-				class:text-primary-foreground={step !== 'upload'}
-				class:bg-muted={step === 'upload'}
-			>
-				{#if step !== 'upload'}
-					<CheckCircle2 class="size-5" />
-				{:else}
-					<Upload class="size-5" />
-				{/if}
-			</div>
-			<span class:font-semibold={step === 'upload'}>Upload</span>
-		</div>
-
-		<div class="h-px flex-1 bg-border"></div>
-
-		<div class="flex items-center gap-2">
-			<div
-				class="flex size-10 items-center justify-center rounded-full"
-				class:bg-primary={step !== 'upload' && step !== 'map'}
-				class:text-primary-foreground={step !== 'upload' && step !== 'map'}
-				class:bg-muted={step === 'upload' || step === 'map'}
-			>
-				{#if step !== 'upload' && step !== 'map'}
-					<CheckCircle2 class="size-5" />
-				{:else}
-					<Map class="size-5" />
-				{/if}
-			</div>
-			<span class:font-semibold={step === 'map'}>Map Columns</span>
-		</div>
-
-		<div class="h-px flex-1 bg-border"></div>
-
-		<div class="flex items-center gap-2">
-			<div
-				class="flex size-10 items-center justify-center rounded-full"
-				class:bg-primary={step !== 'upload' && step !== 'map' && step !== 'preview'}
-				class:text-primary-foreground={step !== 'upload' && step !== 'map' && step !== 'preview'}
-				class:bg-muted={step === 'upload' || step === 'map' || step === 'preview'}
-			>
-				{#if step !== 'upload' && step !== 'map' && step !== 'preview'}
-					<CheckCircle2 class="size-5" />
-				{:else}
-					<FileSearch class="size-5" />
-				{/if}
-			</div>
-			<span class:font-semibold={step === 'preview'}>Preview</span>
-		</div>
-
-		<div class="h-px flex-1 bg-border"></div>
-
-		<div class="flex items-center gap-2">
-			<div
-				class="flex size-10 items-center justify-center rounded-full"
-				class:bg-primary={step === 'complete'}
-				class:text-primary-foreground={step === 'complete'}
-				class:bg-muted={step !== 'complete'}
-			>
-				<CheckCircle2 class="size-5" />
-			</div>
-			<span class:font-semibold={step === 'complete'}>Complete</span>
-		</div>
-	</div>
-
-	<!-- Step Content -->
-	{#if step === 'upload'}
-		<FileUpload onFileSelected={handleFileUploaded} />
-	{:else if step === 'map'}
-		<ColumnMapper {mappings} onComplete={handleMappingComplete} onBack={() => (step = 'upload')} />
-	{:else if step === 'preview'}
-		<ImportPreview
-			{validSitios}
-			{invalidSitios}
-			{errors}
-			onConfirm={handlePreviewConfirm}
-			onBack={() => (step = 'map')}
-		/>
-	{:else if step === 'duplicates'}
-		<DuplicateResolver {duplicates} onResolved={handleDuplicatesResolved} />
-	{:else if step === 'complete'}
-		<Card.Root>
-			<Card.Header>
-				<Card.Title class="flex items-center gap-2 text-2xl">
-					<CheckCircle2 class="size-6 text-primary" />
-					Import Complete!
-				</Card.Title>
-				<Card.Description>Your sitio data has been successfully imported.</Card.Description>
-			</Card.Header>
-			<Card.Content class="space-y-6">
-				{#if importResult}
-					<div class="grid grid-cols-3 gap-4">
-						<div class="rounded-lg bg-primary/5 p-4 text-center">
-							<div class="text-3xl font-bold text-primary">{importResult.success}</div>
-							<div class="text-sm text-muted-foreground">New Sitios Added</div>
-						</div>
-						{#if importResult.replaced > 0}
-							<div class="rounded-lg bg-blue-50 p-4 text-center">
-								<div class="text-3xl font-bold text-blue-600">{importResult.replaced}</div>
-								<div class="text-sm text-muted-foreground">Sitios Updated</div>
-							</div>
-						{/if}
-						{#if importResult.skipped > 0}
-							<div class="rounded-lg bg-muted p-4 text-center">
-								<div class="text-3xl font-bold">{importResult.skipped}</div>
-								<div class="text-sm text-muted-foreground">Duplicates Skipped</div>
-							</div>
+	<!-- Content -->
+	<div class="flex-1 p-6">
+		<div class="mx-auto max-w-6xl">
+			<!-- Progress Steps -->
+			<div class="mb-8 flex items-center justify-between">
+				<div class="flex items-center gap-2">
+					<div
+						class="flex size-10 items-center justify-center rounded-full"
+						class:bg-primary={step !== 'upload'}
+						class:text-primary-foreground={step !== 'upload'}
+						class:bg-muted={step === 'upload'}
+					>
+						{#if step !== 'upload'}
+							<CheckCircle2 class="size-5" />
+						{:else}
+							<Upload class="size-5" />
 						{/if}
 					</div>
-				{/if}
-			</Card.Content>
-			<Card.Footer class="flex justify-between">
-				<Button variant="outline" onclick={resetWizard}>Import More Data</Button>
-				<Button onclick={goToSitiosList}>View Sitios List</Button>
-			</Card.Footer>
-		</Card.Root>
-	{/if}
+					<span class:font-semibold={step === 'upload'}>Upload</span>
+				</div>
 
-	<!-- Processing Overlay -->
-	{#if isProcessing}
-		<div class="fixed inset-0 z-50 flex items-center justify-center bg-background/80">
-			<Card.Root class="w-[300px]">
-				<Card.Content class="flex flex-col items-center gap-4 py-8">
+				<div class="h-px flex-1 bg-border"></div>
+
+				<div class="flex items-center gap-2">
 					<div
-						class="size-12 animate-spin rounded-full border-4 border-primary border-t-transparent"
-					></div>
-					<p class="text-center text-sm text-muted-foreground">Processing...</p>
-				</Card.Content>
-			</Card.Root>
+						class="flex size-10 items-center justify-center rounded-full"
+						class:bg-primary={step !== 'upload' && step !== 'map'}
+						class:text-primary-foreground={step !== 'upload' && step !== 'map'}
+						class:bg-muted={step === 'upload' || step === 'map'}
+					>
+						{#if step !== 'upload' && step !== 'map'}
+							<CheckCircle2 class="size-5" />
+						{:else}
+							<Map class="size-5" />
+						{/if}
+					</div>
+					<span class:font-semibold={step === 'map'}>Map Columns</span>
+				</div>
+
+				<div class="h-px flex-1 bg-border"></div>
+
+				<div class="flex items-center gap-2">
+					<div
+						class="flex size-10 items-center justify-center rounded-full"
+						class:bg-primary={step !== 'upload' && step !== 'map' && step !== 'preview'}
+						class:text-primary-foreground={step !== 'upload' &&
+							step !== 'map' &&
+							step !== 'preview'}
+						class:bg-muted={step === 'upload' || step === 'map' || step === 'preview'}
+					>
+						{#if step !== 'upload' && step !== 'map' && step !== 'preview'}
+							<CheckCircle2 class="size-5" />
+						{:else}
+							<FileSearch class="size-5" />
+						{/if}
+					</div>
+					<span class:font-semibold={step === 'preview'}>Preview</span>
+				</div>
+
+				<div class="h-px flex-1 bg-border"></div>
+
+				<div class="flex items-center gap-2">
+					<div
+						class="flex size-10 items-center justify-center rounded-full"
+						class:bg-primary={step === 'complete'}
+						class:text-primary-foreground={step === 'complete'}
+						class:bg-muted={step !== 'complete'}
+					>
+						<CheckCircle2 class="size-5" />
+					</div>
+					<span class:font-semibold={step === 'complete'}>Complete</span>
+				</div>
+			</div>
+
+			<!-- Step Content -->
+			{#if step === 'upload'}
+				<FileUpload onFileSelected={handleFileUploaded} />
+			{:else if step === 'map'}
+				<ColumnMapper
+					{mappings}
+					onComplete={handleMappingComplete}
+					onBack={() => (step = 'upload')}
+				/>
+			{:else if step === 'preview'}
+				<ImportPreview
+					{validSitios}
+					{invalidSitios}
+					{errors}
+					onConfirm={handlePreviewConfirm}
+					onBack={() => (step = 'map')}
+				/>
+			{:else if step === 'duplicates'}
+				<DuplicateResolver {duplicates} onResolved={handleDuplicatesResolved} />
+			{:else if step === 'complete'}
+				<Card.Root>
+					<Card.Header>
+						<Card.Title class="flex items-center gap-2 text-2xl">
+							<CheckCircle2 class="size-6 text-primary" />
+							Import Complete!
+						</Card.Title>
+						<Card.Description>Your sitio data has been successfully imported.</Card.Description>
+					</Card.Header>
+					<Card.Content class="space-y-6">
+						{#if importResult}
+							<div class="grid grid-cols-3 gap-4">
+								<div class="rounded-lg bg-primary/5 p-4 text-center">
+									<div class="text-3xl font-bold text-primary">{importResult.success}</div>
+									<div class="text-sm text-muted-foreground">New Sitios Added</div>
+								</div>
+								{#if importResult.replaced > 0}
+									<div class="rounded-lg bg-blue-50 p-4 text-center">
+										<div class="text-3xl font-bold text-blue-600">{importResult.replaced}</div>
+										<div class="text-sm text-muted-foreground">Sitios Updated</div>
+									</div>
+								{/if}
+								{#if importResult.skipped > 0}
+									<div class="rounded-lg bg-muted p-4 text-center">
+										<div class="text-3xl font-bold">{importResult.skipped}</div>
+										<div class="text-sm text-muted-foreground">Duplicates Skipped</div>
+									</div>
+								{/if}
+							</div>
+						{/if}
+					</Card.Content>
+					<Card.Footer class="flex justify-between">
+						<Button variant="outline" onclick={resetWizard}>Import More Data</Button>
+						<Button onclick={goToSitiosList}>View Sitios List</Button>
+					</Card.Footer>
+				</Card.Root>
+			{/if}
+
+			<!-- Processing Overlay -->
+			{#if isProcessing}
+				<div class="fixed inset-0 z-50 flex items-center justify-center bg-background/80">
+					<Card.Root class="w-[300px]">
+						<Card.Content class="flex flex-col items-center gap-4 py-8">
+							<div
+								class="size-12 animate-spin rounded-full border-4 border-primary border-t-transparent"
+							></div>
+							<p class="text-center text-sm text-muted-foreground">Processing...</p>
+						</Card.Content>
+					</Card.Root>
+				</div>
+			{/if}
 		</div>
-	{/if}
+	</div>
 </div>

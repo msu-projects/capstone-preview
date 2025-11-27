@@ -1,4 +1,5 @@
 <script lang="ts">
+	import AdminHeader from '$lib/components/admin/AdminHeader.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
@@ -207,14 +208,10 @@
 	<title>Audit Logs - South Cotabato Data Bank</title>
 </svelte:head>
 
-<div class="container mx-auto space-y-6 p-6">
+<div class="flex min-h-screen flex-col bg-muted/30">
 	<!-- Header -->
-	<div class="flex items-center justify-between">
-		<div>
-			<h1 class="text-3xl font-bold tracking-tight">Audit Logs</h1>
-			<p class="text-muted-foreground">Track all system activities and user actions</p>
-		</div>
-		<div class="flex gap-2">
+	<AdminHeader title="Audit Logs" description="Track all system activities and user actions">
+		{#snippet actions()}
 			<Button variant="outline" onclick={exportLogs}>
 				<Download class="mr-2 h-4 w-4" />
 				Export CSV
@@ -223,222 +220,228 @@
 				<RefreshCw class="mr-2 h-4 w-4" />
 				Refresh
 			</Button>
+		{/snippet}
+	</AdminHeader>
+
+	<!-- Content -->
+	<div class="flex-1 space-y-6 p-6">
+		<!-- Stats Cards -->
+		<div class="grid gap-4 md:grid-cols-4">
+			<Card.Root>
+				<Card.Content class="">
+					<div class="flex items-center gap-4">
+						<div class="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
+							<Activity class="h-6 w-6 text-blue-600" />
+						</div>
+						<div>
+							<p class="text-sm text-muted-foreground">Total Activities</p>
+							<p class="text-2xl font-bold">{stats.total}</p>
+						</div>
+					</div>
+				</Card.Content>
+			</Card.Root>
+			<Card.Root>
+				<Card.Content class="">
+					<div class="flex items-center gap-4">
+						<div class="flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
+							<LogIn class="h-6 w-6 text-green-600" />
+						</div>
+						<div>
+							<p class="text-sm text-muted-foreground">Logins</p>
+							<p class="text-2xl font-bold">{stats.byAction['login'] || 0}</p>
+						</div>
+					</div>
+				</Card.Content>
+			</Card.Root>
+			<Card.Root>
+				<Card.Content class="">
+					<div class="flex items-center gap-4">
+						<div class="flex h-12 w-12 items-center justify-center rounded-full bg-yellow-100">
+							<Pencil class="h-6 w-6 text-yellow-600" />
+						</div>
+						<div>
+							<p class="text-sm text-muted-foreground">Updates</p>
+							<p class="text-2xl font-bold">{stats.byAction['update'] || 0}</p>
+						</div>
+					</div>
+				</Card.Content>
+			</Card.Root>
+			<Card.Root>
+				<Card.Content class="">
+					<div class="flex items-center gap-4">
+						<div class="flex h-12 w-12 items-center justify-center rounded-full bg-purple-100">
+							<User class="h-6 w-6 text-purple-600" />
+						</div>
+						<div>
+							<p class="text-sm text-muted-foreground">Active Users</p>
+							<p class="text-2xl font-bold">{Object.keys(stats.byUser).length}</p>
+						</div>
+					</div>
+				</Card.Content>
+			</Card.Root>
 		</div>
-	</div>
 
-	<!-- Stats Cards -->
-	<div class="grid gap-4 md:grid-cols-4">
+		<!-- Filters -->
 		<Card.Root>
 			<Card.Content class="">
-				<div class="flex items-center gap-4">
-					<div class="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
-						<Activity class="h-6 w-6 text-blue-600" />
+				<div class="flex flex-col gap-4 md:flex-row md:items-center">
+					<div class="relative flex-1">
+						<Search
+							class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+						/>
+						<Input placeholder="Search logs..." bind:value={searchQuery} class="pl-10" />
 					</div>
-					<div>
-						<p class="text-sm text-muted-foreground">Total Activities</p>
-						<p class="text-2xl font-bold">{stats.total}</p>
+					<div class="flex flex-wrap gap-2">
+						<Select.Root type="single" bind:value={actionFilter}>
+							<Select.Trigger class="w-[130px]">
+								{actionFilter === 'all'
+									? 'All Actions'
+									: actionFilter.charAt(0).toUpperCase() + actionFilter.slice(1)}
+							</Select.Trigger>
+							<Select.Content>
+								<Select.Item value="all">All Actions</Select.Item>
+								<Select.Item value="login">Login</Select.Item>
+								<Select.Item value="logout">Logout</Select.Item>
+								<Select.Item value="create">Create</Select.Item>
+								<Select.Item value="update">Update</Select.Item>
+								<Select.Item value="delete">Delete</Select.Item>
+								<Select.Item value="view">View</Select.Item>
+								<Select.Item value="export">Export</Select.Item>
+								<Select.Item value="import">Import</Select.Item>
+							</Select.Content>
+						</Select.Root>
+						<Select.Root type="single" bind:value={resourceFilter}>
+							<Select.Trigger class="w-[130px]">
+								{resourceFilter === 'all'
+									? 'All Resources'
+									: resourceFilter.charAt(0).toUpperCase() + resourceFilter.slice(1)}
+							</Select.Trigger>
+							<Select.Content>
+								<Select.Item value="all">All Resources</Select.Item>
+								<Select.Item value="user">User</Select.Item>
+								<Select.Item value="sitio">Sitio</Select.Item>
+								<Select.Item value="project">Project</Select.Item>
+								<Select.Item value="system">System</Select.Item>
+							</Select.Content>
+						</Select.Root>
+						<Select.Root type="single" bind:value={userFilter}>
+							<Select.Trigger class="w-[150px]">
+								{userFilter === 'all' ? 'All Users' : userFilter}
+							</Select.Trigger>
+							<Select.Content>
+								<Select.Item value="all">All Users</Select.Item>
+								{#each uniqueUsers as user}
+									<Select.Item value={user}>{user}</Select.Item>
+								{/each}
+							</Select.Content>
+						</Select.Root>
 					</div>
 				</div>
 			</Card.Content>
 		</Card.Root>
-		<Card.Root>
-			<Card.Content class="">
-				<div class="flex items-center gap-4">
-					<div class="flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
-						<LogIn class="h-6 w-6 text-green-600" />
-					</div>
-					<div>
-						<p class="text-sm text-muted-foreground">Logins</p>
-						<p class="text-2xl font-bold">{stats.byAction['login'] || 0}</p>
-					</div>
-				</div>
-			</Card.Content>
-		</Card.Root>
-		<Card.Root>
-			<Card.Content class="">
-				<div class="flex items-center gap-4">
-					<div class="flex h-12 w-12 items-center justify-center rounded-full bg-yellow-100">
-						<Pencil class="h-6 w-6 text-yellow-600" />
-					</div>
-					<div>
-						<p class="text-sm text-muted-foreground">Updates</p>
-						<p class="text-2xl font-bold">{stats.byAction['update'] || 0}</p>
-					</div>
-				</div>
-			</Card.Content>
-		</Card.Root>
-		<Card.Root>
-			<Card.Content class="">
-				<div class="flex items-center gap-4">
-					<div class="flex h-12 w-12 items-center justify-center rounded-full bg-purple-100">
-						<User class="h-6 w-6 text-purple-600" />
-					</div>
-					<div>
-						<p class="text-sm text-muted-foreground">Active Users</p>
-						<p class="text-2xl font-bold">{Object.keys(stats.byUser).length}</p>
-					</div>
-				</div>
-			</Card.Content>
-		</Card.Root>
-	</div>
 
-	<!-- Filters -->
-	<Card.Root>
-		<Card.Content class="">
-			<div class="flex flex-col gap-4 md:flex-row md:items-center">
-				<div class="relative flex-1">
-					<Search class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-					<Input placeholder="Search logs..." bind:value={searchQuery} class="pl-10" />
-				</div>
-				<div class="flex flex-wrap gap-2">
-					<Select.Root type="single" bind:value={actionFilter}>
-						<Select.Trigger class="w-[130px]">
-							{actionFilter === 'all'
-								? 'All Actions'
-								: actionFilter.charAt(0).toUpperCase() + actionFilter.slice(1)}
-						</Select.Trigger>
-						<Select.Content>
-							<Select.Item value="all">All Actions</Select.Item>
-							<Select.Item value="login">Login</Select.Item>
-							<Select.Item value="logout">Logout</Select.Item>
-							<Select.Item value="create">Create</Select.Item>
-							<Select.Item value="update">Update</Select.Item>
-							<Select.Item value="delete">Delete</Select.Item>
-							<Select.Item value="view">View</Select.Item>
-							<Select.Item value="export">Export</Select.Item>
-							<Select.Item value="import">Import</Select.Item>
-						</Select.Content>
-					</Select.Root>
-					<Select.Root type="single" bind:value={resourceFilter}>
-						<Select.Trigger class="w-[130px]">
-							{resourceFilter === 'all'
-								? 'All Resources'
-								: resourceFilter.charAt(0).toUpperCase() + resourceFilter.slice(1)}
-						</Select.Trigger>
-						<Select.Content>
-							<Select.Item value="all">All Resources</Select.Item>
-							<Select.Item value="user">User</Select.Item>
-							<Select.Item value="sitio">Sitio</Select.Item>
-							<Select.Item value="project">Project</Select.Item>
-							<Select.Item value="system">System</Select.Item>
-						</Select.Content>
-					</Select.Root>
-					<Select.Root type="single" bind:value={userFilter}>
-						<Select.Trigger class="w-[150px]">
-							{userFilter === 'all' ? 'All Users' : userFilter}
-						</Select.Trigger>
-						<Select.Content>
-							<Select.Item value="all">All Users</Select.Item>
-							{#each uniqueUsers as user}
-								<Select.Item value={user}>{user}</Select.Item>
-							{/each}
-						</Select.Content>
-					</Select.Root>
-				</div>
-			</div>
-		</Card.Content>
-	</Card.Root>
-
-	<!-- Logs Table -->
-	<Card.Root>
-		<Card.Header>
-			<Card.Title class="flex items-center gap-2">
-				<FileText class="h-5 w-5" />
-				Activity Log ({filteredLogs.length} entries)
-			</Card.Title>
-		</Card.Header>
-		<Card.Content>
-			<Table.Root>
-				<Table.Header>
-					<Table.Row>
-						<Table.Head class="w-[180px]">Timestamp</Table.Head>
-						<Table.Head>User</Table.Head>
-						<Table.Head>Action</Table.Head>
-						<Table.Head>Resource</Table.Head>
-						<Table.Head>Details</Table.Head>
-					</Table.Row>
-				</Table.Header>
-				<Table.Body>
-					{#each paginatedLogs as log (log.id)}
+		<!-- Logs Table -->
+		<Card.Root>
+			<Card.Header>
+				<Card.Title class="flex items-center gap-2">
+					<FileText class="h-5 w-5" />
+					Activity Log ({filteredLogs.length} entries)
+				</Card.Title>
+			</Card.Header>
+			<Card.Content>
+				<Table.Root>
+					<Table.Header>
 						<Table.Row>
-							<Table.Cell class="text-sm text-muted-foreground">
-								<div class="flex items-center gap-2">
-									<Calendar class="h-4 w-4" />
-									{formatTimestamp(log.timestamp)}
-								</div>
-							</Table.Cell>
-							<Table.Cell>
-								<div class="flex items-center gap-2">
-									<div class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100">
-										<User class="h-4 w-4 text-slate-600" />
+							<Table.Head class="w-[180px]">Timestamp</Table.Head>
+							<Table.Head>User</Table.Head>
+							<Table.Head>Action</Table.Head>
+							<Table.Head>Resource</Table.Head>
+							<Table.Head>Details</Table.Head>
+						</Table.Row>
+					</Table.Header>
+					<Table.Body>
+						{#each paginatedLogs as log (log.id)}
+							<Table.Row>
+								<Table.Cell class="text-sm text-muted-foreground">
+									<div class="flex items-center gap-2">
+										<Calendar class="h-4 w-4" />
+										{formatTimestamp(log.timestamp)}
 									</div>
-									<span class="font-medium">{log.user_name}</span>
-								</div>
-							</Table.Cell>
-							<Table.Cell>
-								<Badge variant={getActionBadgeVariant(log.action)}>
-									{@const ActionIcon = getActionIcon(log.action)}
-									<ActionIcon class="mr-1 h-3 w-3" />
-									{toTitleCase(log.action)}
-								</Badge>
-							</Table.Cell>
-							<Table.Cell>
-								<div class="flex items-center gap-2">
-									<Badge variant={getResourceBadgeVariant(log.resource_type)}>
-										{toTitleCase(log.resource_type)}
+								</Table.Cell>
+								<Table.Cell>
+									<div class="flex items-center gap-2">
+										<div class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100">
+											<User class="h-4 w-4 text-slate-600" />
+										</div>
+										<span class="font-medium">{log.user_name}</span>
+									</div>
+								</Table.Cell>
+								<Table.Cell>
+									<Badge variant={getActionBadgeVariant(log.action)}>
+										{@const ActionIcon = getActionIcon(log.action)}
+										<ActionIcon class="mr-1 h-3 w-3" />
+										{toTitleCase(log.action)}
 									</Badge>
-									{#if log.resource_name}
-										<span class="text-sm text-muted-foreground">{log.resource_name}</span>
+								</Table.Cell>
+								<Table.Cell>
+									<div class="flex items-center gap-2">
+										<Badge variant={getResourceBadgeVariant(log.resource_type)}>
+											{toTitleCase(log.resource_type)}
+										</Badge>
+										{#if log.resource_name}
+											<span class="text-sm text-muted-foreground">{log.resource_name}</span>
+										{/if}
+									</div>
+								</Table.Cell>
+								<Table.Cell class="max-w-[300px] truncate text-sm text-muted-foreground">
+									{log.details || '-'}
+								</Table.Cell>
+							</Table.Row>
+						{:else}
+							<Table.Row>
+								<Table.Cell colspan={5} class="py-8 text-center text-muted-foreground">
+									{#if auditLogs.length === 0}
+										No audit logs yet. Activities will appear here as users interact with the
+										system.
+									{:else}
+										No logs match your filters.
 									{/if}
-								</div>
-							</Table.Cell>
-							<Table.Cell class="max-w-[300px] truncate text-sm text-muted-foreground">
-								{log.details || '-'}
-							</Table.Cell>
-						</Table.Row>
-					{:else}
-						<Table.Row>
-							<Table.Cell colspan={5} class="py-8 text-center text-muted-foreground">
-								{#if auditLogs.length === 0}
-									No audit logs yet. Activities will appear here as users interact with the system.
-								{:else}
-									No logs match your filters.
-								{/if}
-							</Table.Cell>
-						</Table.Row>
-					{/each}
-				</Table.Body>
-			</Table.Root>
+								</Table.Cell>
+							</Table.Row>
+						{/each}
+					</Table.Body>
+				</Table.Root>
 
-			<!-- Pagination -->
-			{#if totalPages > 1}
-				<div class="mt-4 flex items-center justify-between">
-					<p class="text-sm text-muted-foreground">
-						Showing {(currentPage - 1) * perPage + 1} to {Math.min(
-							currentPage * perPage,
-							filteredLogs.length
-						)} of {filteredLogs.length} entries
-					</p>
-					<div class="flex gap-2">
-						<Button
-							variant="outline"
-							size="sm"
-							disabled={currentPage === 1}
-							onclick={() => (currentPage = currentPage - 1)}
-						>
-							Previous
-						</Button>
-						<Button
-							variant="outline"
-							size="sm"
-							disabled={currentPage === totalPages}
-							onclick={() => (currentPage = currentPage + 1)}
-						>
-							Next
-						</Button>
+				<!-- Pagination -->
+				{#if totalPages > 1}
+					<div class="mt-4 flex items-center justify-between">
+						<p class="text-sm text-muted-foreground">
+							Showing {(currentPage - 1) * perPage + 1} to {Math.min(
+								currentPage * perPage,
+								filteredLogs.length
+							)} of {filteredLogs.length} entries
+						</p>
+						<div class="flex gap-2">
+							<Button
+								variant="outline"
+								size="sm"
+								disabled={currentPage === 1}
+								onclick={() => (currentPage = currentPage - 1)}
+							>
+								Previous
+							</Button>
+							<Button
+								variant="outline"
+								size="sm"
+								disabled={currentPage === totalPages}
+								onclick={() => (currentPage = currentPage + 1)}
+							>
+								Next
+							</Button>
+						</div>
 					</div>
-				</div>
-			{/if}
-		</Card.Content>
-	</Card.Root>
+				{/if}
+			</Card.Content>
+		</Card.Root>
+	</div>
 </div>
