@@ -29,11 +29,11 @@ export function generateProjectMonitoringPDF(projects: Project[], quarter: strin
 		return 'N/A';
 	};
 
-	// Helper to calculate slippage from monthly progress
+	// Helper to calculate slippage from monthly targets vs actual progress
 	const getPhysicalProgress = (project: Project) => {
-		const latestProgress =
-			project.monthly_physical_progress?.[project.monthly_physical_progress.length - 1];
-		const plan = latestProgress?.plan_percentage ?? 0;
+		// Get planned from monthly_targets
+		const latestTarget = project.monthly_targets?.[project.monthly_targets.length - 1];
+		const plan = latestTarget?.planned_physical_progress ?? 0;
 		const actual = project.completion_percentage;
 		return { plan, actual, slippage: plan - actual };
 	};

@@ -14,8 +14,7 @@
 		BudgetComponent,
 		CategoryKey,
 		FundingSource,
-		MonthlyPhysicalProgress,
-		MonthlyReleaseSchedule,
+		MonthlyTarget,
 		Project,
 		ProjectSitio,
 		ProjectStatus
@@ -66,8 +65,7 @@
 	let budgetComponents = $state<Omit<BudgetComponent, 'id' | 'project_id'>[]>([]);
 
 	// Tab 6: Monthly Planning
-	let monthlyReleaseSchedule = $state<Omit<MonthlyReleaseSchedule, 'id' | 'project_id'>[]>([]);
-	let monthlyPhysicalProgress = $state<MonthlyPhysicalProgress[]>([]);
+	let monthlyTargets = $state<MonthlyTarget[]>([]);
 
 	// Validation
 	const isTab1Valid = $derived(
@@ -90,9 +88,8 @@
 	const isTab4Valid = $derived(fundingSources.length > 0 && budgetComponents.length > 0);
 
 	const isTab5Valid = $derived(
-		monthlyPhysicalProgress.length > 0 &&
-			monthlyPhysicalProgress.every((mp) => mp.plan_percentage !== undefined) &&
-			monthlyReleaseSchedule.length > 0
+		monthlyTargets.length > 0 &&
+			monthlyTargets.every((mt) => mt.planned_physical_progress !== undefined)
 	);
 
 	const canSave = $derived(isTab1Valid && isTab2Valid && isTab3Valid && isTab4Valid && isTab5Valid);
@@ -228,12 +225,7 @@
 					id: 0,
 					project_id: nextId
 				})),
-				release_schedule: monthlyReleaseSchedule.map((mrs) => ({
-					...mrs,
-					id: 0,
-					project_id: nextId
-				})),
-				monthly_physical_progress: monthlyPhysicalProgress,
+				monthly_targets: monthlyTargets,
 				employment_generated: {
 					male: Number(employmentMale) || 0,
 					female: Number(employmentFemale) || 0
@@ -399,8 +391,7 @@
 								endDate={targetEndDate?.toString() || ''}
 								totalBudget={Number(totalBudget)}
 								onUpdate={(data) => {
-									monthlyPhysicalProgress = data.physicalProgress;
-									monthlyReleaseSchedule = data.releaseSchedule;
+									monthlyTargets = data.monthlyTargets;
 								}}
 							/>
 						</Card.CardContent>

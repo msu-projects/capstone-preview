@@ -222,26 +222,27 @@ export interface MonthlyProgress {
 	id: number;
 	project_id: number;
 	month_year: string; // Format: 'YYYY-MM'
+
+	// Actual physical progress
+	physical_progress_percentage: number;
+
+	// Actual budget utilized
+	budget_utilized: number;
+
+	// Other actuals
 	achieved_outputs: Record<string, number>; // { 'seedlings_distributed': 500, 'training_sessions': 3 }
 	beneficiaries_reached: number;
 	issues_encountered?: string;
-	photo_urls?: string[];
 	photo_documentation?: PhotoDocumentation[];
 	status: 'on-track' | 'delayed' | 'ahead';
 	created_at: string;
 	updated_at: string;
 }
 
-export interface MonthlyBudgetUtilization {
-	id: number;
-	project_id: number;
-	month_year: string;
-	budget_released: number;
-	actual_expenses: number;
-	obligations: number;
-	remaining_balance: number;
-	created_at: string;
-	updated_at: string;
+export interface MonthlyTarget {
+	month_year: string; // Format: 'YYYY-MM'
+	planned_physical_progress: number; // Planned physical progress percentage
+	planned_budget: number; // Planned budget release for the month
 }
 
 export interface BudgetComponent {
@@ -259,21 +260,6 @@ export interface FundingSource {
 	source_type: 'provincial' | 'national' | 'partner' | 'lgu_counterpart';
 	amount: number;
 	percentage: number;
-}
-
-export interface MonthlyReleaseSchedule {
-	id: number;
-	project_id: number;
-	month_year: string;
-	planned_release: number;
-	actual_release?: number;
-	milestone_tied?: string;
-}
-
-export interface MonthlyPhysicalProgress {
-	month_year: string;
-	plan_percentage: number;
-	actual_percentage?: number;
 }
 
 export interface Project {
@@ -303,12 +289,10 @@ export interface Project {
 
 	// Enhanced fields
 	project_sitios?: ProjectSitio[];
-	monthly_progress?: MonthlyProgress[];
-	monthly_budget?: MonthlyBudgetUtilization[];
+	monthly_progress?: MonthlyProgress[]; // Actual progress data
+	monthly_targets?: MonthlyTarget[]; // Planned physical progress and budget per month
 	funding_sources?: FundingSource[];
 	budget_components?: BudgetComponent[];
-	release_schedule?: MonthlyReleaseSchedule[];
-	monthly_physical_progress?: MonthlyPhysicalProgress[];
 	employment_generated?: {
 		male: number;
 		female: number;

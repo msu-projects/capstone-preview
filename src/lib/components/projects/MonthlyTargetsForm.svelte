@@ -4,7 +4,7 @@
 	import * as Card from '$lib/components/ui/card';
 	import { CurrencyInput } from '$lib/components/ui/currency-input';
 	import { Input } from '$lib/components/ui/input';
-	import type { MonthlyPhysicalProgress, MonthlyReleaseSchedule } from '$lib/types';
+	import type { MonthlyTarget } from '$lib/types';
 	import {
 		formatMonth,
 		generateCumulativePercentageTemplate,
@@ -18,10 +18,7 @@
 		startDate: string;
 		endDate: string;
 		totalBudget: number;
-		onUpdate: (data: {
-			physicalProgress: MonthlyPhysicalProgress[];
-			releaseSchedule: Omit<MonthlyReleaseSchedule, 'id' | 'project_id'>[];
-		}) => void;
+		onUpdate: (data: { monthlyTargets: MonthlyTarget[] }) => void;
 	}
 
 	let { startDate, endDate, totalBudget, onUpdate }: Props = $props();
@@ -29,42 +26,29 @@
 	// Generate month range
 	const months = $derived(generateMonthRange(startDate, endDate));
 
-	// Initialize physical progress tracking
-	let physicalProgress = $state<MonthlyPhysicalProgress[]>([]);
+	// Initialize monthly targets (combined physical progress and budget)
+	let monthlyTargets = $state<MonthlyTarget[]>([]);
 
-	// Initialize budget release schedule
-	let releaseSchedule = $state<Omit<MonthlyReleaseSchedule, 'id' | 'project_id'>[]>([]);
-
-	// Initialize physical progress when months change - automatically generate template
+	// Initialize monthly targets when months change - automatically generate template
 	$effect(() => {
 		if (months.length > 0) {
-			// Auto-generate cumulative percentage template
-			const template = generateCumulativePercentageTemplate(months, 'even');
-			physicalProgress = months.map((month) => ({
-				month_year: month,
-				plan_percentage: template[month] || 0,
-				actual_percentage: undefined // Not tracked during creation - only during monitoring
-			}));
-		}
-	});
-
-	// Update release schedule when months change - automatically generate template
-	$effect(() => {
-		if (months.length > 0 && totalBudget > 0) {
+			// Auto-generate cumulative percentage template for physical progress
+			const progressTemplate = generateCumulativePercentageTemplate(months, 'even');
 			// Auto-generate budget template
-			const template = generateMonthlyTemplate(totalBudget, months, 'even');
-			releaseSchedule = months.map((month) => ({
+			const budgetTemplate =
+				totalBudget > 0 ? generateMonthlyTemplate(totalBudget, months, 'even') : {};
+
+			monthlyTargets = months.map((month) => ({
 				month_year: month,
-				planned_release: template[month] || 0,
-				// actual_release is not set during creation - only during monitoring
-				milestone_tied: ''
+				planned_physical_progress: progressTemplate[month] || 0,
+				planned_budget: budgetTemplate[month] || 0
 			}));
 		}
 	});
 
 	// Notify parent when data changes
 	$effect(() => {
-		if (physicalProgress.length > 0 && releaseSchedule.length > 0) {
+		if (monthlyTargets.length > 0) {
 			notifyUpdate();
 		}
 	});
@@ -73,23 +57,20 @@
 	 * Notify parent of updates
 	 */
 	function notifyUpdate() {
-		onUpdate({
-			physicalProgress,
-			releaseSchedule
-		});
+		onUpdate({ monthlyTargets });
 	}
 
 	/**
 	 * Get validation status for physical progress (Plan %)
 	 */
 	function getPhysicalProgressValidationStatus() {
-		if (physicalProgress.length === 0) {
+		if (monthlyTargets.length === 0) {
 			return { isValid: false, message: 'No monthly plan set', variant: 'secondary' as const };
 		}
 
-		const planPercentages = physicalProgress.reduce(
-			(acc, mp) => {
-				acc[mp.month_year] = mp.plan_percentage;
+		const planPercentages = monthlyTargets.reduce(
+			(acc, mt) => {
+				acc[mt.month_year] = mt.planned_physical_progress;
 				return acc;
 			},
 			{} as Record<string, number>
@@ -111,7 +92,7 @@
 	 * Get validation status for budget
 	 */
 	function getBudgetValidationStatus() {
-		const total = releaseSchedule.reduce((sum, item) => sum + item.planned_release, 0);
+		const total = monthlyTargets.reduce((sum, item) => sum + item.planned_budget, 0);
 		const difference = total - totalBudget;
 		if (difference !== 0) {
 			return {
@@ -226,17 +207,17 @@
 					</div>
 
 					<!-- Data Rows -->
-					{#each physicalProgress as progress, index (progress.month_year)}
+					{#each monthlyTargets as target, index (target.month_year)}
 						<div class="grid grid-cols-2 items-center gap-2">
-							<div class="text-xs font-medium">{formatMonth(progress.month_year)}</div>
+							<div class="text-xs font-medium">{formatMonth(target.month_year)}</div>
 							<div>
 								<Input
-									id={`plan-${progress.month_year}`}
+									id={`plan-${target.month_year}`}
 									type="number"
 									min="0"
 									max="100"
 									step="0.1"
-									bind:value={physicalProgress[index].plan_percentage}
+									bind:value={monthlyTargets[index].planned_physical_progress}
 									oninput={() => notifyUpdate()}
 									class="h-8 text-sm"
 									placeholder="0%"
@@ -246,16 +227,16 @@
 					{/each}
 
 					<!-- Summary Row -->
-					{#if physicalProgress.length > 0}
-						{@const finalProgress = physicalProgress[physicalProgress.length - 1]}
+					{#if monthlyTargets.length > 0}
+						{@const finalTarget = monthlyTargets[monthlyTargets.length - 1]}
 						<div class="grid grid-cols-2 gap-2 border-t pt-2 text-sm font-semibold">
 							<div>Final Target</div>
 							<div
-								class={finalProgress.plan_percentage === 100
+								class={finalTarget.planned_physical_progress === 100
 									? 'text-green-600'
 									: 'text-destructive'}
 							>
-								{finalProgress.plan_percentage}%
+								{finalTarget.planned_physical_progress}%
 							</div>
 						</div>
 					{/if}
@@ -300,13 +281,13 @@
 					</div>
 
 					<!-- Data Rows -->
-					{#each releaseSchedule as schedule, index (schedule.month_year)}
+					{#each monthlyTargets as target, index (target.month_year)}
 						<div class="grid grid-cols-2 items-center gap-2">
-							<div class="text-xs font-medium">{formatMonth(schedule.month_year)}</div>
+							<div class="text-xs font-medium">{formatMonth(target.month_year)}</div>
 							<div>
 								<CurrencyInput
-									id={`budget-${schedule.month_year}`}
-									bind:value={releaseSchedule[index].planned_release}
+									id={`budget-${target.month_year}`}
+									bind:value={monthlyTargets[index].planned_budget}
 									class="h-8 text-sm"
 									placeholder="₱ 0"
 									min={0}
@@ -316,9 +297,9 @@
 					{/each}
 
 					<!-- Summary Row -->
-					{#if releaseSchedule.length > 0}
-						{@const totalReleased = releaseSchedule.reduce(
-							(sum, item) => sum + item.planned_release,
+					{#if monthlyTargets.length > 0}
+						{@const totalReleased = monthlyTargets.reduce(
+							(sum, item) => sum + item.planned_budget,
 							0
 						)}
 						<div class="grid grid-cols-2 gap-2 border-t pt-2 text-sm font-semibold">

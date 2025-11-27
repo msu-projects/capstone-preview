@@ -2,9 +2,8 @@
 // SC CATCH-UP 2025 Project Tracking System
 // Entity-Relationship Diagram (DBML)
 // ============================================
-// This schema uses JSONB columns for embedded data
-// to simplify queries while maintaining relational
-// integrity for core relationships.
+// Normalized schema with proper relational tables
+// for project tracking data.
 // ============================================
 
 Project sc_catchup_2025 {
@@ -133,7 +132,7 @@ Table sitios {
   coordinates_lat decimal(10,8) [not null]
   coordinates_lng decimal(11,8) [not null]
   
-  // JSONB columns for embedded data
+  // JSONB columns for embedded sitio profiling data (kept as JSONB for flexibility)
   coding jsonb [note: '{ number: string, code: string }']
   demographics jsonb [not null, note: '{ male, female, total, age_0_14, age_15_64, age_65_above }']
   social_services jsonb [note: '{ registered_voters, philhealth_beneficiaries, fourps_beneficiaries }']
@@ -174,20 +173,8 @@ Table projects {
   beneficiaries integer [not null, default: 0]
   completion_percentage decimal(5,2) [not null, default: 0]
   project_year integer [not null]
-  
-  // Financial tracking
-  allotment jsonb [note: '{ allocated, supplemental, total, released }']
-  expenditure jsonb [note: '{ obligations, contract_cost }']
-  
-  // Contract & status tracking
-  contract jsonb [note: '{ duration, delivery, extension }']
-  status_summary jsonb [note: '{ stage, issues, recommendations }']
+  implementing_agency varchar(100)
   catch_up_plan text
-  
-  // Other embedded data
-  employment_generated jsonb [note: '{ male: number, female: number }']
-  implementing_agency varchar(50)
-  monthly_physical_progress jsonb [note: 'Array of { month_year, plan_percentage, actual_percentage }']
   
   created_at timestamp [not null, default: `now()`]
   updated_at timestamp
@@ -199,7 +186,7 @@ Table projects {
     (start_date, end_date) [name: 'idx_projects_dates']
   }
   
-  Note: 'Main project entity with financial and status tracking'
+  Note: 'Main project entity - related data normalized into separate tables'
 }
 
 Table users {
@@ -211,7 +198,7 @@ Table users {
   department varchar(100)
   is_active boolean [not null, default: true]
   
-  // JSONB for flexible permissions
+  // JSONB for flexible permissions (kept as JSONB for flexibility)
   permissions jsonb [not null, note: '{ sitios: {read, write, delete}, projects: {...}, users: {...}, audit_logs: {...} }']
   
   last_login timestamp
@@ -255,7 +242,95 @@ Table project_types {
 }
 
 // ============================================
-// PROJECT TRACKING
+// PROJECT FINANCIAL TRACKING (Normalized 1:1)
+// ============================================
+
+Table project_allotments {
+  id integer [pk, increment]
+  project_id integer [not null, ref: > projects.id, unique]
+  allocated decimal(15,2) [not null, default: 0]
+  supplemental decimal(15,2) [not null, default: 0]
+  total decimal(15,2) [not null, default: 0]
+  released decimal(15,2) [not null, default: 0]
+  
+  created_at timestamp [not null, default: `now()`]
+  updated_at timestamp
+  
+  indexes {
+    project_id [name: 'idx_allotments_project']
+  }
+  
+  Note: 'Budget allotment details per project (1:1 relationship)'
+}
+
+Table project_expenditures {
+  id integer [pk, increment]
+  project_id integer [not null, ref: > projects.id, unique]
+  obligations decimal(15,2) [not null, default: 0]
+  contract_cost decimal(15,2) [not null, default: 0]
+  
+  created_at timestamp [not null, default: `now()`]
+  updated_at timestamp
+  
+  indexes {
+    project_id [name: 'idx_expenditures_project']
+  }
+  
+  Note: 'Expenditure tracking per project (1:1 relationship)'
+}
+
+Table project_contracts {
+  id integer [pk, increment]
+  project_id integer [not null, ref: > projects.id, unique]
+  duration varchar(50) [note: 'e.g., "180 CD" for calendar days']
+  delivery varchar(50) [note: 'Delivery timeline']
+  extension_date date [note: 'Extension date if requested']
+  
+  created_at timestamp [not null, default: `now()`]
+  updated_at timestamp
+  
+  indexes {
+    project_id [name: 'idx_contracts_project']
+  }
+  
+  Note: 'Contract details per project (1:1 relationship)'
+}
+
+Table project_status_summaries {
+  id integer [pk, increment]
+  project_id integer [not null, ref: > projects.id, unique]
+  stage varchar(100) [note: 'Current project stage']
+  issues text [note: 'Issues encountered']
+  recommendations text [note: 'Recommended actions']
+  
+  created_at timestamp [not null, default: `now()`]
+  updated_at timestamp
+  
+  indexes {
+    project_id [name: 'idx_status_summaries_project']
+  }
+  
+  Note: 'Status summary per project (1:1 relationship)'
+}
+
+Table project_employment {
+  id integer [pk, increment]
+  project_id integer [not null, ref: > projects.id, unique]
+  male integer [not null, default: 0]
+  female integer [not null, default: 0]
+  
+  created_at timestamp [not null, default: `now()`]
+  updated_at timestamp
+  
+  indexes {
+    project_id [name: 'idx_employment_project']
+  }
+  
+  Note: 'Employment generated per project (1:1 relationship)'
+}
+
+// ============================================
+// PROJECT TRACKING (Many-to-One)
 // ============================================
 
 Table project_sitios {
@@ -274,17 +349,33 @@ Table project_sitios {
   Note: 'Junction table linking projects to sitios (many-to-many)'
 }
 
+Table monthly_targets {
+  id integer [pk, increment]
+  project_id integer [not null, ref: > projects.id]
+  month_year varchar(7) [not null, note: 'Format: YYYY-MM']
+  planned_physical_progress decimal(5,2) [not null, default: 0, note: 'Planned cumulative physical progress %']
+  planned_budget decimal(15,2) [not null, default: 0, note: 'Planned budget release for the month']
+  
+  created_at timestamp [not null, default: `now()`]
+  updated_at timestamp
+  
+  indexes {
+    project_id [name: 'idx_monthly_targets_project']
+    (project_id, month_year) [unique, name: 'idx_monthly_targets_unique']
+  }
+  
+  Note: 'Monthly planned targets for physical progress and budget (planning phase)'
+}
+
 Table monthly_progress {
   id integer [pk, increment]
   project_id integer [not null, ref: > projects.id]
   month_year varchar(7) [not null, note: 'Format: YYYY-MM']
+  physical_progress_percentage decimal(5,2) [not null, default: 0, note: 'Actual physical progress %']
+  budget_utilized decimal(15,2) [not null, default: 0, note: 'Actual budget utilized this month']
   beneficiaries_reached integer [default: 0]
   issues_encountered text
   status progress_status [not null, default: 'on_track']
-  
-  // JSONB for flexible output tracking and photos
-  achieved_outputs jsonb [note: '{ output_key: count, ... } e.g., { seedlings_distributed: 500 }']
-  photo_documentation jsonb [note: 'Array of PhotoDocumentation objects with id, filename, caption, storage_ref, etc.']
   
   created_at timestamp [not null, default: `now()`]
   updated_at timestamp
@@ -295,27 +386,42 @@ Table monthly_progress {
     (project_id, month_year) [unique, name: 'idx_monthly_progress_unique']
   }
   
-  Note: 'Project-level monthly progress tracking with flexible outputs stored as JSONB'
+  Note: 'Actual monthly progress tracking with physical progress and budget utilized'
 }
 
-Table monthly_budget_utilization {
+Table monthly_progress_outputs {
   id integer [pk, increment]
-  project_id integer [not null, ref: > projects.id]
-  month_year varchar(7) [not null, note: 'Format: YYYY-MM']
-  budget_released decimal(15,2) [default: 0]
-  actual_expenses decimal(15,2) [default: 0]
-  obligations decimal(15,2) [default: 0]
-  remaining_balance decimal(15,2) [default: 0]
-  
-  created_at timestamp [not null, default: `now()`]
-  updated_at timestamp
+  monthly_progress_id integer [not null, ref: > monthly_progress.id]
+  output_key varchar(100) [not null, note: 'e.g., seedlings_distributed, training_sessions']
+  count integer [not null, default: 0]
   
   indexes {
-    project_id [name: 'idx_monthly_budget_project']
-    (project_id, month_year) [unique, name: 'idx_monthly_budget_unique']
+    monthly_progress_id [name: 'idx_progress_outputs_progress']
+    (monthly_progress_id, output_key) [unique, name: 'idx_progress_outputs_unique']
   }
   
-  Note: 'Monthly budget utilization tracking per project'
+  Note: 'Achieved outputs per monthly progress record'
+}
+
+Table photo_documentation {
+  id varchar(21) [pk, note: 'nanoid']
+  monthly_progress_id integer [not null, ref: > monthly_progress.id]
+  filename varchar(255) [not null]
+  caption text
+  file_size integer [not null, note: 'Size in bytes']
+  mime_type varchar(50) [not null, note: 'e.g., image/jpeg']
+  width integer [not null]
+  height integer [not null]
+  thumbnail_id varchar(21) [note: 'Reference to thumbnail']
+  storage_type storage_type [not null, default: 'indexeddb']
+  storage_ref varchar(500) [not null, note: 'IndexedDB key OR server URL']
+  uploaded_at timestamp [not null, default: `now()`]
+  
+  indexes {
+    monthly_progress_id [name: 'idx_photos_progress']
+  }
+  
+  Note: 'Photo documentation attached to monthly progress'
 }
 
 Table budget_components {
@@ -348,35 +454,31 @@ Table funding_sources {
   Note: 'Funding sources contributing to each project'
 }
 
-Table monthly_release_schedule {
-  id integer [pk, increment]
-  project_id integer [not null, ref: > projects.id]
-  month_year varchar(7) [not null, note: 'Format: YYYY-MM']
-  planned_release decimal(15,2) [not null, default: 0]
-  actual_release decimal(15,2)
-  milestone_tied varchar(255) [note: 'Associated milestone or deliverable']
-  
-  indexes {
-    project_id [name: 'idx_release_schedule_project']
-    (project_id, month_year) [unique, name: 'idx_release_schedule_unique']
-  }
-  
-  Note: 'Planned and actual budget release schedule per month'
-}
-
 Table sitio_coordinators {
   id integer [pk, increment]
   project_id integer [not null, ref: > projects.id]
   sitio_id integer [not null, ref: > sitios.id]
   barangay_captain varchar(255)
   sitio_leader varchar(255)
-  contact_numbers varchar[] [note: 'Array of contact numbers']
   
   indexes {
     (project_id, sitio_id) [unique, name: 'idx_sitio_coordinators_unique']
   }
   
   Note: 'Coordinator assignments for each project-sitio combination'
+}
+
+Table coordinator_contacts {
+  id integer [pk, increment]
+  sitio_coordinator_id integer [not null, ref: > sitio_coordinators.id]
+  contact_number varchar(20) [not null]
+  is_primary boolean [default: false]
+  
+  indexes {
+    sitio_coordinator_id [name: 'idx_coordinator_contacts_coordinator']
+  }
+  
+  Note: 'Contact numbers for sitio coordinators'
 }
 
 // ============================================
@@ -426,14 +528,24 @@ TableGroup reference_data [color: #9b59b6] {
   project_types
 }
 
-TableGroup project_tracking [color: #2ecc71] {
-  project_sitios
-  monthly_progress
-  monthly_budget_utilization
+TableGroup project_financials [color: #1abc9c] {
+  project_allotments
+  project_expenditures
+  project_contracts
+  project_status_summaries
+  project_employment
   budget_components
   funding_sources
-  monthly_release_schedule
+}
+
+TableGroup project_tracking [color: #2ecc71] {
+  project_sitios
+  monthly_targets
+  monthly_progress
+  monthly_progress_outputs
+  photo_documentation
   sitio_coordinators
+  coordinator_contacts
 }
 
 TableGroup system [color: #e74c3c] {

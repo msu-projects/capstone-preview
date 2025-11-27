@@ -4,8 +4,8 @@ import type {
 	BudgetComponent,
 	CategoryKey,
 	FundingSource,
-	MonthlyBudgetUtilization,
 	MonthlyProgress,
+	MonthlyTarget,
 	PriorityLevel,
 	Project,
 	ProjectSitio,
@@ -374,12 +374,14 @@ const AGENCIES = [
 
 function generateMonthlyProgress(
 	projectId: number,
+	totalBudget: number,
 	startDate: Date,
 	months: number,
 	rng: SeededRandom
 ): MonthlyProgress[] {
 	const progress: MonthlyProgress[] = [];
 	let cumulativeBeneficiaries = 0;
+	const monthlyBudget = Math.floor(totalBudget / months);
 
 	for (let i = 0; i < months; i++) {
 		const date = new Date(startDate);
@@ -389,10 +391,19 @@ function generateMonthlyProgress(
 		const beneficiariesThisMonth = rng.nextInt(10, 50);
 		cumulativeBeneficiaries += beneficiariesThisMonth;
 
+		// Calculate actual progress and budget utilized
+		const progressPercent = Math.min(
+			100,
+			Math.floor(((i + 1) / months) * 100) + rng.nextInt(-5, 5)
+		);
+		const budgetUtilized = Math.floor(monthlyBudget * (0.7 + rng.next() * 0.25));
+
 		progress.push({
 			id: projectId * 100 + i,
 			project_id: projectId,
 			month_year: monthYear,
+			physical_progress_percentage: progressPercent,
+			budget_utilized: budgetUtilized,
 			achieved_outputs: {
 				units_completed: rng.nextInt(1, 10),
 				materials_delivered: rng.nextInt(50, 200),
@@ -400,7 +411,6 @@ function generateMonthlyProgress(
 			},
 			beneficiaries_reached: cumulativeBeneficiaries,
 			issues_encountered: rng.next() > 0.7 ? 'Minor delays due to weather' : undefined,
-			photo_urls: [],
 			status: rng.pick(['on-track', 'delayed', 'ahead'] as const),
 			created_at: date.toISOString(),
 			updated_at: date.toISOString()
@@ -410,41 +420,30 @@ function generateMonthlyProgress(
 	return progress;
 }
 
-function generateMonthlyBudget(
-	projectId: number,
+function generateMonthlyTargets(
 	totalBudget: number,
 	startDate: Date,
-	months: number,
-	rng: SeededRandom
-): MonthlyBudgetUtilization[] {
-	const budget: MonthlyBudgetUtilization[] = [];
-	let remainingBudget = totalBudget;
-	const monthlyRelease = Math.floor(totalBudget / months);
+	months: number
+): MonthlyTarget[] {
+	const targets: MonthlyTarget[] = [];
+	const monthlyBudget = Math.floor(totalBudget / months);
 
 	for (let i = 0; i < months; i++) {
 		const date = new Date(startDate);
 		date.setMonth(date.getMonth() + i);
 		const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 
-		const released = monthlyRelease + rng.nextInt(-10000, 10000);
-		const actualExpenses = Math.floor(released * (0.7 + rng.next() * 0.25));
-		const obligations = Math.floor(released * (0.8 + rng.next() * 0.15));
-		remainingBudget -= actualExpenses;
+		// Generate cumulative planned progress (should reach 100% by final month)
+		const plannedProgress = Math.min(100, Math.floor(((i + 1) / months) * 100));
 
-		budget.push({
-			id: projectId * 100 + i,
-			project_id: projectId,
+		targets.push({
 			month_year: monthYear,
-			budget_released: released,
-			actual_expenses: actualExpenses,
-			obligations,
-			remaining_balance: Math.max(0, remainingBudget),
-			created_at: date.toISOString(),
-			updated_at: date.toISOString()
+			planned_physical_progress: plannedProgress,
+			planned_budget: monthlyBudget
 		});
 	}
 
-	return budget;
+	return targets;
 }
 
 function generateFundingSources(
@@ -676,9 +675,8 @@ export function generateProjects(
 			project_year: year,
 			project_sitios: projectSitios,
 			monthly_progress:
-				monthsElapsed > 0 ? generateMonthlyProgress(i, startDate, monthsElapsed, rng) : [],
-			monthly_budget:
-				monthsElapsed > 0 ? generateMonthlyBudget(i, budget, startDate, monthsElapsed, rng) : [],
+				monthsElapsed > 0 ? generateMonthlyProgress(i, budget, startDate, monthsElapsed, rng) : [],
+			monthly_targets: generateMonthlyTargets(budget, startDate, durationMonths),
 			funding_sources: generateFundingSources(i, budget, rng),
 			budget_components: generateBudgetComponents(i, budget, categoryKey, rng),
 			employment_generated: {

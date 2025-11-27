@@ -7,6 +7,8 @@ import type {
 	AllotmentDetails,
 	ContractDetails,
 	ExpenditureDetails,
+	MonthlyProgress,
+	MonthlyTarget,
 	PhotoDocumentation,
 	Project,
 	StatusSummary
@@ -53,24 +55,21 @@ export function projectToQuickUpdate(project: Project): QuickUpdateFormData {
 
 	// Get latest monthly progress for current beneficiaries
 	const latestMonthlyProgress = project.monthly_progress?.find(
-		(mp) => mp.month_year === currentMonth
+		(mp: MonthlyProgress) => mp.month_year === currentMonth
 	);
 
-	// Get latest budget utilization for current month
-	const latestBudgetUtil = project.monthly_budget?.find((mb) => mb.month_year === currentMonth);
-
-	// Get planned percentage from monthly_physical_progress
-	const monthlyPhysicalProgress = project.monthly_physical_progress?.find(
-		(mp) => mp.month_year === currentMonth
+	// Get planned percentage from monthly_targets
+	const monthlyTarget = project.monthly_targets?.find(
+		(mt: MonthlyTarget) => mt.month_year === currentMonth
 	);
-	const plannedPercentage = monthlyPhysicalProgress?.plan_percentage;
+	const plannedPercentage = monthlyTarget?.planned_physical_progress;
 
-	// Calculate cumulative disbursed amount (sum of all monthly expenses up to current month)
+	// Calculate cumulative disbursed amount (sum of all monthly progress budget_utilized up to current month)
 	const cumulativeDisbursed =
-		project.monthly_budget?.reduce((sum, mb) => {
+		project.monthly_progress?.reduce((sum: number, mp: MonthlyProgress) => {
 			// Only sum expenses up to and including current month
-			if (mb.month_year <= currentMonth) {
-				return sum + (mb.actual_expenses || 0);
+			if (mp.month_year <= currentMonth) {
+				return sum + (mp.budget_utilized || 0);
 			}
 			return sum;
 		}, 0) ||
@@ -79,7 +78,7 @@ export function projectToQuickUpdate(project: Project): QuickUpdateFormData {
 		0;
 
 	// Get THIS month's disbursement only (not cumulative)
-	const monthlyDisbursement = latestBudgetUtil?.actual_expenses || 0;
+	const monthlyDisbursement = latestMonthlyProgress?.budget_utilized || 0;
 
 	return {
 		// Progress & Status
@@ -175,62 +174,22 @@ export function applyQuickUpdateToProject(
 		recommendations: formData.statusRecommendations
 	};
 
-	// Update or create monthly_budget for current month
-	let updatedMonthlyBudget = project.monthly_budget || [];
-	const existingBudgetIndex = updatedMonthlyBudget.findIndex(
-		(mb) => mb.month_year === currentMonth
-	);
-
-	// Calculate cumulative disbursed (sum of all months except current, then add new monthly amount)
-	const previousMonthsTotal = updatedMonthlyBudget
-		.filter((mb) => mb.month_year !== currentMonth && mb.month_year < currentMonth)
-		.reduce((sum, mb) => sum + (mb.actual_expenses || 0), 0);
-
 	const monthlyAmount = Number(formData.monthlyDisbursement || 0);
-	const cumulativeTotal = previousMonthsTotal + monthlyAmount;
-	const remainingBalance = project.budget - cumulativeTotal;
 
-	if (existingBudgetIndex >= 0) {
-		// Update existing record for current month
-		updatedMonthlyBudget = updatedMonthlyBudget.map((mb) =>
-			mb.month_year === currentMonth
-				? {
-						...mb,
-						budget_released: monthlyAmount,
-						actual_expenses: monthlyAmount,
-						obligations: monthlyAmount,
-						remaining_balance: remainingBalance,
-						updated_at: new Date().toISOString()
-					}
-				: mb
-		);
-	} else {
-		// Create new record for current month
-		updatedMonthlyBudget.push({
-			id: Date.now(),
-			project_id: project.id,
-			month_year: currentMonth,
-			budget_released: monthlyAmount,
-			actual_expenses: monthlyAmount,
-			obligations: monthlyAmount,
-			remaining_balance: remainingBalance,
-			created_at: new Date().toISOString(),
-			updated_at: new Date().toISOString()
-		});
-	}
-
-	// Update or create monthly_progress for current month
-	let updatedMonthlyProgress = project.monthly_progress || [];
+	// Update or create monthly_progress for current month (now contains budget_utilized)
+	let updatedMonthlyProgress: MonthlyProgress[] = project.monthly_progress || [];
 	const existingProgressIndex = updatedMonthlyProgress.findIndex(
-		(mp) => mp.month_year === currentMonth
+		(mp: MonthlyProgress) => mp.month_year === currentMonth
 	);
 
 	if (existingProgressIndex >= 0) {
 		// Update existing record
-		updatedMonthlyProgress = updatedMonthlyProgress.map((mp) =>
+		updatedMonthlyProgress = updatedMonthlyProgress.map((mp: MonthlyProgress) =>
 			mp.month_year === currentMonth
 				? {
 						...mp,
+						physical_progress_percentage: actualPct,
+						budget_utilized: monthlyAmount,
 						beneficiaries_reached: Number(formData.currentBeneficiaries || 0),
 						issues_encountered: formData.statusIssues,
 						photo_documentation: formData.photoDocumentation,
@@ -245,10 +204,11 @@ export function applyQuickUpdateToProject(
 			id: Date.now(),
 			project_id: project.id,
 			month_year: currentMonth,
+			physical_progress_percentage: actualPct,
+			budget_utilized: monthlyAmount,
 			achieved_outputs: {},
 			beneficiaries_reached: Number(formData.currentBeneficiaries || 0),
 			issues_encountered: formData.statusIssues,
-			photo_urls: [],
 			photo_documentation: formData.photoDocumentation,
 			status: slippage > 10 ? 'delayed' : slippage < -5 ? 'ahead' : ('on-track' as const),
 			created_at: new Date().toISOString(),
@@ -268,7 +228,6 @@ export function applyQuickUpdateToProject(
 		contract: updatedContract,
 		status_summary: updatedStatusSummary,
 		catch_up_plan: formData.catchUpPlan,
-		monthly_budget: updatedMonthlyBudget,
 		monthly_progress: updatedMonthlyProgress,
 		employment_generated: {
 			male: Number(formData.maleEmployment || 0),
@@ -325,7 +284,6 @@ export function validateQuickUpdateData(formData: QuickUpdateFormData): {
 
 	// Validate beneficiaries
 	const currentBeneficiaries = Number(formData.currentBeneficiaries || 0);
-	const targetBeneficiaries = formData.targetBeneficiaries;
 
 	if (currentBeneficiaries < 0) {
 		errors.push('Current beneficiaries cannot be negative');
