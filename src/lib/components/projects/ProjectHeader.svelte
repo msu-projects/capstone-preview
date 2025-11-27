@@ -1,21 +1,13 @@
 <script lang="ts">
 	import { Badge } from '$lib/components/ui/badge';
 	import type { Project } from '$lib/types';
+	import { formatCurrency } from '$lib/utils/formatters';
 
 	interface Props {
 		project: Project;
 	}
 
 	const { project }: Props = $props();
-
-	function formatCurrency(amount: number): string {
-		return new Intl.NumberFormat('en-PH', {
-			style: 'currency',
-			currency: 'PHP',
-			minimumFractionDigits: 0,
-			maximumFractionDigits: 2
-		}).format(amount);
-	}
 </script>
 
 <!-- Project Header Block -->

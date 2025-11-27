@@ -1,6 +1,7 @@
 <script lang="ts">
 	import * as Card from '$lib/components/ui/card';
 	import type { Project } from '$lib/types';
+	import { formatDate, formatNumber } from '$lib/utils/formatters';
 	import {
 		Activity,
 		Briefcase,
@@ -19,18 +20,6 @@
 	}
 
 	const { project }: Props = $props();
-
-	function formatDate(dateString: string): string {
-		return new Date(dateString).toLocaleDateString('en-US', {
-			year: 'numeric',
-			month: 'short',
-			day: 'numeric'
-		});
-	}
-
-	function formatNumber(num: number): string {
-		return new Intl.NumberFormat('en-US').format(num);
-	}
 
 	// Extract unique municipalities and barangays from project_sitios
 	const uniqueMunicipalities = $derived(

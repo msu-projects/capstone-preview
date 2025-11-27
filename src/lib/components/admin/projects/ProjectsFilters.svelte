@@ -3,6 +3,7 @@
 	import * as Card from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
 	import * as Select from '$lib/components/ui/select';
+	import { getStatusLabel } from '$lib/config/status-config';
 	import type { ProjectStatus } from '$lib/types';
 	import { Search, X } from '@lucide/svelte';
 
@@ -21,21 +22,6 @@
 		categories,
 		onReset
 	}: Props = $props();
-
-	function getStatusLabel(status: ProjectStatus): string {
-		switch (status) {
-			case 'planning':
-				return 'Planning';
-			case 'in-progress':
-				return 'In Progress';
-			case 'completed':
-				return 'Completed';
-			case 'suspended':
-				return 'Suspended';
-			default:
-				return status;
-		}
-	}
 </script>
 
 <Card.Card class="shadow-sm">

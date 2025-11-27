@@ -4,6 +4,7 @@
 	import { Progress } from '$lib/components/ui/progress';
 	import type { Sitio } from '$lib/types';
 	import type { SitioYearlySnapshot } from '$lib/types/sitio-yearly';
+	import { formatNumber } from '$lib/utils/formatters';
 	import {
 		Apple,
 		Bus,
@@ -24,10 +25,6 @@
 	}
 
 	const { sitio, previousSnapshot = null }: Props = $props();
-
-	function formatNumber(num: number): string {
-		return new Intl.NumberFormat('en-US').format(num);
-	}
 
 	// Calculate coverages
 	const philhealthCoverage = $derived(

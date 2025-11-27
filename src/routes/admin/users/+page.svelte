@@ -117,7 +117,8 @@
 		}
 	}
 
-	function formatDate(dateString: string): string {
+	// Custom date format with time for users page
+	function formatDateWithTime(dateString: string): string {
 		return new Date(dateString).toLocaleDateString('en-US', {
 			year: 'numeric',
 			month: 'short',
@@ -386,7 +387,7 @@
 									{/if}
 								</Table.Cell>
 								<Table.Cell class="text-sm text-muted-foreground">
-									{user.last_login ? formatDate(user.last_login) : 'Never'}
+									{user.last_login ? formatDateWithTime(user.last_login) : 'Never'}
 								</Table.Cell>
 								{#if canManageUsers}
 									<Table.Cell class="text-right">

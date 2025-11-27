@@ -4,6 +4,7 @@
 	import * as Card from '$lib/components/ui/card';
 	import type { Project, Sitio } from '$lib/types';
 	import type { SitioYearlySnapshot } from '$lib/types/sitio-yearly';
+	import { formatCurrency, formatNumber } from '$lib/utils/formatters';
 	import {
 		ArrowUpRight,
 		Building2,
@@ -26,18 +27,6 @@
 	}
 
 	const { sitio, relatedProjects, previousSnapshot = null }: Props = $props();
-
-	function formatNumber(num: number): string {
-		return new Intl.NumberFormat('en-US').format(num);
-	}
-
-	function formatCurrency(amount: number): string {
-		return new Intl.NumberFormat('en-PH', {
-			style: 'currency',
-			currency: 'PHP',
-			minimumFractionDigits: 0
-		}).format(amount);
-	}
 
 	// Calculate key metrics
 	const philhealthCoverage = $derived(

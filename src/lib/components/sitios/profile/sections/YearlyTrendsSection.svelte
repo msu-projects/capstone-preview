@@ -4,6 +4,7 @@
 	import * as Card from '$lib/components/ui/card';
 	import type { SitioYearlySnapshot, YearlyComparison } from '$lib/types/sitio-yearly';
 	import { getKeyMetricsComparison } from '$lib/types/sitio-yearly';
+	import { formatNumber } from '$lib/utils/formatters';
 	import {
 		ArrowDown,
 		ArrowUp,
@@ -20,10 +21,6 @@
 	}
 
 	const { snapshots, currentYear }: Props = $props();
-
-	function formatNumber(num: number): string {
-		return new Intl.NumberFormat('en-US').format(num);
-	}
 
 	// Get the current and previous year snapshots
 	const currentSnapshot = $derived(snapshots.find((s) => s.year === currentYear));

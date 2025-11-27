@@ -2,6 +2,7 @@
 	import BarChart from '$lib/components/charts/BarChart.svelte';
 	import DonutChart from '$lib/components/charts/DonutChart.svelte';
 	import { Progress } from '$lib/components/ui/progress';
+	import { formatNumber } from '$lib/utils/formatters';
 	import { Home, MapPin, Users } from '@lucide/svelte';
 
 	interface ChartData {
@@ -37,10 +38,6 @@
 		sitiosByMunicipality,
 		populationByMunicipality
 	}: Props = $props();
-
-	function formatNumber(num: number): string {
-		return new Intl.NumberFormat('en-US').format(num);
-	}
 </script>
 
 <!-- Sitio Quick Stats -->
@@ -117,7 +114,12 @@
 	<!-- Population by Municipality -->
 	<div class="rounded-lg border bg-card p-4">
 		<h3 class="mb-4 text-lg font-semibold">Population by Municipality</h3>
-		<BarChart data={populationByMunicipality} orientation="vertical" height={280} title="Population" />
+		<BarChart
+			data={populationByMunicipality}
+			orientation="vertical"
+			height={280}
+			title="Population"
+		/>
 	</div>
 
 	<!-- Social Services Summary -->

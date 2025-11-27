@@ -2,6 +2,7 @@
 	import * as Card from '$lib/components/ui/card';
 	import { Skeleton } from '$lib/components/ui/skeleton';
 	import type { Stats } from '$lib/types';
+	import { formatNumber } from '$lib/utils/formatters';
 	import { Activity, Banknote, CircleCheckBig, MapPin, TrendingUp, Users } from '@lucide/svelte';
 
 	interface Props {
@@ -11,11 +12,8 @@
 
 	let { stats, isLoading = false }: Props = $props();
 
-	function formatNumber(num: number): string {
-		return new Intl.NumberFormat('en-US').format(num);
-	}
-
-	function formatCurrency(num: number): string {
+	// Compact currency format for dashboard
+	function formatCompactCurrency(num: number): string {
 		return new Intl.NumberFormat('en-PH', {
 			style: 'currency',
 			currency: 'PHP',
@@ -118,7 +116,7 @@
 				</div>
 			</Card.CardHeader>
 			<Card.CardContent>
-				<div class="text-3xl font-bold">{formatCurrency(stats.total_budget)}</div>
+				<div class="text-3xl font-bold">{formatCompactCurrency(stats.total_budget)}</div>
 				<p class="mt-1 text-xs text-muted-foreground">Allocated funds</p>
 			</Card.CardContent>
 		</Card.Card>

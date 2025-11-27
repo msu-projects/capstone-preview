@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';
+	import { formatCurrency } from '$lib/utils/formatters';
 	import {
 		Activity,
 		AlertTriangle,
@@ -30,14 +31,6 @@
 	}
 
 	const { monthlyMonitoring, onReportClick }: Props = $props();
-
-	function formatCurrency(amount: number): string {
-		return new Intl.NumberFormat('en-PH', {
-			style: 'currency',
-			currency: 'PHP',
-			minimumFractionDigits: 0
-		}).format(amount);
-	}
 
 	function getStatusColor(status: string): string {
 		switch (status) {

@@ -6,7 +6,14 @@
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { Progress } from '$lib/components/ui/progress';
 	import * as Table from '$lib/components/ui/table';
-	import type { Project, ProjectStatus } from '$lib/types';
+	import { getStatusBadgeVariant, getStatusLabel } from '$lib/config/status-config';
+	import type { Project } from '$lib/types';
+	import {
+		formatCurrency,
+		formatDate,
+		formatRelativeTime,
+		truncateText
+	} from '$lib/utils/formatters';
 	import {
 		ArrowDownUp,
 		Download,
@@ -44,71 +51,6 @@
 		onDownloadPDF,
 		onQuickEdit
 	}: Props = $props();
-
-	function formatCurrency(amount: number): string {
-		return new Intl.NumberFormat('en-PH', {
-			style: 'currency',
-			currency: 'PHP',
-			minimumFractionDigits: 0
-		}).format(amount);
-	}
-
-	function getStatusBadgeVariant(status: ProjectStatus) {
-		switch (status) {
-			case 'planning':
-				return 'secondary' as const;
-			case 'in-progress':
-				return 'outline' as const;
-			case 'completed':
-				return 'default' as const;
-			case 'suspended':
-				return 'destructive' as const;
-			default:
-				return 'default' as const;
-		}
-	}
-
-	function getStatusLabel(status: ProjectStatus): string {
-		switch (status) {
-			case 'planning':
-				return 'Planning';
-			case 'in-progress':
-				return 'In Progress';
-			case 'completed':
-				return 'Completed';
-			case 'suspended':
-				return 'Suspended';
-			default:
-				return status;
-		}
-	}
-
-	function truncateText(text: string, maxLength: number): string {
-		return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
-	}
-
-	function formatDate(dateString: string): string {
-		const date = new Date(dateString);
-		return new Intl.DateTimeFormat('en-PH', {
-			year: 'numeric',
-			month: 'short',
-			day: 'numeric'
-		}).format(date);
-	}
-
-	function formatRelativeTime(dateString: string): string {
-		const date = new Date(dateString);
-		const now = new Date();
-		const diffInMs = now.getTime() - date.getTime();
-		const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
-
-		if (diffInDays === 0) return 'Today';
-		if (diffInDays === 1) return 'Yesterday';
-		if (diffInDays < 7) return `${diffInDays} days ago`;
-		if (diffInDays < 30) return `${Math.floor(diffInDays / 7)} weeks ago`;
-		if (diffInDays < 365) return `${Math.floor(diffInDays / 30)} months ago`;
-		return `${Math.floor(diffInDays / 365)} years ago`;
-	}
 </script>
 
 <Card.Card class="gap-4 shadow-sm">

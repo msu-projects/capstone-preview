@@ -4,28 +4,6 @@ import { loadUsers } from '$lib/utils/user-storage';
 
 const AUTH_SESSION_KEY = 'sccdp_auth_session';
 
-// Default permissions for each role
-export const DEFAULT_PERMISSIONS: Record<string, UserPermissions> = {
-	superadmin: {
-		sitios: { read: true, write: true, delete: true },
-		projects: { read: true, write: true, delete: true },
-		users: { read: true, write: true, delete: true },
-		audit_logs: { read: true, write: true, delete: true }
-	},
-	admin: {
-		sitios: { read: true, write: true, delete: false },
-		projects: { read: true, write: true, delete: false },
-		users: { read: true, write: false, delete: false },
-		audit_logs: { read: true, write: false, delete: false }
-	},
-	viewer: {
-		sitios: { read: true, write: false, delete: false },
-		projects: { read: true, write: false, delete: false },
-		users: { read: false, write: false, delete: false },
-		audit_logs: { read: false, write: false, delete: false }
-	}
-};
-
 // Auth state using Svelte 5 runes
 let currentUser = $state<User | null>(null);
 
@@ -159,3 +137,6 @@ export const authStore = {
 	canPerform,
 	logAction
 };
+
+// Re-export DEFAULT_PERMISSIONS for backwards compatibility
+export { DEFAULT_PERMISSIONS } from '$lib/utils/user-storage';

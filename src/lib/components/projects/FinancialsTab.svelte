@@ -2,6 +2,7 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';
 	import type { Project } from '$lib/types';
+	import { formatCurrency } from '$lib/utils/formatters';
 	import { Banknote, PieChart, PiggyBank, TrendingUp, Wallet } from '@lucide/svelte';
 
 	interface Props {
@@ -9,14 +10,6 @@
 	}
 
 	const { project }: Props = $props();
-
-	function formatCurrency(amount: number): string {
-		return new Intl.NumberFormat('en-PH', {
-			style: 'currency',
-			currency: 'PHP',
-			minimumFractionDigits: 0
-		}).format(amount);
-	}
 
 	// Calculate financial metrics
 	const utilized = $derived(project.budget * 0.45);

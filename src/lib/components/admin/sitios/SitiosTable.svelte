@@ -1,9 +1,11 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import * as Table from '$lib/components/ui/table';
 	import type { Sitio } from '$lib/types';
+	import { formatNumber } from '$lib/utils/formatters';
 	import {
 		ArrowDownUp,
 		Download,
@@ -13,7 +15,6 @@
 		SquarePen,
 		Trash2
 	} from '@lucide/svelte';
-	import { goto } from '$app/navigation';
 
 	interface Props {
 		sitios: Sitio[];
@@ -45,10 +46,6 @@
 		onDownloadPDF,
 		onEdit
 	}: Props = $props();
-
-	function formatNumber(num: number | undefined): string {
-		return num ? num.toLocaleString() : '-';
-	}
 </script>
 
 <Card.Card class="gap-4 shadow-sm">

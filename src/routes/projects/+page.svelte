@@ -5,8 +5,10 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Progress } from '$lib/components/ui/progress';
 	import * as Select from '$lib/components/ui/select';
+	import { getStatusBadgeVariant, getStatusLabel } from '$lib/config/status-config';
 	import { projects } from '$lib/mock-data';
 	import type { ProjectStatus } from '$lib/types';
+	import { formatCurrency } from '$lib/utils/formatters';
 	import { Eye, Search, X } from '@lucide/svelte';
 
 	// State
@@ -46,45 +48,6 @@
 	});
 
 	const totalPages = $derived(Math.ceil(filteredProjects.length / itemsPerPage));
-
-	// Helper functions
-	function formatCurrency(amount: number): string {
-		return new Intl.NumberFormat('en-PH', {
-			style: 'currency',
-			currency: 'PHP',
-			minimumFractionDigits: 0
-		}).format(amount);
-	}
-
-	function getStatusBadgeVariant(status: ProjectStatus) {
-		switch (status) {
-			case 'planning':
-				return 'secondary' as const;
-			case 'in-progress':
-				return 'outline' as const;
-			case 'completed':
-				return 'default' as const;
-			case 'suspended':
-				return 'destructive' as const;
-			default:
-				return 'default' as const;
-		}
-	}
-
-	function getStatusLabel(status: ProjectStatus): string {
-		switch (status) {
-			case 'planning':
-				return 'Planning';
-			case 'in-progress':
-				return 'In Progress';
-			case 'completed':
-				return 'Completed';
-			case 'suspended':
-				return 'Suspended';
-			default:
-				return status;
-		}
-	}
 
 	function resetFilters() {
 		searchQuery = '';

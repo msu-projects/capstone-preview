@@ -1,5 +1,6 @@
 <script lang="ts">
 	import DonutChart from '$lib/components/charts/DonutChart.svelte';
+	import { formatNumber } from '$lib/utils/formatters';
 
 	interface ChartData {
 		label: string;
@@ -20,10 +21,6 @@
 	}
 
 	let { employmentChartData, employmentByCategory, totalEmployment }: Props = $props();
-
-	function formatNumber(num: number): string {
-		return new Intl.NumberFormat('en-US').format(num);
-	}
 </script>
 
 <div class="grid gap-6 lg:grid-cols-2">

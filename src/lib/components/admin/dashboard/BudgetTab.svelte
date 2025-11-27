@@ -15,7 +15,8 @@
 
 	let { topBudgetCategories, totalBudget }: Props = $props();
 
-	function formatCurrency(num: number): string {
+	// Compact currency format for charts
+	function formatCompactCurrency(num: number): string {
 		return new Intl.NumberFormat('en-PH', {
 			style: 'currency',
 			currency: 'PHP',
@@ -32,7 +33,7 @@
 		<DonutChart
 			data={topBudgetCategories}
 			centerLabel="Total Budget"
-			centerValue={formatCurrency(totalBudget)}
+			centerValue={formatCompactCurrency(totalBudget)}
 			height={300}
 		/>
 	</div>
@@ -48,7 +49,7 @@
 							<div class="size-3 rounded-full" style="background-color: {cat.color}"></div>
 							<span class="font-medium">{cat.label}</span>
 						</div>
-						<span class="font-semibold">{formatCurrency(cat.value)}</span>
+						<span class="font-semibold">{formatCompactCurrency(cat.value)}</span>
 					</div>
 					<Progress value={(cat.value / totalBudget) * 100} class="h-2" />
 				</div>

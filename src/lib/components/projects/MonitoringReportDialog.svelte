@@ -1,5 +1,6 @@
 <script lang="ts">
 	import * as Dialog from '$lib/components/ui/dialog';
+	import { formatCurrency } from '$lib/utils/formatters';
 	import {
 		Activity,
 		Banknote,
@@ -30,14 +31,6 @@
 	}
 
 	let { open = $bindable(), selectedReport }: Props = $props();
-
-	function formatCurrency(amount: number): string {
-		return new Intl.NumberFormat('en-PH', {
-			style: 'currency',
-			currency: 'PHP',
-			minimumFractionDigits: 0
-		}).format(amount);
-	}
 
 	function getStatusColor(status: string): string {
 		switch (status) {

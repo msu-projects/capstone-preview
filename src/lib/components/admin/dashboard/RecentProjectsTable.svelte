@@ -5,7 +5,9 @@
 	import { Progress } from '$lib/components/ui/progress';
 	import { Skeleton } from '$lib/components/ui/skeleton';
 	import * as Table from '$lib/components/ui/table';
-	import type { Project, ProjectStatus } from '$lib/types';
+	import { getStatusBadgeVariant, getStatusLabel } from '$lib/config/status-config';
+	import type { Project } from '$lib/types';
+	import { truncateText } from '$lib/utils/formatters';
 	import { ArrowRight } from '@lucide/svelte';
 
 	interface Props {
@@ -14,40 +16,6 @@
 	}
 
 	let { projects, isLoading = false }: Props = $props();
-
-	function truncateText(text: string, maxLength: number): string {
-		return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
-	}
-
-	function getStatusBadgeVariant(status: ProjectStatus) {
-		switch (status) {
-			case 'planning':
-				return 'secondary' as const;
-			case 'in-progress':
-				return 'outline' as const;
-			case 'completed':
-				return 'default' as const;
-			case 'suspended':
-				return 'destructive' as const;
-			default:
-				return 'default' as const;
-		}
-	}
-
-	function getStatusLabel(status: ProjectStatus): string {
-		switch (status) {
-			case 'planning':
-				return 'Planning';
-			case 'in-progress':
-				return 'In Progress';
-			case 'completed':
-				return 'Completed';
-			case 'suspended':
-				return 'Suspended';
-			default:
-				return status;
-		}
-	}
 </script>
 
 <Card.Card class="shadow-sm lg:col-span-2">

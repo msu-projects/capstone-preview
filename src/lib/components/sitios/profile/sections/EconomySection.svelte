@@ -5,6 +5,7 @@
 	import * as Card from '$lib/components/ui/card';
 	import type { Sitio } from '$lib/types';
 	import type { SitioYearlySnapshot } from '$lib/types/sitio-yearly';
+	import { formatNumber } from '$lib/utils/formatters';
 	import { Banknote, Beef, Briefcase, Leaf, Sprout, TrendingUp, Wheat } from '@lucide/svelte';
 
 	interface Props {
@@ -13,10 +14,6 @@
 	}
 
 	const { sitio, previousSnapshot = null }: Props = $props();
-
-	function formatNumber(num: number): string {
-		return new Intl.NumberFormat('en-US').format(num);
-	}
 
 	// Employment types data for chart
 	const employmentData = $derived(

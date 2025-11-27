@@ -3,7 +3,9 @@
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import { Progress } from '$lib/components/ui/progress';
+	import { getStatusConfig as getProjectStatusConfig } from '$lib/config/status-config';
 	import type { Project, Sitio } from '$lib/types';
+	import { formatCurrency, formatDate, formatNumber } from '$lib/utils/formatters';
 	import {
 		ArrowUpRight,
 		Banknote,
@@ -23,26 +25,6 @@
 	}
 
 	const { sitio, relatedProjects, isAdminView = false }: Props = $props();
-
-	function formatNumber(num: number): string {
-		return new Intl.NumberFormat('en-US').format(num);
-	}
-
-	function formatCurrency(amount: number): string {
-		return new Intl.NumberFormat('en-PH', {
-			style: 'currency',
-			currency: 'PHP',
-			minimumFractionDigits: 0
-		}).format(amount);
-	}
-
-	function formatDate(dateString: string): string {
-		return new Date(dateString).toLocaleDateString('en-US', {
-			month: 'short',
-			day: 'numeric',
-			year: 'numeric'
-		});
-	}
 
 	// Project statistics
 	const totalBudget = $derived(relatedProjects.reduce((sum, p) => sum + p.budget, 0));
@@ -66,46 +48,6 @@
 					relatedProjects.length
 			: 0
 	);
-
-	function getStatusConfig(status: string) {
-		switch (status) {
-			case 'in-progress':
-				return {
-					label: 'In Progress',
-					variant: 'default' as const,
-					bgColor: 'bg-blue-100',
-					textColor: 'text-blue-700'
-				};
-			case 'completed':
-				return {
-					label: 'Completed',
-					variant: 'default' as const,
-					bgColor: 'bg-emerald-100',
-					textColor: 'text-emerald-700'
-				};
-			case 'planning':
-				return {
-					label: 'Planning',
-					variant: 'secondary' as const,
-					bgColor: 'bg-slate-100',
-					textColor: 'text-slate-700'
-				};
-			case 'suspended':
-				return {
-					label: 'Suspended',
-					variant: 'destructive' as const,
-					bgColor: 'bg-red-100',
-					textColor: 'text-red-700'
-				};
-			default:
-				return {
-					label: status,
-					variant: 'outline' as const,
-					bgColor: 'bg-slate-100',
-					textColor: 'text-slate-700'
-				};
-		}
-	}
 
 	function getStatusIcon(status: string) {
 		switch (status) {
@@ -296,7 +238,7 @@
 			<Card.Content class="p-0">
 				<div class="divide-y divide-slate-100">
 					{#each relatedProjects as project}
-						{@const statusConfig = getStatusConfig(project.status)}
+						{@const statusConfig = getProjectStatusConfig(project.status)}
 						{@const StatusIcon = getStatusIcon(project.status)}
 						<div class="group p-4 transition-colors hover:bg-slate-50/50 sm:p-5">
 							<div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
