@@ -155,7 +155,7 @@
 					{#each tabs as tab}
 						<Tabs.Trigger
 							value={tab.id}
-							class="inline-flex shrink-0 items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-slate-600 transition-all hover:bg-slate-50 hover:text-slate-900 data-[state=active]:bg-slate-900 data-[state=active]:text-white data-[state=active]:shadow-sm"
+							class="inline-flex shrink-0 items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-slate-600 transition-all hover:bg-slate-50 hover:text-slate-900 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-sm"
 						>
 							<tab.icon class="size-4" />
 							<span class="hidden sm:inline">{tab.label}</span>

@@ -142,6 +142,9 @@
 				class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50"
 			>
 				<div
+					class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full {metric.bgColor} opacity-50"
+				></div>
+				<div
 					class="absolute inset-0 {metric.bgColor} opacity-0 transition-opacity group-hover:opacity-30"
 				></div>
 				<Card.Content class="relative p-4 sm:p-5">
