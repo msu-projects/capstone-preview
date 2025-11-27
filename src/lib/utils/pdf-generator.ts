@@ -31,7 +31,8 @@ export function generateProjectMonitoringPDF(projects: Project[], quarter: strin
 
 	// Helper to calculate slippage from monthly progress
 	const getPhysicalProgress = (project: Project) => {
-		const latestProgress = project.monthly_physical_progress?.[project.monthly_physical_progress.length - 1];
+		const latestProgress =
+			project.monthly_physical_progress?.[project.monthly_physical_progress.length - 1];
 		const plan = latestProgress?.plan_percentage ?? 0;
 		const actual = project.completion_percentage;
 		return { plan, actual, slippage: plan - actual };
@@ -41,10 +42,19 @@ export function generateProjectMonitoringPDF(projects: Project[], quarter: strin
 	const projectRows = projects
 		.filter((project) => project.allotment !== undefined || project.budget > 0)
 		.map((project) => {
-			const allotment = project.allotment ?? { allocated: project.budget, supplemental: 0, total: project.budget, released: 0 };
+			const allotment = project.allotment ?? {
+				allocated: project.budget,
+				supplemental: 0,
+				total: project.budget,
+				released: 0
+			};
 			const expenditure = project.expenditure ?? { obligations: 0, contract_cost: project.budget };
 			const contract = project.contract ?? { duration: '', delivery: '', extension: undefined };
-			const statusSummary = project.status_summary ?? { stage: '', issues: '', recommendations: '' };
+			const statusSummary = project.status_summary ?? {
+				stage: '',
+				issues: '',
+				recommendations: ''
+			};
 			const employment = project.employment_generated ?? { male: 0, female: 0 };
 			const municipalities = project.project_sitios?.map((s) => s.municipality).join(', ') || 'N/A';
 			const physical = getPhysicalProgress(project);

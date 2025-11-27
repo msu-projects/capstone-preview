@@ -197,10 +197,7 @@
 										{project.completion_percentage.toFixed(0)}%
 									</span>
 								</div>
-								<Progress
-									value={Math.min(100, project.completion_percentage)}
-									class="h-2"
-								/>
+								<Progress value={Math.min(100, project.completion_percentage)} class="h-2" />
 							</div>
 						</Card.CardContent>
 

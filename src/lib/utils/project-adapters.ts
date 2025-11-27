@@ -3,7 +3,14 @@
  * and form structures for UI interaction
  */
 
-import type { PhotoDocumentation, Project, AllotmentDetails, ExpenditureDetails, ContractDetails, StatusSummary } from '$lib/types';
+import type {
+	AllotmentDetails,
+	ContractDetails,
+	ExpenditureDetails,
+	PhotoDocumentation,
+	Project,
+	StatusSummary
+} from '$lib/types';
 import { getCurrentMonth } from './project-calculations';
 
 /**

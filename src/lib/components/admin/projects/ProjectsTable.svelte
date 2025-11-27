@@ -166,10 +166,7 @@
 								<!-- Progress -->
 								<Table.TableCell>
 									<div class="flex items-center gap-2">
-										<Progress
-											value={Math.min(100, project.completion_percentage)}
-											class="w-full"
-										/>
+										<Progress value={Math.min(100, project.completion_percentage)} class="w-full" />
 										<span class="min-w-10 text-xs text-muted-foreground">
 											{project.completion_percentage.toFixed(0)}%
 										</span>
