@@ -23,10 +23,7 @@ export interface Sitio {
 	};
 
 	// Coding information
-	coding?: {
-		number: string;
-		code: string;
-	};
+	coding?: string;
 
 	// Demographics
 	demographics: {

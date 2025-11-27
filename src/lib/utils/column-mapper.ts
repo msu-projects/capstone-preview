@@ -6,8 +6,7 @@ import type { ColumnMapping, ImportedRow, Sitio } from '$lib/types';
  */
 export const SITIO_FIELD_DEFINITIONS = [
 	// Core identification
-	{ field: 'coding.number', label: 'Record Number', csvHeader: 'NO.', required: false },
-	{ field: 'coding.code', label: 'Coding', csvHeader: 'CODING', required: false },
+	{ field: 'coding', label: 'Coding', csvHeader: 'CODING', required: false },
 	{
 		field: 'municipality',
 		label: 'Municipality',

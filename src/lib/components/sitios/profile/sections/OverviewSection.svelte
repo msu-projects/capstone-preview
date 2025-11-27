@@ -216,13 +216,13 @@
 							<div class="mt-1 text-base font-semibold text-slate-900">{sitio.province}</div>
 						</div>
 					{/if}
-					{#if sitio.coding?.code}
+					{#if sitio.coding}
 						<div class="rounded-lg bg-slate-50 p-3">
 							<div class="text-xs font-medium tracking-wider text-slate-400 uppercase">
 								Sitio Code
 							</div>
 							<div class="mt-1 font-mono text-base font-semibold text-slate-900">
-								{sitio.coding.code}
+								{sitio.coding}
 							</div>
 						</div>
 					{/if}

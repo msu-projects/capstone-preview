@@ -44,7 +44,7 @@
 	let population = $state(0);
 	let households = $state(0);
 	let coordinates = $state({ lat: 0, lng: 0 });
-	let coding = $state({ number: '', code: '' });
+	let coding = $state('');
 
 	// Tab 2: Demographics
 	let demographics = $state({
@@ -180,7 +180,7 @@
 		population = sitio.population || 0;
 		households = sitio.households || 0;
 		coordinates = sitio.coordinates || { lat: 0, lng: 0 };
-		coding = sitio.coding || { number: '', code: '' };
+		coding = sitio.coding || '';
 
 		demographics = {
 			male: sitio.demographics?.male || 0,

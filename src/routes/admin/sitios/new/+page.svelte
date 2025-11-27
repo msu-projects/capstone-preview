@@ -39,7 +39,7 @@
 	let population = $state(0);
 	let households = $state(0);
 	let coordinates = $state({ lat: 0, lng: 0 });
-	let coding = $state({ number: '', code: '' });
+	let coding = $state('');
 
 	// Tab 2: Demographics
 	let demographics = $state({

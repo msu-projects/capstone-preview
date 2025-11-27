@@ -17,7 +17,7 @@
 		population = $bindable(0),
 		households = $bindable(0),
 		coordinates = $bindable({ lat: 0, lng: 0 }),
-		coding = $bindable({ number: '', code: '' }),
+		coding = $bindable(''),
 		demographicsTotal = 0
 	}: {
 		municipality: string;
@@ -27,7 +27,7 @@
 		population: number;
 		households: number;
 		coordinates: { lat: number; lng: number };
-		coding: { number: string; code: string };
+		coding: string;
 		demographicsTotal?: number;
 	} = $props();
 
@@ -206,8 +206,8 @@
 			</div> -->
 
 			<div class="space-y-2">
-				<Label for="coding_code">Coding Code</Label>
-				<Input id="coding_code" bind:value={coding.code} placeholder="Enter coding code" />
+				<Label for="coding">Coding</Label>
+				<Input id="coding" bind:value={coding} placeholder="Enter sitio coding" />
 			</div>
 
 			<!-- Population -->

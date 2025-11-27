@@ -127,13 +127,34 @@ Table sitios {
   id integer [pk, increment]
   name varchar(255) [not null]
   barangay_id integer [not null, ref: > barangays.id]
-  population integer [not null, default: 0]
-  households integer [not null, default: 0]
   coordinates_lat decimal(10,8) [not null]
   coordinates_lng decimal(11,8) [not null]
+  coding varchar(50) [note: 'Sitio code identifier']
   
-  // JSONB columns for embedded sitio profiling data (kept as JSONB for flexibility)
-  coding jsonb [note: '{ number: string, code: string }']
+  created_at timestamp [not null, default: `now()`]
+  updated_at timestamp
+  
+  indexes {
+    barangay_id [name: 'idx_sitios_barangay']
+    name [name: 'idx_sitios_name']
+    (barangay_id, name) [unique, name: 'idx_sitios_unique_name']
+  }
+  
+  Note: 'Core sitio (community) entity - contains only identification and location data'
+}
+
+Table sitio_data {
+  id integer [pk, increment]
+  sitio_id integer [not null, ref: > sitios.id]
+  year integer [not null, note: 'Year this data was recorded']
+  is_current boolean [not null, default: false, note: 'Whether this is the current/active data for the sitio']
+  recorded_at timestamp [not null, default: `now()`]
+  
+  // Core metrics
+  population integer [not null, default: 0]
+  households integer [not null, default: 0]
+  
+  // JSONB columns for embedded profiling data
   demographics jsonb [not null, note: '{ male, female, total, age_0_14, age_15_64, age_65_above }']
   social_services jsonb [note: '{ registered_voters, philhealth_beneficiaries, fourps_beneficiaries }']
   economic_condition jsonb [note: '{ employments: [{type, count}], income_brackets: [{bracket, households}] }']
@@ -146,35 +167,36 @@ Table sitios {
   community_empowerment jsonb [note: '{ sectoral_organizations, info_dissemination_methods[], transportation_methods[] }']
   utilities jsonb [note: '{ households_with_electricity, alternative_electricity_sources[] }']
   
-  created_at timestamp [not null, default: `now()`]
-  updated_at timestamp
-  
   indexes {
-    barangay_id [name: 'idx_sitios_barangay']
-    name [name: 'idx_sitios_name']
-    (barangay_id, name) [unique, name: 'idx_sitios_unique_name']
+    sitio_id [name: 'idx_sitio_data_sitio']
+    year [name: 'idx_sitio_data_year']
+    is_current [name: 'idx_sitio_data_current']
+    (sitio_id, year) [unique, name: 'idx_sitio_data_unique']
   }
   
-  Note: 'Core sitio (community) entity with comprehensive profiling data stored as JSONB'
+  Note: 'Sitio profiling data with year-over-year tracking. is_current=true indicates the active data for the sitio.'
 }
 
 Table projects {
   id integer [pk, increment]
   title varchar(500) [not null]
   description text
-  category varchar(100) [not null, note: 'Display name of category']
-  category_key category_key [note: 'FK to categories.key']
+  category_key category_key [not null, note: 'FK to categories.key']
   project_type_id integer [ref: > project_types.id]
-  project_type_name varchar(255) [note: 'Denormalized for quick access']
   status project_status [not null, default: 'planning']
   start_date date [not null]
-  end_date date [not null]
-  budget decimal(15,2) [not null, default: 0]
+  contract_duration varchar(50) [note: 'e.g., "180 CD" for calendar days']
+  total_budget decimal(15,2) [not null, default: 0]
+  contract_cost decimal(15,2) [not null, default: 0]
   beneficiaries integer [not null, default: 0]
-  completion_percentage decimal(5,2) [not null, default: 0]
   project_year integer [not null]
-  implementing_agency varchar(100)
+  
+  // Status tracking
+  issues text [note: 'Issues encountered']
+  recommendations text [note: 'Recommended actions']
   catch_up_plan text
+  
+  implementing_agency varchar(100)
   
   created_at timestamp [not null, default: `now()`]
   updated_at timestamp
@@ -183,7 +205,7 @@ Table projects {
     status [name: 'idx_projects_status']
     category_key [name: 'idx_projects_category']
     project_year [name: 'idx_projects_year']
-    (start_date, end_date) [name: 'idx_projects_dates']
+    start_date [name: 'idx_projects_start_date']
   }
   
   Note: 'Main project entity - related data normalized into separate tables'
@@ -244,74 +266,6 @@ Table project_types {
 // ============================================
 // PROJECT FINANCIAL TRACKING (Normalized 1:1)
 // ============================================
-
-Table project_allotments {
-  id integer [pk, increment]
-  project_id integer [not null, ref: > projects.id, unique]
-  allocated decimal(15,2) [not null, default: 0]
-  supplemental decimal(15,2) [not null, default: 0]
-  total decimal(15,2) [not null, default: 0]
-  released decimal(15,2) [not null, default: 0]
-  
-  created_at timestamp [not null, default: `now()`]
-  updated_at timestamp
-  
-  indexes {
-    project_id [name: 'idx_allotments_project']
-  }
-  
-  Note: 'Budget allotment details per project (1:1 relationship)'
-}
-
-Table project_expenditures {
-  id integer [pk, increment]
-  project_id integer [not null, ref: > projects.id, unique]
-  obligations decimal(15,2) [not null, default: 0]
-  contract_cost decimal(15,2) [not null, default: 0]
-  
-  created_at timestamp [not null, default: `now()`]
-  updated_at timestamp
-  
-  indexes {
-    project_id [name: 'idx_expenditures_project']
-  }
-  
-  Note: 'Expenditure tracking per project (1:1 relationship)'
-}
-
-Table project_contracts {
-  id integer [pk, increment]
-  project_id integer [not null, ref: > projects.id, unique]
-  duration varchar(50) [note: 'e.g., "180 CD" for calendar days']
-  delivery varchar(50) [note: 'Delivery timeline']
-  extension_date date [note: 'Extension date if requested']
-  
-  created_at timestamp [not null, default: `now()`]
-  updated_at timestamp
-  
-  indexes {
-    project_id [name: 'idx_contracts_project']
-  }
-  
-  Note: 'Contract details per project (1:1 relationship)'
-}
-
-Table project_status_summaries {
-  id integer [pk, increment]
-  project_id integer [not null, ref: > projects.id, unique]
-  stage varchar(100) [note: 'Current project stage']
-  issues text [note: 'Issues encountered']
-  recommendations text [note: 'Recommended actions']
-  
-  created_at timestamp [not null, default: `now()`]
-  updated_at timestamp
-  
-  indexes {
-    project_id [name: 'idx_status_summaries_project']
-  }
-  
-  Note: 'Status summary per project (1:1 relationship)'
-}
 
 Table project_employment {
   id integer [pk, increment]
@@ -387,20 +341,6 @@ Table monthly_progress {
   }
   
   Note: 'Actual monthly progress tracking with physical progress and budget utilized'
-}
-
-Table monthly_progress_outputs {
-  id integer [pk, increment]
-  monthly_progress_id integer [not null, ref: > monthly_progress.id]
-  output_key varchar(100) [not null, note: 'e.g., seedlings_distributed, training_sessions']
-  count integer [not null, default: 0]
-  
-  indexes {
-    monthly_progress_id [name: 'idx_progress_outputs_progress']
-    (monthly_progress_id, output_key) [unique, name: 'idx_progress_outputs_unique']
-  }
-  
-  Note: 'Achieved outputs per monthly progress record'
 }
 
 Table photo_documentation {
@@ -519,6 +459,7 @@ TableGroup location_hierarchy [color: #f39c12] {
 
 TableGroup core_entities [color: #3498db] {
   sitios
+  sitio_data
   projects
   users
 }
@@ -529,10 +470,6 @@ TableGroup reference_data [color: #9b59b6] {
 }
 
 TableGroup project_financials [color: #1abc9c] {
-  project_allotments
-  project_expenditures
-  project_contracts
-  project_status_summaries
   project_employment
   budget_components
   funding_sources
@@ -542,7 +479,6 @@ TableGroup project_tracking [color: #2ecc71] {
   project_sitios
   monthly_targets
   monthly_progress
-  monthly_progress_outputs
   photo_documentation
   sitio_coordinators
   coordinator_contacts

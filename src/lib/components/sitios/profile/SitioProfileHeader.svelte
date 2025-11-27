@@ -54,9 +54,9 @@
 					<Badge variant="secondary" class="bg-indigo-50 text-indigo-700 hover:bg-indigo-100">
 						{sitio.barangay}
 					</Badge>
-					{#if sitio.coding?.code}
+					{#if sitio.coding}
 						<Badge variant="outline" class="font-mono text-slate-500">
-							Code: {sitio.coding.code}
+							Code: {sitio.coding}
 						</Badge>
 					{/if}
 				</div>

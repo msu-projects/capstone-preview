@@ -181,10 +181,7 @@ export function generateSitios(count: number = 50, seed: number = 42): Sitio[] {
 				lat: Number(lat.toFixed(6)),
 				lng: Number(lng.toFixed(6))
 			},
-			coding: {
-				number: `SC-${location.municipality.substring(0, 3).toUpperCase()}-${String(i).padStart(4, '0')}`,
-				code: `${String(rng.nextInt(100, 999))}-${String(rng.nextInt(10, 99))}`
-			},
+			coding: `${String(rng.nextInt(100, 999))}-${String(rng.nextInt(10, 99))}`,
 			demographics: {
 				male,
 				female,
