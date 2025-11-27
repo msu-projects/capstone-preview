@@ -137,6 +137,3 @@ export const authStore = {
 	canPerform,
 	logAction
 };
-
-// Re-export DEFAULT_PERMISSIONS for backwards compatibility
-export { DEFAULT_PERMISSIONS } from '$lib/utils/user-storage';
