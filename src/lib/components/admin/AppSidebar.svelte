@@ -174,8 +174,8 @@
 								</Avatar.Root>
 								<div class="grid flex-1 text-left text-sm leading-tight">
 									<span class="truncate font-medium">{userDisplay.name}</span>
-									<div class="flex items-center gap-1">
-										<span class="truncate text-xs">{userDisplay.email}</span>
+									<div class="flex w-full items-center gap-1">
+										<span class="w-full truncate text-xs">{userDisplay.email}</span>
 									</div>
 								</div>
 							</div>
