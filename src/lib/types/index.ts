@@ -201,14 +201,6 @@ export interface ProjectType {
 	category_key: CategoryKey;
 	name: string;
 	description: string;
-	default_indicators: PerformanceIndicator[];
-}
-
-export interface PerformanceIndicator {
-	id: string;
-	name: string;
-	unit: string;
-	description: string;
 }
 
 export interface ProjectSitio {
@@ -221,18 +213,6 @@ export interface ProjectSitio {
 	priority_level: PriorityLevel;
 	focal_person?: string;
 	focal_contact?: string;
-}
-
-export interface PerformanceTarget {
-	id: number;
-	project_id: number;
-	indicator_type: string;
-	indicator_name: string;
-	target_value: number;
-	unit_of_measure: string;
-	monthly_breakdown?: Record<string, number>; // DEPRECATED: Use monthly_plan_percentage instead
-	monthly_plan_percentage?: Record<string, number>; // Cumulative planned progress % { '2025-01': 15, '2025-02': 35, ... final: 100 }
-	monthly_actual_percentage?: Record<string, number>; // Cumulative actual progress % { '2025-01': 12, '2025-02': 30, ... }
 }
 
 export interface PhotoDocumentation {
@@ -326,7 +306,6 @@ export interface Project {
 	monitoring?: MonitoringDetails;
 	// Enhanced fields
 	project_sitios?: ProjectSitio[];
-	performance_targets?: PerformanceTarget[];
 	monthly_progress?: MonthlyProgress[];
 	monthly_budget?: MonthlyBudgetUtilization[];
 	funding_sources?: FundingSource[];

@@ -14,7 +14,6 @@
 		FundingSource,
 		MonthlyPhysicalProgress,
 		MonthlyReleaseSchedule,
-		PerformanceTarget,
 		Project,
 		ProjectSitio,
 		ProjectStatus
@@ -53,13 +52,10 @@
 	let showSitioSelection = $state(true);
 
 	// Tab 3: Performance Targets
-	let performanceTargets = $state<Omit<PerformanceTarget, 'id' | 'project_id'>[]>([]);
 	let targetStartDate = $state<DateValue | undefined>(today(getLocalTimeZone()));
 	let targetEndDate = $state<DateValue | undefined>(undefined);
 	let durationInCalendarDays = $state('');
 	let totalBudget = $state('');
-	let directBeneficiariesMale = $state('');
-	let directBeneficiariesFemale = $state('');
 	let employmentMale = $state('');
 	let employmentFemale = $state('');
 
@@ -220,11 +216,6 @@
 				// New enhanced fields
 				project_sitios: projectSitios.map((ps) => ({
 					...ps,
-					project_id: nextId
-				})),
-				performance_targets: performanceTargets.map((pt) => ({
-					...pt,
-					id: 0, // Will be assigned by backend
 					project_id: nextId
 				})),
 				funding_sources: fundingSources.map((fs) => ({
@@ -391,14 +382,10 @@
 
 				<Tabs.Content value="performance">
 					<PerformanceTargetsTab
-						selectedProjectTypeId={selectedProjectType}
-						bind:performanceTargets
 						bind:targetStartDate
 						bind:targetEndDate
 						bind:durationInCalendarDays
 						bind:totalBudget
-						bind:directBeneficiariesMale
-						bind:directBeneficiariesFemale
 						bind:employmentMale
 						bind:employmentFemale
 					/>

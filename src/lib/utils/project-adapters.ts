@@ -55,15 +55,11 @@ export function projectToQuickUpdate(project: Project): QuickUpdateFormData {
 
 	// Get planned percentage from multiple sources (priority order):
 	// 1. monthly_physical_progress (preferred, from Monthly Planning tab)
-	// 2. performance_targets.monthly_plan_percentage (from performance targets)
-	// 3. monitoring.physical.plan (legacy fallback)
+	// 2. monitoring.physical.plan (legacy fallback)
 	const monthlyPhysicalProgress = project.monthly_physical_progress?.find(
 		(mp) => mp.month_year === currentMonth
 	);
-	const performanceTarget = project.performance_targets?.[0];
-	const plannedPercentage =
-		monthlyPhysicalProgress?.plan_percentage ??
-		performanceTarget?.monthly_plan_percentage?.[currentMonth];
+	const plannedPercentage = monthlyPhysicalProgress?.plan_percentage;
 
 	// Calculate cumulative disbursed amount (sum of all monthly expenses up to current month)
 	const cumulativeDisbursed =
@@ -277,15 +273,6 @@ export function applyQuickUpdateToProject(
 		});
 	}
 
-	// Update performance targets with actual progress for current month
-	const updatedPerformanceTargets = project.performance_targets?.map((pt) => ({
-		...pt,
-		monthly_actual_percentage: {
-			...pt.monthly_actual_percentage,
-			[currentMonth]: actualPct
-		}
-	}));
-
 	// Return updated project
 	return {
 		...project,
@@ -296,7 +283,6 @@ export function applyQuickUpdateToProject(
 		monitoring: updatedMonitoring,
 		monthly_budget: updatedMonthlyBudget,
 		monthly_progress: updatedMonthlyProgress,
-		performance_targets: updatedPerformanceTargets,
 		employment_generated: {
 			male: Number(formData.maleEmployment || 0),
 			female: Number(formData.femaleEmployment || 0)

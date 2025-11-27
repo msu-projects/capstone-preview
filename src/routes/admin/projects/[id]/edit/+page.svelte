@@ -16,7 +16,6 @@
 		FundingSource,
 		MonthlyPhysicalProgress,
 		MonthlyReleaseSchedule,
-		PerformanceTarget,
 		Project,
 		ProjectSitio,
 		ProjectStatus
@@ -108,15 +107,6 @@
 	let showSitioSelection = $state(false);
 
 	// Tab 3: Performance Targets
-	let performanceTargets = $state<Omit<PerformanceTarget, 'id' | 'project_id'>[]>(
-		existingProject?.performance_targets?.map((pt) => ({
-			indicator_type: pt.indicator_type,
-			indicator_name: pt.indicator_name,
-			target_value: pt.target_value,
-			unit_of_measure: pt.unit_of_measure,
-			monthly_breakdown: pt.monthly_breakdown
-		})) ?? []
-	);
 	let targetStartDate = $state<DateValue | undefined>(
 		existingProject?.start_date ? parseDate(existingProject.start_date) : today(getLocalTimeZone())
 	);
@@ -134,8 +124,6 @@
 			: ''
 	);
 	let totalBudget = $state(existingProject?.budget?.toString() ?? '');
-	let directBeneficiariesMale = $state('');
-	let directBeneficiariesFemale = $state('');
 	let employmentMale = $state(existingProject?.employment_generated?.male?.toString() ?? '');
 	let employmentFemale = $state(existingProject?.employment_generated?.female?.toString() ?? ''); // Tab 4: Accountability & Partners
 	let projectManager = $state(existingProject?.project_manager_team?.project_manager ?? '');
@@ -230,10 +218,7 @@
 	const isTab2Valid = $derived(projectSitios.length > 0);
 
 	const isTab3Valid = $derived(
-		performanceTargets.length > 0 &&
-			targetStartDate !== undefined &&
-			targetEndDate !== undefined &&
-			totalBudget !== ''
+		targetStartDate !== undefined && targetEndDate !== undefined && totalBudget !== ''
 	);
 
 	const isTab4Valid = $derived(fundingSources.length > 0 && budgetComponents.length > 0);
@@ -307,12 +292,6 @@
 				// Tab 2
 				project_sitios: projectSitios.map((ps) => ({
 					...ps,
-					project_id: existingProject!.id
-				})),
-				// Tab 3
-				performance_targets: performanceTargets.map((pt) => ({
-					...pt,
-					id: 0,
 					project_id: existingProject!.id
 				})),
 				// Tab 4
@@ -492,14 +471,10 @@
 
 				<Tabs.Content value="performance">
 					<PerformanceTargetsTab
-						selectedProjectTypeId={selectedProjectType}
-						bind:performanceTargets
 						bind:targetStartDate
 						bind:targetEndDate
 						bind:durationInCalendarDays
 						bind:totalBudget
-						bind:directBeneficiariesMale
-						bind:directBeneficiariesFemale
 						bind:employmentMale
 						bind:employmentFemale
 					/>
