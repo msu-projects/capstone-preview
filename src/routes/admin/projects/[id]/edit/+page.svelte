@@ -90,11 +90,7 @@
 	let description = $state(existingProject?.description ?? '');
 	let selectedCategory = $state<CategoryKey | ''>(getCategoryKey(existingProject));
 	let selectedProjectType = $state<number | undefined>(existingProject?.project_type_id);
-	let implementingAgency = $state(
-		existingProject?.project_manager_team?.agency ??
-			existingProject?.accountability?.pm_agency ??
-			''
-	);
+	let implementingAgency = $state(existingProject?.project_manager_team?.agency ?? '');
 
 	// Tab 2: Location & Beneficiaries
 	let projectSitios = $state<Omit<ProjectSitio, 'project_id'>[]>(
@@ -156,21 +152,9 @@
 	let directBeneficiariesFemale = $state('');
 	let employmentMale = $state(existingProject?.employment_generated?.male?.toString() ?? '');
 	let employmentFemale = $state(existingProject?.employment_generated?.female?.toString() ?? ''); // Tab 4: Accountability & Partners
-	let projectManager = $state(
-		existingProject?.project_manager_team?.project_manager ??
-			existingProject?.accountability?.project_manager ??
-			''
-	);
-	let pmAgency = $state(
-		existingProject?.project_manager_team?.agency ??
-			existingProject?.accountability?.pm_agency ??
-			''
-	);
-	let technicalLead = $state(
-		existingProject?.project_manager_team?.technical_lead ??
-			existingProject?.accountability?.technical_lead ??
-			''
-	);
+	let projectManager = $state(existingProject?.project_manager_team?.project_manager ?? '');
+	let pmAgency = $state(existingProject?.project_manager_team?.agency ?? '');
+	let technicalLead = $state(existingProject?.project_manager_team?.technical_lead ?? '');
 	let lguCounterparts = $state<string[]>(
 		existingProject?.project_manager_team?.lgu_counterpart ?? []
 	);

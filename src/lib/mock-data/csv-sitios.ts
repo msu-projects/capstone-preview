@@ -76,7 +76,6 @@ export const csvSitiosData: Sitio[] = [
 			]
 		},
 		domestic_animals: {
-			total_count: 91,
 			dogs: 56,
 			cats: 35,
 			dogs_vaccinated: 40,

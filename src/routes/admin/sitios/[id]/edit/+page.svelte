@@ -133,7 +133,6 @@
 	});
 
 	let domestic_animals = $state({
-		total_count: 0,
 		dogs: 0,
 		cats: 0,
 		dogs_vaccinated: 0,
@@ -252,7 +251,6 @@
 		};
 
 		domestic_animals = {
-			total_count: sitio.domestic_animals?.total_count || 0,
 			dogs: sitio.domestic_animals?.dogs || 0,
 			cats: sitio.domestic_animals?.cats || 0,
 			dogs_vaccinated: sitio.domestic_animals?.dogs_vaccinated || 0,

@@ -1,17 +1,5 @@
 export type ProjectStatus = 'planning' | 'in-progress' | 'completed' | 'suspended';
-export type MilestoneStatus = 'not_started' | 'in_progress' | 'completed' | 'delayed';
-export type DelayType = 'weather' | 'material' | 'utility_coordination' | 'permit' | 'other';
-export type DelaySeverity = 'low' | 'medium' | 'high' | 'critical';
-export type RecoveryActionStatus = 'planned' | 'in_progress' | 'completed' | 'cancelled';
 export type PriorityLevel = 'high' | 'medium' | 'low';
-export type IssueCategory =
-	| 'weather_climate'
-	| 'material_supply'
-	| 'budget_funding'
-	| 'community_concerns'
-	| 'technical_challenges'
-	| 'permit_clearance'
-	| 'partner_coordination';
 export type CategoryKey =
 	| 'infrastructure'
 	| 'agriculture'
@@ -21,14 +9,14 @@ export type CategoryKey =
 	| 'environment';
 
 export interface Sitio {
-	// Core identification (required for backwards compatibility)
+	// Core identification
 	id: number;
-	name: string; // maps to SITIO column
+	name: string;
 	municipality: string;
 	barangay: string;
 	province?: string;
-	population: number; // maps to POPULATION - TOTAL
-	households: number; // maps to No. of Households
+	population: number;
+	households: number;
 	coordinates: {
 		lat: number;
 		lng: number;
@@ -36,11 +24,11 @@ export interface Sitio {
 
 	// Coding information
 	coding?: {
-		number: string; // NO.
-		code: string; // CODING (e.g., "1-1")
+		number: string;
+		code: string;
 	};
 
-	// Demographics (expanded for 86-column dataset)
+	// Demographics
 	demographics: {
 		male: number;
 		female: number;
@@ -48,12 +36,6 @@ export interface Sitio {
 		age_0_14: number;
 		age_15_64: number;
 		age_65_above: number;
-		// Legacy fields (kept for backwards compatibility)
-		employment_rate?: number;
-		poverty_incidence?: number;
-		farmers?: number;
-		potable_water_access?: number;
-		electricity_access?: number;
 	};
 
 	// Social services
@@ -65,8 +47,8 @@ export interface Sitio {
 
 	// Economic condition
 	economic_condition?: {
-		employments: Array<{ type: string; count: number }>; // e.g., [{ type: 'Farmer', count: 150 }, { type: 'Vendor', count: 80 }]
-		income_brackets: Array<{ bracket: string; households: number }>; // bracket options: '<=100', '100-300', '300-500', '>=500' (daily income in PHP)
+		employments: Array<{ type: string; count: number }>;
+		income_brackets: Array<{ bracket: string; households: number }>;
 	};
 
 	// Agriculture
@@ -74,7 +56,7 @@ export interface Sitio {
 		farmers_count: number;
 		farmer_associations: number;
 		farm_area_hectares: number;
-		top_crops: string[]; // Array of top 5
+		top_crops: string[];
 	};
 
 	// Water and sanitation
@@ -100,18 +82,17 @@ export interface Sitio {
 	// Food security
 	food_security?: {
 		households_with_backyard_garden: number;
-		common_garden_commodities: string[]; // Top 3
+		common_garden_commodities: string[];
 	};
 
 	// Housing
 	housing?: {
-		quality_types: Array<{ type: string; count: number }>; // Concrete, Wood, Half-Concrete, Makeshift, Others
-		ownership_types: Array<{ type: string; count: number }>; // Owned, Rented, Protected Land, Informal Settler, Owner Consent
+		quality_types: Array<{ type: string; count: number }>;
+		ownership_types: Array<{ type: string; count: number }>;
 	};
 
 	// Domestic animals
 	domestic_animals?: {
-		total_count: number;
 		dogs: number;
 		cats: number;
 		dogs_vaccinated: number;
@@ -121,18 +102,17 @@ export interface Sitio {
 	// Community empowerment
 	community_empowerment?: {
 		sectoral_organizations: number;
-		info_dissemination_methods: string[]; // Radio, Signages, Person in Authority, etc.
-		transportation_methods: string[]; // Motorcycle, Tricycle, 4-Wheels, Boat
+		info_dissemination_methods: string[];
+		transportation_methods: string[];
 	};
 
 	// Utilities
 	utilities?: {
 		households_with_electricity: number;
-		alternative_electricity_sources: string[]; // Solar, Generator, Battery
+		alternative_electricity_sources: string[];
 	};
 
 	// Metadata
-	projects_count?: number;
 	created_at: string;
 	updated_at?: string;
 }
@@ -166,110 +146,7 @@ export interface ImportResult {
 export interface DuplicateSitio {
 	existing: Sitio;
 	incoming: Sitio;
-	key: string; // municipality-barangay-sitio identifier
-}
-
-export interface TimelineEvent {
-	date: string;
-	status: string;
-	title: string;
-	description: string;
-}
-
-export interface Phase {
-	id: number;
-	name: string;
-	order: number;
-}
-
-export interface Milestone {
-	id: number;
-	phase_id: number;
-	name: string;
-	description: string;
-	baseline_start: string;
-	baseline_end: string;
-	planned_start: string;
-	planned_end: string;
-	actual_start: string | null;
-	actual_end: string | null;
-	status: MilestoneStatus;
-	completion_percentage: number;
-	owner: string;
-	approver: string;
-	deliverables: string[];
-	budget_allocation: number;
-	delay_ids?: number[];
-}
-
-export interface Delay {
-	id: number;
-	milestone_id: number;
-	reported_date: string;
-	reported_by: string;
-	title: string;
-	delay_type: DelayType;
-	root_cause: string;
-	contributing_factors: string[];
-	preventable: boolean;
-	responsible_party: string;
-	accountability_type: string;
-	internal_contributing?: string;
-	duration_days_estimated: number;
-	duration_days_actual: number | null;
-	schedule_impact_days: number;
-	cost_impact: number;
-	critical_path_affected: boolean;
-	beneficiary_impact: string;
-	severity: DelaySeverity;
-	status: string;
-	resolution_target_date: string;
-	resolution_actual_date: string | null;
-	recovery_action_ids: number[];
-	lessons_learned?: string;
-	preventive_actions_future?: string;
-}
-
-export interface RecoveryAction {
-	id: number;
-	delay_id: number;
-	action: string;
-	description: string;
-	owner: string;
-	owner_contact: string;
-	supporting_parties: string[];
-	planned_start: string;
-	target_completion: string;
-	actual_completion: string | null;
-	status: RecoveryActionStatus;
-	progress_percentage: number;
-	expected_time_recovery_days: number;
-	actual_time_recovery_days: number | null;
-	effectiveness_rating: number | null;
-	cost_estimate: number;
-	cost_actual: number | null;
-	notes?: string;
-	obstacles?: string | null;
-}
-
-export interface Accountability {
-	project_manager: string;
-	pm_agency: string;
-	technical_lead: string;
-	contractor: string;
-	oversight_committee: string[];
-	escalation_contacts: {
-		technical: string;
-		administrative: string;
-	};
-}
-
-export interface Baseline {
-	approved_date: string;
-	planned_start: string;
-	planned_end: string;
-	planned_duration_days: number;
-	budget: number;
+	key: string;
 }
 
 export interface MonitoringDetails {
@@ -380,8 +257,8 @@ export interface MonthlyProgress {
 	achieved_outputs: Record<string, number>; // { 'seedlings_distributed': 500, 'training_sessions': 3 }
 	beneficiaries_reached: number;
 	issues_encountered?: string;
-	photo_urls?: string[]; // DEPRECATED - use photo_documentation instead
-	photo_documentation?: PhotoDocumentation[]; // NEW - replaces photo_urls
+	photo_urls?: string[];
+	photo_documentation?: PhotoDocumentation[];
 	status: 'on-track' | 'delayed' | 'ahead';
 	created_at: string;
 	updated_at: string;
@@ -390,50 +267,13 @@ export interface MonthlyProgress {
 export interface MonthlyBudgetUtilization {
 	id: number;
 	project_id: number;
-	month_year: string; // Format: 'YYYY-MM'
+	month_year: string;
 	budget_released: number;
 	actual_expenses: number;
 	obligations: number;
 	remaining_balance: number;
 	created_at: string;
 	updated_at: string;
-}
-
-export interface ProjectIssue {
-	id: number;
-	project_id: number;
-	sitio_id?: number;
-	month_year: string;
-	category: IssueCategory;
-	title: string;
-	description: string;
-	affected_sitios: number[];
-	deliverables_at_risk: string[];
-	beneficiaries_impacted: number;
-	days_delay: number;
-	mitigation_actions?: string;
-	resources_needed?: string;
-	revised_timeline?: string;
-	status: 'open' | 'mitigating' | 'resolved';
-	created_at: string;
-	updated_at: string;
-}
-
-export interface Partner {
-	id: number;
-	name: string;
-	type: 'ngo' | 'cso' | 'private_sector' | 'lgu' | 'national_agency';
-	contact_person?: string;
-	contact_number?: string;
-	email?: string;
-}
-
-export interface ProjectPartner {
-	project_id: number;
-	partner_id: number;
-	role: string;
-	contribution_amount?: number;
-	contribution_inkind?: string;
 }
 
 export interface BudgetComponent {
@@ -463,9 +303,9 @@ export interface MonthlyReleaseSchedule {
 }
 
 export interface MonthlyPhysicalProgress {
-	month_year: string; // Format: 'YYYY-MM'
-	plan_percentage: number; // Cumulative planned %
-	actual_percentage?: number; // Cumulative actual % - optional, only filled during monitoring
+	month_year: string;
+	plan_percentage: number;
+	actual_percentage?: number;
 }
 
 export interface Project {
@@ -473,9 +313,9 @@ export interface Project {
 	title: string;
 	description: string;
 	category: string;
-	category_key?: CategoryKey; // NEW: For category-driven design
-	project_type_id?: number; // NEW: Links to ProjectType
-	project_type_name?: string; // NEW: Display name of project type
+	category_key?: CategoryKey;
+	project_type_id?: number;
+	project_type_name?: string;
 	/** @deprecated Use project_sitios instead for multi-sitio support */
 	sitio_id: number;
 	/** @deprecated Use project_sitios instead for multi-sitio support */
@@ -489,29 +329,20 @@ export interface Project {
 	beneficiaries: number;
 	completion_percentage: number;
 	project_year: number;
-	timeline?: TimelineEvent[];
-	phases?: Phase[];
-	milestones?: Milestone[];
-	delays?: Delay[];
-	recovery_actions?: RecoveryAction[];
-	accountability?: Accountability;
-	baseline?: Baseline;
 	monitoring?: MonitoringDetails;
-	// NEW ENHANCED FIELDS
-	project_sitios?: ProjectSitio[]; // Multi-sitio support
-	performance_targets?: PerformanceTarget[]; // Category-specific targets
-	monthly_progress?: MonthlyProgress[]; // Monthly tracking
-	monthly_budget?: MonthlyBudgetUtilization[]; // Monthly budget tracking
-	issues?: ProjectIssue[]; // Issue management
-	partners?: ProjectPartner[]; // Implementation partners
-	funding_sources?: FundingSource[]; // Multi-source funding
-	budget_components?: BudgetComponent[]; // Budget breakdown
-	release_schedule?: MonthlyReleaseSchedule[]; // Monthly releases
-	monthly_physical_progress?: MonthlyPhysicalProgress[]; // Monthly planned/actual progress
+	// Enhanced fields
+	project_sitios?: ProjectSitio[];
+	performance_targets?: PerformanceTarget[];
+	monthly_progress?: MonthlyProgress[];
+	monthly_budget?: MonthlyBudgetUtilization[];
+	funding_sources?: FundingSource[];
+	budget_components?: BudgetComponent[];
+	release_schedule?: MonthlyReleaseSchedule[];
+	monthly_physical_progress?: MonthlyPhysicalProgress[];
 	employment_generated?: {
 		male: number;
 		female: number;
-	}; // NEW: Employment to be generated by project
+	};
 	project_manager_team?: {
 		project_manager?: string;
 		agency?: string;

@@ -78,7 +78,6 @@ export interface SitioYearlySnapshot {
 
 	// Domestic animals
 	domestic_animals?: {
-		total_count: number;
 		dogs: number;
 		cats: number;
 		dogs_vaccinated: number;

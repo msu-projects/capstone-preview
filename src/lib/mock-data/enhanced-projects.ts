@@ -199,29 +199,6 @@ export const enhancedProjects: Project[] = [
 				updated_at: '2025-11-11'
 			}
 		],
-		issues: [
-			{
-				id: 4001,
-				project_id: 100,
-				sitio_id: 22,
-				month_year: '2025-03',
-				category: 'weather_climate',
-				title: 'Heavy rainfall delayed seedling distribution in Sitio Pagasa',
-				description:
-					'Continuous heavy rains made access roads impassable for 5 days, delaying scheduled distribution.',
-				affected_sitios: [22],
-				deliverables_at_risk: ['March seedling distribution target'],
-				beneficiaries_impacted: 70,
-				days_delay: 5,
-				mitigation_actions:
-					'Rescheduled distribution to early April, coordinated with barangay for road clearing',
-				resources_needed: 'Additional transportation support for catch-up distribution',
-				revised_timeline: 'April 5-7, 2025',
-				status: 'mitigating',
-				created_at: '2025-03-15',
-				updated_at: '2025-03-20'
-			}
-		],
 		funding_sources: [
 			{
 				id: 5001,
