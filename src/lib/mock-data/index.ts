@@ -7,13 +7,34 @@ import type {
 	Stats,
 	User
 } from '$lib/types';
-import { loadProjects, loadSitios, saveSitios } from '$lib/utils/storage';
-import { csvSitiosData } from './csv-sitios';
-import { enhancedProjects } from './enhanced-projects';
+import { loadProjects, loadSitios, saveProjects, saveSitios } from '$lib/utils/storage';
+import {
+	generateProjects,
+	generateSitios,
+	initializeMockDataIfNeeded,
+	isMockDataInitialized,
+	MOCK_DATA_INITIALIZED_KEY,
+	MOCK_PROJECTS_KEY,
+	MOCK_SITIOS_KEY,
+	resetMockData
+} from './generator';
+
+// Re-export generator functions for external use
+export {
+	generateProjects,
+	generateSitios,
+	isMockDataInitialized,
+	MOCK_DATA_INITIALIZED_KEY,
+	MOCK_PROJECTS_KEY,
+	MOCK_SITIOS_KEY,
+	resetMockData
+};
 
 // ===== HELPER FUNCTIONS =====
 
-function createMonitoringDetails(overrides: Partial<MonitoringDetails> = {}): MonitoringDetails {
+export function createMonitoringDetails(
+	overrides: Partial<MonitoringDetails> = {}
+): MonitoringDetails {
 	const base: MonitoringDetails = {
 		fundSource: '20% LDF',
 		fiscalYear: 2025,
@@ -67,24 +88,32 @@ function createMonitoringDetails(overrides: Partial<MonitoringDetails> = {}): Mo
 
 // ===== SITIOS DATA =====
 
-// Initialize LocalStorage with CSV data if empty (runs only in browser)
+// Initialize LocalStorage with generated mock data if empty (runs only in browser)
 function initializeSitios(): Sitio[] {
 	if (typeof window === 'undefined') {
-		// Server-side: return CSV data
-		return csvSitiosData;
+		// Server-side: generate fresh data for SSR
+		return generateSitios(50);
 	}
 
 	try {
+		// First check if we have data in the main storage
 		const storedSitios = loadSitios();
-		if (storedSitios.length === 0) {
-			// First load: initialize with CSV data
-			saveSitios(csvSitiosData);
-			return csvSitiosData;
+		if (storedSitios.length > 0) {
+			return storedSitios;
 		}
-		return storedSitios;
+
+		// Check/initialize mock data
+		const { sitios: generatedSitios } = initializeMockDataIfNeeded();
+
+		// Also save to main storage for compatibility
+		if (generatedSitios.length > 0) {
+			saveSitios(generatedSitios);
+		}
+
+		return generatedSitios;
 	} catch (error) {
 		console.error('Failed to initialize sitios from storage:', error);
-		return csvSitiosData;
+		return generateSitios(50);
 	}
 }
 
@@ -94,17 +123,17 @@ export const sitios: Sitio[] = initializeSitios();
 // Export function to refresh sitios from storage (useful after imports)
 export function refreshSitios(): Sitio[] {
 	if (typeof window === 'undefined') {
-		return csvSitiosData;
+		return generateSitios(50);
 	}
 	return loadSitios();
 }
 
 // ===== PROJECTS DATA =====
 
-// Use enhanced projects with comprehensive multi-sitio tracking
-// Add monitoring data to enhanced projects for PDF generation
-const enhancedProjectsWithMonitoring = enhancedProjects.map((project) => {
-	// Add monitoring data based on project status and budget
+/**
+ * Add monitoring details to a project for PDF generation
+ */
+function addMonitoringToProject(project: Project): Project {
 	const allocated = project.budget;
 	const supplemental = Math.floor(allocated * 0.1);
 	const total = allocated + supplemental;
@@ -116,8 +145,9 @@ const enhancedProjectsWithMonitoring = enhancedProjects.map((project) => {
 	const actual = project.completion_percentage;
 	const slippage = Number((actual - plan).toFixed(2));
 
-	const maleEmployment = 8 + Math.floor(Math.random() * 15);
-	const femaleEmployment = 5 + Math.floor(Math.random() * 10);
+	const maleEmployment = project.employment_generated?.male ?? 8 + Math.floor(Math.random() * 15);
+	const femaleEmployment =
+		project.employment_generated?.female ?? 5 + Math.floor(Math.random() * 10);
 
 	return {
 		...project,
@@ -182,53 +212,42 @@ const enhancedProjectsWithMonitoring = enhancedProjects.map((project) => {
 						: 'N/A'
 		})
 	};
-});
+}
 
 /**
- * Initialize projects by merging mock data with localStorage projects
+ * Initialize projects from localStorage or generate new mock data
  */
 function initializeProjects(): Project[] {
 	if (typeof window === 'undefined') {
-		// Server-side: return default mock data
-		return enhancedProjectsWithMonitoring;
+		// Server-side: generate fresh data for SSR
+		const generatedSitios = generateSitios(50);
+		const generatedProjects = generateProjects(generatedSitios, 20);
+		return generatedProjects.map(addMonitoringToProject);
 	}
 
 	try {
+		// First check if we have data in the main storage
 		const storedProjects = loadProjects();
+		if (storedProjects.length > 0) {
+			return storedProjects.map(addMonitoringToProject);
+		}
 
-		// Merge: localStorage projects take precedence (by ID)
-		// Start with mock data
-		const mockProjectsMap = new Map<number, Project>(
-			enhancedProjectsWithMonitoring.map((p) => [p.id, p])
-		);
+		// Check/initialize mock data
+		const { projects: generatedProjects } = initializeMockDataIfNeeded();
 
-		// Override with localStorage projects (or add new ones)
-		// Ensure monitoring details exist for stored projects
-		storedProjects.forEach((storedProject) => {
-			const projectWithMonitoring: Project = {
-				...storedProject,
-				// Add monitoring details if not present
-				monitoring:
-					storedProject.monitoring ||
-					createMonitoringDetails({
-						location: storedProject.project_sitios?.[0]?.municipality || '',
-						fiscalYear: storedProject.project_year,
-						allotment: {
-							allocated: storedProject.budget,
-							supplemental: 0,
-							total: storedProject.budget,
-							released: 0
-						}
-					})
-			};
-			mockProjectsMap.set(storedProject.id, projectWithMonitoring);
-		});
+		// Add monitoring details and save to main storage
+		const projectsWithMonitoring = generatedProjects.map(addMonitoringToProject);
 
-		// Convert back to array and sort by ID
-		return Array.from(mockProjectsMap.values()).sort((a, b) => a.id - b.id);
+		if (projectsWithMonitoring.length > 0) {
+			saveProjects(projectsWithMonitoring);
+		}
+
+		return projectsWithMonitoring;
 	} catch (error) {
 		console.error('Failed to initialize projects from storage:', error);
-		return enhancedProjectsWithMonitoring;
+		const generatedSitios = generateSitios(50);
+		const generatedProjects = generateProjects(generatedSitios, 20);
+		return generatedProjects.map(addMonitoringToProject);
 	}
 }
 
@@ -238,32 +257,13 @@ export const projects: Project[] = initializeProjects();
 // Export function to refresh projects from storage (useful after creating new projects)
 export function refreshProjects(): Project[] {
 	if (typeof window === 'undefined') {
-		return enhancedProjectsWithMonitoring;
+		const generatedSitios = generateSitios(50);
+		const generatedProjects = generateProjects(generatedSitios, 20);
+		return generatedProjects.map(addMonitoringToProject);
 	}
 
 	const storedProjects = loadProjects();
-	const mockProjectsMap = new Map<number, Project>(
-		enhancedProjectsWithMonitoring.map((p) => [p.id, p])
-	);
-	storedProjects.forEach((storedProject) => {
-		const projectWithMonitoring: Project = {
-			...storedProject,
-			monitoring:
-				storedProject.monitoring ||
-				createMonitoringDetails({
-					location: storedProject.project_sitios?.[0]?.municipality || '',
-					fiscalYear: storedProject.project_year,
-					allotment: {
-						allocated: storedProject.budget,
-						supplemental: 0,
-						total: storedProject.budget,
-						released: 0
-					}
-				})
-		};
-		mockProjectsMap.set(storedProject.id, projectWithMonitoring);
-	});
-	return Array.from(mockProjectsMap.values()).sort((a, b) => a.id - b.id);
+	return storedProjects.map(addMonitoringToProject);
 }
 
 // ===== USERS DATA =====

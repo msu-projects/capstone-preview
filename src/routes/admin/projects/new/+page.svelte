@@ -9,6 +9,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import * as Tabs from '$lib/components/ui/tabs';
+	import { categories } from '$lib/config/project-categories';
 	import type {
 		BudgetComponent,
 		CategoryKey,
@@ -179,8 +180,6 @@
 			// Get next available ID
 			const nextId = getNextProjectId();
 
-			// Get the first sitio info for legacy fields (required by Project type)
-			const firstSitio = projectSitios[0];
 			const totalBeneficiaries = projectSitios.reduce(
 				(sum, ps) => sum + ps.beneficiaries_target,
 				0
@@ -204,7 +203,7 @@
 				id: nextId,
 				title,
 				description,
-				category: selectedCategory || '',
+				category: categories.find((v) => v.key === selectedCategory)?.name || '',
 				category_key: selectedCategory as any,
 				project_type_id: selectedProjectType,
 				status,
