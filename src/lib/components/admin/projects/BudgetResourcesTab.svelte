@@ -81,15 +81,15 @@
 	const sourceNameLabel = $derived(
 		isCustomSourceName
 			? 'Custom...'
-			: sourceNameOptions.find((opt) => opt.value === selectedSourceNameOption)?.label ??
-				'Select Source'
+			: (sourceNameOptions.find((opt) => opt.value === selectedSourceNameOption)?.label ??
+					'Select Source')
 	);
 
 	const componentNameLabel = $derived(
 		isCustomComponentName
 			? 'Custom...'
-			: componentNameOptions.find((opt) => opt.value === selectedComponentNameOption)?.label ??
-				'Select Component'
+			: (componentNameOptions.find((opt) => opt.value === selectedComponentNameOption)?.label ??
+					'Select Component')
 	);
 
 	function addFundingSource() {
@@ -502,18 +502,6 @@
 						<Plus class="size-4" />
 						Add Component
 					</Button>
-				</div>
-			</div>
-
-			<div class="rounded-lg border border-border bg-muted/30 p-4">
-				<p class="mb-2 text-sm font-medium">Common Budget Components:</p>
-				<div class="flex flex-wrap gap-2 text-xs">
-					<Badge variant="outline">Materials/Supplies</Badge>
-					<Badge variant="outline">Labor/Services</Badge>
-					<Badge variant="outline">Equipment Rental</Badge>
-					<Badge variant="outline">Training/Capacity Building</Badge>
-					<Badge variant="outline">Administrative Costs</Badge>
-					<Badge variant="outline">Contingency (5-10%)</Badge>
 				</div>
 			</div>
 		</Card.CardContent>
