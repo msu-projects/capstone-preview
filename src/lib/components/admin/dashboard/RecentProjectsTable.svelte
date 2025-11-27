@@ -8,6 +8,7 @@
 	import { getStatusBadgeVariant, getStatusLabel } from '$lib/config/status-config';
 	import type { Project } from '$lib/types';
 	import { truncateText } from '$lib/utils/formatters';
+	import { getCategoryName, getCompletionPercentage } from '$lib/utils/project-calculations';
 	import { ArrowRight } from '@lucide/svelte';
 
 	interface Props {
@@ -54,10 +55,13 @@
 					</Table.TableHeader>
 					<Table.TableBody>
 						{#each projects as project}
+							{@const completionPct = getCompletionPercentage(project)}
 							<Table.TableRow class="cursor-pointer hover:bg-accent/10">
 								<Table.TableCell>
 									<div class="font-medium">{truncateText(project.title, 40)}</div>
-									<div class="text-xs text-muted-foreground">{project.category}</div>
+									<div class="text-xs text-muted-foreground">
+										{getCategoryName(project.category_key)}
+									</div>
 								</Table.TableCell>
 								<Table.TableCell>
 									{#if project.project_sitios && project.project_sitios.length > 0}
@@ -73,9 +77,9 @@
 								</Table.TableCell>
 								<Table.TableCell>
 									<div class="flex items-center gap-2">
-										<Progress value={project.completion_percentage} class="w-full" />
+										<Progress value={completionPct} class="w-full" />
 										<span class="min-w-12 text-xs text-muted-foreground">
-											{project.completion_percentage}%
+											{completionPct}%
 										</span>
 									</div>
 								</Table.TableCell>

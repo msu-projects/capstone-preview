@@ -2,6 +2,7 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import type { Project } from '$lib/types';
 	import { formatCurrency } from '$lib/utils/formatters';
+	import { getCategoryName } from '$lib/utils/project-calculations';
 
 	interface Props {
 		project: Project;
@@ -25,7 +26,7 @@
 					: project.status.charAt(0).toUpperCase() + project.status.slice(1)}
 			</Badge>
 			<Badge variant="outline" class="bg-blue-50 text-blue-700">
-				{project.project_type_name || project.category}
+				{getCategoryName(project.category_key)}
 			</Badge>
 		</div>
 		<h1 class="text-3xl leading-tight font-bold tracking-tight text-slate-900">
@@ -36,6 +37,6 @@
 		class="flex flex-col items-start gap-1 rounded-lg border border-slate-200 bg-slate-50 px-6 py-4 md:min-w-[200px] md:items-end"
 	>
 		<span class="text-xs font-semibold tracking-wider text-slate-500 uppercase">Total Budget</span>
-		<span class="text-2xl font-bold text-slate-900">{formatCurrency(project.budget)}</span>
+		<span class="text-2xl font-bold text-slate-900">{formatCurrency(project.total_budget)}</span>
 	</div>
 </div>

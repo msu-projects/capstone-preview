@@ -34,9 +34,8 @@
 		// Existing fields
 		status: ProjectStatus;
 		physicalActual: string;
-		statusStage: string;
-		statusIssues: string;
-		statusRecommendations: string;
+		issues: string;
+		recommendations: string;
 		catchUpPlan: string;
 		maleEmployment: string;
 		femaleEmployment: string;
@@ -46,9 +45,7 @@
 		monthlyDisbursement: string; // This month only (editable)
 		// New fields - Timeline
 		startDate: string;
-		targetEndDate: string;
-		extensionRequested: boolean;
-		extensionDays: string;
+		contractDuration: string;
 		// New fields - Beneficiaries
 		targetBeneficiaries: number;
 		currentBeneficiaries: string;
@@ -64,9 +61,8 @@
 	let {
 		status = $bindable(),
 		physicalActual = $bindable(),
-		statusStage = $bindable(),
-		statusIssues = $bindable(),
-		statusRecommendations = $bindable(),
+		issues = $bindable(),
+		recommendations = $bindable(),
 		catchUpPlan = $bindable(),
 		maleEmployment = $bindable(),
 		femaleEmployment = $bindable(),
@@ -74,9 +70,7 @@
 		budgetDisbursed = $bindable(),
 		monthlyDisbursement = $bindable(),
 		startDate = $bindable(),
-		targetEndDate = $bindable(),
-		extensionRequested = $bindable(),
-		extensionDays = $bindable(),
+		contractDuration = $bindable(),
 		targetBeneficiaries = $bindable(),
 		currentBeneficiaries = $bindable(),
 		householdsReached = $bindable(),
@@ -100,7 +94,15 @@
 	);
 	let budgetMetrics = $derived(calculateBudgetUtilization(totalBudget, updatedBudgetDisbursed));
 
-	// Derived computed values - Timeline
+	// Derived computed values - Timeline - calculate end date from start + duration
+	const targetEndDate = $derived.by(() => {
+		if (!startDate || !contractDuration) return '';
+		const days = parseInt(contractDuration.replace(/\D/g, ''), 10);
+		if (isNaN(days) || days <= 0) return '';
+		const start = new Date(startDate);
+		start.setDate(start.getDate() + days);
+		return start.toISOString().split('T')[0];
+	});
 	let timelineMetrics = $derived(calculateDaysRemaining(targetEndDate));
 
 	// Derived computed values - Beneficiaries
@@ -112,19 +114,6 @@
 	let slippageMetrics = $derived(
 		calculateProgressSlippage(Number(plannedPercentage || 0), Number(physicalActual || 0))
 	);
-
-	// Calculate new target date from extension days
-	let calculatedExtensionDate = $derived.by(() => {
-		if (!extensionRequested || !extensionDays || !targetEndDate) return '';
-		const days = Number(extensionDays);
-		if (isNaN(days) || days <= 0) return '';
-
-		const baseDate = new Date(targetEndDate);
-		const newDate = new Date(baseDate);
-		newDate.setDate(newDate.getDate() + days);
-
-		return newDate.toISOString().split('T')[0];
-	});
 
 	// Get status label for display
 	const getStatusLabel = (s: ProjectStatus) => {
@@ -365,56 +354,30 @@
 					<Input id="start-date" type="date" bind:value={startDate} disabled class="opacity-75" />
 				</div>
 
-				<!-- Target End Date -->
+				<!-- Contract Duration -->
 				<div class="space-y-2">
-					<Label for="target-end-date">Target End Date</Label>
-					<Input id="target-end-date" type="date" bind:value={targetEndDate} disabled />
-				</div>
-
-				<!-- Extension Requested -->
-				<div class="space-y-2">
-					<Label for="extension-requested" class="flex items-center gap-2">
-						<input
-							id="extension-requested"
-							type="checkbox"
-							bind:checked={extensionRequested}
-							class="size-4 rounded border-input"
-						/>
-						Extension Requested
-					</Label>
-				</div>
-
-				<!-- Extension Days (conditional) -->
-				{#if extensionRequested}
-					<div class="space-y-2">
-						<Label for="extension-days">Extension (Calendar Days)</Label>
-						<Input
-							id="extension-days"
-							type="number"
-							min="1"
-							bind:value={extensionDays}
-							placeholder="Number of days"
-						/>
-					</div>
-				{/if}
-			</div>
-
-			<!-- Show calculated new target date if extension is requested -->
-			{#if extensionRequested && calculatedExtensionDate}
-				<div class="space-y-2">
-					<Label for="calculated-extension-date" class="flex items-center gap-1.5">
-						New Target Date
-						<Info class="size-3.5 text-muted-foreground" />
-					</Label>
+					<Label for="contract-duration">Contract Duration</Label>
 					<Input
-						id="calculated-extension-date"
-						type="date"
-						value={calculatedExtensionDate}
+						id="contract-duration"
+						type="text"
+						value={contractDuration}
 						disabled
-						class="font-medium opacity-75"
+						class="opacity-75"
 					/>
 				</div>
-			{/if}
+
+				<!-- Target End Date (Calculated) -->
+				<div class="space-y-2">
+					<Label for="target-end-date">Target End Date</Label>
+					<Input
+						id="target-end-date"
+						type="date"
+						value={targetEndDate}
+						disabled
+						class="opacity-75"
+					/>
+				</div>
+			</div>
 
 			<!-- Timeline status indicator -->
 			{#if timelineMetrics.isOverdue}
@@ -566,17 +529,6 @@
 					</Select.Root>
 				</div>
 
-				<!-- Current Stage -->
-				<div class="space-y-2">
-					<Label for="current-stage">Current Stage</Label>
-					<Input
-						id="current-stage"
-						type="text"
-						bind:value={statusStage}
-						placeholder="e.g., Foundation work ongoing"
-					/>
-				</div>
-
 				<!-- Planned Percentage (for comparison) -->
 				<div class="space-y-2">
 					<Label for="planned-percentage">Planned Progress (%)</Label>
@@ -677,7 +629,7 @@
 				<Label for="issues">Issues Encountered</Label>
 				<Textarea
 					id="issues"
-					bind:value={statusIssues}
+					bind:value={issues}
 					placeholder="Describe any issues or challenges encountered during implementation"
 					rows={3}
 				/>
@@ -688,7 +640,7 @@
 				<Label for="recommendations">Recommendations</Label>
 				<Textarea
 					id="recommendations"
-					bind:value={statusRecommendations}
+					bind:value={recommendations}
 					placeholder="Provide recommendations for addressing issues or improving implementation"
 					rows={3}
 				/>

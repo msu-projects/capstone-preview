@@ -3,6 +3,7 @@ import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
 import type { TDocumentDefinitions } from 'pdfmake/interfaces';
 import { logAuditAction } from './audit';
+import { getCompletionPercentage } from './project-calculations';
 
 // Initialize pdfMake with fonts
 if (pdfFonts && pdfFonts.vfs) {
@@ -34,218 +35,160 @@ export function generateProjectMonitoringPDF(projects: Project[], quarter: strin
 		// Get planned from monthly_targets
 		const latestTarget = project.monthly_targets?.[project.monthly_targets.length - 1];
 		const plan = latestTarget?.planned_physical_progress ?? 0;
-		const actual = project.completion_percentage;
+		const actual = getCompletionPercentage(project);
 		return { plan, actual, slippage: plan - actual };
 	};
 
-	// Create table rows for projects (filter out projects without financial data)
-	const projectRows = projects
-		.filter((project) => project.allotment !== undefined || project.budget > 0)
-		.map((project) => {
-			const allotment = project.allotment ?? {
-				allocated: project.budget,
-				supplemental: 0,
-				total: project.budget,
-				released: 0
-			};
-			const expenditure = project.expenditure ?? { obligations: 0, contract_cost: project.budget };
-			const contract = project.contract ?? { duration: '', delivery: '', extension: undefined };
-			const statusSummary = project.status_summary ?? {
-				stage: '',
-				issues: '',
-				recommendations: ''
-			};
-			const employment = project.employment_generated ?? { male: 0, female: 0 };
-			const municipalities = project.project_sitios?.map((s) => s.municipality).join(', ') || 'N/A';
-			const physical = getPhysicalProgress(project);
+	// Create table rows for projects
+	const projectRows = projects.map((project) => {
+		const employment = project.employment_generated ?? { male: 0, female: 0 };
+		const municipalities = project.project_sitios?.map((s) => s.municipality).join(', ') || 'N/A';
+		const physical = getPhysicalProgress(project);
 
-			return [
-				// Name of Projects column
-				{
-					text: [
-						{ text: `${project.title}\n`, bold: true, fontSize: 9 },
-						{
-							text: `Location: ${getProjectLocation(project)}\n`,
-							fontSize: 8,
-							italics: true
-						},
-						{
-							text: `Municipality: ${municipalities}\n`,
-							fontSize: 8
-						},
-						{
-							text: `Date Started: ${project.start_date}\n`,
-							fontSize: 8
-						},
-						{
-							text: `Target Completion: ${project.end_date}`,
-							fontSize: 8
-						}
-					],
-					margin: [2, 4, 2, 4] as [number, number, number, number]
-				},
-				// Allotted Budget
-				{
-					text: allotment.allocated.toLocaleString('en-PH', {
-						style: 'currency',
-						currency: 'PHP',
-						minimumFractionDigits: 2
-					}),
-					alignment: 'right' as const,
-					fontSize: 8,
-					margin: [2, 4, 2, 4] as [number, number, number, number]
-				},
-				// Supplemental Budget
-				{
-					text: allotment.supplemental.toLocaleString('en-PH', {
-						style: 'currency',
-						currency: 'PHP',
-						minimumFractionDigits: 2
-					}),
-					alignment: 'right' as const,
-					fontSize: 8,
-					margin: [2, 4, 2, 4] as [number, number, number, number]
-				},
-				// Total Allocated Budget
-				{
-					text: allotment.total.toLocaleString('en-PH', {
-						style: 'currency',
-						currency: 'PHP',
-						minimumFractionDigits: 2
-					}),
-					alignment: 'right' as const,
-					fontSize: 8,
-					margin: [2, 4, 2, 4] as [number, number, number, number]
-				},
-				// Allotment Release
-				{
-					text: allotment.released.toLocaleString('en-PH', {
-						style: 'currency',
-						currency: 'PHP',
-						minimumFractionDigits: 2
-					}),
-					alignment: 'right' as const,
-					fontSize: 8,
-					margin: [2, 4, 2, 4] as [number, number, number, number]
-				},
-				// Obligations Incurred
-				{
-					text: expenditure.obligations.toLocaleString('en-PH', {
-						style: 'currency',
-						currency: 'PHP',
-						minimumFractionDigits: 2
-					}),
-					alignment: 'right' as const,
-					fontSize: 8,
-					margin: [2, 4, 2, 4] as [number, number, number, number]
-				},
-				// Contract Cost
-				{
-					text: expenditure.contract_cost.toLocaleString('en-PH', {
-						style: 'currency',
-						currency: 'PHP',
-						minimumFractionDigits: 2
-					}),
-					alignment: 'right' as const,
-					fontSize: 8,
-					margin: [2, 4, 2, 4] as [number, number, number, number]
-				},
-				// Plan %
-				{
-					text: `${physical.plan.toFixed(2)}%`,
-					alignment: 'center' as const,
-					fontSize: 8,
-					margin: [2, 4, 2, 4] as [number, number, number, number]
-				},
-				// Actual %
-				{
-					text: `${physical.actual.toFixed(2)}%`,
-					alignment: 'center' as const,
-					fontSize: 8,
-					margin: [2, 4, 2, 4] as [number, number, number, number]
-				},
-				// Slippage %
-				{
-					text: `${physical.slippage.toFixed(2)}%`,
-					alignment: 'center' as const,
-					fontSize: 8,
-					margin: [2, 4, 2, 4] as [number, number, number, number],
-					color: physical.slippage < 0 ? 'red' : 'black'
-				},
-				// Male Employment
-				{
-					text: employment.male.toString(),
-					alignment: 'center' as const,
-					fontSize: 8,
-					margin: [2, 4, 2, 4] as [number, number, number, number]
-				},
-				// Female Employment
-				{
-					text: employment.female.toString(),
-					alignment: 'center' as const,
-					fontSize: 8,
-					margin: [2, 4, 2, 4] as [number, number, number, number]
-				},
-				// Contract Time
-				{
-					text: contract.duration,
-					alignment: 'center' as const,
-					fontSize: 8,
-					margin: [2, 4, 2, 4] as [number, number, number, number]
-				},
-				// Delivery Time
-				{
-					text: contract.delivery,
-					alignment: 'center' as const,
-					fontSize: 8,
-					margin: [2, 4, 2, 4] as [number, number, number, number]
-				},
-				// Extension
-				{
-					text: contract.extension || 'None',
-					alignment: 'center' as const,
-					fontSize: 8,
-					margin: [2, 4, 2, 4] as [number, number, number, number]
-				},
-				// Project Status
-				{
-					text: statusSummary.stage,
-					alignment: 'center' as const,
-					fontSize: 8,
-					margin: [2, 4, 2, 4] as [number, number, number, number]
-				},
-				// Remarks/Justification
-				{
-					text: [
-						{
-							text: 'Issues: ',
-							bold: true,
-							fontSize: 7
-						},
-						{
-							text: `${statusSummary.issues}\n\n`,
-							fontSize: 7
-						},
-						{
-							text: 'Recommendations: ',
-							bold: true,
-							fontSize: 7
-						},
-						{
-							text: statusSummary.recommendations,
-							fontSize: 7
-						}
-					],
-					margin: [2, 4, 2, 4] as [number, number, number, number]
-				},
-				// CATCH-UP Plans
-				{
-					text: project.catch_up_plan || '',
-					fontSize: 7,
-					margin: [2, 4, 2, 4] as [number, number, number, number]
-				}
-			];
-		});
+		// Calculate cumulative budget utilized from monthly progress
+		const cumulativeDisbursed =
+			project.monthly_progress?.reduce((sum, mp) => sum + (mp.budget_utilized || 0), 0) || 0;
+
+		return [
+			// Name of Projects column
+			{
+				text: [
+					{ text: `${project.title}\n`, bold: true, fontSize: 9 },
+					{
+						text: `Location: ${getProjectLocation(project)}\n`,
+						fontSize: 8,
+						italics: true
+					},
+					{
+						text: `Municipality: ${municipalities}\n`,
+						fontSize: 8
+					},
+					{
+						text: `Date Started: ${project.start_date}\n`,
+						fontSize: 8
+					},
+					{
+						text: `Duration: ${project.contract_duration}`,
+						fontSize: 8
+					}
+				],
+				margin: [2, 4, 2, 4] as [number, number, number, number]
+			},
+			// Total Budget
+			{
+				text: project.total_budget.toLocaleString('en-PH', {
+					style: 'currency',
+					currency: 'PHP',
+					minimumFractionDigits: 2
+				}),
+				alignment: 'right' as const,
+				fontSize: 8,
+				margin: [2, 4, 2, 4] as [number, number, number, number]
+			},
+			// Contract Cost
+			{
+				text: project.contract_cost.toLocaleString('en-PH', {
+					style: 'currency',
+					currency: 'PHP',
+					minimumFractionDigits: 2
+				}),
+				alignment: 'right' as const,
+				fontSize: 8,
+				margin: [2, 4, 2, 4] as [number, number, number, number]
+			},
+			// Budget Utilized (from monthly progress)
+			{
+				text: cumulativeDisbursed.toLocaleString('en-PH', {
+					style: 'currency',
+					currency: 'PHP',
+					minimumFractionDigits: 2
+				}),
+				alignment: 'right' as const,
+				fontSize: 8,
+				margin: [2, 4, 2, 4] as [number, number, number, number]
+			},
+			// Plan %
+			{
+				text: `${physical.plan.toFixed(2)}%`,
+				alignment: 'center' as const,
+				fontSize: 8,
+				margin: [2, 4, 2, 4] as [number, number, number, number]
+			},
+			// Actual %
+			{
+				text: `${physical.actual.toFixed(2)}%`,
+				alignment: 'center' as const,
+				fontSize: 8,
+				margin: [2, 4, 2, 4] as [number, number, number, number]
+			},
+			// Slippage %
+			{
+				text: `${physical.slippage.toFixed(2)}%`,
+				alignment: 'center' as const,
+				fontSize: 8,
+				margin: [2, 4, 2, 4] as [number, number, number, number],
+				color: physical.slippage < 0 ? 'red' : 'black'
+			},
+			// Male Employment
+			{
+				text: employment.male.toString(),
+				alignment: 'center' as const,
+				fontSize: 8,
+				margin: [2, 4, 2, 4] as [number, number, number, number]
+			},
+			// Female Employment
+			{
+				text: employment.female.toString(),
+				alignment: 'center' as const,
+				fontSize: 8,
+				margin: [2, 4, 2, 4] as [number, number, number, number]
+			},
+			// Contract Duration
+			{
+				text: project.contract_duration,
+				alignment: 'center' as const,
+				fontSize: 8,
+				margin: [2, 4, 2, 4] as [number, number, number, number]
+			},
+			// Project Status
+			{
+				text: project.status,
+				alignment: 'center' as const,
+				fontSize: 8,
+				margin: [2, 4, 2, 4] as [number, number, number, number]
+			},
+			// Remarks/Justification
+			{
+				text: [
+					{
+						text: 'Issues: ',
+						bold: true,
+						fontSize: 7
+					},
+					{
+						text: `${project.issues || 'None'}\n\n`,
+						fontSize: 7
+					},
+					{
+						text: 'Recommendations: ',
+						bold: true,
+						fontSize: 7
+					},
+					{
+						text: project.recommendations || 'None',
+						fontSize: 7
+					}
+				],
+				margin: [2, 4, 2, 4] as [number, number, number, number]
+			},
+			// CATCH-UP Plans
+			{
+				text: project.catch_up_plan || '',
+				fontSize: 7,
+				margin: [2, 4, 2, 4] as [number, number, number, number]
+			}
+		];
+	});
 
 	const docDefinition: TDocumentDefinitions = {
 		pageOrientation: 'landscape',
@@ -288,42 +231,34 @@ export function generateProjectMonitoringPDF(projects: Project[], quarter: strin
 				table: {
 					headerRows: 2,
 					widths: [
-						80, // Name of Projects
-						35, // Allotted Budget
-						35, // Supplemental
-						35, // Total Allocated
-						35, // Allotment Release
-						35, // Obligations
-						35, // Contract Cost
-						25, // Plan %
-						25, // Actual %
-						25, // Slippage %
-						15, // Male
-						15, // Female
-						30, // Contract Time
-						30, // Delivery Time
-						30, // Extension
-						40, // Project Status
-						80, // Remarks
-						60 // CATCH-UP Plans
+						100, // Name of Projects
+						50, // Total Budget
+						50, // Contract Cost
+						50, // Budget Utilized
+						30, // Plan %
+						30, // Actual %
+						30, // Slippage %
+						20, // Male
+						20, // Female
+						40, // Contract Duration
+						50, // Project Status
+						100, // Remarks
+						70 // CATCH-UP Plans
 					],
 					body: [
 						// First header row - Grouped headers
 						[
 							{
-								text: "IMPLEMENTER: Provincial Governor's Office\nPROVINCE: South Cotabato\n\nNAME OF PROJECTS\n(All on-going projects implemented by an office under the 20% LDF in priority areas and supplemental target)",
+								text: "IMPLEMENTER: Provincial Governor's Office\nPROVINCE: South Cotabato\n\nNAME OF PROJECTS",
 								style: 'tableHeader',
 								rowSpan: 2
 							},
 							{
-								text: 'FINANCIAL STATUS (000)',
+								text: 'FINANCIAL STATUS',
 								style: 'tableHeader',
-								colSpan: 6,
+								colSpan: 3,
 								alignment: 'center'
 							},
-							{},
-							{},
-							{},
 							{},
 							{},
 							{
@@ -335,39 +270,32 @@ export function generateProjectMonitoringPDF(projects: Project[], quarter: strin
 							{},
 							{},
 							{
-								text: 'NO. OF EMPLOYEES GENERATED',
+								text: 'EMPLOYMENT',
 								style: 'tableHeader',
 								colSpan: 2,
 								alignment: 'center'
 							},
 							{},
 							{
-								text: 'CONTRACT TIME/ DELIVERY TIME',
-								style: 'tableHeader',
-								colSpan: 2,
-								alignment: 'center'
-							},
-							{},
-							{
-								text: 'EXTENSION, if any',
+								text: 'CONTRACT\nDURATION',
 								style: 'tableHeader',
 								rowSpan: 2,
 								alignment: 'center'
 							},
 							{
-								text: 'PROJECT STATUS\n(Completed, On going, Suspended)',
+								text: 'PROJECT\nSTATUS',
 								style: 'tableHeader',
 								rowSpan: 2,
 								alignment: 'center'
 							},
 							{
-								text: 'REMARKS/ JUSTIFICATION\n(1) Procurement Issues of LGI\n(2) Recommendations',
+								text: 'REMARKS/ JUSTIFICATION\n(Issues & Recommendations)',
 								style: 'tableHeader',
 								rowSpan: 2,
 								alignment: 'center'
 							},
 							{
-								text: 'CATCHUP PLANS',
+								text: 'CATCH-UP\nPLANS',
 								style: 'tableHeader',
 								rowSpan: 2,
 								alignment: 'center'
@@ -376,27 +304,18 @@ export function generateProjectMonitoringPDF(projects: Project[], quarter: strin
 						// Second header row - Column details
 						[
 							{}, // NAME OF PROJECTS (rowSpan from above)
-							{ text: 'ALLOTTED BUDGET', style: 'tableHeader', fontSize: 7 },
-							{ text: 'SUPPLEMENTAL BUDGET', style: 'tableHeader', fontSize: 7 },
-							{ text: 'TOTAL ALLOCATED BUDGET', style: 'tableHeader', fontSize: 7 },
-							{ text: 'ALLOTMENT RELEASE To Date', style: 'tableHeader', fontSize: 7 },
-							{
-								text: 'OBLIGATIONS INCURRED To Date',
-								style: 'tableHeader',
-								fontSize: 7
-							},
-							{ text: 'CONTRACT COST To Date', style: 'tableHeader', fontSize: 7 },
-							{ text: 'PLAN This Month (%)', style: 'tableHeader', fontSize: 7 },
-							{ text: 'ACTUAL This Month (%)', style: 'tableHeader', fontSize: 7 },
+							{ text: 'TOTAL BUDGET', style: 'tableHeader', fontSize: 7 },
+							{ text: 'CONTRACT COST', style: 'tableHeader', fontSize: 7 },
+							{ text: 'BUDGET UTILIZED', style: 'tableHeader', fontSize: 7 },
+							{ text: 'PLAN (%)', style: 'tableHeader', fontSize: 7 },
+							{ text: 'ACTUAL (%)', style: 'tableHeader', fontSize: 7 },
 							{ text: 'SLIPPAGE (%)', style: 'tableHeader', fontSize: 7 },
 							{ text: '(M)', style: 'tableHeader', fontSize: 7 },
 							{ text: '(F)', style: 'tableHeader', fontSize: 7 },
-							{ text: '', style: 'tableHeader', fontSize: 7 },
-							{ text: '', style: 'tableHeader', fontSize: 7 },
-							{}, // EXTENSION (rowSpan from above)
+							{}, // CONTRACT DURATION (rowSpan from above)
 							{}, // PROJECT STATUS (rowSpan from above)
 							{}, // REMARKS (rowSpan from above)
-							{} // CATCHUP PLANS (rowSpan from above)
+							{} // CATCH-UP PLANS (rowSpan from above)
 						],
 						// Data rows
 						...projectRows

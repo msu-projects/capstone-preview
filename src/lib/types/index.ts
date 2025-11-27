@@ -149,32 +149,6 @@ export interface DuplicateSitio {
 	key: string;
 }
 
-// ===== CONTRACT & STATUS TYPES =====
-
-export interface ContractDetails {
-	duration: string; // e.g., "180 CD" (calendar days)
-	delivery: string; // Delivery timeline
-	extension?: string; // Extension date if requested (ISO date string)
-}
-
-export interface StatusSummary {
-	stage: string; // Current project stage
-	issues: string; // Issues encountered
-	recommendations: string; // Recommended actions
-}
-
-export interface AllotmentDetails {
-	allocated: number;
-	supplemental: number;
-	total: number;
-	released: number;
-}
-
-export interface ExpenditureDetails {
-	obligations: number;
-	contract_cost: number;
-}
-
 // ===== NEW ENHANCED TRACKING SYSTEM TYPES =====
 
 export interface Category {
@@ -266,25 +240,19 @@ export interface Project {
 	id: number;
 	title: string;
 	description: string;
-	category: string;
-	category_key?: CategoryKey;
+	category_key: CategoryKey;
 	project_type_id?: number;
-	project_type_name?: string;
 	status: ProjectStatus;
 	start_date: string;
-	end_date: string;
-	budget: number;
+	contract_duration: string; // e.g., "180 CD" (calendar days)
+	total_budget: number;
+	contract_cost: number;
 	beneficiaries: number;
-	completion_percentage: number;
 	project_year: number;
 
-	// Financial tracking (migrated from monitoring)
-	allotment?: AllotmentDetails;
-	expenditure?: ExpenditureDetails;
-
-	// Contract & status (migrated from monitoring)
-	contract?: ContractDetails;
-	status_summary?: StatusSummary;
+	// Status tracking
+	issues?: string;
+	recommendations?: string;
 	catch_up_plan?: string;
 
 	// Enhanced fields
@@ -298,7 +266,7 @@ export interface Project {
 		female: number;
 	};
 	implementing_agency?: string;
-	sitio_coordinators?: Array<{
+	sitios_affected?: Array<{
 		sitio_id: number;
 		barangay_captain?: string;
 		sitio_leader?: string;

@@ -11,14 +11,12 @@
 
 	let {
 		targetStartDate = $bindable<DateValue | undefined>(undefined),
-		targetEndDate = $bindable<DateValue | undefined>(undefined),
 		durationInCalendarDays = $bindable(''),
 		totalBudget = $bindable(''),
 		employmentMale = $bindable(''),
 		employmentFemale = $bindable('')
 	} = $props<{
 		targetStartDate: DateValue | undefined;
-		targetEndDate: DateValue | undefined;
 		durationInCalendarDays: string;
 		totalBudget: string;
 		employmentMale: string;
@@ -26,13 +24,14 @@
 	}>();
 
 	// Auto-calculate target end date based on start date + calendar days
-	$effect(() => {
+	const targetEndDate = $derived.by(() => {
 		if (targetStartDate && durationInCalendarDays) {
 			const days = Number(durationInCalendarDays);
 			if (days > 0) {
-				targetEndDate = targetStartDate.add({ days });
+				return targetStartDate.add({ days });
 			}
 		}
+		return undefined;
 	});
 </script>
 

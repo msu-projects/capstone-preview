@@ -3,17 +3,8 @@
  * and form structures for UI interaction
  */
 
-import type {
-	AllotmentDetails,
-	ContractDetails,
-	ExpenditureDetails,
-	MonthlyProgress,
-	MonthlyTarget,
-	PhotoDocumentation,
-	Project,
-	StatusSummary
-} from '$lib/types';
-import { getCurrentMonth } from './project-calculations';
+import type { MonthlyProgress, MonthlyTarget, PhotoDocumentation, Project } from '$lib/types';
+import { getCompletionPercentage, getCurrentMonth } from './project-calculations';
 
 /**
  * Interface for Quick Update form data
@@ -23,9 +14,8 @@ export interface QuickUpdateFormData {
 	status: Project['status'];
 	physicalActual: string;
 	plannedPercentage: string;
-	statusStage: string;
-	statusIssues: string;
-	statusRecommendations: string;
+	issues: string;
+	recommendations: string;
 	catchUpPlan: string;
 	// Employment
 	maleEmployment: string;
@@ -36,9 +26,7 @@ export interface QuickUpdateFormData {
 	monthlyDisbursement: string; // Amount disbursed THIS month only
 	// Timeline
 	startDate: string;
-	targetEndDate: string;
-	extensionRequested: boolean;
-	extensionDays: string;
+	contractDuration: string;
 	// Beneficiaries
 	targetBeneficiaries: number;
 	currentBeneficiaries: string;
@@ -72,43 +60,32 @@ export function projectToQuickUpdate(project: Project): QuickUpdateFormData {
 				return sum + (mp.budget_utilized || 0);
 			}
 			return sum;
-		}, 0) ||
-		project.allotment?.released ||
-		project.expenditure?.obligations ||
-		0;
+		}, 0) || 0;
 
 	// Get THIS month's disbursement only (not cumulative)
 	const monthlyDisbursement = latestMonthlyProgress?.budget_utilized || 0;
 
+	// Get completion percentage from latest monthly progress
+	const completionPct = getCompletionPercentage(project);
+
 	return {
 		// Progress & Status
 		status: project.status,
-		physicalActual: project.completion_percentage?.toString() || '0',
+		physicalActual: completionPct.toString(),
 		plannedPercentage: plannedPercentage?.toString() || '0',
-		statusStage: project.status_summary?.stage || '',
-		statusIssues: project.status_summary?.issues || '',
-		statusRecommendations: project.status_summary?.recommendations || '',
+		issues: project.issues || '',
+		recommendations: project.recommendations || '',
 		catchUpPlan: project.catch_up_plan || '',
 		// Employment
 		maleEmployment: project.employment_generated?.male?.toString() || '0',
 		femaleEmployment: project.employment_generated?.female?.toString() || '0',
 		// Financial
-		totalBudget: project.budget || 0,
+		totalBudget: project.total_budget || 0,
 		budgetDisbursed: cumulativeDisbursed.toString(), // Cumulative total
 		monthlyDisbursement: monthlyDisbursement.toString(), // This month only
 		// Timeline
 		startDate: project.start_date || '',
-		targetEndDate: project.end_date || '',
-		extensionRequested: !!project.contract?.extension,
-		extensionDays: (() => {
-			// Calculate extension days from stored extension date
-			if (!project.contract?.extension || !project.end_date) return '';
-			const endDate = new Date(project.end_date);
-			const extensionDate = new Date(project.contract.extension);
-			const diffInMs = extensionDate.getTime() - endDate.getTime();
-			const diffInDays = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
-			return diffInDays > 0 ? diffInDays.toString() : '';
-		})(),
+		contractDuration: project.contract_duration || '',
 		// Beneficiaries
 		targetBeneficiaries: project.beneficiaries || 0,
 		currentBeneficiaries:
@@ -135,48 +112,9 @@ export function applyQuickUpdateToProject(
 	const actualPct = Number(formData.physicalActual || 0);
 	const slippage = plannedPct - actualPct;
 
-	// Update allotment
-	const updatedAllotment: AllotmentDetails = {
-		...project.allotment,
-		allocated: project.budget || 0,
-		supplemental: project.allotment?.supplemental || 0,
-		total: project.budget || 0,
-		released: Number(formData.budgetDisbursed || 0)
-	};
-
-	// Update expenditure
-	const updatedExpenditure: ExpenditureDetails = {
-		obligations: Number(formData.budgetDisbursed || 0),
-		contract_cost: project.expenditure?.contract_cost || project.budget || 0
-	};
-
-	// Update contract
-	const updatedContract: ContractDetails = {
-		...project.contract,
-		duration: project.contract?.duration || '',
-		delivery: project.contract?.delivery || '',
-		extension: (() => {
-			// Calculate extension date from calendar days
-			if (!formData.extensionRequested || !formData.extensionDays) return undefined;
-			const days = Number(formData.extensionDays);
-			if (isNaN(days) || days <= 0) return undefined;
-			const baseDate = new Date(formData.targetEndDate);
-			const extensionDate = new Date(baseDate);
-			extensionDate.setDate(extensionDate.getDate() + days);
-			return extensionDate.toISOString().split('T')[0];
-		})()
-	};
-
-	// Update status summary
-	const updatedStatusSummary: StatusSummary = {
-		stage: formData.statusStage,
-		issues: formData.statusIssues,
-		recommendations: formData.statusRecommendations
-	};
-
 	const monthlyAmount = Number(formData.monthlyDisbursement || 0);
 
-	// Update or create monthly_progress for current month (now contains budget_utilized)
+	// Update or create monthly_progress for current month
 	let updatedMonthlyProgress: MonthlyProgress[] = project.monthly_progress || [];
 	const existingProgressIndex = updatedMonthlyProgress.findIndex(
 		(mp: MonthlyProgress) => mp.month_year === currentMonth
@@ -191,7 +129,7 @@ export function applyQuickUpdateToProject(
 						physical_progress_percentage: actualPct,
 						budget_utilized: monthlyAmount,
 						beneficiaries_reached: Number(formData.currentBeneficiaries || 0),
-						issues_encountered: formData.statusIssues,
+						issues_encountered: formData.issues,
 						photo_documentation: formData.photoDocumentation,
 						status: slippage > 10 ? 'delayed' : slippage < -5 ? 'ahead' : ('on-track' as const),
 						updated_at: new Date().toISOString()
@@ -208,7 +146,7 @@ export function applyQuickUpdateToProject(
 			budget_utilized: monthlyAmount,
 			achieved_outputs: {},
 			beneficiaries_reached: Number(formData.currentBeneficiaries || 0),
-			issues_encountered: formData.statusIssues,
+			issues_encountered: formData.issues,
 			photo_documentation: formData.photoDocumentation,
 			status: slippage > 10 ? 'delayed' : slippage < -5 ? 'ahead' : ('on-track' as const),
 			created_at: new Date().toISOString(),
@@ -220,13 +158,10 @@ export function applyQuickUpdateToProject(
 	return {
 		...project,
 		status: formData.status,
-		end_date: formData.targetEndDate,
-		completion_percentage: actualPct,
+		contract_duration: formData.contractDuration,
 		beneficiaries: Number(formData.currentBeneficiaries || project.beneficiaries || 0),
-		allotment: updatedAllotment,
-		expenditure: updatedExpenditure,
-		contract: updatedContract,
-		status_summary: updatedStatusSummary,
+		issues: formData.issues || undefined,
+		recommendations: formData.recommendations || undefined,
 		catch_up_plan: formData.catchUpPlan,
 		monthly_progress: updatedMonthlyProgress,
 		employment_generated: {
@@ -289,24 +224,9 @@ export function validateQuickUpdateData(formData: QuickUpdateFormData): {
 		errors.push('Current beneficiaries cannot be negative');
 	}
 
-	// Validate extension
-	if (formData.extensionRequested && !formData.extensionDays) {
-		errors.push('Extension days is required when extension is requested');
-	}
-
-	if (formData.extensionRequested && formData.extensionDays) {
-		const days = Number(formData.extensionDays);
-		if (isNaN(days) || days <= 0) {
-			errors.push('Extension days must be a positive number');
-		}
-	}
-
-	// Validate timeline
-	const startDate = new Date(formData.startDate);
-	const endDate = new Date(formData.targetEndDate);
-
-	if (endDate < startDate) {
-		errors.push('End date must be after start date');
+	// Validate contract duration format
+	if (formData.contractDuration && !/^\d+\s*CD$/.test(formData.contractDuration.trim())) {
+		errors.push('Contract duration should be in format "XXX CD" (e.g., "180 CD")');
 	}
 
 	return {
@@ -368,21 +288,31 @@ export function getQuickUpdateWarnings(
 		});
 	}
 
-	// Timeline warnings
-	const endDate = new Date(formData.targetEndDate);
-	const today = new Date();
-	const daysRemaining = Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+	// Timeline warnings based on contract duration
+	// Parse contract duration (e.g., "180 CD" -> 180 days)
+	const durationMatch = formData.contractDuration?.match(/(\d+)\s*CD/i);
+	if (durationMatch && formData.startDate) {
+		const contractDays = parseInt(durationMatch[1], 10);
+		const startDate = new Date(formData.startDate);
+		const targetEndDate = new Date(startDate);
+		targetEndDate.setDate(targetEndDate.getDate() + contractDays);
 
-	if (daysRemaining < 0 && actualPct < 100) {
-		warnings.push({
-			type: 'warning',
-			message: `Project is overdue by ${Math.abs(daysRemaining)} days`
-		});
-	} else if (daysRemaining <= 30 && daysRemaining > 0 && actualPct < 90) {
-		warnings.push({
-			type: 'info',
-			message: `Deadline approaching in ${daysRemaining} days with ${actualPct}% completion`
-		});
+		const today = new Date();
+		const daysRemaining = Math.ceil(
+			(targetEndDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+		);
+
+		if (daysRemaining < 0 && actualPct < 100) {
+			warnings.push({
+				type: 'warning',
+				message: `Project is overdue by ${Math.abs(daysRemaining)} days`
+			});
+		} else if (daysRemaining <= 30 && daysRemaining > 0 && actualPct < 90) {
+			warnings.push({
+				type: 'info',
+				message: `Deadline approaching in ${daysRemaining} days with ${actualPct}% completion`
+			});
+		}
 	}
 
 	return warnings;

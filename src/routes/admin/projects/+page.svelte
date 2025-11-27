@@ -4,8 +4,10 @@
 	import ProjectsFilters from '$lib/components/admin/projects/ProjectsFilters.svelte';
 	import ProjectsTable from '$lib/components/admin/projects/ProjectsTable.svelte';
 	import { Button } from '$lib/components/ui/button';
+	import { categories } from '$lib/config/project-categories';
 	import { projects } from '$lib/mock-data';
 	import { downloadProjectMonitoringPDF, downloadSingleProjectPDF } from '$lib/utils/pdf-generator';
+	import { getCategoryName, getCompletionPercentage } from '$lib/utils/project-calculations';
 	import { Download, Plus } from '@lucide/svelte';
 
 	// State
@@ -19,8 +21,8 @@
 	let deleteDialogOpen = $state(false);
 	let projectToDelete = $state<number | null>(null);
 
-	// Get unique categories
-	const categories = $derived([...new Set(projects.map((p) => p.category))]);
+	// Get unique categories from config
+	const categoryOptions = categories.map((c) => c.name);
 
 	// Filter and sort projects
 	const filteredProjects = $derived.by(() => {
@@ -45,7 +47,8 @@
 			}
 
 			const matchesStatus = !statusFilter || project.status === statusFilter;
-			const matchesCategory = !categoryFilter || project.category === categoryFilter;
+			const matchesCategory =
+				!categoryFilter || getCategoryName(project.category_key) === categoryFilter;
 
 			return matchesSearch && matchesStatus && matchesCategory;
 		});
@@ -58,13 +61,11 @@
 					comparison = a.title.localeCompare(b.title);
 					break;
 				case 'budget':
-					const budgetA = a.allotment?.total ?? a.budget;
-					const budgetB = b.allotment?.total ?? b.budget;
-					comparison = budgetA - budgetB;
+					comparison = a.total_budget - b.total_budget;
 					break;
 				case 'progress':
-					const progressA = a.completion_percentage;
-					const progressB = b.completion_percentage;
+					const progressA = getCompletionPercentage(a);
+					const progressB = getCompletionPercentage(b);
 					comparison = progressA - progressB;
 					break;
 				case 'status':
@@ -169,7 +170,7 @@
 			bind:searchQuery
 			bind:statusFilter
 			bind:categoryFilter
-			{categories}
+			categories={categoryOptions}
 			onReset={resetFilters}
 		/>
 

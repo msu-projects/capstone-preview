@@ -610,7 +610,6 @@ export function generateProjects(
 		const categoryKey = rng.pick(categories).key;
 		const titles = PROJECT_TITLES[categoryKey];
 		const title = rng.pick(titles);
-		const category = categories.find((c) => c.key === categoryKey)!;
 		const projectType = projectTypes.find((pt) => pt.category_key === categoryKey);
 
 		const status = rng.pick(STATUSES);
@@ -621,20 +620,6 @@ export function generateProjects(
 		const startMonth = rng.nextInt(0, 8);
 		const startDate = new Date(year, startMonth, rng.nextInt(1, 28));
 		const durationMonths = rng.nextInt(3, 12);
-		const endDate = new Date(startDate);
-		endDate.setMonth(endDate.getMonth() + durationMonths);
-
-		// Calculate completion based on status
-		let completion = 0;
-		if (status === 'completed') {
-			completion = 100;
-		} else if (status === 'in-progress') {
-			completion = rng.nextInt(20, 85);
-		} else if (status === 'suspended') {
-			completion = rng.nextInt(10, 60);
-		} else {
-			completion = 0;
-		}
 
 		// Assign random sitios to project (1-4 sitios)
 		const numSitios = rng.nextInt(1, Math.min(4, sitios.length));
@@ -658,21 +643,48 @@ export function generateProjects(
 		const monthsElapsed =
 			status === 'completed' ? durationMonths : status === 'in-progress' ? rng.nextInt(1, 6) : 0;
 
+		// Contract duration in calendar days
+		const contractDuration = `${durationMonths * 30} CD`;
+
+		// Contract cost is slightly less than total budget
+		const contractCost = Math.floor(budget * (0.85 + rng.next() * 0.1));
+
+		// Issues and recommendations for some projects
+		const hasIssues = rng.next() > 0.6;
+		const issues = hasIssues
+			? rng.pick([
+					'Weather delays affecting construction timeline',
+					'Material supply chain disruptions',
+					'Pending local permits and clearances',
+					'Budget realignment needed for additional scope',
+					'Community coordination challenges'
+				])
+			: undefined;
+		const recommendations = hasIssues
+			? rng.pick([
+					'Extend contract duration by 30 days',
+					'Coordinate with local suppliers for materials',
+					'Expedite permit processing through LGU',
+					'Submit budget modification request',
+					'Increase community engagement activities'
+				])
+			: undefined;
+
 		const project: Project = {
 			id: i,
 			title: `${title} - ${selectedSitios[0].municipality}`,
 			description: `${title} implementation covering ${selectedSitios.map((s) => s.name).join(', ')} in ${selectedSitios[0].municipality}.`,
-			category: category.name,
 			category_key: categoryKey,
 			project_type_id: projectType?.id,
-			project_type_name: projectType?.name,
 			status,
 			start_date: startDate.toISOString().split('T')[0],
-			end_date: endDate.toISOString().split('T')[0],
-			budget,
+			contract_duration: contractDuration,
+			total_budget: budget,
+			contract_cost: contractCost,
 			beneficiaries: totalBeneficiaries,
-			completion_percentage: completion,
 			project_year: year,
+			issues,
+			recommendations,
 			project_sitios: projectSitios,
 			monthly_progress:
 				monthsElapsed > 0 ? generateMonthlyProgress(i, budget, startDate, monthsElapsed, rng) : [],

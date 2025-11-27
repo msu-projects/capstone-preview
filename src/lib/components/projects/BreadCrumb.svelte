@@ -3,6 +3,7 @@
 	import { Separator } from '$lib/components/ui/separator';
 	import * as Sidebar from '$lib/components/ui/sidebar';
 	import type { Project } from '$lib/types';
+	import { getCategoryName } from '$lib/utils/project-calculations';
 	import { ArrowLeft } from '@lucide/svelte';
 
 	interface Props {
@@ -31,7 +32,7 @@
 				<div class="flex items-center gap-2 text-sm text-slate-500">
 					<span>Projects</span>
 					<span class="text-slate-300">/</span>
-					<span>{project.category}</span>
+					<span>{getCategoryName(project.category_key)}</span>
 					<span class="text-slate-300">/</span>
 					<span class="font-medium text-slate-800">PROJ-{project.id}</span>
 				</div>

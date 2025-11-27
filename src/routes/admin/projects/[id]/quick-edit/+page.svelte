@@ -182,9 +182,8 @@
 					<QuickUpdateForm
 						bind:status={quickUpdateData.status}
 						bind:physicalActual={quickUpdateData.physicalActual}
-						bind:statusStage={quickUpdateData.statusStage}
-						bind:statusIssues={quickUpdateData.statusIssues}
-						bind:statusRecommendations={quickUpdateData.statusRecommendations}
+						bind:issues={quickUpdateData.issues}
+						bind:recommendations={quickUpdateData.recommendations}
 						bind:catchUpPlan={quickUpdateData.catchUpPlan}
 						bind:maleEmployment={quickUpdateData.maleEmployment}
 						bind:femaleEmployment={quickUpdateData.femaleEmployment}
@@ -192,9 +191,7 @@
 						bind:budgetDisbursed={quickUpdateData.budgetDisbursed}
 						bind:monthlyDisbursement={quickUpdateData.monthlyDisbursement}
 						bind:startDate={quickUpdateData.startDate}
-						bind:targetEndDate={quickUpdateData.targetEndDate}
-						bind:extensionRequested={quickUpdateData.extensionRequested}
-						bind:extensionDays={quickUpdateData.extensionDays}
+						bind:contractDuration={quickUpdateData.contractDuration}
 						bind:targetBeneficiaries={quickUpdateData.targetBeneficiaries}
 						bind:currentBeneficiaries={quickUpdateData.currentBeneficiaries}
 						bind:householdsReached={quickUpdateData.householdsReached}

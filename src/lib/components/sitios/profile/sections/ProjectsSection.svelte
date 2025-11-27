@@ -6,6 +6,7 @@
 	import { getStatusConfig as getProjectStatusConfig } from '$lib/config/status-config';
 	import type { Project, Sitio } from '$lib/types';
 	import { formatCurrency, formatDate, formatNumber } from '$lib/utils/formatters';
+	import { getCategoryName, getCompletionPercentage } from '$lib/utils/project-calculations';
 	import {
 		ArrowUpRight,
 		Banknote,
@@ -27,7 +28,7 @@
 	const { sitio, relatedProjects, isAdminView = false }: Props = $props();
 
 	// Project statistics
-	const totalBudget = $derived(relatedProjects.reduce((sum, p) => sum + p.budget, 0));
+	const totalBudget = $derived(relatedProjects.reduce((sum, p) => sum + p.total_budget, 0));
 	const activeProjects = $derived(relatedProjects.filter((p) => p.status === 'in-progress'));
 	const completedProjects = $derived(relatedProjects.filter((p) => p.status === 'completed'));
 	const planningProjects = $derived(relatedProjects.filter((p) => p.status === 'planning'));
@@ -44,7 +45,7 @@
 	// Average completion
 	const avgCompletion = $derived(
 		relatedProjects.length > 0
-			? relatedProjects.reduce((sum, p) => sum + p.completion_percentage, 0) /
+			? relatedProjects.reduce((sum, p) => sum + getCompletionPercentage(p), 0) /
 					relatedProjects.length
 			: 0
 	);
@@ -240,6 +241,7 @@
 					{#each relatedProjects as project}
 						{@const statusConfig = getProjectStatusConfig(project.status)}
 						{@const StatusIcon = getStatusIcon(project.status)}
+						{@const completionPct = getCompletionPercentage(project)}
 						<div class="group p-4 transition-colors hover:bg-slate-50/50 sm:p-5">
 							<div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
 								<!-- Project Info -->
@@ -253,7 +255,7 @@
 											{statusConfig.label}
 										</Badge>
 										<Badge variant="secondary" class="text-xs">
-											{project.category}
+											{getCategoryName(project.category_key)}
 										</Badge>
 										<span class="text-xs text-slate-400">Year {project.project_year}</span>
 									</div>
@@ -268,22 +270,22 @@
 								<!-- Progress & Budget -->
 								<div class="flex flex-col gap-2 sm:items-end sm:text-right">
 									<div class="text-lg font-bold text-slate-900">
-										{formatCurrency(project.budget)}
+										{formatCurrency(project.total_budget)}
 									</div>
 									<div class="flex items-center gap-2">
 										<div class="h-2 w-24 overflow-hidden rounded-full bg-slate-200">
 											<div
 												class="h-full rounded-full bg-blue-500 transition-all"
-												style="width: {project.completion_percentage}%"
+												style="width: {completionPct}%"
 											></div>
 										</div>
 										<span class="text-sm font-medium text-slate-700">
-											{project.completion_percentage}%
+											{completionPct}%
 										</span>
 									</div>
 									<div class="flex items-center gap-1 text-xs text-slate-500">
 										<Calendar class="size-3" />
-										{formatDate(project.start_date)} - {formatDate(project.end_date)}
+										{formatDate(project.start_date)} ({project.contract_duration})
 									</div>
 								</div>
 							</div>

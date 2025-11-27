@@ -5,21 +5,23 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Progress } from '$lib/components/ui/progress';
 	import * as Select from '$lib/components/ui/select';
+	import { categories } from '$lib/config/project-categories';
 	import { getStatusBadgeVariant, getStatusLabel } from '$lib/config/status-config';
 	import { projects } from '$lib/mock-data';
-	import type { ProjectStatus } from '$lib/types';
+	import type { CategoryKey, ProjectStatus } from '$lib/types';
 	import { formatCurrency } from '$lib/utils/formatters';
+	import { getCategoryName, getCompletionPercentage } from '$lib/utils/project-calculations';
 	import { Eye, Search, X } from '@lucide/svelte';
 
 	// State
 	let searchQuery = $state('');
 	let statusFilter = $state<string>('');
-	let categoryFilter = $state<string>('');
+	let categoryFilter = $state<CategoryKey | ''>('');
 	let currentPage = $state(1);
 	const itemsPerPage = 12;
 
-	// Get unique categories
-	const categories = $derived([...new Set(projects.map((p) => p.category))]);
+	// Get unique categories from config
+	const categoryOptions = categories.map((c) => ({ key: c.key, name: c.name }));
 
 	// Filter projects
 	const filteredProjects = $derived.by(() => {
@@ -35,7 +37,7 @@
 					false);
 
 			const matchesStatus = !statusFilter || project.status === statusFilter;
-			const matchesCategory = !categoryFilter || project.category === categoryFilter;
+			const matchesCategory = !categoryFilter || project.category_key === categoryFilter;
 
 			return matchesSearch && matchesStatus && matchesCategory;
 		});
@@ -111,12 +113,14 @@
 					<div class="w-[200px]">
 						<Select.Root type="single" bind:value={categoryFilter}>
 							<Select.Trigger class="w-full">
-								{categoryFilter || 'All Categories'}
+								{categoryFilter ? getCategoryName(categoryFilter as CategoryKey) : 'All Categories'}
 							</Select.Trigger>
 							<Select.Content>
 								<Select.Item value="" label="All Categories">All Categories</Select.Item>
-								{#each categories as category (category)}
-									<Select.Item value={category} label={category}>{category}</Select.Item>
+								{#each categoryOptions as category (category.key)}
+									<Select.Item value={category.key} label={category.name}
+										>{category.name}</Select.Item
+									>
 								{/each}
 							</Select.Content>
 						</Select.Root>
@@ -146,6 +150,7 @@
 		{:else}
 			<div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
 				{#each paginatedProjects as project (project.id)}
+					{@const completionPct = getCompletionPercentage(project)}
 					<Card.Card class="group overflow-hidden transition-shadow hover:shadow-lg">
 						<Card.CardHeader class="space-y-2">
 							<div class="flex items-start justify-between gap-2">
@@ -153,7 +158,7 @@
 									{getStatusLabel(project.status)}
 								</Badge>
 								<Badge variant="outline" class="text-xs">
-									{project.category}
+									{getCategoryName(project.category_key)}
 								</Badge>
 							</div>
 							<Card.CardTitle class="line-clamp-2 text-lg leading-tight group-hover:text-primary">
@@ -182,7 +187,7 @@
 								</div>
 								<div class="flex justify-between">
 									<span class="text-muted-foreground">Budget</span>
-									<span class="font-medium">{formatCurrency(project.budget)}</span>
+									<span class="font-medium">{formatCurrency(project.total_budget)}</span>
 								</div>
 								<div class="flex justify-between">
 									<span class="text-muted-foreground">Beneficiaries</span>
@@ -194,10 +199,10 @@
 								<div class="mb-2 flex items-center justify-between text-sm">
 									<span class="text-muted-foreground">Progress</span>
 									<span class="font-medium">
-										{project.completion_percentage.toFixed(0)}%
+										{completionPct.toFixed(0)}%
 									</span>
 								</div>
-								<Progress value={Math.min(100, project.completion_percentage)} class="h-2" />
+								<Progress value={Math.min(100, completionPct)} class="h-2" />
 							</div>
 						</Card.CardContent>
 

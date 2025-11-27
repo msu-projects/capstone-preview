@@ -14,6 +14,7 @@
 		formatRelativeTime,
 		truncateText
 	} from '$lib/utils/formatters';
+	import { getCategoryName, getCompletionPercentage } from '$lib/utils/project-calculations';
 	import {
 		ArrowDownUp,
 		Download,
@@ -130,7 +131,7 @@
 						</Table.TableRow>
 					{:else}
 						{#each projects as project (project.id)}
-							{@const allotment = project.allotment}
+							{@const completionPct = getCompletionPercentage(project)}
 							<Table.TableRow
 								class="cursor-pointer hover:bg-accent/10"
 								onclick={() => (window.location.href = `/admin/projects/${project.id}`)}
@@ -142,7 +143,7 @@
 											{truncateText(project.title, 80)}
 										</div>
 										<div class="text-xs text-muted-foreground">
-											{project.category} • FY {project.project_year}
+											{getCategoryName(project.category_key)} • FY {project.project_year}
 										</div>
 									</div>
 								</Table.TableCell>
@@ -159,16 +160,16 @@
 								<!-- Budget -->
 								<Table.TableCell>
 									<div class="text-sm font-medium">
-										{formatCurrency(allotment?.total ?? project.budget)}
+										{formatCurrency(project.total_budget)}
 									</div>
 								</Table.TableCell>
 
 								<!-- Progress -->
 								<Table.TableCell>
 									<div class="flex items-center gap-2">
-										<Progress value={Math.min(100, project.completion_percentage)} class="w-full" />
+										<Progress value={Math.min(100, completionPct)} class="w-full" />
 										<span class="min-w-10 text-xs text-muted-foreground">
-											{project.completion_percentage.toFixed(0)}%
+											{completionPct.toFixed(0)}%
 										</span>
 									</div>
 								</Table.TableCell>

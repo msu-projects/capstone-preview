@@ -2,6 +2,7 @@
 	import * as Card from '$lib/components/ui/card';
 	import type { Project } from '$lib/types';
 	import { formatDate, formatNumber } from '$lib/utils/formatters';
+	import { getCompletionPercentage } from '$lib/utils/project-calculations';
 	import {
 		Activity,
 		Briefcase,
@@ -20,6 +21,9 @@
 	}
 
 	const { project }: Props = $props();
+
+	// Get completion percentage from monthly progress
+	const completionPercentage = $derived(getCompletionPercentage(project));
 
 	// Extract unique municipalities and barangays from project_sitios
 	const uniqueMunicipalities = $derived(
@@ -217,14 +221,14 @@
 						<div class="mb-1 flex items-end justify-between">
 							<span class="text-sm font-medium text-slate-700">Physical Completion</span>
 							<span class="text-sm font-bold text-slate-900"
-								>{project.completion_percentage}%
+								>{completionPercentage}%
 								<span class="text-xs font-normal text-slate-400">Actual</span></span
 							>
 						</div>
 						<div class="h-2.5 w-full rounded-full bg-slate-100">
 							<div
 								class="h-full rounded-full bg-emerald-500 transition-all"
-								style="width: {project.completion_percentage}%"
+								style="width: {completionPercentage}%"
 							></div>
 						</div>
 					</div>
@@ -260,17 +264,8 @@
 							>
 						</div>
 						<div class="flex items-center justify-between border-b border-slate-100 pb-3">
-							<span class="text-sm text-slate-500">Target Completion</span>
-							<span class="text-sm font-medium text-slate-800">{formatDate(project.end_date)}</span>
-						</div>
-						<div class="flex items-center justify-between">
-							<span class="text-sm text-slate-500">Total Duration</span>
-							<span class="text-sm font-medium text-slate-800">
-								{Math.ceil(
-									(new Date(project.end_date).getTime() - new Date(project.start_date).getTime()) /
-										(1000 * 60 * 60 * 24)
-								)} Days
-							</span>
+							<span class="text-sm text-slate-500">Contract Duration</span>
+							<span class="text-sm font-medium text-slate-800">{project.contract_duration}</span>
 						</div>
 					</div>
 				</Card.Content>

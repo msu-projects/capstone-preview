@@ -3,6 +3,38 @@
  * Used by Quick Update form for real-time calculations and indicators
  */
 
+import { categories } from '$lib/config/project-categories';
+import type { CategoryKey, Project } from '$lib/types';
+
+/**
+ * Gets the completion percentage from the latest monthly progress entry
+ * @param project - The project to get completion percentage from
+ * @returns The latest physical progress percentage, or 0 if no progress data
+ */
+export function getCompletionPercentage(project: Project): number {
+	if (!project.monthly_progress || project.monthly_progress.length === 0) {
+		return 0;
+	}
+
+	// Sort by month_year descending and get the latest
+	const sorted = [...project.monthly_progress].sort((a, b) =>
+		b.month_year.localeCompare(a.month_year)
+	);
+
+	return sorted[0].physical_progress_percentage;
+}
+
+/**
+ * Gets the category name from a category key
+ * @param key - The category key
+ * @returns The category display name
+ */
+export function getCategoryName(key: CategoryKey | undefined): string {
+	if (!key) return 'Unknown';
+	const category = categories.find((c) => c.key === key);
+	return category?.name ?? 'Unknown';
+}
+
 /**
  * Calculates budget utilization metrics
  * @param totalBudget - Total project budget
@@ -56,9 +88,7 @@ export function calculateDaysRemaining(
 	}
 
 	const isOverdue = days < 0;
-	const formattedMessage = isOverdue
-		? `${Math.abs(days)} days overdue`
-		: `${days} days remaining`;
+	const formattedMessage = isOverdue ? `${Math.abs(days)} days overdue` : `${days} days remaining`;
 
 	return {
 		days,
@@ -78,9 +108,8 @@ export function calculateBeneficiaryProgress(
 	targetBeneficiaries: number,
 	currentBeneficiaries: number
 ) {
-	const percentage = targetBeneficiaries > 0
-		? (currentBeneficiaries / targetBeneficiaries) * 100
-		: 0;
+	const percentage =
+		targetBeneficiaries > 0 ? (currentBeneficiaries / targetBeneficiaries) * 100 : 0;
 
 	let status: 'below-target' | 'on-track' | 'exceeding' = 'on-track';
 	if (percentage < 80) {
@@ -102,10 +131,7 @@ export function calculateBeneficiaryProgress(
  * @param actualPercentage - Actual progress percentage
  * @returns Slippage (positive = behind, negative = ahead) and status
  */
-export function calculateProgressSlippage(
-	plannedPercentage: number,
-	actualPercentage: number
-) {
+export function calculateProgressSlippage(plannedPercentage: number, actualPercentage: number) {
 	const slippage = plannedPercentage - actualPercentage;
 
 	let status: 'ahead' | 'on-track' | 'behind' = 'on-track';
@@ -126,11 +152,12 @@ export function calculateProgressSlippage(
 		slippage: Math.round(slippage * 100) / 100,
 		status,
 		severity,
-		formattedMessage: slippage > 0
-			? `${Math.abs(slippage)}% behind schedule`
-			: slippage < 0
-				? `${Math.abs(slippage)}% ahead of schedule`
-				: 'On schedule'
+		formattedMessage:
+			slippage > 0
+				? `${Math.abs(slippage)}% behind schedule`
+				: slippage < 0
+					? `${Math.abs(slippage)}% ahead of schedule`
+					: 'On schedule'
 	};
 }
 
@@ -161,7 +188,9 @@ export function projectCompletionDate(
 	}
 
 	const start = new Date(startDate);
-	const daysSinceStart = Math.ceil((currentDate.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+	const daysSinceStart = Math.ceil(
+		(currentDate.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
+	);
 
 	// Calculate daily progress rate
 	const dailyRate = actualPercentage / daysSinceStart;
@@ -203,7 +232,13 @@ export function calculateProjectHealth(params: {
 	status: 'healthy' | 'needs-attention' | 'critical';
 	issues: string[];
 } {
-	const { budgetUtilization, progressPercentage, plannedPercentage, beneficiaryProgress, daysRemaining } = params;
+	const {
+		budgetUtilization,
+		progressPercentage,
+		plannedPercentage,
+		beneficiaryProgress,
+		daysRemaining
+	} = params;
 
 	let score = 100;
 	const issues: string[] = [];

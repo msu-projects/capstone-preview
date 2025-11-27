@@ -9,7 +9,6 @@
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import * as Tabs from '$lib/components/ui/tabs';
-	import { categories } from '$lib/config/project-categories';
 	import type {
 		BudgetComponent,
 		CategoryKey,
@@ -54,7 +53,6 @@
 
 	// Tab 3: Performance Targets
 	let targetStartDate = $state<DateValue | undefined>(today(getLocalTimeZone()));
-	let targetEndDate = $state<DateValue | undefined>(undefined);
 	let durationInCalendarDays = $state('');
 	let totalBudget = $state('');
 	let employmentMale = $state('');
@@ -200,21 +198,23 @@
 				id: nextId,
 				title,
 				description,
-				category: categories.find((v) => v.key === selectedCategory)?.name || '',
-				category_key: selectedCategory as any,
+				category_key: selectedCategory as CategoryKey,
 				project_type_id: selectedProjectType,
 				status,
 				start_date: startDateValue,
-				end_date: targetEndDate?.toString() || '',
-				budget: Number(totalBudget),
+				contract_duration: durationInCalendarDays ? `${durationInCalendarDays} CD` : '',
+				total_budget: Number(totalBudget),
+				contract_cost: Number(totalBudget), // Same as budget for new projects
 				beneficiaries: totalBeneficiaries,
-				completion_percentage: 0,
 				project_year: currentYear,
+				issues: '',
+				recommendations: '',
 				// New enhanced fields
 				project_sitios: projectSitios.map((ps) => ({
 					...ps,
 					project_id: nextId
 				})),
+				sitios_affected: [],
 				funding_sources: fundingSources.map((fs) => ({
 					...fs,
 					id: 0,
@@ -371,7 +371,6 @@
 				<Tabs.Content value="performance">
 					<PerformanceTargetsTab
 						bind:targetStartDate
-						bind:targetEndDate
 						bind:durationInCalendarDays
 						bind:totalBudget
 						bind:employmentMale
@@ -386,9 +385,13 @@
 				<Tabs.Content value="monthly">
 					<Card.Card class="py-0">
 						<Card.CardContent class="p-6">
+							{@const endDate =
+								targetStartDate && durationInCalendarDays
+									? targetStartDate.add({ days: Number(durationInCalendarDays) }).toString()
+									: ''}
 							<MonthlyTargetsForm
 								startDate={targetStartDate?.toString() || ''}
-								endDate={targetEndDate?.toString() || ''}
+								{endDate}
 								totalBudget={Number(totalBudget)}
 								onUpdate={(data) => {
 									monthlyTargets = data.monthlyTargets;

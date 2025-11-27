@@ -2,6 +2,7 @@ import type { Project, Sitio } from '$lib/types';
 import type { SitioYearlySnapshot } from '$lib/types/sitio-yearly';
 import { createSnapshotFromSitio } from '$lib/types/sitio-yearly';
 import { logAuditAction } from './audit';
+import { getCategoryName } from './project-calculations';
 
 const SITIOS_STORAGE_KEY = 'sccdp_sitios';
 const PROJECTS_STORAGE_KEY = 'sccdp_projects';
@@ -240,7 +241,7 @@ export function addProject(project: Project): boolean {
 			'project',
 			project.id,
 			project.title,
-			`Created project: ${project.category} - Budget: ₱${project.budget.toLocaleString()}`
+			`Created project: ${getCategoryName(project.category_key)} - Budget: ₱${project.total_budget.toLocaleString()}`
 		);
 	}
 	return success;
@@ -304,7 +305,7 @@ export function deleteProject(id: number): boolean {
 			'project',
 			id,
 			projectToDelete.title,
-			`Deleted project: ${projectToDelete.category}`
+			`Deleted project: ${getCategoryName(projectToDelete.category_key)}`
 		);
 	}
 	return success;

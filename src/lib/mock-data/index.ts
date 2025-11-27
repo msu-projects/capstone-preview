@@ -1,15 +1,5 @@
-import type {
-	Activity,
-	AllotmentDetails,
-	ChartDataItem,
-	ContractDetails,
-	ExpenditureDetails,
-	Project,
-	Sitio,
-	Stats,
-	StatusSummary,
-	User
-} from '$lib/types';
+import type { Activity, ChartDataItem, Project, Sitio, Stats, User } from '$lib/types';
+import { getCategoryName, getCompletionPercentage } from '$lib/utils/project-calculations';
 import { loadProjects, loadSitios, saveProjects, saveSitios } from '$lib/utils/storage';
 import {
 	generateProjects,
@@ -78,83 +68,6 @@ export function refreshSitios(): Sitio[] {
 // ===== PROJECTS DATA =====
 
 /**
- * Add financial and status details to a project for display/PDF generation
- */
-function enrichProjectData(project: Project): Project {
-	const allocated = project.budget;
-	const supplemental = Math.floor(allocated * 0.1);
-	const total = allocated + supplemental;
-	const released = Math.floor(total * 0.85);
-	const obligations = Math.floor(released * 0.9);
-	const contractCost = Math.floor(total * 0.95);
-
-	const maleEmployment = project.employment_generated?.male ?? 8 + Math.floor(Math.random() * 15);
-	const femaleEmployment =
-		project.employment_generated?.female ?? 5 + Math.floor(Math.random() * 10);
-
-	const allotment: AllotmentDetails = {
-		allocated,
-		supplemental,
-		total,
-		released
-	};
-
-	const expenditure: ExpenditureDetails = {
-		obligations,
-		contract_cost: contractCost
-	};
-
-	const contract: ContractDetails = {
-		duration: '120 CD',
-		delivery: '120 CD',
-		extension: project.status === 'suspended' ? 'Pending approval' : undefined
-	};
-
-	const statusSummary: StatusSummary = {
-		stage:
-			project.status === 'completed'
-				? 'Completed'
-				: project.status === 'in-progress'
-					? 'Implementation'
-					: project.status === 'suspended'
-						? 'Suspended'
-						: 'Planning',
-		issues:
-			project.status === 'suspended'
-				? 'Project temporarily halted due to weather conditions.'
-				: project.status === 'in-progress'
-					? 'Ongoing, minor delays in material delivery.'
-					: 'None',
-		recommendations:
-			project.status === 'suspended'
-				? 'Resume works once weather improves and deploy catch-up teams.'
-				: project.status === 'in-progress'
-					? 'Coordinate with suppliers to expedite material delivery.'
-					: 'Proceed as planned.'
-	};
-
-	const catchUpPlan =
-		project.status === 'suspended'
-			? 'Deploy double shifts upon resumption to recover lost time.'
-			: project.status === 'in-progress'
-				? 'Maintain current pace and monitor progress weekly.'
-				: undefined;
-
-	return {
-		...project,
-		allotment,
-		expenditure,
-		contract,
-		status_summary: statusSummary,
-		catch_up_plan: catchUpPlan,
-		employment_generated: {
-			male: maleEmployment,
-			female: femaleEmployment
-		}
-	};
-}
-
-/**
  * Initialize projects from localStorage or generate new mock data
  */
 function initializeProjects(): Project[] {
@@ -162,32 +75,29 @@ function initializeProjects(): Project[] {
 		// Server-side: generate fresh data for SSR
 		const generatedSitios = generateSitios(50);
 		const generatedProjects = generateProjects(generatedSitios, 20);
-		return generatedProjects.map(enrichProjectData);
+		return generatedProjects;
 	}
 
 	try {
 		// First check if we have data in the main storage
 		const storedProjects = loadProjects();
 		if (storedProjects.length > 0) {
-			return storedProjects.map(enrichProjectData);
+			return storedProjects;
 		}
 
 		// Check/initialize mock data
 		const { projects: generatedProjects } = initializeMockDataIfNeeded();
 
-		// Add financial/status details and save to main storage
-		const enrichedProjects = generatedProjects.map(enrichProjectData);
-
-		if (enrichedProjects.length > 0) {
-			saveProjects(enrichedProjects);
+		if (generatedProjects.length > 0) {
+			saveProjects(generatedProjects);
 		}
 
-		return enrichedProjects;
+		return generatedProjects;
 	} catch (error) {
 		console.error('Failed to initialize projects from storage:', error);
 		const generatedSitios = generateSitios(50);
 		const generatedProjects = generateProjects(generatedSitios, 20);
-		return generatedProjects.map(enrichProjectData);
+		return generatedProjects;
 	}
 }
 
@@ -199,11 +109,11 @@ export function refreshProjects(): Project[] {
 	if (typeof window === 'undefined') {
 		const generatedSitios = generateSitios(50);
 		const generatedProjects = generateProjects(generatedSitios, 20);
-		return generatedProjects.map(enrichProjectData);
+		return generatedProjects;
 	}
 
 	const storedProjects = loadProjects();
-	return storedProjects.map(enrichProjectData);
+	return storedProjects;
 }
 
 // ===== USERS DATA =====
@@ -267,9 +177,9 @@ export const stats: Stats = {
 	planning_projects: projects.filter((p) => p.status === 'planning').length,
 	suspended_projects: projects.filter((p) => p.status === 'suspended').length,
 	total_beneficiaries: projects.reduce((sum, p) => sum + p.beneficiaries, 0),
-	total_budget: projects.reduce((sum, p) => sum + p.budget, 0),
+	total_budget: projects.reduce((sum, p) => sum + p.total_budget, 0),
 	average_completion: Math.round(
-		projects.reduce((sum, p) => sum + p.completion_percentage, 0) / projects.length
+		projects.reduce((sum, p) => sum + getCompletionPercentage(p), 0) / projects.length
 	),
 	municipalities: [...new Set(sitios.map((s) => s.municipality))].length
 };
@@ -277,9 +187,9 @@ export const stats: Stats = {
 // ===== CHART DATA =====
 
 export const chartData = {
-	projectsByCategory: [...new Set(projects.map((p) => p.category))].map((cat) => ({
-		category: cat,
-		count: projects.filter((p) => p.category === cat).length
+	projectsByCategory: [...new Set(projects.map((p) => p.category_key))].map((cat) => ({
+		category: getCategoryName(cat),
+		count: projects.filter((p) => p.category_key === cat).length
 	})) as ChartDataItem[],
 	projectsByStatus: [
 		{ status: 'Planning', count: stats.planning_projects },
@@ -347,7 +257,8 @@ export interface ProjectFilters {
 
 export function filterProjects(filters: ProjectFilters): Project[] {
 	return projects.filter((project) => {
-		if (filters.category && project.category !== filters.category) return false;
+		if (filters.category && getCategoryName(project.category_key) !== filters.category)
+			return false;
 		if (filters.status && project.status !== filters.status) return false;
 		if (filters.municipality) {
 			const hasMatchingMunicipality = project.project_sitios?.some(

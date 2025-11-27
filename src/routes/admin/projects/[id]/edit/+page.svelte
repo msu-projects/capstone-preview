@@ -57,6 +57,7 @@
 	}
 
 	// Helper function to map old category names to new category keys
+	// Helper function to map old category names to new category keys
 	function getCategoryKey(project: typeof existingProject): CategoryKey | '' {
 		if (!project) return '';
 
@@ -65,18 +66,7 @@
 			return project.category_key as CategoryKey;
 		}
 
-		// Otherwise, map from old category name to new category key
-		const categoryMap: Record<string, CategoryKey> = {
-			'Water and Sanitation': 'infrastructure',
-			Education: 'education',
-			Livelihood: 'livelihood',
-			Agriculture: 'agriculture',
-			Health: 'health',
-			Environment: 'environment',
-			Infrastructure: 'infrastructure'
-		};
-
-		return categoryMap[project.category] ?? '';
+		return '';
 	}
 
 	// Form state
@@ -110,36 +100,37 @@
 	let targetStartDate = $state<DateValue | undefined>(
 		existingProject?.start_date ? parseDate(existingProject.start_date) : today(getLocalTimeZone())
 	);
-	let targetEndDate = $state<DateValue | undefined>(
-		existingProject?.end_date ? parseDate(existingProject.end_date) : undefined
-	);
-	// Calculate duration in calendar days from existing dates
+	// Calculate duration from contract_duration string (e.g., "180 CD")
 	let durationInCalendarDays = $state(
-		existingProject?.start_date && existingProject?.end_date
-			? Math.ceil(
-					(new Date(existingProject.end_date).getTime() -
-						new Date(existingProject.start_date).getTime()) /
-						(1000 * 60 * 60 * 24)
-				).toString()
-			: ''
+		existingProject?.contract_duration ? existingProject.contract_duration.replace(/\D/g, '') : ''
 	);
-	let totalBudget = $state(existingProject?.budget?.toString() ?? '');
+	let totalBudget = $state(existingProject?.total_budget?.toString() ?? '');
 	let employmentMale = $state(existingProject?.employment_generated?.male?.toString() ?? '');
 	let employmentFemale = $state(existingProject?.employment_generated?.female?.toString() ?? ''); // Tab 4: Accountability & Partners
 
+	// Define type for sitio coordinator form data
+	interface SitioCoordinatorFormData {
+		sitio_id: number;
+		sitio_name: string;
+		barangay_captain: string;
+		sitio_leader: string;
+		volunteer_coordinator: string;
+		contact_numbers: string;
+	}
+
 	// Auto-generate/load sitio coordinators
-	let sitioCoordinators = $state(
-		existingProject?.sitio_coordinators?.map((sc) => {
+	let sitioCoordinators = $state<SitioCoordinatorFormData[]>(
+		existingProject?.sitios_affected?.map((sa) => {
 			// Find the sitio from existing data
-			const sitio = existingProject?.project_sitios?.find((ps) => ps.sitio_id === sc.sitio_id);
+			const sitio = existingProject?.project_sitios?.find((ps) => ps.sitio_id === sa.sitio_id);
 
 			return {
-				sitio_id: sc.sitio_id,
+				sitio_id: sa.sitio_id,
 				sitio_name: sitio?.sitio_name ?? '',
-				barangay_captain: sc.barangay_captain ?? '',
-				sitio_leader: sc.sitio_leader ?? '',
-				volunteer_coordinator: sc.volunteer_coordinator ?? '',
-				contact_numbers: sc.contact_numbers?.join(', ') ?? ''
+				barangay_captain: sa.barangay_captain ?? '',
+				sitio_leader: sa.sitio_leader ?? '',
+				volunteer_coordinator: sa.volunteer_coordinator ?? '',
+				contact_numbers: sa.contact_numbers?.join(', ') ?? ''
 			};
 		}) ?? []
 	);
@@ -200,7 +191,7 @@
 	const isTab2Valid = $derived(projectSitios.length > 0);
 
 	const isTab3Valid = $derived(
-		targetStartDate !== undefined && targetEndDate !== undefined && totalBudget !== ''
+		targetStartDate !== undefined && durationInCalendarDays !== '' && totalBudget !== ''
 	);
 
 	const isTab4Valid = $derived(fundingSources.length > 0 && budgetComponents.length > 0);
@@ -262,13 +253,12 @@
 				// Tab 1
 				title,
 				description,
-				category: selectedCategory || '',
-				category_key: selectedCategory as any,
+				category_key: selectedCategory as CategoryKey,
 				project_type_id: selectedProjectType,
 				status,
 				start_date: startDateValue,
-				end_date: targetEndDate?.toString() || existingProject?.end_date || '',
-				budget: Number(totalBudget),
+				contract_duration: durationInCalendarDays ? `${durationInCalendarDays} CD` : '',
+				total_budget: Number(totalBudget),
 				beneficiaries: totalBeneficiaries,
 				// Tab 2
 				project_sitios: projectSitios.map((ps) => ({
@@ -438,7 +428,6 @@
 				<Tabs.Content value="performance">
 					<PerformanceTargetsTab
 						bind:targetStartDate
-						bind:targetEndDate
 						bind:durationInCalendarDays
 						bind:totalBudget
 						bind:employmentMale
@@ -453,9 +442,13 @@
 				<Tabs.Content value="monthly">
 					<Card.Card class="py-0">
 						<Card.CardContent class="p-6">
+							{@const endDate =
+								targetStartDate && durationInCalendarDays
+									? targetStartDate.add({ days: Number(durationInCalendarDays) }).toString()
+									: ''}
 							<MonthlyTargetsForm
 								startDate={targetStartDate?.toString() || ''}
-								endDate={targetEndDate?.toString() || ''}
+								{endDate}
 								totalBudget={Number(totalBudget)}
 								onUpdate={(data) => {
 									monthlyTargets = data.monthlyTargets;

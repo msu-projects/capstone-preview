@@ -12,6 +12,7 @@
 	import * as Card from '$lib/components/ui/card';
 	import { Skeleton } from '$lib/components/ui/skeleton';
 	import * as Tabs from '$lib/components/ui/tabs';
+	import { categories } from '$lib/config/project-categories';
 	import { activities, chartData, projects, sitios, stats } from '$lib/mock-data';
 	import toTitleCase from '$lib/utils/common';
 	import { downloadProjectMonitoringPDF } from '$lib/utils/pdf-generator';
@@ -87,9 +88,11 @@
 	const monthlyProgressCategories = chartData.monthlyProgress.map((item) => item.month as string);
 
 	// Budget by category (derived)
-	const budgetByCategory = [...new Set(projects.map((p) => p.category))].map((cat, i) => ({
-		label: cat,
-		value: projects.filter((p) => p.category === cat).reduce((sum, p) => sum + p.budget, 0),
+	const budgetByCategory = categories.map((cat, i) => ({
+		label: cat.name,
+		value: projects
+			.filter((p) => p.category_key === cat.key)
+			.reduce((sum, p) => sum + p.total_budget, 0),
 		color: chartColors[i % chartColors.length]
 	}));
 	const topBudgetCategories = budgetByCategory.sort((a, b) => b.value - a.value).slice(0, 5);
@@ -109,11 +112,11 @@
 	];
 
 	// Employment by category for stacked comparison
-	const employmentByCategory = [...new Set(projects.map((p) => p.category))]
+	const employmentByCategory = categories
 		.map((cat) => {
-			const catProjects = projects.filter((p) => p.category === cat);
+			const catProjects = projects.filter((p) => p.category_key === cat.key);
 			return {
-				category: cat,
+				category: cat.name,
 				male: catProjects.reduce((sum, p) => sum + (p.employment_generated?.male || 0), 0),
 				female: catProjects.reduce((sum, p) => sum + (p.employment_generated?.female || 0), 0)
 			};

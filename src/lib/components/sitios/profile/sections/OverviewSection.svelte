@@ -51,7 +51,7 @@
 		sitio.water_sanitation?.water_systems_count ? sitio.water_sanitation.water_systems_count : 0
 	);
 
-	const totalBudget = $derived(relatedProjects.reduce((sum, p) => sum + p.budget, 0));
+	const totalBudget = $derived(relatedProjects.reduce((sum, p) => sum + p.total_budget, 0));
 	const activeProjects = $derived(relatedProjects.filter((p) => p.status === 'in-progress').length);
 	const completedProjects = $derived(
 		relatedProjects.filter((p) => p.status === 'completed').length

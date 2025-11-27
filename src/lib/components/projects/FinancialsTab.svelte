@@ -12,9 +12,9 @@
 	const { project }: Props = $props();
 
 	// Calculate financial metrics
-	const utilized = $derived(project.budget * 0.45);
-	const remaining = $derived(project.budget - utilized);
-	const utilizationRate = $derived((utilized / project.budget) * 100);
+	const utilized = $derived(project.total_budget * 0.45);
+	const remaining = $derived(project.total_budget - utilized);
+	const utilizationRate = $derived((utilized / project.total_budget) * 100);
 </script>
 
 <!-- Financials Tab -->
@@ -30,7 +30,7 @@
 							Total Allocation
 						</p>
 						<h3 class="mt-1 text-2xl font-bold text-slate-900">
-							{formatCurrency(project.budget)}
+							{formatCurrency(project.total_budget)}
 						</h3>
 					</div>
 					<div class="rounded-lg bg-blue-50 p-2 text-blue-600">
