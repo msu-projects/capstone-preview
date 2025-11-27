@@ -1,5 +1,5 @@
 <script lang="ts">
-	import DemographicDonutChart from '$lib/components/charts/DemographicDonutChart.svelte';
+	import DonutChart from '$lib/components/charts/DonutChart.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';
 	import { Progress } from '$lib/components/ui/progress';
@@ -82,10 +82,12 @@
 			<Card.Content class="pt-0">
 				{#if housingQualityData.length > 0}
 					<div style="height: 300px;">
-						<DemographicDonutChart
+						<DonutChart
 							data={housingQualityData}
-							centerText={formatNumber(sitio.households)}
-							centerSubtext="Households"
+							centerValue={formatNumber(sitio.households)}
+							centerLabel="Households"
+							height={300}
+							showLegend={false}
 						/>
 					</div>
 				{:else}
@@ -112,7 +114,7 @@
 			<Card.Content class="pt-0">
 				{#if housingOwnershipData.length > 0}
 					<div style="height: 300px;">
-						<DemographicDonutChart data={housingOwnershipData} />
+						<DonutChart data={housingOwnershipData} height={300} showLegend={false} />
 					</div>
 				{:else}
 					<div class="flex h-[300px] items-center justify-center">

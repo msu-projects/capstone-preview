@@ -1,6 +1,6 @@
 <script lang="ts">
-	import DemographicBarChart from '$lib/components/charts/DemographicBarChart.svelte';
-	import DemographicDonutChart from '$lib/components/charts/DemographicDonutChart.svelte';
+	import BarChart from '$lib/components/charts/BarChart.svelte';
+	import DonutChart from '$lib/components/charts/DonutChart.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';
 	import type { Sitio } from '$lib/types';
@@ -96,7 +96,7 @@
 			<Card.Content class="pt-0">
 				{#if employmentData.length > 0}
 					<div style="height: 300px;">
-						<DemographicBarChart data={employmentData} orientation="horizontal" />
+						<BarChart data={employmentData} orientation="horizontal" height={300} />
 					</div>
 				{:else}
 					<div class="flex h-[300px] items-center justify-center">
@@ -122,10 +122,12 @@
 			<Card.Content class="pt-0">
 				{#if incomeData.length > 0}
 					<div style="height: 300px;">
-						<DemographicDonutChart
+						<DonutChart
 							data={incomeData}
-							centerText={formatNumber(sitio.households)}
-							centerSubtext="Households"
+							centerValue={formatNumber(sitio.households)}
+							centerLabel="Households"
+							height={300}
+							showLegend={false}
 						/>
 					</div>
 				{:else}
@@ -227,7 +229,7 @@
 			</Card.Header>
 			<Card.Content class="pt-0">
 				<div style="height: 300px;">
-					<DemographicBarChart data={livestockData} orientation="horizontal" />
+					<BarChart data={livestockData} orientation="horizontal" height={300} />
 				</div>
 			</Card.Content>
 		</Card.Root>

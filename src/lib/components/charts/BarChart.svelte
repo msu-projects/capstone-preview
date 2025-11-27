@@ -1,4 +1,7 @@
 <script lang="ts">
+	import { Chart } from '@flowbite-svelte-plugins/chart';
+	import type { ApexOptions } from 'apexcharts';
+
 	export interface BarChartData {
 		label: string;
 		value: number;
@@ -15,7 +18,96 @@
 
 	let { data, orientation = 'vertical', height = 300, showGrid = true, title }: Props = $props();
 
-	const maxValue = $derived(Math.max(...data.map((d) => d.value), 1));
+	// Prepare chart data with colors
+	const chartData = $derived(
+		data.map((d, i) => ({
+			...d,
+			color: d.color || `hsl(var(--chart-${(i % 5) + 1}))`
+		}))
+	);
+
+	// Prepare chart options
+	const options = $derived<ApexOptions>({
+		chart: {
+			type: 'bar',
+			height: height,
+			fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif',
+			toolbar: {
+				show: false
+			}
+		},
+		plotOptions: {
+			bar: {
+				horizontal: orientation === 'horizontal',
+				columnWidth: orientation === 'vertical' ? '60%' : undefined,
+				barHeight: orientation === 'horizontal' ? '70%' : undefined,
+				borderRadius: 6,
+				dataLabels: {
+					position: 'top'
+				}
+			}
+		},
+		dataLabels: {
+			enabled: false
+		},
+		series: [
+			{
+				name: title || 'Value',
+				data: chartData.map((d) => d.value)
+			}
+		],
+		xaxis: {
+			categories: chartData.map((d) => d.label),
+			labels: {
+				style: {
+					colors: '#64748b',
+					fontSize: '12px',
+					fontWeight: 500
+				}
+			},
+			axisBorder: {
+				show: false
+			},
+			axisTicks: {
+				show: false
+			}
+		},
+		yaxis: {
+			labels: {
+				style: {
+					colors: '#64748b',
+					fontSize: '12px',
+					fontWeight: 500
+				},
+				formatter: (val) => val.toLocaleString()
+			}
+		},
+		grid: {
+			show: showGrid,
+			borderColor: '#e2e8f0',
+			strokeDashArray: 4,
+			xaxis: {
+				lines: {
+					show: orientation === 'horizontal'
+				}
+			},
+			yaxis: {
+				lines: {
+					show: orientation === 'vertical'
+				}
+			}
+		},
+		colors: chartData.map((d) => d.color),
+		tooltip: {
+			enabled: true,
+			y: {
+				formatter: (val) => val.toLocaleString()
+			}
+		},
+		legend: {
+			show: false
+		}
+	});
 </script>
 
 <div class="w-full">
@@ -23,52 +115,6 @@
 		<h3 class="mb-2 text-sm font-semibold text-slate-700">{title}</h3>
 	{/if}
 	<div class="w-full" style="height: {height}px;">
-		{#if orientation === 'horizontal'}
-			<!-- Horizontal Bar Chart -->
-			<div class="flex h-full flex-col justify-center gap-6 py-4">
-				{#each data as item, i}
-					<div class="space-y-2">
-						<div class="flex items-center justify-between">
-							<span class="text-sm font-medium text-slate-600">{item.label}</span>
-							<span class="text-lg font-bold text-slate-900">
-								{item.value.toLocaleString()}
-							</span>
-						</div>
-						<div class="relative h-12 overflow-hidden rounded-lg bg-slate-100">
-							<div
-								class="h-full rounded-lg transition-all duration-500"
-								style="width: {(item.value / maxValue) * 100}%; background-color: {item.color ||
-									`hsl(var(--chart-${(i % 5) + 1}))`}"
-							></div>
-						</div>
-					</div>
-				{/each}
-			</div>
-		{:else}
-			<!-- Vertical Bar Chart -->
-			<div class="flex h-full items-end justify-center gap-8 px-4 pb-2">
-				{#each data as item, i}
-					<div class="flex flex-col items-center gap-3">
-						<div class="text-center">
-							<div class="text-2xl font-bold text-slate-900">{item.value.toLocaleString()}</div>
-						</div>
-						<div
-							class="relative flex flex-col items-center justify-end"
-							style="height: {height - 80}px;"
-						>
-							<div
-								class="w-20 rounded-t-lg transition-all duration-500"
-								style="height: {(item.value / maxValue) *
-									(height - 100)}px; background-color: {item.color ||
-									`hsl(var(--chart-${(i % 5) + 1}))`}"
-							></div>
-						</div>
-						<div class="text-center">
-							<div class="text-xs font-medium text-slate-600">{item.label}</div>
-						</div>
-					</div>
-				{/each}
-			</div>
-		{/if}
+		<Chart {options} />
 	</div>
 </div>

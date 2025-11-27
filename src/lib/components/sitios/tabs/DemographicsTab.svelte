@@ -1,5 +1,5 @@
 <script lang="ts">
-	import DemographicBarChart from '$lib/components/charts/DemographicBarChart.svelte';
+	import BarChart from '$lib/components/charts/BarChart.svelte';
 	import * as Card from '$lib/components/ui/card';
 	import type { Sitio } from '$lib/types';
 	import { Percent, Users } from '@lucide/svelte';
@@ -79,7 +79,7 @@
 			</Card.Header>
 			<Card.Content class="pt-0">
 				<div style="height: 180px;">
-					<DemographicBarChart data={genderData} orientation="horizontal" />
+					<BarChart data={genderData} orientation="horizontal" height={180} />
 				</div>
 			</Card.Content>
 		</Card.Root>
@@ -96,7 +96,7 @@
 			</Card.Header>
 			<Card.Content class="pt-0">
 				<div style="height: 240px;">
-					<DemographicBarChart data={ageData} orientation="vertical" />
+					<BarChart data={ageData} orientation="vertical" height={240} />
 				</div>
 			</Card.Content>
 		</Card.Root>

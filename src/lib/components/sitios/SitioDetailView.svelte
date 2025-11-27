@@ -1,8 +1,9 @@
 <script lang="ts">
+	import { Tabs, TabsContent, TabsList, TabsTrigger } from '$lib/components/ui/tabs';
 	import type { Sitio } from '$lib/types';
+	import { Briefcase, FileText, FolderKanban, Heart, Home, Users } from '@lucide/svelte';
 	import SitioBreadcrumb from './SitioBreadcrumb.svelte';
 	import SitioHeader from './SitioHeader.svelte';
-	import SitioTabNavigation from './SitioTabNavigation.svelte';
 	import DemographicsTab from './tabs/DemographicsTab.svelte';
 	import EconomicLivelihoodsTab from './tabs/EconomicLivelihoodsTab.svelte';
 	import InfrastructureHousingTab from './tabs/InfrastructureHousingTab.svelte';
@@ -26,23 +27,59 @@
 	<!-- Main Content Area -->
 	<main class="w-full px-4 py-8 sm:px-6 lg:px-8">
 		<SitioHeader {sitio} />
-		<SitioTabNavigation {activeTab} onTabChange={(tab) => (activeTab = tab)} />
 
-		<!-- Tab Content -->
-		<div class="animate-in duration-300 fade-in slide-in-from-bottom-2">
-			{#if activeTab === 'overview'}
+		<!-- Tabs Component -->
+		<Tabs bind:value={activeTab} class="mb-8">
+			<TabsList class="w-full justify-start overflow-x-auto">
+				<TabsTrigger value="overview" class="gap-2">
+					<FileText class="size-4" />
+					Overview
+				</TabsTrigger>
+				<TabsTrigger value="demographics" class="gap-2">
+					<Users class="size-4" />
+					Demographics
+				</TabsTrigger>
+				<TabsTrigger value="economic" class="gap-2">
+					<Briefcase class="size-4" />
+					Economic & Livelihoods
+				</TabsTrigger>
+				<TabsTrigger value="infrastructure" class="gap-2">
+					<Home class="size-4" />
+					Infrastructure & Housing
+				</TabsTrigger>
+				<TabsTrigger value="services" class="gap-2">
+					<Heart class="size-4" />
+					Social Services
+				</TabsTrigger>
+				<TabsTrigger value="projects" class="gap-2">
+					<FolderKanban class="size-4" />
+					Related Projects
+				</TabsTrigger>
+			</TabsList>
+
+			<TabsContent value="overview">
 				<OverviewTab {sitio} />
-			{:else if activeTab === 'demographics'}
+			</TabsContent>
+
+			<TabsContent value="demographics">
 				<DemographicsTab {sitio} />
-			{:else if activeTab === 'economic'}
+			</TabsContent>
+
+			<TabsContent value="economic">
 				<EconomicLivelihoodsTab {sitio} />
-			{:else if activeTab === 'infrastructure'}
+			</TabsContent>
+
+			<TabsContent value="infrastructure">
 				<InfrastructureHousingTab {sitio} />
-			{:else if activeTab === 'services'}
+			</TabsContent>
+
+			<TabsContent value="services">
 				<SocialServicesTab {sitio} />
-			{:else if activeTab === 'projects'}
+			</TabsContent>
+
+			<TabsContent value="projects">
 				<RelatedProjectsTab {sitio} />
-			{/if}
-		</div>
+			</TabsContent>
+		</Tabs>
 	</main>
 </div>
