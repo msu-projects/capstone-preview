@@ -50,7 +50,7 @@
 		value: item.count,
 		color:
 			item.status === 'Planning'
-				? 'hsl(var(--muted-foreground))'
+				? 'hsl(217, 64%, 44%)'
 				: item.status === 'In Progress'
 					? 'hsl(48, 96%, 53%)'
 					: item.status === 'Completed'
