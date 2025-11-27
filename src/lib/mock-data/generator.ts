@@ -1,6 +1,7 @@
 import { MUNICIPALITIES_DATA } from '$lib/config/location-data';
 import { categories, projectTypes } from '$lib/config/project-categories';
 import type {
+	BudgetComponent,
 	CategoryKey,
 	FundingSource,
 	MonthlyBudgetUtilization,
@@ -363,7 +364,6 @@ const PROJECT_TITLES: Record<CategoryKey, string[]> = {
 
 const STATUSES: ProjectStatus[] = ['planning', 'in-progress', 'completed', 'suspended'];
 const PRIORITIES: PriorityLevel[] = ['high', 'medium', 'low'];
-const FUND_SOURCES = ['Provincial LDF', 'National Government', 'DSWD', 'DA Region XII', 'DOH'];
 const AGENCIES = [
 	"Provincial Governor's Office",
 	'Provincial Engineering Office',
@@ -494,6 +494,107 @@ function generateFundingSources(
 	return sources;
 }
 
+function generateBudgetComponents(
+	projectId: number,
+	totalBudget: number,
+	categoryKey: CategoryKey,
+	rng: SeededRandom
+): BudgetComponent[] {
+	const components: BudgetComponent[] = [];
+
+	// Define budget component templates by category
+	const componentsByCategory: Record<CategoryKey, string[]> = {
+		infrastructure: [
+			'Materials and Supplies',
+			'Labor and Manpower',
+			'Equipment Rental',
+			'Transportation',
+			'Engineering Services',
+			'Contingency'
+		],
+		agriculture: [
+			'Seeds and Seedlings',
+			'Farm Equipment',
+			'Training and Capacity Building',
+			'Transportation',
+			'Technical Assistance',
+			'Contingency'
+		],
+		education: [
+			'Learning Materials',
+			'Equipment and Furniture',
+			'Training and Workshops',
+			'Transportation',
+			'Administrative Costs',
+			'Contingency'
+		],
+		health: [
+			'Medical Supplies',
+			'Equipment and Devices',
+			'Health Personnel',
+			'Transportation',
+			'Training Programs',
+			'Contingency'
+		],
+		livelihood: [
+			'Starter Kits and Tools',
+			'Training and Skills Development',
+			'Marketing Support',
+			'Transportation',
+			'Monitoring and Evaluation',
+			'Contingency'
+		],
+		environment: [
+			'Seedlings and Plants',
+			'Tools and Equipment',
+			'Labor and Manpower',
+			'Transportation',
+			'Information Campaign',
+			'Contingency'
+		]
+	};
+
+	const availableComponents = componentsByCategory[categoryKey];
+	const numComponents = rng.nextInt(4, 6);
+	const selectedComponents = rng.shuffle(availableComponents).slice(0, numComponents);
+
+	// Generate realistic percentage distribution
+	let remaining = 100;
+	const percentages: number[] = [];
+
+	for (let i = 0; i < selectedComponents.length - 1; i++) {
+		// Major components get 20-40%, minor ones get 5-15%
+		const isMajor = i < 2;
+		const minPercent = isMajor ? 20 : 5;
+		const maxPercent = isMajor ? 40 : 15;
+		const percent = Math.min(
+			rng.nextInt(minPercent, maxPercent),
+			remaining - (selectedComponents.length - i - 1) * 5
+		);
+		percentages.push(percent);
+		remaining -= percent;
+	}
+
+	// Last component gets the remainder
+	percentages.push(remaining);
+
+	// Create budget components
+	selectedComponents.forEach((componentName, index) => {
+		const percentage = percentages[index];
+		const amount = Math.floor((totalBudget * percentage) / 100);
+
+		components.push({
+			id: projectId * 100 + index,
+			project_id: projectId,
+			component_name: componentName,
+			amount,
+			percentage
+		});
+	});
+
+	return components;
+}
+
 export function generateProjects(
 	sitios: Sitio[],
 	count: number = 20,
@@ -579,6 +680,7 @@ export function generateProjects(
 			monthly_budget:
 				monthsElapsed > 0 ? generateMonthlyBudget(i, budget, startDate, monthsElapsed, rng) : [],
 			funding_sources: generateFundingSources(i, budget, rng),
+			budget_components: generateBudgetComponents(i, budget, categoryKey, rng),
 			employment_generated: {
 				male: rng.nextInt(5, 30),
 				female: rng.nextInt(3, 20)
