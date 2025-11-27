@@ -29,7 +29,6 @@
 	import SocialServicesSection from './sections/SocialServicesSection.svelte';
 	import YearlyTrendsSection from './sections/YearlyTrendsSection.svelte';
 	import SitioProfileHeader from './SitioProfileHeader.svelte';
-	import YearSelector from './YearSelector.svelte';
 
 	interface Props {
 		sitio: Sitio;
@@ -134,22 +133,19 @@
 	</div>
 
 	<!-- Hero Header Section -->
-	<SitioProfileHeader {sitio} {relatedProjects} {isAdminView} />
+	<SitioProfileHeader
+		{sitio}
+		{relatedProjects}
+		{isAdminView}
+		{availableYears}
+		bind:selectedYear
+		onYearChange={handleYearChange}
+		onSaveCurrentYear={handleSaveCurrentYear}
+		{isCurrentYearSaved}
+	/>
 
 	<!-- Main Content -->
 	<main class="mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8">
-		<!-- Year Selector -->
-		<div class="flex flex-col items-start justify-between gap-4 pt-6 sm:flex-row sm:items-center">
-			<YearSelector
-				{availableYears}
-				bind:selectedYear
-				onYearChange={handleYearChange}
-				onSaveCurrentYear={handleSaveCurrentYear}
-				showSaveButton={isAdminView}
-				{isCurrentYearSaved}
-			/>
-		</div>
-
 		<!-- Tab Navigation -->
 		<Tabs.Root bind:value={activeTab}>
 			<div

@@ -93,7 +93,7 @@
 						<div class="flex items-center gap-2">
 							<span>{year}</span>
 							{#if year === currentYear}
-								<span class="text-xs text-slate-500">(Current)</span>
+								<span class="text-xs text-slate-100">(Current)</span>
 							{/if}
 							{#if availableYears.includes(year)}
 								<span class="text-xs text-emerald-600">✓</span>

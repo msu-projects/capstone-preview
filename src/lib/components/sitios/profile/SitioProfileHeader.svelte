@@ -3,14 +3,29 @@
 	import { Button } from '$lib/components/ui/button';
 	import type { Project, Sitio } from '$lib/types';
 	import { Calendar, Download, MapPin, Pencil } from '@lucide/svelte';
+	import YearSelector from './YearSelector.svelte';
 
 	interface Props {
 		sitio: Sitio;
 		relatedProjects: Project[];
 		isAdminView?: boolean;
+		availableYears: number[];
+		selectedYear: number;
+		onYearChange: (year: number) => void;
+		onSaveCurrentYear: () => void;
+		isCurrentYearSaved: boolean;
 	}
 
-	const { sitio, relatedProjects, isAdminView = false }: Props = $props();
+	let {
+		sitio,
+		relatedProjects,
+		isAdminView = false,
+		availableYears,
+		selectedYear = $bindable(),
+		onYearChange,
+		onSaveCurrentYear,
+		isCurrentYearSaved
+	}: Props = $props();
 </script>
 
 <!-- Hero Header -->
@@ -77,19 +92,29 @@
 				</div>
 			</div>
 
-			<!-- Right: Actions -->
-			{#if isAdminView}
-				<div class="flex shrink-0 gap-2">
-					<Button variant="outline" size="sm" class="gap-2">
-						<Download class="size-4" />
-						Export
-					</Button>
-					<Button size="sm" class="gap-2" href="/admin/sitios/{sitio.id}/edit">
-						<Pencil class="size-4" />
-						Edit Sitio
-					</Button>
-				</div>
-			{/if}
+			<!-- Right: Year Selector & Actions -->
+			<div class="flex shrink-0 items-center gap-4">
+				<YearSelector
+					{availableYears}
+					bind:selectedYear
+					{onYearChange}
+					{onSaveCurrentYear}
+					showSaveButton={false}
+					{isCurrentYearSaved}
+				/>
+				{#if isAdminView}
+					<div class="flex gap-2">
+						<Button variant="outline" size="sm" class="gap-2">
+							<Download class="size-4" />
+							Export
+						</Button>
+						<Button size="sm" class="gap-2" href="/admin/sitios/{sitio.id}/edit">
+							<Pencil class="size-4" />
+							Edit Sitio
+						</Button>
+					</div>
+				{/if}
+			</div>
 		</div>
 	</div>
 </header>
