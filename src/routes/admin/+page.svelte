@@ -1,39 +1,21 @@
 <script lang="ts">
+	import ActivityFeed from '$lib/components/admin/dashboard/ActivityFeed.svelte';
+	import BudgetTab from '$lib/components/admin/dashboard/BudgetTab.svelte';
+	import DashboardStats from '$lib/components/admin/dashboard/DashboardStats.svelte';
+	import EmploymentTab from '$lib/components/admin/dashboard/EmploymentTab.svelte';
+	import GeographicTab from '$lib/components/admin/dashboard/GeographicTab.svelte';
+	import OverviewTab from '$lib/components/admin/dashboard/OverviewTab.svelte';
+	import RecentProjectsTable from '$lib/components/admin/dashboard/RecentProjectsTable.svelte';
+	import SitiosTab from '$lib/components/admin/dashboard/SitiosTab.svelte';
 	import AdminHeader from '$lib/components/admin/AdminHeader.svelte';
-	import BarChart from '$lib/components/charts/BarChart.svelte';
-	import DonutChart from '$lib/components/charts/DonutChart.svelte';
-	import LineChart from '$lib/components/charts/LineChart.svelte';
-	import SitioList from '$lib/components/projects/SitioList.svelte';
-	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
-	import { Progress } from '$lib/components/ui/progress';
 	import { Skeleton } from '$lib/components/ui/skeleton';
-	import * as Table from '$lib/components/ui/table';
 	import * as Tabs from '$lib/components/ui/tabs';
 	import { activities, chartData, projects, sitios, stats } from '$lib/mock-data';
-	import type { ProjectStatus } from '$lib/types';
 	import toTitleCase from '$lib/utils/common';
 	import { downloadProjectMonitoringPDF } from '$lib/utils/pdf-generator';
-	import {
-		Activity,
-		ArrowRight,
-		Banknote,
-		BarChart3,
-		CircleCheckBig,
-		CirclePlus,
-		Download,
-		FileText,
-		Home,
-		MapPin,
-		Plus,
-		SquarePen,
-		TrendingUp,
-		Upload,
-		Users,
-		type IconProps
-	} from '@lucide/svelte';
-	import type { Component } from 'svelte';
+	import { BarChart3, Download, Plus } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 
 	// Loading state for async data simulation
@@ -46,77 +28,6 @@
 		// }, 800);
 		// return () => clearTimeout(timer);
 	});
-
-	function formatNumber(num: number): string {
-		return new Intl.NumberFormat('en-US').format(num);
-	}
-
-	function formatCurrency(num: number): string {
-		return new Intl.NumberFormat('en-PH', {
-			style: 'currency',
-			currency: 'PHP',
-			notation: 'compact',
-			maximumFractionDigits: 1
-		}).format(num);
-	}
-
-	function truncateText(text: string, maxLength: number): string {
-		return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
-	}
-
-	function getStatusBadgeVariant(status: ProjectStatus) {
-		switch (status) {
-			case 'planning':
-				return 'secondary' as const;
-			case 'in-progress':
-				return 'outline' as const;
-			case 'completed':
-				return 'default' as const;
-			case 'suspended':
-				return 'destructive' as const;
-			default:
-				return 'default' as const;
-		}
-	}
-
-	function getStatusLabel(status: ProjectStatus): string {
-		switch (status) {
-			case 'planning':
-				return 'Planning';
-			case 'in-progress':
-				return 'In Progress';
-			case 'completed':
-				return 'Completed';
-			case 'suspended':
-				return 'Suspended';
-			default:
-				return status;
-		}
-	}
-
-	function formatActivityTime(timestamp: string): string {
-		const date = new Date(timestamp);
-		const now = new Date();
-		const diffMs = now.getTime() - date.getTime();
-		const diffMins = Math.floor(diffMs / 60000);
-		const diffHours = Math.floor(diffMs / 3600000);
-		const diffDays = Math.floor(diffMs / 86400000);
-
-		if (diffMins < 60) return `${diffMins} minutes ago`;
-		if (diffHours < 24) return `${diffHours} hours ago`;
-		return `${diffDays} days ago`;
-	}
-
-	function getActivityIcon(iconName: string): Component<IconProps> {
-		const iconMap: Record<string, Component<IconProps>> = {
-			'plus-circle': CirclePlus,
-			edit: SquarePen,
-			'map-pin': MapPin,
-			upload: Upload,
-			'file-text': FileText
-		};
-		return iconMap[iconName] || Activity;
-	}
 
 	const recentProjects = projects.slice(0, 5);
 
@@ -311,105 +222,7 @@
 	<!-- Content -->
 	<div class="flex-1 space-y-6 p-6">
 		<!-- Stats Grid -->
-		<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-			{#if isLoading}
-				{#each Array(5) as _}
-					<Card.Card class="shadow-sm">
-						<Card.CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-							<Skeleton class="h-4 w-24" />
-							<Skeleton class="size-9 rounded-full" />
-						</Card.CardHeader>
-						<Card.CardContent>
-							<Skeleton class="mb-2 h-8 w-20" />
-							<Skeleton class="h-3 w-28" />
-						</Card.CardContent>
-					</Card.Card>
-				{/each}
-			{:else}
-				<Card.Card class="shadow-sm">
-					<Card.CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-						<Card.CardTitle class="text-sm font-medium text-muted-foreground"
-							>Total Sitios</Card.CardTitle
-						>
-						<div class="rounded-full bg-blue-500/10 p-2">
-							<MapPin class="size-5 text-blue-600" />
-						</div>
-					</Card.CardHeader>
-					<Card.CardContent>
-						<div class="text-3xl font-bold">{formatNumber(stats.total_sitios)}</div>
-						<p class="mt-1 text-xs text-green-600">
-							<TrendingUp class="mr-1 inline size-3" />5 added this month
-						</p>
-					</Card.CardContent>
-				</Card.Card>
-
-				<Card.Card class="shadow-sm">
-					<Card.CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-						<Card.CardTitle class="text-sm font-medium text-muted-foreground"
-							>Active Projects</Card.CardTitle
-						>
-						<div class="rounded-full bg-yellow-500/10 p-2">
-							<Activity class="size-5 text-yellow-600" />
-						</div>
-					</Card.CardHeader>
-					<Card.CardContent>
-						<div class="text-3xl font-bold">{formatNumber(stats.active_projects)}</div>
-						<p class="mt-1 text-xs text-green-600">
-							<TrendingUp class="mr-1 inline size-3" />In progress
-						</p>
-					</Card.CardContent>
-				</Card.Card>
-
-				<Card.Card class="shadow-sm">
-					<Card.CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-						<Card.CardTitle class="text-sm font-medium text-muted-foreground"
-							>Completed Projects</Card.CardTitle
-						>
-						<div class="rounded-full bg-green-500/10 p-2">
-							<CircleCheckBig class="size-5 text-green-600" />
-						</div>
-					</Card.CardHeader>
-					<Card.CardContent>
-						<div class="text-3xl font-bold">{formatNumber(stats.completed_projects)}</div>
-						<p class="mt-1 text-xs text-green-600">
-							<TrendingUp class="mr-1 inline size-3" />This year
-						</p>
-					</Card.CardContent>
-				</Card.Card>
-
-				<Card.Card class="shadow-sm">
-					<Card.CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-						<Card.CardTitle class="text-sm font-medium text-muted-foreground"
-							>Total Beneficiaries</Card.CardTitle
-						>
-						<div class="rounded-full bg-purple-500/10 p-2">
-							<Users class="size-5 text-purple-600" />
-						</div>
-					</Card.CardHeader>
-					<Card.CardContent>
-						<div class="text-3xl font-bold">{formatNumber(stats.total_beneficiaries)}</div>
-						<p class="mt-1 text-xs text-green-600">
-							<TrendingUp class="mr-1 inline size-3" />Across all projects
-						</p>
-					</Card.CardContent>
-				</Card.Card>
-
-				<Card.Card class="shadow-sm">
-					<Card.CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-						<Card.CardTitle class="text-sm font-medium text-muted-foreground"
-							>Total Budget</Card.CardTitle
-						>
-						<div class="rounded-full bg-emerald-500/10 p-2">
-							<Banknote class="size-5 text-emerald-600" />
-						</div>
-					</Card.CardHeader>
-					<Card.CardContent>
-						<div class="text-3xl font-bold">{formatCurrency(stats.total_budget)}</div>
-						<p class="mt-1 text-xs text-muted-foreground">Allocated funds</p>
-					</Card.CardContent>
-				</Card.Card>
-			{/if}
-		</div>
+		<DashboardStats {stats} {isLoading} />
 
 		<!-- Charts Section with Tabs -->
 		<Card.Card class="shadow-sm">
@@ -442,268 +255,45 @@
 						</Tabs.List>
 
 						<Tabs.Content value="overview" class="mt-6">
-							<div class="grid gap-6 lg:grid-cols-2">
-								<!-- Projects by Status Donut -->
-								<div class="rounded-lg border bg-card p-4">
-									<h3 class="mb-4 text-lg font-semibold">Projects by Status</h3>
-									<DonutChart
-										data={statusChartData}
-										centerLabel="Total Projects"
-										centerValue={(stats.total_projects ?? 0).toString()}
-										height={280}
-									/>
-								</div>
-
-								<!-- Monthly Progress Line Chart -->
-								<div class="rounded-lg border bg-card p-4">
-									<h3 class="mb-4 text-lg font-semibold">Monthly Project Completions</h3>
-									<LineChart
-										series={monthlyProgressSeries}
-										categories={monthlyProgressCategories}
-										height={280}
-										title="Projects Completed"
-									/>
-								</div>
-							</div>
-
-							<!-- Categories Bar Chart - Full Width -->
-							<div class="mt-6 rounded-lg border bg-card p-4">
-								<h3 class="mb-4 text-lg font-semibold">Projects by Category</h3>
-								<BarChart
-									data={categoryChartData}
-									orientation="horizontal"
-									height={320}
-									title="Projects"
-								/>
-							</div>
-						</Tabs.Content>
-
-						<Tabs.Content value="geographic" class="mt-6">
-							<div class="rounded-lg border bg-card p-4">
-								<h3 class="mb-4 text-lg font-semibold">Projects by Municipality</h3>
-								<BarChart
-									data={municipalityChartData}
-									orientation="vertical"
-									height={350}
-									title="Projects"
-								/>
-							</div>
-						</Tabs.Content>
-
-						<Tabs.Content value="budget" class="mt-6">
-							<div class="grid gap-6 lg:grid-cols-2">
-								<!-- Budget by Category Donut -->
-								<div class="rounded-lg border bg-card p-4">
-									<h3 class="mb-4 text-lg font-semibold">Budget Allocation by Category</h3>
-									<DonutChart
-										data={topBudgetCategories}
-										centerLabel="Total Budget"
-										centerValue={formatCurrency(stats.total_budget)}
-										height={300}
-									/>
-								</div>
-
-								<!-- Budget Details Table -->
-								<div class="rounded-lg border bg-card p-4">
-									<h3 class="mb-4 text-lg font-semibold">Top Categories by Budget</h3>
-									<div class="space-y-4">
-										{#each topBudgetCategories as cat}
-											<div class="space-y-2">
-												<div class="flex items-center justify-between text-sm">
-													<div class="flex items-center gap-2">
-														<div
-															class="size-3 rounded-full"
-															style="background-color: {cat.color}"
-														></div>
-														<span class="font-medium">{cat.label}</span>
-													</div>
-													<span class="font-semibold">{formatCurrency(cat.value)}</span>
-												</div>
-												<Progress value={(cat.value / stats.total_budget) * 100} class="h-2" />
-											</div>
-										{/each}
-									</div>
-								</div>
-							</div>
+							<OverviewTab
+								{statusChartData}
+								{categoryChartData}
+								{monthlyProgressSeries}
+								{monthlyProgressCategories}
+								totalProjects={stats.total_projects ?? 0}
+							/>
 						</Tabs.Content>
 
 						<Tabs.Content value="sitios" class="mt-6">
-							<!-- Sitio Quick Stats -->
-							<div class="mb-6 grid gap-4 md:grid-cols-4">
-								<div class="rounded-lg border bg-card p-4">
-									<div class="flex items-center gap-2">
-										<div class="rounded-full bg-blue-500/10 p-2">
-											<Users class="size-4 text-blue-600" />
-										</div>
-										<span class="text-sm text-muted-foreground">Total Population</span>
-									</div>
-									<p class="mt-2 text-2xl font-bold">{formatNumber(totalPopulation)}</p>
-								</div>
-								<div class="rounded-lg border bg-card p-4">
-									<div class="flex items-center gap-2">
-										<div class="rounded-full bg-green-500/10 p-2">
-											<Home class="size-4 text-green-600" />
-										</div>
-										<span class="text-sm text-muted-foreground">Households</span>
-									</div>
-									<p class="mt-2 text-2xl font-bold">{formatNumber(totalHouseholds)}</p>
-								</div>
-								<div class="rounded-lg border bg-card p-4">
-									<div class="flex items-center gap-2">
-										<div class="rounded-full bg-purple-500/10 p-2">
-											<Users class="size-4 text-purple-600" />
-										</div>
-										<span class="text-sm text-muted-foreground">Registered Voters</span>
-									</div>
-									<p class="mt-2 text-2xl font-bold">{formatNumber(totalVoters)}</p>
-								</div>
-								<div class="rounded-lg border bg-card p-4">
-									<div class="flex items-center gap-2">
-										<div class="rounded-full bg-amber-500/10 p-2">
-											<MapPin class="size-4 text-amber-600" />
-										</div>
-										<span class="text-sm text-muted-foreground">Farmers</span>
-									</div>
-									<p class="mt-2 text-2xl font-bold">{formatNumber(totalFarmers)}</p>
-								</div>
-							</div>
+							<SitiosTab
+								{totalPopulation}
+								{totalHouseholds}
+								{totalVoters}
+								{totalFarmers}
+								{totalFarmArea}
+								{totalPhilhealth}
+								{total4Ps}
+								{demographicsChartData}
+								{ageDistribution}
+								{sitiosByMunicipality}
+								{populationByMunicipality}
+							/>
+						</Tabs.Content>
 
-							<div class="grid gap-6 lg:grid-cols-2">
-								<!-- Demographics Gender Distribution -->
-								<div class="rounded-lg border bg-card p-4">
-									<h3 class="mb-4 text-lg font-semibold">Population by Gender</h3>
-									<DonutChart
-										data={demographicsChartData}
-										centerLabel="Total"
-										centerValue={formatNumber(totalMalePopulation + totalFemalePopulation)}
-										height={260}
-									/>
-								</div>
+						<Tabs.Content value="geographic" class="mt-6">
+							<GeographicTab {municipalityChartData} />
+						</Tabs.Content>
 
-								<!-- Age Distribution -->
-								<div class="rounded-lg border bg-card p-4">
-									<h3 class="mb-4 text-lg font-semibold">Population by Age Group</h3>
-									<DonutChart
-										data={ageDistribution}
-										centerLabel="Total"
-										centerValue={formatNumber(ageDistribution.reduce((s, a) => s + a.value, 0))}
-										height={260}
-									/>
-								</div>
-							</div>
-
-							<!-- Sitios by Municipality -->
-							<div class="mt-6 rounded-lg border bg-card p-4">
-								<h3 class="mb-4 text-lg font-semibold">Sitios by Municipality</h3>
-								<BarChart
-									data={sitiosByMunicipality}
-									orientation="horizontal"
-									height={280}
-									title="Sitios"
-								/>
-							</div>
-
-							<div class="mt-6 grid gap-6 lg:grid-cols-[60%_40%]">
-								<!-- Population by Municipality -->
-								<div class="rounded-lg border bg-card p-4">
-									<h3 class="mb-4 text-lg font-semibold">Population by Municipality</h3>
-									<BarChart
-										data={populationByMunicipality}
-										orientation="vertical"
-										height={280}
-										title="Population"
-									/>
-								</div>
-
-								<!-- Social Services Summary -->
-								<div class="rounded-lg border bg-card p-4">
-									<h3 class="mb-4 text-lg font-semibold">Social Services Coverage</h3>
-									<div class="space-y-4">
-										<div class="space-y-2">
-											<div class="flex items-center justify-between text-sm">
-												<span class="font-medium">PhilHealth Beneficiaries</span>
-												<span class="font-semibold">{formatNumber(totalPhilhealth)}</span>
-											</div>
-											<Progress value={(totalPhilhealth / totalPopulation) * 100} class="h-2" />
-											<p class="text-xs text-muted-foreground">
-												{((totalPhilhealth / totalPopulation) * 100).toFixed(1)}% coverage
-											</p>
-										</div>
-										<div class="space-y-2">
-											<div class="flex items-center justify-between text-sm">
-												<span class="font-medium">4Ps Beneficiaries</span>
-												<span class="font-semibold">{formatNumber(total4Ps)}</span>
-											</div>
-											<Progress value={(total4Ps / totalHouseholds) * 100} class="h-2" />
-											<p class="text-xs text-muted-foreground">
-												{((total4Ps / totalHouseholds) * 100).toFixed(1)}% of households
-											</p>
-										</div>
-										<div class="space-y-2">
-											<div class="flex items-center justify-between text-sm">
-												<span class="font-medium">Registered Voters</span>
-												<span class="font-semibold">{formatNumber(totalVoters)}</span>
-											</div>
-											<Progress value={(totalVoters / totalPopulation) * 100} class="h-2" />
-											<p class="text-xs text-muted-foreground">
-												{((totalVoters / totalPopulation) * 100).toFixed(1)}% of population
-											</p>
-										</div>
-										<div class="mt-4 rounded-lg bg-muted/50 p-3">
-											<div class="flex items-center justify-between">
-												<span class="text-sm font-medium">Total Farm Area</span>
-												<span class="text-lg font-bold">{formatNumber(totalFarmArea)} ha</span>
-											</div>
-										</div>
-									</div>
-								</div>
-							</div>
+						<Tabs.Content value="budget" class="mt-6">
+							<BudgetTab {topBudgetCategories} totalBudget={stats.total_budget} />
 						</Tabs.Content>
 
 						<Tabs.Content value="employment" class="mt-6">
-							<div class="grid gap-6 lg:grid-cols-2">
-								<!-- Employment Distribution Donut -->
-								<div class="rounded-lg border bg-card p-4">
-									<h3 class="mb-4 text-lg font-semibold">Employment Distribution</h3>
-									<DonutChart
-										data={employmentChartData}
-										centerLabel="Total Employed"
-										centerValue={formatNumber(totalMaleEmployment + totalFemaleEmployment)}
-										height={280}
-									/>
-								</div>
-
-								<!-- Employment by Category -->
-								<div class="rounded-lg border bg-card p-4">
-									<h3 class="mb-4 text-lg font-semibold">Employment by Category</h3>
-									<div class="space-y-4">
-										{#each employmentByCategory as cat}
-											<div class="space-y-2">
-												<div class="flex items-center justify-between text-sm">
-													<span class="font-medium">{cat.category}</span>
-													<span class="text-muted-foreground">{cat.male + cat.female} total</span>
-												</div>
-												<div class="flex h-3 overflow-hidden rounded-full bg-muted">
-													<div
-														class="bg-blue-500"
-														style="width: {(cat.male / (cat.male + cat.female)) * 100}%"
-														title="Male: {cat.male}"
-													></div>
-													<div
-														class="bg-pink-500"
-														style="width: {(cat.female / (cat.male + cat.female)) * 100}%"
-														title="Female: {cat.female}"
-													></div>
-												</div>
-												<div class="flex justify-between text-xs text-muted-foreground">
-													<span>Male: {cat.male}</span>
-													<span>Female: {cat.female}</span>
-												</div>
-											</div>
-										{/each}
-									</div>
-								</div>
-							</div>
+							<EmploymentTab
+								{employmentChartData}
+								{employmentByCategory}
+								totalEmployment={totalMaleEmployment + totalFemaleEmployment}
+							/>
 						</Tabs.Content>
 					</Tabs.Root>
 				{/if}
@@ -713,120 +303,10 @@
 		<!-- Main Grid -->
 		<div class="grid gap-6 lg:grid-cols-3">
 			<!-- Recent Projects -->
-			<Card.Card class="shadow-sm lg:col-span-2">
-				<Card.CardHeader class="flex flex-row items-center justify-between">
-					<Card.CardTitle class="text-xl font-semibold">Recent Projects</Card.CardTitle>
-					<a
-						href="/admin/projects"
-						class="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-					>
-						View All
-						<ArrowRight class="size-4" />
-					</a>
-				</Card.CardHeader>
-				<Card.CardContent>
-					{#if isLoading}
-						<div class="space-y-3">
-							{#each Array(5) as _}
-								<div class="flex items-center gap-4">
-									<Skeleton class="h-12 flex-1" />
-									<Skeleton class="h-12 w-24" />
-									<Skeleton class="h-6 w-20" />
-									<Skeleton class="h-4 w-32" />
-								</div>
-							{/each}
-						</div>
-					{:else}
-						<div class="rounded-md border">
-							<Table.Table>
-								<Table.TableHeader>
-									<Table.TableRow>
-										<Table.TableHead>Project</Table.TableHead>
-										<Table.TableHead>Location</Table.TableHead>
-										<Table.TableHead>Status</Table.TableHead>
-										<Table.TableHead>Progress</Table.TableHead>
-									</Table.TableRow>
-								</Table.TableHeader>
-								<Table.TableBody>
-									{#each recentProjects as project}
-										<Table.TableRow class="cursor-pointer hover:bg-accent/10">
-											<Table.TableCell>
-												<div class="font-medium">{truncateText(project.title, 40)}</div>
-												<div class="text-xs text-muted-foreground">{project.category}</div>
-											</Table.TableCell>
-											<Table.TableCell>
-												{#if project.project_sitios && project.project_sitios.length > 0}
-													<SitioList sitios={project.project_sitios} maxVisible={1} />
-												{:else}
-													<div class="text-sm text-muted-foreground">No sitios</div>
-												{/if}
-											</Table.TableCell>
-											<Table.TableCell>
-												<Badge variant={getStatusBadgeVariant(project.status)}>
-													{getStatusLabel(project.status)}
-												</Badge>
-											</Table.TableCell>
-											<Table.TableCell>
-												<div class="flex items-center gap-2">
-													<Progress value={project.completion_percentage} class="w-full" />
-													<span class="min-w-12 text-xs text-muted-foreground">
-														{project.completion_percentage}%
-													</span>
-												</div>
-											</Table.TableCell>
-										</Table.TableRow>
-									{/each}
-								</Table.TableBody>
-							</Table.Table>
-						</div>
-					{/if}
-				</Card.CardContent>
-			</Card.Card>
+			<RecentProjectsTable projects={recentProjects} {isLoading} />
 
 			<!-- Activity Feed -->
-			<Card.Card class="shadow-sm">
-				<Card.CardHeader>
-					<Card.CardTitle class="text-xl font-semibold">Recent Activity</Card.CardTitle>
-				</Card.CardHeader>
-				<Card.CardContent>
-					{#if isLoading}
-						<div class="space-y-6">
-							{#each Array(5) as _}
-								<div class="flex gap-3">
-									<Skeleton class="size-10 rounded-full" />
-									<div class="flex-1 space-y-2">
-										<Skeleton class="h-4 w-24" />
-										<Skeleton class="h-3 w-full" />
-										<Skeleton class="h-3 w-16" />
-									</div>
-								</div>
-							{/each}
-						</div>
-					{:else}
-						<div class="space-y-6">
-							{#each activities as activity}
-								{@const ActivityIcon = getActivityIcon(activity.icon)}
-								<div class="flex gap-3">
-									<div
-										class="flex size-10 shrink-0 items-center justify-center rounded-full border-2 border-border bg-card"
-									>
-										<ActivityIcon class="size-4" />
-									</div>
-									<div class="flex-1 space-y-1">
-										<p class="text-sm font-semibold">{activity.user}</p>
-										<p class="text-sm text-muted-foreground">
-											{activity.action}: {activity.target}
-										</p>
-										<p class="text-xs text-muted-foreground">
-											{formatActivityTime(activity.timestamp)}
-										</p>
-									</div>
-								</div>
-							{/each}
-						</div>
-					{/if}
-				</Card.CardContent>
-			</Card.Card>
+			<ActivityFeed {activities} {isLoading} />
 		</div>
 	</div>
 </div>
