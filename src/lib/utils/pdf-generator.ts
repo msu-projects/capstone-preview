@@ -21,12 +21,33 @@ export function generateProjectMonitoringPDF(projects: Project[], quarter: strin
 		day: 'numeric'
 	});
 
-	// Create table rows for projects (filter out projects without monitoring data)
+	// Helper to get location from project sitios
+	const getProjectLocation = (project: Project): string => {
+		if (project.project_sitios && project.project_sitios.length > 0) {
+			return project.project_sitios[0].sitio_name || project.project_sitios[0].municipality;
+		}
+		return 'N/A';
+	};
+
+	// Helper to calculate slippage from monthly progress
+	const getPhysicalProgress = (project: Project) => {
+		const latestProgress = project.monthly_physical_progress?.[project.monthly_physical_progress.length - 1];
+		const plan = latestProgress?.plan_percentage ?? 0;
+		const actual = project.completion_percentage;
+		return { plan, actual, slippage: plan - actual };
+	};
+
+	// Create table rows for projects (filter out projects without financial data)
 	const projectRows = projects
-		.filter((project) => project.monitoring !== undefined)
+		.filter((project) => project.allotment !== undefined || project.budget > 0)
 		.map((project) => {
-			const monitoring = project.monitoring!;
+			const allotment = project.allotment ?? { allocated: project.budget, supplemental: 0, total: project.budget, released: 0 };
+			const expenditure = project.expenditure ?? { obligations: 0, contract_cost: project.budget };
+			const contract = project.contract ?? { duration: '', delivery: '', extension: undefined };
+			const statusSummary = project.status_summary ?? { stage: '', issues: '', recommendations: '' };
+			const employment = project.employment_generated ?? { male: 0, female: 0 };
 			const municipalities = project.project_sitios?.map((s) => s.municipality).join(', ') || 'N/A';
+			const physical = getPhysicalProgress(project);
 
 			return [
 				// Name of Projects column
@@ -34,7 +55,7 @@ export function generateProjectMonitoringPDF(projects: Project[], quarter: strin
 					text: [
 						{ text: `${project.title}\n`, bold: true, fontSize: 9 },
 						{
-							text: `Location: ${monitoring.location}\n`,
+							text: `Location: ${getProjectLocation(project)}\n`,
 							fontSize: 8,
 							italics: true
 						},
@@ -55,7 +76,7 @@ export function generateProjectMonitoringPDF(projects: Project[], quarter: strin
 				},
 				// Allotted Budget
 				{
-					text: monitoring.allotment.allocated.toLocaleString('en-PH', {
+					text: allotment.allocated.toLocaleString('en-PH', {
 						style: 'currency',
 						currency: 'PHP',
 						minimumFractionDigits: 2
@@ -66,7 +87,7 @@ export function generateProjectMonitoringPDF(projects: Project[], quarter: strin
 				},
 				// Supplemental Budget
 				{
-					text: monitoring.allotment.supplemental.toLocaleString('en-PH', {
+					text: allotment.supplemental.toLocaleString('en-PH', {
 						style: 'currency',
 						currency: 'PHP',
 						minimumFractionDigits: 2
@@ -77,7 +98,7 @@ export function generateProjectMonitoringPDF(projects: Project[], quarter: strin
 				},
 				// Total Allocated Budget
 				{
-					text: monitoring.allotment.total.toLocaleString('en-PH', {
+					text: allotment.total.toLocaleString('en-PH', {
 						style: 'currency',
 						currency: 'PHP',
 						minimumFractionDigits: 2
@@ -88,7 +109,7 @@ export function generateProjectMonitoringPDF(projects: Project[], quarter: strin
 				},
 				// Allotment Release
 				{
-					text: monitoring.allotment.released.toLocaleString('en-PH', {
+					text: allotment.released.toLocaleString('en-PH', {
 						style: 'currency',
 						currency: 'PHP',
 						minimumFractionDigits: 2
@@ -99,7 +120,7 @@ export function generateProjectMonitoringPDF(projects: Project[], quarter: strin
 				},
 				// Obligations Incurred
 				{
-					text: monitoring.expenditure.obligations.toLocaleString('en-PH', {
+					text: expenditure.obligations.toLocaleString('en-PH', {
 						style: 'currency',
 						currency: 'PHP',
 						minimumFractionDigits: 2
@@ -110,7 +131,7 @@ export function generateProjectMonitoringPDF(projects: Project[], quarter: strin
 				},
 				// Contract Cost
 				{
-					text: monitoring.expenditure.contractCost.toLocaleString('en-PH', {
+					text: expenditure.contract_cost.toLocaleString('en-PH', {
 						style: 'currency',
 						currency: 'PHP',
 						minimumFractionDigits: 2
@@ -121,64 +142,64 @@ export function generateProjectMonitoringPDF(projects: Project[], quarter: strin
 				},
 				// Plan %
 				{
-					text: `${monitoring.physical.plan.toFixed(2)}%`,
+					text: `${physical.plan.toFixed(2)}%`,
 					alignment: 'center' as const,
 					fontSize: 8,
 					margin: [2, 4, 2, 4] as [number, number, number, number]
 				},
 				// Actual %
 				{
-					text: `${monitoring.physical.actual.toFixed(2)}%`,
+					text: `${physical.actual.toFixed(2)}%`,
 					alignment: 'center' as const,
 					fontSize: 8,
 					margin: [2, 4, 2, 4] as [number, number, number, number]
 				},
 				// Slippage %
 				{
-					text: `${monitoring.physical.slippage.toFixed(2)}%`,
+					text: `${physical.slippage.toFixed(2)}%`,
 					alignment: 'center' as const,
 					fontSize: 8,
 					margin: [2, 4, 2, 4] as [number, number, number, number],
-					color: monitoring.physical.slippage < 0 ? 'red' : 'black'
+					color: physical.slippage < 0 ? 'red' : 'black'
 				},
 				// Male Employment
 				{
-					text: monitoring.employment.male.toString(),
+					text: employment.male.toString(),
 					alignment: 'center' as const,
 					fontSize: 8,
 					margin: [2, 4, 2, 4] as [number, number, number, number]
 				},
 				// Female Employment
 				{
-					text: monitoring.employment.female.toString(),
+					text: employment.female.toString(),
 					alignment: 'center' as const,
 					fontSize: 8,
 					margin: [2, 4, 2, 4] as [number, number, number, number]
 				},
 				// Contract Time
 				{
-					text: monitoring.contract.duration,
+					text: contract.duration,
 					alignment: 'center' as const,
 					fontSize: 8,
 					margin: [2, 4, 2, 4] as [number, number, number, number]
 				},
 				// Delivery Time
 				{
-					text: monitoring.contract.delivery,
+					text: contract.delivery,
 					alignment: 'center' as const,
 					fontSize: 8,
 					margin: [2, 4, 2, 4] as [number, number, number, number]
 				},
 				// Extension
 				{
-					text: monitoring.contract.extension || 'None',
+					text: contract.extension || 'None',
 					alignment: 'center' as const,
 					fontSize: 8,
 					margin: [2, 4, 2, 4] as [number, number, number, number]
 				},
 				// Project Status
 				{
-					text: monitoring.statusSummary.stage,
+					text: statusSummary.stage,
 					alignment: 'center' as const,
 					fontSize: 8,
 					margin: [2, 4, 2, 4] as [number, number, number, number]
@@ -192,7 +213,7 @@ export function generateProjectMonitoringPDF(projects: Project[], quarter: strin
 							fontSize: 7
 						},
 						{
-							text: `${monitoring.statusSummary.issues}\n\n`,
+							text: `${statusSummary.issues}\n\n`,
 							fontSize: 7
 						},
 						{
@@ -201,7 +222,7 @@ export function generateProjectMonitoringPDF(projects: Project[], quarter: strin
 							fontSize: 7
 						},
 						{
-							text: monitoring.statusSummary.recommendations,
+							text: statusSummary.recommendations,
 							fontSize: 7
 						}
 					],
@@ -209,7 +230,7 @@ export function generateProjectMonitoringPDF(projects: Project[], quarter: strin
 				},
 				// CATCH-UP Plans
 				{
-					text: monitoring.catchUpPlan,
+					text: project.catch_up_plan || '',
 					fontSize: 7,
 					margin: [2, 4, 2, 4] as [number, number, number, number]
 				}

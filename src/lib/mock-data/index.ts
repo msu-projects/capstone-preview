@@ -1,10 +1,13 @@
 import type {
 	Activity,
+	AllotmentDetails,
 	ChartDataItem,
-	MonitoringDetails,
+	ContractDetails,
+	ExpenditureDetails,
 	Project,
 	Sitio,
 	Stats,
+	StatusSummary,
 	User
 } from '$lib/types';
 import { loadProjects, loadSitios, saveProjects, saveSitios } from '$lib/utils/storage';
@@ -29,62 +32,6 @@ export {
 	MOCK_SITIOS_KEY,
 	resetMockData
 };
-
-// ===== HELPER FUNCTIONS =====
-
-export function createMonitoringDetails(
-	overrides: Partial<MonitoringDetails> = {}
-): MonitoringDetails {
-	const base: MonitoringDetails = {
-		fundSource: '20% LDF',
-		fiscalYear: 2025,
-		implementingUnit: "Provincial Governor's Office - CATCH-UP Program", // Always PGO-CATCH-UP
-		location: '',
-		allotment: {
-			allocated: 0,
-			supplemental: 0,
-			total: 0,
-			released: 0
-		},
-		expenditure: {
-			obligations: 0,
-			contractCost: 0
-		},
-		physical: {
-			plan: 0,
-			actual: 0,
-			slippage: 0
-		},
-		employment: {
-			male: 0,
-			female: 0
-		},
-		contract: {
-			duration: 'N/A',
-			delivery: 'N/A',
-			extension: 'None'
-		},
-		statusSummary: {
-			stage: 'Planning',
-			issues: 'No major issues reported.',
-			recommendations: 'Maintain current work program.'
-		},
-		catchUpPlan: 'N/A'
-	};
-
-	return {
-		...base,
-		...overrides,
-		// Always ensure implementingUnit is set to default
-		implementingUnit: "Provincial Governor's Office - CATCH-UP Program",
-		allotment: { ...base.allotment, ...(overrides.allotment || {}) },
-		expenditure: { ...base.expenditure, ...(overrides.expenditure || {}) },
-		physical: { ...base.physical, ...(overrides.physical || {}) },
-		employment: { ...base.employment, ...(overrides.employment || {}) },
-		contract: { ...base.contract, ...(overrides.contract || {}) },
-		statusSummary: { ...base.statusSummary, ...(overrides.statusSummary || {}) }
-	};
-}
 
 // ===== SITIOS DATA =====
 
@@ -131,9 +78,9 @@ export function refreshSitios(): Sitio[] {
 // ===== PROJECTS DATA =====
 
 /**
- * Add monitoring details to a project for PDF generation
+ * Add financial and status details to a project for display/PDF generation
  */
-function addMonitoringToProject(project: Project): Project {
+function enrichProjectData(project: Project): Project {
 	const allocated = project.budget;
 	const supplemental = Math.floor(allocated * 0.1);
 	const total = allocated + supplemental;
@@ -141,76 +88,69 @@ function addMonitoringToProject(project: Project): Project {
 	const obligations = Math.floor(released * 0.9);
 	const contractCost = Math.floor(total * 0.95);
 
-	const plan = project.completion_percentage + 5;
-	const actual = project.completion_percentage;
-	const slippage = Number((actual - plan).toFixed(2));
-
 	const maleEmployment = project.employment_generated?.male ?? 8 + Math.floor(Math.random() * 15);
 	const femaleEmployment =
 		project.employment_generated?.female ?? 5 + Math.floor(Math.random() * 10);
 
+	const allotment: AllotmentDetails = {
+		allocated,
+		supplemental,
+		total,
+		released
+	};
+
+	const expenditure: ExpenditureDetails = {
+		obligations,
+		contract_cost: contractCost
+	};
+
+	const contract: ContractDetails = {
+		duration: '120 CD',
+		delivery: '120 CD',
+		extension: project.status === 'suspended' ? 'Pending approval' : undefined
+	};
+
+	const statusSummary: StatusSummary = {
+		stage:
+			project.status === 'completed'
+				? 'Completed'
+				: project.status === 'in-progress'
+					? 'Implementation'
+					: project.status === 'suspended'
+						? 'Suspended'
+						: 'Planning',
+		issues:
+			project.status === 'suspended'
+				? 'Project temporarily halted due to weather conditions.'
+				: project.status === 'in-progress'
+					? 'Ongoing, minor delays in material delivery.'
+					: 'None',
+		recommendations:
+			project.status === 'suspended'
+				? 'Resume works once weather improves and deploy catch-up teams.'
+				: project.status === 'in-progress'
+					? 'Coordinate with suppliers to expedite material delivery.'
+					: 'Proceed as planned.'
+	};
+
+	const catchUpPlan =
+		project.status === 'suspended'
+			? 'Deploy double shifts upon resumption to recover lost time.'
+			: project.status === 'in-progress'
+				? 'Maintain current pace and monitor progress weekly.'
+				: undefined;
+
 	return {
 		...project,
+		allotment,
+		expenditure,
+		contract,
+		status_summary: statusSummary,
+		catch_up_plan: catchUpPlan,
 		employment_generated: {
 			male: maleEmployment,
 			female: femaleEmployment
-		},
-		monitoring: createMonitoringDetails({
-			location: project.project_sitios?.[0]?.municipality || '',
-			fiscalYear: project.project_year,
-			allotment: {
-				allocated,
-				supplemental,
-				total,
-				released
-			},
-			expenditure: {
-				obligations,
-				contractCost
-			},
-			physical: {
-				plan,
-				actual,
-				slippage
-			},
-			employment: {
-				male: maleEmployment,
-				female: femaleEmployment
-			},
-			contract: {
-				duration: '120 CD',
-				delivery: '120 CD',
-				extension: project.status === 'suspended' ? 'Pending approval' : 'None'
-			},
-			statusSummary: {
-				stage:
-					project.status === 'completed'
-						? 'Completed'
-						: project.status === 'in-progress'
-							? 'Implementation'
-							: project.status === 'suspended'
-								? 'Suspended'
-								: 'Planning',
-				issues:
-					project.status === 'suspended'
-						? 'Project temporarily halted due to weather conditions.'
-						: project.status === 'in-progress'
-							? 'Ongoing, minor delays in material delivery.'
-							: 'None',
-				recommendations:
-					project.status === 'suspended'
-						? 'Resume works once weather improves and deploy catch-up teams.'
-						: project.status === 'in-progress'
-							? 'Coordinate with suppliers to expedite material delivery.'
-							: 'Proceed as planned.'
-			},
-			catchUpPlan:
-				project.status === 'suspended'
-					? 'Deploy double shifts upon resumption to recover lost time.'
-					: project.status === 'in-progress'
-						? 'Maintain current pace and monitor progress weekly.'
-						: 'N/A'
-		})
+		}
 	};
 }
 
@@ -222,32 +162,32 @@ function initializeProjects(): Project[] {
 		// Server-side: generate fresh data for SSR
 		const generatedSitios = generateSitios(50);
 		const generatedProjects = generateProjects(generatedSitios, 20);
-		return generatedProjects.map(addMonitoringToProject);
+		return generatedProjects.map(enrichProjectData);
 	}
 
 	try {
 		// First check if we have data in the main storage
 		const storedProjects = loadProjects();
 		if (storedProjects.length > 0) {
-			return storedProjects.map(addMonitoringToProject);
+			return storedProjects.map(enrichProjectData);
 		}
 
 		// Check/initialize mock data
 		const { projects: generatedProjects } = initializeMockDataIfNeeded();
 
-		// Add monitoring details and save to main storage
-		const projectsWithMonitoring = generatedProjects.map(addMonitoringToProject);
+		// Add financial/status details and save to main storage
+		const enrichedProjects = generatedProjects.map(enrichProjectData);
 
-		if (projectsWithMonitoring.length > 0) {
-			saveProjects(projectsWithMonitoring);
+		if (enrichedProjects.length > 0) {
+			saveProjects(enrichedProjects);
 		}
 
-		return projectsWithMonitoring;
+		return enrichedProjects;
 	} catch (error) {
 		console.error('Failed to initialize projects from storage:', error);
 		const generatedSitios = generateSitios(50);
 		const generatedProjects = generateProjects(generatedSitios, 20);
-		return generatedProjects.map(addMonitoringToProject);
+		return generatedProjects.map(enrichProjectData);
 	}
 }
 
@@ -259,11 +199,11 @@ export function refreshProjects(): Project[] {
 	if (typeof window === 'undefined') {
 		const generatedSitios = generateSitios(50);
 		const generatedProjects = generateProjects(generatedSitios, 20);
-		return generatedProjects.map(addMonitoringToProject);
+		return generatedProjects.map(enrichProjectData);
 	}
 
 	const storedProjects = loadProjects();
-	return storedProjects.map(addMonitoringToProject);
+	return storedProjects.map(enrichProjectData);
 }
 
 // ===== USERS DATA =====

@@ -1,9 +1,9 @@
 /**
- * Data adapter functions to map between legacy monitoring fields
- * and enhanced project structures for backwards compatibility
+ * Data adapter functions to map between project fields
+ * and form structures for UI interaction
  */
 
-import type { MonitoringDetails, PhotoDocumentation, Project } from '$lib/types';
+import type { PhotoDocumentation, Project, AllotmentDetails, ExpenditureDetails, ContractDetails, StatusSummary } from '$lib/types';
 import { getCurrentMonth } from './project-calculations';
 
 /**
@@ -40,7 +40,6 @@ export interface QuickUpdateFormData {
 
 /**
  * Extracts Quick Update form data from a Project
- * Handles both legacy monitoring and enhanced fields
  */
 export function projectToQuickUpdate(project: Project): QuickUpdateFormData {
 	const currentMonth = getCurrentMonth();
@@ -53,9 +52,7 @@ export function projectToQuickUpdate(project: Project): QuickUpdateFormData {
 	// Get latest budget utilization for current month
 	const latestBudgetUtil = project.monthly_budget?.find((mb) => mb.month_year === currentMonth);
 
-	// Get planned percentage from multiple sources (priority order):
-	// 1. monthly_physical_progress (preferred, from Monthly Planning tab)
-	// 2. monitoring.physical.plan (legacy fallback)
+	// Get planned percentage from monthly_physical_progress
 	const monthlyPhysicalProgress = project.monthly_physical_progress?.find(
 		(mp) => mp.month_year === currentMonth
 	);
@@ -70,8 +67,8 @@ export function projectToQuickUpdate(project: Project): QuickUpdateFormData {
 			}
 			return sum;
 		}, 0) ||
-		project.monitoring?.allotment?.released ||
-		project.monitoring?.expenditure?.obligations ||
+		project.allotment?.released ||
+		project.expenditure?.obligations ||
 		0;
 
 	// Get THIS month's disbursement only (not cumulative)
@@ -81,21 +78,14 @@ export function projectToQuickUpdate(project: Project): QuickUpdateFormData {
 		// Progress & Status
 		status: project.status,
 		physicalActual: project.completion_percentage?.toString() || '0',
-		plannedPercentage:
-			plannedPercentage?.toString() || project.monitoring?.physical?.plan?.toString() || '0',
-		statusStage: project.monitoring?.statusSummary?.stage || '',
-		statusIssues: project.monitoring?.statusSummary?.issues || '',
-		statusRecommendations: project.monitoring?.statusSummary?.recommendations || '',
-		catchUpPlan: project.monitoring?.catchUpPlan || '',
-		// Employment - check employment_generated first (new field), then fallback to monitoring.employment (legacy)
-		maleEmployment:
-			project.employment_generated?.male?.toString() ||
-			project.monitoring?.employment?.male?.toString() ||
-			'0',
-		femaleEmployment:
-			project.employment_generated?.female?.toString() ||
-			project.monitoring?.employment?.female?.toString() ||
-			'0',
+		plannedPercentage: plannedPercentage?.toString() || '0',
+		statusStage: project.status_summary?.stage || '',
+		statusIssues: project.status_summary?.issues || '',
+		statusRecommendations: project.status_summary?.recommendations || '',
+		catchUpPlan: project.catch_up_plan || '',
+		// Employment
+		maleEmployment: project.employment_generated?.male?.toString() || '0',
+		femaleEmployment: project.employment_generated?.female?.toString() || '0',
 		// Financial
 		totalBudget: project.budget || 0,
 		budgetDisbursed: cumulativeDisbursed.toString(), // Cumulative total
@@ -103,12 +93,12 @@ export function projectToQuickUpdate(project: Project): QuickUpdateFormData {
 		// Timeline
 		startDate: project.start_date || '',
 		targetEndDate: project.end_date || '',
-		extensionRequested: !!project.monitoring?.contract?.extension,
+		extensionRequested: !!project.contract?.extension,
 		extensionDays: (() => {
 			// Calculate extension days from stored extension date
-			if (!project.monitoring?.contract?.extension || !project.end_date) return '';
+			if (!project.contract?.extension || !project.end_date) return '';
 			const endDate = new Date(project.end_date);
-			const extensionDate = new Date(project.monitoring.contract.extension);
+			const extensionDate = new Date(project.contract.extension);
 			const diffInMs = extensionDate.getTime() - endDate.getTime();
 			const diffInDays = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
 			return diffInDays > 0 ? diffInDays.toString() : '';
@@ -127,7 +117,6 @@ export function projectToQuickUpdate(project: Project): QuickUpdateFormData {
 
 /**
  * Applies Quick Update form data back to a Project
- * Updates both legacy monitoring and enhanced fields
  */
 export function applyQuickUpdateToProject(
 	formData: QuickUpdateFormData,
@@ -135,60 +124,48 @@ export function applyQuickUpdateToProject(
 ): Project {
 	const currentMonth = getCurrentMonth();
 
-	// Calculate slippage for legacy monitoring
+	// Calculate slippage
 	const plannedPct = Number(formData.plannedPercentage || 0);
 	const actualPct = Number(formData.physicalActual || 0);
 	const slippage = plannedPct - actualPct;
 
-	// Update legacy monitoring structure
-	const updatedMonitoring: MonitoringDetails = {
-		...project.monitoring,
-		fundSource: project.monitoring?.fundSource || '',
-		fiscalYear: project.monitoring?.fiscalYear || project.project_year || new Date().getFullYear(),
-		implementingUnit: project.monitoring?.implementingUnit || '',
-		location: project.monitoring?.location || project.project_sitios?.[0]?.sitio_name || '',
-		allotment: {
-			...project.monitoring?.allotment,
-			allocated: project.budget || 0,
-			supplemental: 0,
-			total: project.budget || 0,
-			released: Number(formData.budgetDisbursed || 0)
-		},
-		expenditure: {
-			...project.monitoring?.expenditure,
-			obligations: Number(formData.budgetDisbursed || 0),
-			contractCost: project.monitoring?.expenditure?.contractCost || project.budget || 0
-		},
-		physical: {
-			plan: plannedPct,
-			actual: actualPct,
-			slippage: slippage
-		},
-		employment: {
-			male: Number(formData.maleEmployment || 0),
-			female: Number(formData.femaleEmployment || 0)
-		},
-		contract: {
-			...project.monitoring?.contract,
-			duration: project.monitoring?.contract?.duration || '',
-			delivery: project.monitoring?.contract?.delivery || '',
-			extension: (() => {
-				// Calculate extension date from calendar days
-				if (!formData.extensionRequested || !formData.extensionDays) return '';
-				const days = Number(formData.extensionDays);
-				if (isNaN(days) || days <= 0) return '';
-				const baseDate = new Date(formData.targetEndDate);
-				const extensionDate = new Date(baseDate);
-				extensionDate.setDate(extensionDate.getDate() + days);
-				return extensionDate.toISOString().split('T')[0];
-			})()
-		},
-		statusSummary: {
-			stage: formData.statusStage,
-			issues: formData.statusIssues,
-			recommendations: formData.statusRecommendations
-		},
-		catchUpPlan: formData.catchUpPlan
+	// Update allotment
+	const updatedAllotment: AllotmentDetails = {
+		...project.allotment,
+		allocated: project.budget || 0,
+		supplemental: project.allotment?.supplemental || 0,
+		total: project.budget || 0,
+		released: Number(formData.budgetDisbursed || 0)
+	};
+
+	// Update expenditure
+	const updatedExpenditure: ExpenditureDetails = {
+		obligations: Number(formData.budgetDisbursed || 0),
+		contract_cost: project.expenditure?.contract_cost || project.budget || 0
+	};
+
+	// Update contract
+	const updatedContract: ContractDetails = {
+		...project.contract,
+		duration: project.contract?.duration || '',
+		delivery: project.contract?.delivery || '',
+		extension: (() => {
+			// Calculate extension date from calendar days
+			if (!formData.extensionRequested || !formData.extensionDays) return undefined;
+			const days = Number(formData.extensionDays);
+			if (isNaN(days) || days <= 0) return undefined;
+			const baseDate = new Date(formData.targetEndDate);
+			const extensionDate = new Date(baseDate);
+			extensionDate.setDate(extensionDate.getDate() + days);
+			return extensionDate.toISOString().split('T')[0];
+		})()
+	};
+
+	// Update status summary
+	const updatedStatusSummary: StatusSummary = {
+		stage: formData.statusStage,
+		issues: formData.statusIssues,
+		recommendations: formData.statusRecommendations
 	};
 
 	// Update or create monthly_budget for current month
@@ -212,10 +189,10 @@ export function applyQuickUpdateToProject(
 			mb.month_year === currentMonth
 				? {
 						...mb,
-						budget_released: monthlyAmount, // This month's amount
-						actual_expenses: monthlyAmount, // This month's expenses only
+						budget_released: monthlyAmount,
+						actual_expenses: monthlyAmount,
 						obligations: monthlyAmount,
-						remaining_balance: remainingBalance, // Balance after cumulative total
+						remaining_balance: remainingBalance,
 						updated_at: new Date().toISOString()
 					}
 				: mb
@@ -223,13 +200,13 @@ export function applyQuickUpdateToProject(
 	} else {
 		// Create new record for current month
 		updatedMonthlyBudget.push({
-			id: Date.now(), // Temporary ID
+			id: Date.now(),
 			project_id: project.id,
 			month_year: currentMonth,
-			budget_released: monthlyAmount, // This month's amount
-			actual_expenses: monthlyAmount, // This month's expenses only
+			budget_released: monthlyAmount,
+			actual_expenses: monthlyAmount,
 			obligations: monthlyAmount,
-			remaining_balance: remainingBalance, // Balance after cumulative total
+			remaining_balance: remainingBalance,
 			created_at: new Date().toISOString(),
 			updated_at: new Date().toISOString()
 		});
@@ -258,11 +235,10 @@ export function applyQuickUpdateToProject(
 	} else {
 		// Create new record for current month
 		updatedMonthlyProgress.push({
-			id: Date.now(), // Temporary ID
+			id: Date.now(),
 			project_id: project.id,
-			sitio_id: undefined, // Project-level progress
 			month_year: currentMonth,
-			achieved_outputs: {}, // Could be enhanced to track specific outputs
+			achieved_outputs: {},
 			beneficiaries_reached: Number(formData.currentBeneficiaries || 0),
 			issues_encountered: formData.statusIssues,
 			photo_urls: [],
@@ -280,7 +256,11 @@ export function applyQuickUpdateToProject(
 		end_date: formData.targetEndDate,
 		completion_percentage: actualPct,
 		beneficiaries: Number(formData.currentBeneficiaries || project.beneficiaries || 0),
-		monitoring: updatedMonitoring,
+		allotment: updatedAllotment,
+		expenditure: updatedExpenditure,
+		contract: updatedContract,
+		status_summary: updatedStatusSummary,
+		catch_up_plan: formData.catchUpPlan,
 		monthly_budget: updatedMonthlyBudget,
 		monthly_progress: updatedMonthlyProgress,
 		employment_generated: {

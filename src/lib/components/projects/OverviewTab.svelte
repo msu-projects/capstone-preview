@@ -172,7 +172,7 @@
 						<div class="flex items-center gap-3 rounded-lg border border-slate-100 bg-slate-50 p-3">
 							<Building2 class="size-5 text-slate-400" />
 							<span class="text-sm font-medium text-slate-700">
-								{project.project_manager_team?.agency || 'Not specified'}
+								{project.implementing_agency || 'Not specified'}
 							</span>
 						</div>
 					</div>

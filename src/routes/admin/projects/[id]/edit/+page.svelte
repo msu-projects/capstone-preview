@@ -90,7 +90,7 @@
 	let description = $state(existingProject?.description ?? '');
 	let selectedCategory = $state<CategoryKey | ''>(getCategoryKey(existingProject));
 	let selectedProjectType = $state<number | undefined>(existingProject?.project_type_id);
-	let implementingAgency = $state(existingProject?.project_manager_team?.agency ?? '');
+	let implementingAgency = $state(existingProject?.implementing_agency ?? '');
 
 	// Tab 2: Location & Beneficiaries
 	let projectSitios = $state<Omit<ProjectSitio, 'project_id'>[]>(
@@ -127,17 +127,6 @@
 	let totalBudget = $state(existingProject?.budget?.toString() ?? '');
 	let employmentMale = $state(existingProject?.employment_generated?.male?.toString() ?? '');
 	let employmentFemale = $state(existingProject?.employment_generated?.female?.toString() ?? ''); // Tab 4: Accountability & Partners
-	let projectManager = $state(existingProject?.project_manager_team?.project_manager ?? '');
-	let pmAgency = $state(existingProject?.project_manager_team?.agency ?? '');
-	let technicalLead = $state(existingProject?.project_manager_team?.technical_lead ?? '');
-	let lguCounterparts = $state<string[]>(
-		existingProject?.project_manager_team?.lgu_counterpart ?? []
-	);
-	let provincialTeam = $state<string[]>(
-		existingProject?.oversight_structure?.provincial_team ?? []
-	);
-	let dilgRep = $state(existingProject?.oversight_structure?.dilg_rep ?? '');
-	let sectoralRep = $state(existingProject?.oversight_structure?.sectoral_rep ?? '');
 
 	// Auto-generate/load sitio coordinators
 	let sitioCoordinators = $state(
@@ -317,9 +306,7 @@
 					male: Number(employmentMale) || 0,
 					female: Number(employmentFemale) || 0
 				},
-				project_manager_team: {
-					agency: implementingAgency
-				},
+				implementing_agency: implementingAgency,
 				updated_at: new Date().toISOString()
 			};
 

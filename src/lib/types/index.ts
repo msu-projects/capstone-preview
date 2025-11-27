@@ -149,41 +149,30 @@ export interface DuplicateSitio {
 	key: string;
 }
 
-export interface MonitoringDetails {
-	fundSource: string;
-	fiscalYear: number;
-	implementingUnit: string;
-	location: string;
-	allotment: {
-		allocated: number;
-		supplemental: number;
-		total: number;
-		released: number;
-	};
-	expenditure: {
-		obligations: number;
-		contractCost: number;
-	};
-	physical: {
-		plan: number;
-		actual: number;
-		slippage: number;
-	};
-	employment: {
-		male: number;
-		female: number;
-	};
-	contract: {
-		duration: string;
-		delivery: string;
-		extension: string;
-	};
-	statusSummary: {
-		stage: string;
-		issues: string;
-		recommendations: string;
-	};
-	catchUpPlan: string;
+// ===== CONTRACT & STATUS TYPES =====
+
+export interface ContractDetails {
+	duration: string; // e.g., "180 CD" (calendar days)
+	delivery: string; // Delivery timeline
+	extension?: string; // Extension date if requested (ISO date string)
+}
+
+export interface StatusSummary {
+	stage: string; // Current project stage
+	issues: string; // Issues encountered
+	recommendations: string; // Recommended actions
+}
+
+export interface AllotmentDetails {
+	allocated: number;
+	supplemental: number;
+	total: number;
+	released: number;
+}
+
+export interface ExpenditureDetails {
+	obligations: number;
+	contract_cost: number;
 }
 
 // ===== NEW ENHANCED TRACKING SYSTEM TYPES =====
@@ -232,7 +221,6 @@ export interface PhotoDocumentation {
 export interface MonthlyProgress {
 	id: number;
 	project_id: number;
-	sitio_id?: number; // null means project-level progress
 	month_year: string; // Format: 'YYYY-MM'
 	achieved_outputs: Record<string, number>; // { 'seedlings_distributed': 500, 'training_sessions': 3 }
 	beneficiaries_reached: number;
@@ -303,7 +291,16 @@ export interface Project {
 	beneficiaries: number;
 	completion_percentage: number;
 	project_year: number;
-	monitoring?: MonitoringDetails;
+
+	// Financial tracking (migrated from monitoring)
+	allotment?: AllotmentDetails;
+	expenditure?: ExpenditureDetails;
+
+	// Contract & status (migrated from monitoring)
+	contract?: ContractDetails;
+	status_summary?: StatusSummary;
+	catch_up_plan?: string;
+
 	// Enhanced fields
 	project_sitios?: ProjectSitio[];
 	monthly_progress?: MonthlyProgress[];
@@ -316,12 +313,7 @@ export interface Project {
 		male: number;
 		female: number;
 	};
-	project_manager_team?: {
-		project_manager?: string;
-		agency?: string;
-		technical_lead?: string;
-		lgu_counterpart?: string[];
-	};
+	implementing_agency?: string;
 	sitio_coordinators?: Array<{
 		sitio_id: number;
 		barangay_captain?: string;
@@ -329,11 +321,6 @@ export interface Project {
 		volunteer_coordinator?: string;
 		contact_numbers?: string[];
 	}>;
-	oversight_structure?: {
-		provincial_team?: string[];
-		dilg_rep?: string;
-		sectoral_rep?: string;
-	};
 	created_at: string;
 	updated_at: string;
 }

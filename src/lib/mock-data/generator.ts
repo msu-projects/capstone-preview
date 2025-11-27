@@ -685,11 +685,7 @@ export function generateProjects(
 				male: rng.nextInt(5, 30),
 				female: rng.nextInt(3, 20)
 			},
-			project_manager_team: {
-				project_manager: `Engr. ${rng.pick(['Juan', 'Maria', 'Pedro', 'Ana'])} ${rng.pick(['Santos', 'Reyes', 'Cruz', 'Garcia'])}`,
-				agency: rng.pick(AGENCIES),
-				technical_lead: `Dr. ${rng.pick(['Ramon', 'Elena', 'Carlos', 'Linda'])} ${rng.pick(['Torres', 'Flores', 'Mendoza', 'Ramos'])}`
-			},
+			implementing_agency: rng.pick(AGENCIES),
 			created_at: startDate.toISOString(),
 			updated_at: new Date().toISOString()
 		};

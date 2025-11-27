@@ -146,8 +146,6 @@
 		{:else}
 			<div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
 				{#each paginatedProjects as project (project.id)}
-					{@const monitoring = project.monitoring}
-					{@const physical = monitoring?.physical}
 					<Card.Card class="group overflow-hidden transition-shadow hover:shadow-lg">
 						<Card.CardHeader class="space-y-2">
 							<div class="flex items-start justify-between gap-2">
@@ -196,11 +194,11 @@
 								<div class="mb-2 flex items-center justify-between text-sm">
 									<span class="text-muted-foreground">Progress</span>
 									<span class="font-medium">
-										{(physical?.actual ?? project.completion_percentage).toFixed(0)}%
+										{project.completion_percentage.toFixed(0)}%
 									</span>
 								</div>
 								<Progress
-									value={Math.min(100, physical?.actual ?? project.completion_percentage)}
+									value={Math.min(100, project.completion_percentage)}
 									class="h-2"
 								/>
 							</div>

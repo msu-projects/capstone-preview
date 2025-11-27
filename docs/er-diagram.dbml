@@ -1,0 +1,441 @@
+// ============================================
+// SC CATCH-UP 2025 Project Tracking System
+// Entity-Relationship Diagram (DBML)
+// ============================================
+// This schema uses JSONB columns for embedded data
+// to simplify queries while maintaining relational
+// integrity for core relationships.
+// ============================================
+
+Project sc_catchup_2025 {
+  database_type: 'PostgreSQL'
+  Note: 'South Cotabato CATCH-UP 2025 Project Tracking System - Sitio profiling and project monitoring'
+}
+
+// ============================================
+// ENUMS
+// ============================================
+
+enum project_status {
+  planning [note: 'Project is in planning phase']
+  in_progress [note: 'Project is currently being implemented']
+  completed [note: 'Project has been completed']
+  suspended [note: 'Project is temporarily suspended']
+}
+
+enum priority_level {
+  high
+  medium
+  low
+}
+
+enum category_key {
+  infrastructure
+  agriculture
+  education
+  health
+  livelihood
+  environment
+}
+
+enum user_role {
+  superadmin [note: 'Full system access']
+  admin [note: 'Can manage sitios and projects']
+  viewer [note: 'Read-only access']
+}
+
+enum audit_action {
+  login
+  logout
+  create
+  update
+  delete
+  view
+  export
+  import
+}
+
+enum audit_resource_type {
+  user
+  sitio
+  project
+  system
+}
+
+enum funding_source_type {
+  provincial [note: 'Provincial government funds']
+  national [note: 'National government funds']
+  partner [note: 'Partner organization funds']
+  lgu_counterpart [note: 'Local government unit counterpart']
+}
+
+enum progress_status {
+  on_track [note: 'Project is on schedule']
+  delayed [note: 'Project is behind schedule']
+  ahead [note: 'Project is ahead of schedule']
+}
+
+enum storage_type {
+  indexeddb [note: 'Stored in browser IndexedDB']
+  server [note: 'Stored on server']
+}
+
+// ============================================
+// LOCATION HIERARCHY
+// ============================================
+
+Table provinces {
+  id integer [pk, increment]
+  name varchar(100) [unique, not null]
+  psgc_code varchar(10) [unique, note: 'Philippine Standard Geographic Code']
+  
+  Note: 'Province reference table'
+}
+
+Table municipalities {
+  id integer [pk, increment]
+  province_id integer [not null, ref: > provinces.id]
+  name varchar(100) [not null]
+  psgc_code varchar(10) [unique, note: 'Philippine Standard Geographic Code']
+  
+  indexes {
+    province_id [name: 'idx_municipalities_province']
+    (province_id, name) [unique, name: 'idx_municipalities_unique_name']
+  }
+  
+  Note: 'Municipality/City reference table'
+}
+
+Table barangays {
+  id integer [pk, increment]
+  municipality_id integer [not null, ref: > municipalities.id]
+  name varchar(100) [not null]
+  psgc_code varchar(10) [unique, note: 'Philippine Standard Geographic Code']
+  
+  indexes {
+    municipality_id [name: 'idx_barangays_municipality']
+    (municipality_id, name) [unique, name: 'idx_barangays_unique_name']
+  }
+  
+  Note: 'Barangay reference table'
+}
+
+// ============================================
+// CORE ENTITIES
+// ============================================
+
+Table sitios {
+  id integer [pk, increment]
+  name varchar(255) [not null]
+  barangay_id integer [not null, ref: > barangays.id]
+  population integer [not null, default: 0]
+  households integer [not null, default: 0]
+  coordinates_lat decimal(10,8) [not null]
+  coordinates_lng decimal(11,8) [not null]
+  
+  // JSONB columns for embedded data
+  coding jsonb [note: '{ number: string, code: string }']
+  demographics jsonb [not null, note: '{ male, female, total, age_0_14, age_15_64, age_65_above }']
+  social_services jsonb [note: '{ registered_voters, philhealth_beneficiaries, fourps_beneficiaries }']
+  economic_condition jsonb [note: '{ employments: [{type, count}], income_brackets: [{bracket, households}] }']
+  agriculture jsonb [note: '{ farmers_count, farmer_associations, farm_area_hectares, top_crops[] }']
+  water_sanitation jsonb [note: '{ water_systems_count, water_sources[], households_without_toilet, toilet_facility_types[], waste_segregation_practice }']
+  livestock_poultry jsonb [note: '{ pigs, cows, carabaos, horses, goats, chickens, ducks }']
+  food_security jsonb [note: '{ households_with_backyard_garden, common_garden_commodities[] }']
+  housing jsonb [note: '{ quality_types: [{type, count}], ownership_types: [{type, count}] }']
+  domestic_animals jsonb [note: '{ dogs, cats, dogs_vaccinated, cats_vaccinated }']
+  community_empowerment jsonb [note: '{ sectoral_organizations, info_dissemination_methods[], transportation_methods[] }']
+  utilities jsonb [note: '{ households_with_electricity, alternative_electricity_sources[] }']
+  
+  created_at timestamp [not null, default: `now()`]
+  updated_at timestamp
+  
+  indexes {
+    barangay_id [name: 'idx_sitios_barangay']
+    name [name: 'idx_sitios_name']
+    (barangay_id, name) [unique, name: 'idx_sitios_unique_name']
+  }
+  
+  Note: 'Core sitio (community) entity with comprehensive profiling data stored as JSONB'
+}
+
+Table projects {
+  id integer [pk, increment]
+  title varchar(500) [not null]
+  description text
+  category varchar(100) [not null, note: 'Display name of category']
+  category_key category_key [note: 'FK to categories.key']
+  project_type_id integer [ref: > project_types.id]
+  project_type_name varchar(255) [note: 'Denormalized for quick access']
+  status project_status [not null, default: 'planning']
+  start_date date [not null]
+  end_date date [not null]
+  budget decimal(15,2) [not null, default: 0]
+  beneficiaries integer [not null, default: 0]
+  completion_percentage decimal(5,2) [not null, default: 0]
+  project_year integer [not null]
+  
+  // Financial tracking
+  allotment jsonb [note: '{ allocated, supplemental, total, released }']
+  expenditure jsonb [note: '{ obligations, contract_cost }']
+  
+  // Contract & status tracking
+  contract jsonb [note: '{ duration, delivery, extension }']
+  status_summary jsonb [note: '{ stage, issues, recommendations }']
+  catch_up_plan text
+  
+  // Other embedded data
+  employment_generated jsonb [note: '{ male: number, female: number }']
+  implementing_agency varchar(50)
+  monthly_physical_progress jsonb [note: 'Array of { month_year, plan_percentage, actual_percentage }']
+  
+  created_at timestamp [not null, default: `now()`]
+  updated_at timestamp
+  
+  indexes {
+    status [name: 'idx_projects_status']
+    category_key [name: 'idx_projects_category']
+    project_year [name: 'idx_projects_year']
+    (start_date, end_date) [name: 'idx_projects_dates']
+  }
+  
+  Note: 'Main project entity with financial and status tracking'
+}
+
+Table users {
+  id integer [pk, increment]
+  name varchar(255) [not null]
+  email varchar(255) [unique, not null]
+  password_hash varchar(255) [not null]
+  role user_role [not null, default: 'viewer']
+  department varchar(100)
+  is_active boolean [not null, default: true]
+  
+  // JSONB for flexible permissions
+  permissions jsonb [not null, note: '{ sitios: {read, write, delete}, projects: {...}, users: {...}, audit_logs: {...} }']
+  
+  last_login timestamp
+  created_at timestamp [not null, default: `now()`]
+  updated_at timestamp
+  
+  indexes {
+    email [unique, name: 'idx_users_email']
+    role [name: 'idx_users_role']
+    is_active [name: 'idx_users_active']
+  }
+  
+  Note: 'System users with role-based access control and granular permissions'
+}
+
+// ============================================
+// REFERENCE DATA
+// ============================================
+
+Table categories {
+  id integer [pk, increment]
+  key category_key [unique, not null]
+  name varchar(100) [not null]
+  description text
+  icon varchar(50) [note: 'Icon identifier for UI']
+  
+  Note: 'Project category reference table'
+}
+
+Table project_types {
+  id integer [pk, increment]
+  category_key category_key [not null, ref: > categories.key]
+  name varchar(255) [not null]
+  description text
+  
+  indexes {
+    category_key [name: 'idx_project_types_category']
+  }
+  
+  Note: 'Specific project types within each category'
+}
+
+// ============================================
+// PROJECT TRACKING
+// ============================================
+
+Table project_sitios {
+  project_id integer [not null, ref: > projects.id]
+  sitio_id integer [not null, ref: > sitios.id]
+  beneficiaries_target integer [default: 0]
+  priority_level priority_level [default: 'medium']
+  focal_person varchar(255)
+  focal_contact varchar(100)
+  
+  indexes {
+    (project_id, sitio_id) [pk]
+    sitio_id [name: 'idx_project_sitios_sitio']
+  }
+  
+  Note: 'Junction table linking projects to sitios (many-to-many)'
+}
+
+Table monthly_progress {
+  id integer [pk, increment]
+  project_id integer [not null, ref: > projects.id]
+  month_year varchar(7) [not null, note: 'Format: YYYY-MM']
+  beneficiaries_reached integer [default: 0]
+  issues_encountered text
+  status progress_status [not null, default: 'on_track']
+  
+  // JSONB for flexible output tracking and photos
+  achieved_outputs jsonb [note: '{ output_key: count, ... } e.g., { seedlings_distributed: 500 }']
+  photo_documentation jsonb [note: 'Array of PhotoDocumentation objects with id, filename, caption, storage_ref, etc.']
+  
+  created_at timestamp [not null, default: `now()`]
+  updated_at timestamp
+  
+  indexes {
+    project_id [name: 'idx_monthly_progress_project']
+    month_year [name: 'idx_monthly_progress_month']
+    (project_id, month_year) [unique, name: 'idx_monthly_progress_unique']
+  }
+  
+  Note: 'Project-level monthly progress tracking with flexible outputs stored as JSONB'
+}
+
+Table monthly_budget_utilization {
+  id integer [pk, increment]
+  project_id integer [not null, ref: > projects.id]
+  month_year varchar(7) [not null, note: 'Format: YYYY-MM']
+  budget_released decimal(15,2) [default: 0]
+  actual_expenses decimal(15,2) [default: 0]
+  obligations decimal(15,2) [default: 0]
+  remaining_balance decimal(15,2) [default: 0]
+  
+  created_at timestamp [not null, default: `now()`]
+  updated_at timestamp
+  
+  indexes {
+    project_id [name: 'idx_monthly_budget_project']
+    (project_id, month_year) [unique, name: 'idx_monthly_budget_unique']
+  }
+  
+  Note: 'Monthly budget utilization tracking per project'
+}
+
+Table budget_components {
+  id integer [pk, increment]
+  project_id integer [not null, ref: > projects.id]
+  component_name varchar(255) [not null]
+  amount decimal(15,2) [not null, default: 0]
+  percentage decimal(5,2) [default: 0]
+  
+  indexes {
+    project_id [name: 'idx_budget_components_project']
+  }
+  
+  Note: 'Budget breakdown by component for each project'
+}
+
+Table funding_sources {
+  id integer [pk, increment]
+  project_id integer [not null, ref: > projects.id]
+  source_name varchar(255) [not null]
+  source_type funding_source_type [not null]
+  amount decimal(15,2) [not null, default: 0]
+  percentage decimal(5,2) [default: 0]
+  
+  indexes {
+    project_id [name: 'idx_funding_sources_project']
+    source_type [name: 'idx_funding_sources_type']
+  }
+  
+  Note: 'Funding sources contributing to each project'
+}
+
+Table monthly_release_schedule {
+  id integer [pk, increment]
+  project_id integer [not null, ref: > projects.id]
+  month_year varchar(7) [not null, note: 'Format: YYYY-MM']
+  planned_release decimal(15,2) [not null, default: 0]
+  actual_release decimal(15,2)
+  milestone_tied varchar(255) [note: 'Associated milestone or deliverable']
+  
+  indexes {
+    project_id [name: 'idx_release_schedule_project']
+    (project_id, month_year) [unique, name: 'idx_release_schedule_unique']
+  }
+  
+  Note: 'Planned and actual budget release schedule per month'
+}
+
+Table sitio_coordinators {
+  id integer [pk, increment]
+  project_id integer [not null, ref: > projects.id]
+  sitio_id integer [not null, ref: > sitios.id]
+  barangay_captain varchar(255)
+  sitio_leader varchar(255)
+  contact_numbers varchar[] [note: 'Array of contact numbers']
+  
+  indexes {
+    (project_id, sitio_id) [unique, name: 'idx_sitio_coordinators_unique']
+  }
+  
+  Note: 'Coordinator assignments for each project-sitio combination'
+}
+
+// ============================================
+// SYSTEM / AUDIT
+// ============================================
+
+Table audit_logs {
+  id varchar(21) [pk, note: 'nanoid']
+  user_id integer [ref: > users.id]
+  user_name varchar(255) [not null, note: 'Denormalized for historical accuracy']
+  action audit_action [not null]
+  resource_type audit_resource_type [not null]
+  resource_id varchar(50) [note: 'ID of affected resource']
+  resource_name varchar(255) [note: 'Name/title of affected resource']
+  details text [note: 'Additional context or changes summary']
+  ip_address varchar(45)
+  timestamp timestamp [not null, default: `now()`]
+  
+  indexes {
+    timestamp [name: 'idx_audit_logs_timestamp']
+    user_id [name: 'idx_audit_logs_user']
+    resource_type [name: 'idx_audit_logs_resource_type']
+    action [name: 'idx_audit_logs_action']
+  }
+  
+  Note: 'Comprehensive audit trail for all system actions'
+}
+
+// ============================================
+// TABLE GROUPS (for diagram organization)
+// ============================================
+
+TableGroup location_hierarchy [color: #f39c12] {
+  provinces
+  municipalities
+  barangays
+}
+
+TableGroup core_entities [color: #3498db] {
+  sitios
+  projects
+  users
+}
+
+TableGroup reference_data [color: #9b59b6] {
+  categories
+  project_types
+}
+
+TableGroup project_tracking [color: #2ecc71] {
+  project_sitios
+  monthly_progress
+  monthly_budget_utilization
+  budget_components
+  funding_sources
+  monthly_release_schedule
+  sitio_coordinators
+}
+
+TableGroup system [color: #e74c3c] {
+  audit_logs
+}

@@ -58,13 +58,13 @@
 					comparison = a.title.localeCompare(b.title);
 					break;
 				case 'budget':
-					const budgetA = a.monitoring?.allotment?.total ?? a.budget;
-					const budgetB = b.monitoring?.allotment?.total ?? b.budget;
+					const budgetA = a.allotment?.total ?? a.budget;
+					const budgetB = b.allotment?.total ?? b.budget;
 					comparison = budgetA - budgetB;
 					break;
 				case 'progress':
-					const progressA = a.monitoring?.physical?.actual ?? a.completion_percentage;
-					const progressB = b.monitoring?.physical?.actual ?? b.completion_percentage;
+					const progressA = a.completion_percentage;
+					const progressB = b.completion_percentage;
 					comparison = progressA - progressB;
 					break;
 				case 'status':
