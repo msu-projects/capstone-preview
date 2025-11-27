@@ -18,11 +18,22 @@
 
 	let { data, orientation = 'vertical', height = 300, showGrid = true, title }: Props = $props();
 
+	$inspect(data);
+
+	// Default color palette for fallback
+	const defaultColors = [
+		'hsl(217, 91%, 60%)', // blue
+		'hsl(142, 71%, 45%)', // green
+		'hsl(48, 96%, 53%)', // yellow
+		'hsl(280, 70%, 60%)', // purple
+		'hsl(340, 82%, 52%)' // pink
+	];
+
 	// Prepare chart data with colors
 	const chartData = $derived(
 		data.map((d, i) => ({
 			...d,
-			color: d.color || `hsl(var(--chart-${(i % 5) + 1}))`
+			color: d.color || defaultColors[i % defaultColors.length]
 		}))
 	);
 
@@ -42,6 +53,7 @@
 				columnWidth: orientation === 'vertical' ? '60%' : undefined,
 				barHeight: orientation === 'horizontal' ? '70%' : undefined,
 				borderRadius: 6,
+				distributed: true,
 				dataLabels: {
 					position: 'top'
 				}
@@ -98,6 +110,10 @@
 			}
 		},
 		colors: chartData.map((d) => d.color),
+		fill: {
+			opacity: 1,
+			colors: chartData.map((d) => d.color)
+		},
 		tooltip: {
 			enabled: true,
 			y: {
@@ -106,6 +122,13 @@
 		},
 		legend: {
 			show: false
+		},
+		states: {
+			hover: {
+				filter: {
+					type: 'darken'
+				}
+			}
 		}
 	});
 </script>

@@ -11,7 +11,7 @@
 	import { Skeleton } from '$lib/components/ui/skeleton';
 	import * as Table from '$lib/components/ui/table';
 	import * as Tabs from '$lib/components/ui/tabs';
-	import { activities, chartData, projects, stats } from '$lib/mock-data';
+	import { activities, chartData, projects, sitios, stats } from '$lib/mock-data';
 	import type { ProjectStatus } from '$lib/types';
 	import toTitleCase from '$lib/utils/common';
 	import { downloadProjectMonitoringPDF } from '$lib/utils/pdf-generator';
@@ -24,6 +24,7 @@
 		CirclePlus,
 		Download,
 		FileText,
+		Home,
 		MapPin,
 		Plus,
 		SquarePen,
@@ -209,6 +210,79 @@
 		.sort((a, b) => b.male + b.female - (a.male + a.female))
 		.slice(0, 6);
 
+	// ===== SITIO ANALYTICS =====
+	// Total population and households across all sitios
+	const totalPopulation = sitios.reduce((sum, s) => sum + (s.population || 0), 0);
+	const totalHouseholds = sitios.reduce((sum, s) => sum + (s.households || 0), 0);
+
+	// Sitios by municipality
+	const sitiosByMunicipality = [...new Set(sitios.map((s) => s.municipality))]
+		.map((mun, i) => ({
+			label: mun,
+			value: sitios.filter((s) => s.municipality === mun).length,
+			color: chartColors[i % chartColors.length]
+		}))
+		.sort((a, b) => b.value - a.value);
+
+	// Population by municipality
+	const populationByMunicipality = [...new Set(sitios.map((s) => s.municipality))]
+		.map((mun, i) => ({
+			label: mun,
+			value: sitios
+				.filter((s) => s.municipality === mun)
+				.reduce((sum, s) => sum + (s.population || 0), 0),
+			color: chartColors[i % chartColors.length]
+		}))
+		.sort((a, b) => b.value - a.value);
+
+	// Demographics aggregation (male vs female)
+	const totalMalePopulation = sitios.reduce((sum, s) => sum + (s.demographics?.male || 0), 0);
+	const totalFemalePopulation = sitios.reduce((sum, s) => sum + (s.demographics?.female || 0), 0);
+	const demographicsChartData = [
+		{ label: 'Male', value: totalMalePopulation, color: 'hsl(217, 91%, 60%)' },
+		{ label: 'Female', value: totalFemalePopulation, color: 'hsl(340, 82%, 52%)' }
+	];
+
+	// Age distribution aggregation
+	const ageDistribution = [
+		{
+			label: '0-14 years',
+			value: sitios.reduce((sum, s) => sum + (s.demographics?.age_0_14 || 0), 0),
+			color: 'hsl(142, 71%, 45%)'
+		},
+		{
+			label: '15-64 years',
+			value: sitios.reduce((sum, s) => sum + (s.demographics?.age_15_64 || 0), 0),
+			color: 'hsl(217, 91%, 60%)'
+		},
+		{
+			label: '65+ years',
+			value: sitios.reduce((sum, s) => sum + (s.demographics?.age_65_above || 0), 0),
+			color: 'hsl(280, 70%, 60%)'
+		}
+	];
+
+	// Social services aggregation
+	const totalVoters = sitios.reduce(
+		(sum, s) => sum + (s.social_services?.registered_voters || 0),
+		0
+	);
+	const totalPhilhealth = sitios.reduce(
+		(sum, s) => sum + (s.social_services?.philhealth_beneficiaries || 0),
+		0
+	);
+	const total4Ps = sitios.reduce(
+		(sum, s) => sum + (s.social_services?.fourps_beneficiaries || 0),
+		0
+	);
+
+	// Agriculture data
+	const totalFarmers = sitios.reduce((sum, s) => sum + (s.agriculture?.farmers_count || 0), 0);
+	const totalFarmArea = sitios.reduce(
+		(sum, s) => sum + (s.agriculture?.farm_area_hectares || 0),
+		0
+	);
+
 	function handleExportReport() {
 		// Download PDF for all projects
 		downloadProjectMonitoringPDF(projects, '3rd');
@@ -359,8 +433,9 @@
 					</div>
 				{:else}
 					<Tabs.Root value="overview" class="w-full">
-						<Tabs.List class="grid w-full grid-cols-4">
+						<Tabs.List class="grid w-full grid-cols-5">
 							<Tabs.Trigger value="overview">Overview</Tabs.Trigger>
+							<Tabs.Trigger value="sitios">Sitios</Tabs.Trigger>
 							<Tabs.Trigger value="geographic">Geographic</Tabs.Trigger>
 							<Tabs.Trigger value="budget">Budget</Tabs.Trigger>
 							<Tabs.Trigger value="employment">Employment</Tabs.Trigger>
@@ -447,6 +522,139 @@
 												<Progress value={(cat.value / stats.total_budget) * 100} class="h-2" />
 											</div>
 										{/each}
+									</div>
+								</div>
+							</div>
+						</Tabs.Content>
+
+						<Tabs.Content value="sitios" class="mt-6">
+							<!-- Sitio Quick Stats -->
+							<div class="mb-6 grid gap-4 md:grid-cols-4">
+								<div class="rounded-lg border bg-card p-4">
+									<div class="flex items-center gap-2">
+										<div class="rounded-full bg-blue-500/10 p-2">
+											<Users class="size-4 text-blue-600" />
+										</div>
+										<span class="text-sm text-muted-foreground">Total Population</span>
+									</div>
+									<p class="mt-2 text-2xl font-bold">{formatNumber(totalPopulation)}</p>
+								</div>
+								<div class="rounded-lg border bg-card p-4">
+									<div class="flex items-center gap-2">
+										<div class="rounded-full bg-green-500/10 p-2">
+											<Home class="size-4 text-green-600" />
+										</div>
+										<span class="text-sm text-muted-foreground">Households</span>
+									</div>
+									<p class="mt-2 text-2xl font-bold">{formatNumber(totalHouseholds)}</p>
+								</div>
+								<div class="rounded-lg border bg-card p-4">
+									<div class="flex items-center gap-2">
+										<div class="rounded-full bg-purple-500/10 p-2">
+											<Users class="size-4 text-purple-600" />
+										</div>
+										<span class="text-sm text-muted-foreground">Registered Voters</span>
+									</div>
+									<p class="mt-2 text-2xl font-bold">{formatNumber(totalVoters)}</p>
+								</div>
+								<div class="rounded-lg border bg-card p-4">
+									<div class="flex items-center gap-2">
+										<div class="rounded-full bg-amber-500/10 p-2">
+											<MapPin class="size-4 text-amber-600" />
+										</div>
+										<span class="text-sm text-muted-foreground">Farmers</span>
+									</div>
+									<p class="mt-2 text-2xl font-bold">{formatNumber(totalFarmers)}</p>
+								</div>
+							</div>
+
+							<div class="grid gap-6 lg:grid-cols-2">
+								<!-- Demographics Gender Distribution -->
+								<div class="rounded-lg border bg-card p-4">
+									<h3 class="mb-4 text-lg font-semibold">Population by Gender</h3>
+									<DonutChart
+										data={demographicsChartData}
+										centerLabel="Total"
+										centerValue={formatNumber(totalMalePopulation + totalFemalePopulation)}
+										height={260}
+									/>
+								</div>
+
+								<!-- Age Distribution -->
+								<div class="rounded-lg border bg-card p-4">
+									<h3 class="mb-4 text-lg font-semibold">Population by Age Group</h3>
+									<DonutChart
+										data={ageDistribution}
+										centerLabel="Total"
+										centerValue={formatNumber(ageDistribution.reduce((s, a) => s + a.value, 0))}
+										height={260}
+									/>
+								</div>
+							</div>
+
+							<!-- Sitios by Municipality -->
+							<div class="mt-6 rounded-lg border bg-card p-4">
+								<h3 class="mb-4 text-lg font-semibold">Sitios by Municipality</h3>
+								<BarChart
+									data={sitiosByMunicipality}
+									orientation="horizontal"
+									height={280}
+									title="Sitios"
+								/>
+							</div>
+
+							<div class="mt-6 grid gap-6 lg:grid-cols-[60%_40%]">
+								<!-- Population by Municipality -->
+								<div class="rounded-lg border bg-card p-4">
+									<h3 class="mb-4 text-lg font-semibold">Population by Municipality</h3>
+									<BarChart
+										data={populationByMunicipality}
+										orientation="vertical"
+										height={280}
+										title="Population"
+									/>
+								</div>
+
+								<!-- Social Services Summary -->
+								<div class="rounded-lg border bg-card p-4">
+									<h3 class="mb-4 text-lg font-semibold">Social Services Coverage</h3>
+									<div class="space-y-4">
+										<div class="space-y-2">
+											<div class="flex items-center justify-between text-sm">
+												<span class="font-medium">PhilHealth Beneficiaries</span>
+												<span class="font-semibold">{formatNumber(totalPhilhealth)}</span>
+											</div>
+											<Progress value={(totalPhilhealth / totalPopulation) * 100} class="h-2" />
+											<p class="text-xs text-muted-foreground">
+												{((totalPhilhealth / totalPopulation) * 100).toFixed(1)}% coverage
+											</p>
+										</div>
+										<div class="space-y-2">
+											<div class="flex items-center justify-between text-sm">
+												<span class="font-medium">4Ps Beneficiaries</span>
+												<span class="font-semibold">{formatNumber(total4Ps)}</span>
+											</div>
+											<Progress value={(total4Ps / totalHouseholds) * 100} class="h-2" />
+											<p class="text-xs text-muted-foreground">
+												{((total4Ps / totalHouseholds) * 100).toFixed(1)}% of households
+											</p>
+										</div>
+										<div class="space-y-2">
+											<div class="flex items-center justify-between text-sm">
+												<span class="font-medium">Registered Voters</span>
+												<span class="font-semibold">{formatNumber(totalVoters)}</span>
+											</div>
+											<Progress value={(totalVoters / totalPopulation) * 100} class="h-2" />
+											<p class="text-xs text-muted-foreground">
+												{((totalVoters / totalPopulation) * 100).toFixed(1)}% of population
+											</p>
+										</div>
+										<div class="mt-4 rounded-lg bg-muted/50 p-3">
+											<div class="flex items-center justify-between">
+												<span class="text-sm font-medium">Total Farm Area</span>
+												<span class="text-lg font-bold">{formatNumber(totalFarmArea)} ha</span>
+											</div>
+										</div>
 									</div>
 								</div>
 							</div>

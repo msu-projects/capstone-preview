@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import AdminHeader from '$lib/components/admin/AdminHeader.svelte';
-	import ColumnMapper from '$lib/components/admin/ColumnMapper.svelte';
-	import DuplicateResolver from '$lib/components/admin/DuplicateResolver.svelte';
-	import FileUpload from '$lib/components/admin/FileUpload.svelte';
-	import ImportPreview from '$lib/components/admin/ImportPreview.svelte';
+	import ColumnMapper from '$lib/components/admin/import/ColumnMapper.svelte';
+	import DuplicateResolver from '$lib/components/admin/import/DuplicateResolver.svelte';
+	import FileUpload from '$lib/components/admin/import/FileUpload.svelte';
+	import ImportPreview from '$lib/components/admin/import/ImportPreview.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import type { ColumnMapping, DuplicateSitio, ImportedRow, Sitio } from '$lib/types';
