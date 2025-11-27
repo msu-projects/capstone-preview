@@ -9,7 +9,7 @@
 	import * as Select from '$lib/components/ui/select';
 	import type { Sitio } from '$lib/types';
 	import { deleteSitio, loadSitios } from '$lib/utils/storage';
-	import { MapPin, Plus, Search, Upload } from '@lucide/svelte';
+	import { Plus, Search, Upload } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 
 	let sitios = $state<Sitio[]>([]);
@@ -181,54 +181,6 @@
 
 	<!-- Content -->
 	<div class="flex-1 space-y-6 p-6">
-		<!-- Stats Cards -->
-		<div class="grid grid-cols-1 gap-4 md:grid-cols-4">
-			<Card.Root>
-				<Card.Content class="">
-					<div class="flex items-center gap-2">
-						<MapPin class="size-5 text-primary" />
-						<div>
-							<p class="text-2xl font-bold">{sitios.length}</p>
-							<p class="text-sm text-muted-foreground">Total Sitios</p>
-						</div>
-					</div>
-				</Card.Content>
-			</Card.Root>
-
-			<Card.Root>
-				<Card.Content class="">
-					<div>
-						<p class="text-2xl font-bold">
-							{sitios.reduce((sum, s) => sum + (s.population || 0), 0).toLocaleString()}
-						</p>
-						<p class="text-sm text-muted-foreground">Total Population</p>
-					</div>
-				</Card.Content>
-			</Card.Root>
-
-			<Card.Root>
-				<Card.Content class="">
-					<div>
-						<p class="text-2xl font-bold">
-							{sitios.reduce((sum, s) => sum + (s.households || 0), 0).toLocaleString()}
-						</p>
-						<p class="text-sm text-muted-foreground">Total Households</p>
-					</div>
-				</Card.Content>
-			</Card.Root>
-
-			<Card.Root>
-				<Card.Content class="">
-					<div>
-						<p class="text-2xl font-bold">
-							{new Set(sitios.map((s) => s.municipality)).size}
-						</p>
-						<p class="text-sm text-muted-foreground">Municipalities</p>
-					</div>
-				</Card.Content>
-			</Card.Root>
-		</div>
-
 		<!-- Search and Filters -->
 		<Card.Root>
 			<Card.Content class="">
