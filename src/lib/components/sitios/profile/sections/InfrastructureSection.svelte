@@ -4,13 +4,15 @@
 	import * as Card from '$lib/components/ui/card';
 	import { Progress } from '$lib/components/ui/progress';
 	import type { Sitio } from '$lib/types';
+	import type { SitioYearlySnapshot } from '$lib/types/sitio-yearly';
 	import { Bath, Building, CheckCircle, Droplets, Home, Recycle, Zap } from '@lucide/svelte';
 
 	interface Props {
 		sitio: Sitio;
+		previousSnapshot?: SitioYearlySnapshot | null;
 	}
 
-	const { sitio }: Props = $props();
+	const { sitio, previousSnapshot = null }: Props = $props();
 
 	function formatNumber(num: number): string {
 		return new Intl.NumberFormat('en-US').format(num);
@@ -66,7 +68,8 @@
 
 	// Water sources status
 	const functionalWaterSources = $derived(
-		sitio.water_sanitation?.water_sources?.filter((s) => s.status === 'Functional').length || 0
+		sitio.water_sanitation?.water_sources?.filter((s) => ['Functional', 'Good'].includes(s.status))
+			.length || 0
 	);
 	const totalWaterSources = $derived(sitio.water_sanitation?.water_sources?.length || 0);
 </script>
@@ -76,6 +79,9 @@
 	<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
 		<Card.Root
 			class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50"
+			title="{formatNumber(sitio.utilities?.households_with_electricity || 0)} out of {formatNumber(
+				sitio.households
+			)} households"
 		>
 			<div
 				class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-amber-50 opacity-50"
@@ -128,6 +134,9 @@
 
 		<Card.Root
 			class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50"
+			title="{formatNumber(
+				sitio.households - (sitio.water_sanitation?.households_without_toilet || 0)
+			)} out of {formatNumber(sitio.households)} households"
 		>
 			<div
 				class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-purple-50 opacity-50"
@@ -235,7 +244,12 @@
 			<Card.Content class="py-6">
 				{#if housingOwnershipData.length > 0}
 					<div style="height: 280px;">
-						<DonutChart data={housingOwnershipData} height={280} />
+						<DonutChart
+							data={housingOwnershipData}
+							centerValue={formatNumber(sitio.households)}
+							centerLabel="Households"
+							height={280}
+						/>
 					</div>
 					<!-- Legend -->
 					<div class="mt-4 grid grid-cols-2 gap-2">
@@ -382,7 +396,7 @@
 								<div class="text-xl font-bold text-purple-700">
 									{sitio.water_sanitation.households_without_toilet}
 								</div>
-								<div class="text-xs text-purple-600">Without Toilet</div>
+								<div class="text-xs text-purple-600">HHs Without Toilet</div>
 							</div>
 							<div class="rounded-lg bg-emerald-50 p-3 text-center ring-1 ring-emerald-100">
 								<div class="text-xl font-bold text-emerald-700">{toiletCoverage.toFixed(0)}%</div>

@@ -2,6 +2,14 @@
 	import * as Tabs from '$lib/components/ui/tabs';
 	import { projects } from '$lib/mock-data';
 	import type { Project, Sitio } from '$lib/types';
+	import type { SitioYearlySnapshot } from '$lib/types/sitio-yearly';
+	import { applySitioSnapshot } from '$lib/types/sitio-yearly';
+	import {
+		getSitioAvailableYears,
+		getSitioSnapshotByYear,
+		loadSitioYearlySnapshots,
+		saveSitioAsYearlySnapshot
+	} from '$lib/utils/storage';
 	import {
 		Briefcase,
 		ChevronRight,
@@ -9,24 +17,55 @@
 		FolderKanban,
 		Heart,
 		Home,
+		TrendingUp,
 		Users
 	} from '@lucide/svelte';
+	import { toast } from 'svelte-sonner';
 	import DemographicsSection from './sections/DemographicsSection.svelte';
 	import EconomySection from './sections/EconomySection.svelte';
 	import InfrastructureSection from './sections/InfrastructureSection.svelte';
 	import OverviewSection from './sections/OverviewSection.svelte';
 	import ProjectsSection from './sections/ProjectsSection.svelte';
 	import SocialServicesSection from './sections/SocialServicesSection.svelte';
+	import YearlyTrendsSection from './sections/YearlyTrendsSection.svelte';
 	import SitioProfileHeader from './SitioProfileHeader.svelte';
+	import YearSelector from './YearSelector.svelte';
 
 	interface Props {
 		sitio: Sitio;
 		isAdminView?: boolean;
 	}
 
-	const { sitio, isAdminView = false }: Props = $props();
+	const { sitio: originalSitio, isAdminView = false }: Props = $props();
 
 	let activeTab = $state('overview');
+	const currentYear = new Date().getFullYear();
+	let selectedYear = $state(currentYear);
+
+	// Load yearly snapshots for this sitio
+	let yearlySnapshots = $state<SitioYearlySnapshot[]>(loadSitioYearlySnapshots(originalSitio.id));
+	let availableYears = $state<number[]>(getSitioAvailableYears(originalSitio.id));
+
+	// Check if current year is already saved
+	const isCurrentYearSaved = $derived(availableYears.includes(currentYear));
+
+	// Get the sitio data for the selected year (or original if current year)
+	const sitio = $derived.by((): Sitio => {
+		if (selectedYear === currentYear) {
+			return originalSitio;
+		}
+		const snapshot = getSitioSnapshotByYear(originalSitio.id, selectedYear);
+		if (snapshot) {
+			return applySitioSnapshot(originalSitio, snapshot);
+		}
+		return originalSitio;
+	});
+
+	// Get the previous year's snapshot for trend comparison
+	const previousYearSnapshot = $derived.by((): SitioYearlySnapshot | null => {
+		const prevYear = selectedYear - 1;
+		return yearlySnapshots.find((s) => s.year === prevYear) || null;
+	});
 
 	// Get related projects for this sitio
 	const relatedProjects = $derived<Project[]>(
@@ -37,12 +76,35 @@
 		})
 	);
 
+	// Handle year change
+	function handleYearChange(year: number) {
+		selectedYear = year;
+	}
+
+	// Handle save current year
+	function handleSaveCurrentYear() {
+		const success = saveSitioAsYearlySnapshot(originalSitio, currentYear);
+		if (success) {
+			// Refresh the data
+			yearlySnapshots = loadSitioYearlySnapshots(originalSitio.id);
+			availableYears = getSitioAvailableYears(originalSitio.id);
+			toast.success(`${currentYear} data saved successfully`, {
+				description: 'You can now view historical trends and comparisons.'
+			});
+		} else {
+			toast.error('Failed to save data', {
+				description: 'Please try again later.'
+			});
+		}
+	}
+
 	const tabs = [
 		{ id: 'overview', label: 'Overview', icon: FileText },
 		{ id: 'demographics', label: 'Demographics', icon: Users },
 		{ id: 'economy', label: 'Economy & Livelihoods', icon: Briefcase },
 		{ id: 'infrastructure', label: 'Infrastructure', icon: Home },
 		{ id: 'services', label: 'Social Services', icon: Heart },
+		{ id: 'trends', label: 'Trends', icon: TrendingUp },
 		{ id: 'projects', label: 'Projects', icon: FolderKanban }
 	];
 </script>
@@ -76,6 +138,18 @@
 
 	<!-- Main Content -->
 	<main class="mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8">
+		<!-- Year Selector -->
+		<div class="flex flex-col items-start justify-between gap-4 pt-6 sm:flex-row sm:items-center">
+			<YearSelector
+				{availableYears}
+				bind:selectedYear
+				onYearChange={handleYearChange}
+				onSaveCurrentYear={handleSaveCurrentYear}
+				showSaveButton={isAdminView}
+				{isCurrentYearSaved}
+			/>
+		</div>
+
 		<!-- Tab Navigation -->
 		<Tabs.Root bind:value={activeTab}>
 			<div
@@ -102,35 +176,39 @@
 					value="overview"
 					class="animate-in duration-300 fade-in slide-in-from-bottom-2"
 				>
-					<OverviewSection {sitio} {relatedProjects} />
+					<OverviewSection {sitio} {relatedProjects} previousSnapshot={previousYearSnapshot} />
 				</Tabs.Content>
 
 				<Tabs.Content
 					value="demographics"
 					class="animate-in duration-300 fade-in slide-in-from-bottom-2"
 				>
-					<DemographicsSection {sitio} />
+					<DemographicsSection {sitio} previousSnapshot={previousYearSnapshot} />
 				</Tabs.Content>
 
 				<Tabs.Content
 					value="economy"
 					class="animate-in duration-300 fade-in slide-in-from-bottom-2"
 				>
-					<EconomySection {sitio} />
+					<EconomySection {sitio} previousSnapshot={previousYearSnapshot} />
 				</Tabs.Content>
 
 				<Tabs.Content
 					value="infrastructure"
 					class="animate-in duration-300 fade-in slide-in-from-bottom-2"
 				>
-					<InfrastructureSection {sitio} />
+					<InfrastructureSection {sitio} previousSnapshot={previousYearSnapshot} />
 				</Tabs.Content>
 
 				<Tabs.Content
 					value="services"
 					class="animate-in duration-300 fade-in slide-in-from-bottom-2"
 				>
-					<SocialServicesSection {sitio} />
+					<SocialServicesSection {sitio} previousSnapshot={previousYearSnapshot} />
+				</Tabs.Content>
+
+				<Tabs.Content value="trends" class="animate-in duration-300 fade-in slide-in-from-bottom-2">
+					<YearlyTrendsSection snapshots={yearlySnapshots} currentYear={selectedYear} />
 				</Tabs.Content>
 
 				<Tabs.Content

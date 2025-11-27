@@ -3,6 +3,7 @@
 	import * as Card from '$lib/components/ui/card';
 	import { Progress } from '$lib/components/ui/progress';
 	import type { Sitio } from '$lib/types';
+	import type { SitioYearlySnapshot } from '$lib/types/sitio-yearly';
 	import {
 		Apple,
 		Bus,
@@ -19,9 +20,10 @@
 
 	interface Props {
 		sitio: Sitio;
+		previousSnapshot?: SitioYearlySnapshot | null;
 	}
 
-	const { sitio }: Props = $props();
+	const { sitio, previousSnapshot = null }: Props = $props();
 
 	function formatNumber(num: number): string {
 		return new Intl.NumberFormat('en-US').format(num);
@@ -76,6 +78,9 @@
 	<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
 		<Card.Root
 			class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50"
+			title="{formatNumber(
+				sitio.social_services?.philhealth_beneficiaries || 0
+			)} out of {formatNumber(sitio.population)} people"
 		>
 			<div
 				class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-emerald-50 opacity-50"
@@ -102,6 +107,9 @@
 
 		<Card.Root
 			class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50"
+			title="{formatNumber(sitio.social_services?.fourps_beneficiaries || 0)} out of {formatNumber(
+				sitio.households
+			)} households"
 		>
 			<div
 				class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-purple-50 opacity-50"
@@ -154,6 +162,9 @@
 
 		<Card.Root
 			class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50"
+			title="{formatNumber(
+				sitio.food_security?.households_with_backyard_garden || 0
+			)} out of {formatNumber(sitio.households)} households"
 		>
 			<div
 				class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-green-50 opacity-50"

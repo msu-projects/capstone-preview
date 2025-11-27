@@ -18,8 +18,24 @@
 
 	let { data, centerLabel, centerValue, height = 300, showLegend = true }: Props = $props();
 
+	// Track hovered segment
+	let hoveredIndex = $state<number | null>(null);
+
 	// Calculate total
 	const total = $derived(data.reduce((sum, d) => sum + d.value, 0));
+
+	// Get the current display value and label based on hover state
+	const displayValue = $derived(
+		hoveredIndex !== null && hoveredIndex >= 0 && hoveredIndex < data.length
+			? data[hoveredIndex].value.toLocaleString()
+			: centerValue || total.toLocaleString()
+	);
+
+	const displayLabel = $derived(
+		hoveredIndex !== null && hoveredIndex >= 0 && hoveredIndex < data.length
+			? data[hoveredIndex].label
+			: centerLabel || 'Total'
+	);
 
 	// Calculate percentage for each item
 	function getPercentage(value: number): string {
@@ -42,6 +58,14 @@
 			fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif',
 			toolbar: {
 				show: false
+			},
+			events: {
+				dataPointMouseEnter: (event, chartContext, config) => {
+					hoveredIndex = config.dataPointIndex;
+				},
+				dataPointMouseLeave: (event, chartContext, config) => {
+					hoveredIndex = null;
+				}
 			}
 		},
 		series: chartData.map((d) => d.value),
@@ -52,7 +76,7 @@
 				donut: {
 					size: '70%',
 					labels: {
-						show: !!(centerLabel && centerValue),
+						show: true,
 						name: {
 							show: true,
 							fontSize: '14px',
@@ -64,15 +88,15 @@
 							fontSize: '28px',
 							fontWeight: 700,
 							color: '#0f172a',
-							formatter: () => centerValue || ''
+							formatter: () => displayValue
 						},
 						total: {
 							show: true,
-							label: centerLabel || '',
+							label: displayLabel,
 							fontSize: '14px',
 							fontWeight: 500,
 							color: '#64748b',
-							formatter: () => centerValue || ''
+							formatter: () => displayValue
 						}
 					}
 				}

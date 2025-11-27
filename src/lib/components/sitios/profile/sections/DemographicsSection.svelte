@@ -1,9 +1,11 @@
 <script lang="ts">
 	import DonutChart from '$lib/components/charts/DonutChart.svelte';
+	import TrendBadge from '$lib/components/sitios/profile/TrendBadge.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';
 	import { Progress } from '$lib/components/ui/progress';
 	import type { Sitio } from '$lib/types';
+	import type { SitioYearlySnapshot } from '$lib/types/sitio-yearly';
 	import {
 		Activity,
 		Baby,
@@ -16,9 +18,10 @@
 
 	interface Props {
 		sitio: Sitio;
+		previousSnapshot?: SitioYearlySnapshot | null;
 	}
 
-	const { sitio }: Props = $props();
+	const { sitio, previousSnapshot = null }: Props = $props();
 
 	function formatNumber(num: number): string {
 		return new Intl.NumberFormat('en-US').format(num);
@@ -101,7 +104,13 @@
 						<Users class="size-5 text-blue-700 sm:size-6" />
 					</div>
 					<div class="min-w-0 flex-1">
-						<p class="truncate text-xs font-medium text-slate-500 sm:text-sm">Total Population</p>
+						<div class="flex items-center gap-2">
+							<p class="truncate text-xs font-medium text-slate-500 sm:text-sm">Total Population</p>
+							<TrendBadge
+								currentValue={sitio.population}
+								previousValue={previousSnapshot?.population ?? null}
+							/>
+						</div>
 						<p
 							class="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl"
 						>
@@ -128,7 +137,13 @@
 						<Home class="size-5 text-emerald-700 sm:size-6" />
 					</div>
 					<div class="min-w-0 flex-1">
-						<p class="truncate text-xs font-medium text-slate-500 sm:text-sm">Households</p>
+						<div class="flex items-center gap-2">
+							<p class="truncate text-xs font-medium text-slate-500 sm:text-sm">Households</p>
+							<TrendBadge
+								currentValue={sitio.households}
+								previousValue={previousSnapshot?.households ?? null}
+							/>
+						</div>
 						<p
 							class="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl"
 						>
@@ -171,6 +186,9 @@
 		<!-- Working Age Population -->
 		<Card.Root
 			class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50"
+			title="{formatNumber(sitio.demographics.age_15_64)} out of {formatNumber(
+				sitio.population
+			)} people"
 		>
 			<div
 				class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-amber-50 opacity-50"

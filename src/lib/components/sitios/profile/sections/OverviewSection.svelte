@@ -3,6 +3,7 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';
 	import type { Project, Sitio } from '$lib/types';
+	import type { SitioYearlySnapshot } from '$lib/types/sitio-yearly';
 	import {
 		ArrowUpRight,
 		Building2,
@@ -21,9 +22,10 @@
 	interface Props {
 		sitio: Sitio;
 		relatedProjects: Project[];
+		previousSnapshot?: SitioYearlySnapshot | null;
 	}
 
-	const { sitio, relatedProjects }: Props = $props();
+	const { sitio, relatedProjects, previousSnapshot = null }: Props = $props();
 
 	function formatNumber(num: number): string {
 		return new Intl.NumberFormat('en-US').format(num);
@@ -252,6 +254,21 @@
 						</div>
 					</div>
 				</div>
+
+				<!-- Registered Voters -->
+				{#if sitio.social_services?.registered_voters}
+					<div class="mt-4 border-t pt-4">
+						<div class="flex items-center justify-between rounded-lg bg-slate-50 p-3">
+							<div class="flex items-center gap-2">
+								<Vote class="size-4 text-slate-500" />
+								<span class="text-sm text-slate-600">Registered Voters</span>
+							</div>
+							<span class="font-semibold text-slate-900">
+								{formatNumber(sitio.social_services.registered_voters)}
+							</span>
+						</div>
+					</div>
+				{/if}
 			</Card.Content>
 		</Card.Root>
 	</div>
@@ -396,18 +413,6 @@
 					<div class="flex flex-col items-center justify-center py-8 text-center">
 						<Leaf class="size-12 text-slate-300" />
 						<p class="mt-2 text-sm text-slate-500">No agriculture data available</p>
-					</div>
-				{/if}
-
-				{#if sitio.social_services?.registered_voters}
-					<div class="mt-4 flex items-center justify-between rounded-lg bg-slate-50 p-3">
-						<div class="flex items-center gap-2">
-							<Vote class="size-4 text-slate-500" />
-							<span class="text-sm text-slate-600">Registered Voters</span>
-						</div>
-						<span class="font-semibold text-slate-900">
-							{formatNumber(sitio.social_services.registered_voters)}
-						</span>
 					</div>
 				{/if}
 			</Card.Content>

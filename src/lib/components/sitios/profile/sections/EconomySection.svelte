@@ -4,13 +4,15 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';
 	import type { Sitio } from '$lib/types';
+	import type { SitioYearlySnapshot } from '$lib/types/sitio-yearly';
 	import { Banknote, Beef, Briefcase, Leaf, Sprout, TrendingUp, Wheat } from '@lucide/svelte';
 
 	interface Props {
 		sitio: Sitio;
+		previousSnapshot?: SitioYearlySnapshot | null;
 	}
 
-	const { sitio }: Props = $props();
+	const { sitio, previousSnapshot = null }: Props = $props();
 
 	function formatNumber(num: number): string {
 		return new Intl.NumberFormat('en-US').format(num);
