@@ -126,7 +126,7 @@
 		states: {
 			hover: {
 				filter: {
-					type: 'darken'
+					type: 'lighten'
 				}
 			}
 		}
