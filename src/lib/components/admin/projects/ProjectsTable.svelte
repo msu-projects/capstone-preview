@@ -26,6 +26,7 @@
 
 	interface Props {
 		projects: Project[];
+		totalProjects: number;
 		currentPage: number;
 		itemsPerPage: number;
 		totalPages: number;
@@ -41,6 +42,7 @@
 
 	let {
 		projects,
+		totalProjects,
 		currentPage = $bindable(),
 		itemsPerPage,
 		totalPages,
@@ -57,8 +59,7 @@
 <Card.Card class="gap-4 shadow-sm">
 	<Card.CardHeader>
 		<div class="flex items-center justify-between">
-			<Card.CardTitle class="text-xl font-semibold">All Projects ({projects.length})</Card.CardTitle
-			>
+			<Card.CardTitle class="text-xl font-semibold">All Projects ({totalProjects})</Card.CardTitle>
 			<Button variant="ghost" size="icon" onclick={onRefresh}>
 				<RefreshCw class="size-4" />
 			</Button>

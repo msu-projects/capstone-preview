@@ -15,7 +15,7 @@
 	let statusFilter = $state<string>('');
 	let categoryFilter = $state<string>('');
 	let currentPage = $state(1);
-	let sortBy = $state<'title' | 'budget' | 'progress' | 'status' | 'updated'>('title');
+	let sortBy = $state<'title' | 'budget' | 'progress' | 'status' | 'updated'>('updated');
 	let sortOrder = $state<'asc' | 'desc'>('asc');
 	const itemsPerPage = 10;
 	let deleteDialogOpen = $state(false);
@@ -57,6 +57,11 @@
 		return filtered.sort((a, b) => {
 			let comparison = 0;
 			switch (sortBy) {
+				case 'updated':
+					const dateA = new Date(a.updated_at).getTime();
+					const dateB = new Date(b.updated_at).getTime();
+					comparison = dateA - dateB;
+					break;
 				case 'title':
 					comparison = a.title.localeCompare(b.title);
 					break;
@@ -70,11 +75,6 @@
 					break;
 				case 'status':
 					comparison = a.status.localeCompare(b.status);
-					break;
-				case 'updated':
-					const dateA = new Date(a.updated_at).getTime();
-					const dateB = new Date(b.updated_at).getTime();
-					comparison = dateA - dateB;
 					break;
 			}
 			return sortOrder === 'asc' ? comparison : -comparison;
@@ -177,6 +177,7 @@
 		<!-- Table -->
 		<ProjectsTable
 			projects={paginatedProjects}
+			totalProjects={projects.length}
 			bind:currentPage
 			{itemsPerPage}
 			{totalPages}

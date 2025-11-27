@@ -17,7 +17,9 @@
 	let selectedMunicipality = $state<string>('all');
 	let selectedBarangay = $state<string>('all');
 	let currentPage = $state(1);
-	let sortBy = $state<'name' | 'municipality' | 'barangay' | 'population' | 'households'>('name');
+	let sortBy = $state<'name' | 'municipality' | 'barangay' | 'population' | 'households'>(
+		'households'
+	);
 	let sortOrder = $state<'asc' | 'desc'>('asc');
 	const itemsPerPage = 10;
 	let deleteDialogOpen = $state(false);
@@ -225,6 +227,7 @@
 		<!-- Sitios Table -->
 		<SitiosTable
 			sitios={paginatedSitios}
+			totalSitios={sitios.length}
 			bind:currentPage
 			{itemsPerPage}
 			{totalPages}

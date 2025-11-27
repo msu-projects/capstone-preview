@@ -18,6 +18,7 @@
 
 	interface Props {
 		sitios: Sitio[];
+		totalSitios: number;
 		currentPage: number;
 		itemsPerPage: number;
 		totalPages: number;
@@ -35,6 +36,7 @@
 
 	let {
 		sitios,
+		totalSitios,
 		currentPage = $bindable(),
 		itemsPerPage,
 		totalPages,
@@ -51,7 +53,7 @@
 <Card.Card class="gap-4 shadow-sm">
 	<Card.CardHeader>
 		<div class="flex items-center justify-between">
-			<Card.CardTitle class="text-xl font-semibold">All Sitios ({sitios.length})</Card.CardTitle>
+			<Card.CardTitle class="text-xl font-semibold">All Sitios ({totalSitios})</Card.CardTitle>
 			<Button variant="ghost" size="icon" onclick={onRefresh}>
 				<RefreshCw class="size-4" />
 			</Button>
