@@ -9,11 +9,15 @@
 	import * as Card from '$lib/components/ui/card';
 	import type { ColumnMapping, DuplicateSitio, ImportedRow, Sitio } from '$lib/types';
 	import { logAuditAction } from '$lib/utils/audit';
-	import { autoMapColumns, transformRowToSitio } from '$lib/utils/column-mapper';
+	import {
+		autoMapColumns,
+		createDefaultSitio,
+		transformRowToSitio
+	} from '$lib/utils/column-mapper';
 	import { parseFile } from '$lib/utils/import-parser';
 	import { findDuplicates, validateBatch } from '$lib/utils/import-validator';
 	import { getNextSitioId, loadSitios, saveSitios } from '$lib/utils/storage';
-	import { CheckCircle2, FileSearch, Map, Upload } from '@lucide/svelte';
+	import { CircleCheck, FileSearch, Map as MapIcon, Upload } from '@lucide/svelte';
 
 	let step = $state<'upload' | 'map' | 'preview' | 'duplicates' | 'complete'>('upload');
 	let uploadedFile = $state<File | null>(null);
@@ -125,27 +129,13 @@
 						replaced++;
 					}
 				} else {
-					// New sitio
+					// New sitio - merge with defaults
 					const newSitio: Sitio = {
+						...createDefaultSitio(),
 						...sitio,
 						id: nextId++,
-						created_at: new Date().toISOString(),
-						// Ensure required fields have values
-						name: sitio.name || '',
-						municipality: sitio.municipality || '',
-						barangay: sitio.barangay || '',
-						population: sitio.population || 0,
-						households: sitio.households || 0,
-						coordinates: sitio.coordinates || { lat: 0, lng: 0 },
-						demographics: sitio.demographics || {
-							male: 0,
-							female: 0,
-							total: 0,
-							age_0_14: 0,
-							age_15_64: 0,
-							age_65_above: 0
-						}
-					} as Sitio;
+						created_at: new Date().toISOString()
+					};
 
 					existingSitios.push(newSitio);
 					added++;
@@ -219,7 +209,7 @@
 						class:bg-muted={step === 'upload'}
 					>
 						{#if step !== 'upload'}
-							<CheckCircle2 class="size-5" />
+							<CircleCheck class="size-5" />
 						{:else}
 							<Upload class="size-5" />
 						{/if}
@@ -237,9 +227,9 @@
 						class:bg-muted={step === 'upload' || step === 'map'}
 					>
 						{#if step !== 'upload' && step !== 'map'}
-							<CheckCircle2 class="size-5" />
+							<CircleCheck class="size-5" />
 						{:else}
-							<Map class="size-5" />
+							<MapIcon class="size-5" />
 						{/if}
 					</div>
 					<span class:font-semibold={step === 'map'}>Map Columns</span>
@@ -257,7 +247,7 @@
 						class:bg-muted={step === 'upload' || step === 'map' || step === 'preview'}
 					>
 						{#if step !== 'upload' && step !== 'map' && step !== 'preview'}
-							<CheckCircle2 class="size-5" />
+							<CircleCheck class="size-5" />
 						{:else}
 							<FileSearch class="size-5" />
 						{/if}
@@ -274,7 +264,7 @@
 						class:text-primary-foreground={step === 'complete'}
 						class:bg-muted={step !== 'complete'}
 					>
-						<CheckCircle2 class="size-5" />
+						<CircleCheck class="size-5" />
 					</div>
 					<span class:font-semibold={step === 'complete'}>Complete</span>
 				</div>
@@ -303,7 +293,7 @@
 				<Card.Root>
 					<Card.Header>
 						<Card.Title class="flex items-center gap-2 text-2xl">
-							<CheckCircle2 class="size-6 text-primary" />
+							<CircleCheck class="size-6 text-primary" />
 							Import Complete!
 						</Card.Title>
 						<Card.Description>Your sitio data has been successfully imported.</Card.Description>

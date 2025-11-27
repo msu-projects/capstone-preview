@@ -82,19 +82,19 @@ export const SITIO_FIELD_DEFINITIONS = [
 
 	// Economic/Employment
 	{
-		field: 'economic_condition.top_employments',
+		field: 'economic_condition.employments',
 		label: 'Top Employment 1',
 		csvHeader: 'Top 3 Employment - 1st',
 		required: false
 	},
 	{
-		field: 'economic_condition.top_employments',
+		field: 'economic_condition.employments',
 		label: 'Top Employment 2',
 		csvHeader: 'Top 3 Employment - 2nd',
 		required: false
 	},
 	{
-		field: 'economic_condition.top_employments',
+		field: 'economic_condition.employments',
 		label: 'Top Employment 3',
 		csvHeader: 'Top 3 Employment - 3rd',
 		required: false
@@ -102,19 +102,19 @@ export const SITIO_FIELD_DEFINITIONS = [
 
 	// Income brackets
 	{
-		field: 'economic_condition.top_income_brackets',
+		field: 'economic_condition.income_brackets',
 		label: 'Top Income Bracket 1',
 		csvHeader: 'Top 3 Income Bracket - 1st',
 		required: false
 	},
 	{
-		field: 'economic_condition.top_income_brackets',
+		field: 'economic_condition.income_brackets',
 		label: 'Top Income Bracket 2',
 		csvHeader: 'Top 3 Income Bracket - 2nd',
 		required: false
 	},
 	{
-		field: 'economic_condition.top_income_brackets',
+		field: 'economic_condition.income_brackets',
 		label: 'Top Income Bracket 3',
 		csvHeader: 'Top 3 Income Bracket - 3rd',
 		required: false
@@ -314,11 +314,22 @@ export function autoMapColumns(csvHeaders: string[]): ColumnMapping[] {
 }
 
 /**
- * Transform a raw CSV/Excel row to a partial Sitio object
- * Handles nested field paths and array aggregation
+ * Creates a default Sitio object with all required fields initialized
  */
-export function transformRowToSitio(row: ImportedRow, mappings: ColumnMapping[]): Partial<Sitio> {
-	const sitio: any = {
+export function createDefaultSitio(): Sitio {
+	return {
+		// Required core fields
+		id: 0,
+		name: '',
+		municipality: '',
+		barangay: '',
+		population: 0,
+		households: 0,
+		coordinates: { lat: 0, lng: 0 },
+		created_at: new Date().toISOString(),
+
+		// Optional fields with defaults
+		coding: '',
 		demographics: {
 			male: 0,
 			female: 0,
@@ -327,11 +338,14 @@ export function transformRowToSitio(row: ImportedRow, mappings: ColumnMapping[])
 			age_15_64: 0,
 			age_65_above: 0
 		},
-		coding: {},
-		social_services: {},
+		social_services: {
+			registered_voters: 0,
+			philhealth_beneficiaries: 0,
+			fourps_beneficiaries: 0
+		},
 		economic_condition: {
-			top_employments: [],
-			top_income_brackets: []
+			employments: [],
+			income_brackets: []
 		},
 		agriculture: {
 			farmers_count: 0,
@@ -356,7 +370,6 @@ export function transformRowToSitio(row: ImportedRow, mappings: ColumnMapping[])
 			ownership_types: []
 		},
 		domestic_animals: {
-			total_count: 0,
 			dogs: 0,
 			cats: 0,
 			dogs_vaccinated: 0,
@@ -372,6 +385,16 @@ export function transformRowToSitio(row: ImportedRow, mappings: ColumnMapping[])
 			alternative_electricity_sources: []
 		}
 	};
+}
+
+/**
+ * Transform a raw CSV/Excel row to a partial Sitio object
+ * Handles nested field paths and array aggregation
+ */
+export function transformRowToSitio(row: ImportedRow, mappings: ColumnMapping[]): Partial<Sitio> {
+	// Create a properly typed default, cast to any for dynamic field manipulation
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const sitio: any = createDefaultSitio();
 
 	mappings.forEach((mapping) => {
 		if (!mapping.sitioField) return;
@@ -381,17 +404,24 @@ export function transformRowToSitio(row: ImportedRow, mappings: ColumnMapping[])
 
 		const fieldPath = mapping.sitioField.split('.');
 
-		// Handle array fields specially
-		if (
-			fieldPath[fieldPath.length - 1] === 'top_employments' ||
-			fieldPath[fieldPath.length - 1] === 'top_income_brackets' ||
-			fieldPath[fieldPath.length - 1] === 'top_crops' ||
-			fieldPath[fieldPath.length - 1] === 'common_garden_commodities' ||
-			fieldPath[fieldPath.length - 1] === 'info_dissemination_methods' ||
-			fieldPath[fieldPath.length - 1] === 'transportation_methods' ||
-			fieldPath[fieldPath.length - 1] === 'alternative_electricity_sources' ||
-			fieldPath[fieldPath.length - 1] === 'quality_types'
-		) {
+		// Define fields that need special array or object-array handling
+		const arrayFields = [
+			'top_crops',
+			'common_garden_commodities',
+			'info_dissemination_methods',
+			'transportation_methods',
+			'alternative_electricity_sources'
+		];
+		const objectArrayFields = [
+			'employments',
+			'income_brackets',
+			'quality_types',
+			'ownership_types'
+		];
+		const lastField = fieldPath[fieldPath.length - 1];
+
+		// Handle simple string array fields
+		if (arrayFields.includes(lastField)) {
 			// Navigate to parent object
 			let current = sitio;
 			for (let i = 0; i < fieldPath.length - 1; i++) {
@@ -407,6 +437,40 @@ export function transformRowToSitio(row: ImportedRow, mappings: ColumnMapping[])
 			const stringValue = String(value).trim();
 			if (stringValue && !current[arrayField].includes(stringValue)) {
 				current[arrayField].push(stringValue);
+			}
+		} else if (objectArrayFields.includes(lastField)) {
+			// Handle object array fields (employments, income_brackets, quality_types, ownership_types)
+			let current = sitio;
+			for (let i = 0; i < fieldPath.length - 1; i++) {
+				current = current[fieldPath[i]];
+			}
+
+			if (!Array.isArray(current[lastField])) {
+				current[lastField] = [];
+			}
+
+			const stringValue = String(value).trim();
+			if (stringValue) {
+				// Create appropriate object structure based on field type
+				if (lastField === 'employments') {
+					// Check if this employment type already exists
+					const existing = current[lastField].find((e: { type: string }) => e.type === stringValue);
+					if (!existing) {
+						current[lastField].push({ type: stringValue, count: 0 });
+					}
+				} else if (lastField === 'income_brackets') {
+					const existing = current[lastField].find(
+						(e: { bracket: string }) => e.bracket === stringValue
+					);
+					if (!existing) {
+						current[lastField].push({ bracket: stringValue, households: 0 });
+					}
+				} else if (lastField === 'quality_types' || lastField === 'ownership_types') {
+					const existing = current[lastField].find((e: { type: string }) => e.type === stringValue);
+					if (!existing) {
+						current[lastField].push({ type: stringValue, count: 0 });
+					}
+				}
 			}
 		} else {
 			// Regular field assignment
@@ -446,12 +510,6 @@ export function transformRowToSitio(row: ImportedRow, mappings: ColumnMapping[])
 	// Map total to population if population not set
 	if (!sitio.population && sitio.demographics.total) {
 		sitio.population = sitio.demographics.total;
-	}
-
-	// Calculate domestic animals total
-	if (sitio.domestic_animals) {
-		sitio.domestic_animals.total_count =
-			(sitio.domestic_animals.dogs || 0) + (sitio.domestic_animals.cats || 0);
 	}
 
 	return sitio;
