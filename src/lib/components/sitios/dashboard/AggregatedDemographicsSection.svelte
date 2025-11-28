@@ -185,20 +185,8 @@
 					data={genderChartData}
 					centerLabel="Total"
 					centerValue={formatNumber(demographics.totalPopulation)}
-					height={200}
+					height={280}
 				/>
-				<div class="mt-4 grid grid-cols-2 gap-2 text-center text-sm">
-					<div class="rounded-lg bg-blue-50 p-2">
-						<div class="font-semibold text-blue-700">{demographics.malePercentage.toFixed(1)}%</div>
-						<div class="text-xs text-slate-500">Male</div>
-					</div>
-					<div class="rounded-lg bg-pink-50 p-2">
-						<div class="font-semibold text-pink-700">
-							{demographics.femalePercentage.toFixed(1)}%
-						</div>
-						<div class="text-xs text-slate-500">Female</div>
-					</div>
-				</div>
 			</Card.Content>
 		</Card.Root>
 	</div>
@@ -218,31 +206,8 @@
 					data={ageChartData}
 					centerLabel="Population"
 					centerValue={formatNumber(demographics.totalPopulation)}
-					height={200}
+					height={280}
 				/>
-				<div class="mt-4 space-y-3">
-					<div class="flex items-center justify-between text-sm">
-						<div class="flex items-center gap-2">
-							<div class="h-3 w-3 rounded-full bg-blue-500"></div>
-							<span>Children (0-14)</span>
-						</div>
-						<span class="font-medium">{formatNumber(demographics.age0to14)}</span>
-					</div>
-					<div class="flex items-center justify-between text-sm">
-						<div class="flex items-center gap-2">
-							<div class="h-3 w-3 rounded-full bg-emerald-500"></div>
-							<span>Working Age (15-64)</span>
-						</div>
-						<span class="font-medium">{formatNumber(demographics.age15to64)}</span>
-					</div>
-					<div class="flex items-center justify-between text-sm">
-						<div class="flex items-center gap-2">
-							<div class="h-3 w-3 rounded-full bg-orange-500"></div>
-							<span>Seniors (65+)</span>
-						</div>
-						<span class="font-medium">{formatNumber(demographics.age65above)}</span>
-					</div>
-				</div>
 			</Card.Content>
 		</Card.Root>
 

@@ -1,13 +1,21 @@
 <script lang="ts">
 	import DonutChart from '$lib/components/charts/DonutChart.svelte';
-	import RadarChart from '$lib/components/charts/RadarChart.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';
 	import { Progress } from '$lib/components/ui/progress';
 	import type { Sitio } from '$lib/types';
 	import type { SitioYearlySnapshot } from '$lib/types/sitio-yearly';
 	import { formatNumber } from '$lib/utils/formatters';
-	import { Bath, Building, CheckCircle, Droplets, Home, Recycle, Zap } from '@lucide/svelte';
+	import {
+		Bath,
+		Building,
+		CheckCircle,
+		Droplets,
+		Home,
+		Recycle,
+		TrendingDown,
+		Zap
+	} from '@lucide/svelte';
 
 	interface Props {
 		sitio: Sitio;
@@ -78,16 +86,80 @@
 			: 0
 	);
 
-	// Radar chart data for utilities access matrix
-	const utilitiesRadarData = $derived([
-		{ label: 'Electricity', value: electricityCoverage },
-		{ label: 'Water Access', value: waterAccessPercentage },
-		{ label: 'Sanitary Toilet', value: toiletCoverage }
-		// {
-		// 	label: 'Waste Segregation',
-		// 	value: sitio.water_sanitation?.waste_segregation_practice ? 100 : 0
-		// }
+	// Coverage status helper with proper badge/progress classes
+	type CoverageStatus = {
+		status: string;
+		badgeClass: string;
+		progressClass: string;
+		textClass: string;
+		bgClass: string;
+		icon: 'good' | 'moderate' | 'critical';
+	};
+
+	function getCoverageStatus(percent: number): CoverageStatus {
+		if (percent >= 80)
+			return {
+				status: 'Good Coverage',
+				badgeClass: 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100',
+				progressClass: '[&>div]:bg-emerald-500',
+				textClass: 'text-emerald-600',
+				bgClass: 'bg-emerald-500',
+				icon: 'good'
+			};
+		if (percent >= 50)
+			return {
+				status: 'Moderate',
+				badgeClass: 'bg-amber-100 text-amber-700 hover:bg-amber-100',
+				progressClass: '[&>div]:bg-amber-500',
+				textClass: 'text-amber-600',
+				bgClass: 'bg-amber-500',
+				icon: 'moderate'
+			};
+		return {
+			status: 'Low Coverage',
+			badgeClass: 'bg-red-100 text-red-700 hover:bg-red-100',
+			progressClass: '[&>div]:bg-red-500',
+			textClass: 'text-red-600',
+			bgClass: 'bg-red-500',
+			icon: 'critical'
+		};
+	}
+
+	const electricityStatus = $derived(getCoverageStatus(electricityCoverage));
+	const toiletStatus = $derived(getCoverageStatus(toiletCoverage));
+	const waterStatus = $derived(getCoverageStatus(waterAccessPercentage));
+
+	// Utilities data for the improved visualization
+	const utilitiesData = $derived([
+		{
+			label: 'Electricity',
+			value: electricityCoverage,
+			icon: Zap,
+			iconBg: 'bg-amber-100',
+			iconColor: 'text-amber-600',
+			status: electricityStatus
+		},
+		{
+			label: 'Water Access',
+			value: waterAccessPercentage,
+			icon: Droplets,
+			iconBg: 'bg-cyan-100',
+			iconColor: 'text-cyan-600',
+			status: waterStatus
+		},
+		{
+			label: 'Sanitary Toilet',
+			value: toiletCoverage,
+			icon: Bath,
+			iconBg: 'bg-purple-100',
+			iconColor: 'text-purple-600',
+			status: toiletStatus
+		}
 	]);
+
+	// Priority areas for display
+	const criticalAreas = $derived(utilitiesData.filter((u) => u.status.icon === 'critical'));
+	const moderateAreas = $derived(utilitiesData.filter((u) => u.status.icon === 'moderate'));
 </script>
 
 <div class="space-y-6">
@@ -219,24 +291,12 @@
 			</Card.Header>
 			<Card.Content class="py-6">
 				{#if housingQualityData.length > 0}
-					<div style="height: 280px;">
-						<DonutChart
-							data={housingQualityData}
-							centerValue={formatNumber(sitio.households)}
-							centerLabel="Households"
-							height={280}
-						/>
-					</div>
-					<!-- Legend -->
-					<div class="mt-4 grid grid-cols-2 gap-2">
-						{#each housingQualityData as item}
-							<div class="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2 text-sm">
-								<div class="h-3 w-3 rounded-full" style="background-color: {item.color}"></div>
-								<span class="truncate text-slate-600">{item.label}</span>
-								<span class="ml-auto font-semibold text-slate-900">{item.value}</span>
-							</div>
-						{/each}
-					</div>
+					<DonutChart
+						data={housingQualityData}
+						centerValue={formatNumber(sitio.households)}
+						centerLabel="Households"
+						height={320}
+					/>
 				{:else}
 					<div class="flex flex-col items-center justify-center py-12 text-center">
 						<Building class="size-16 text-slate-200" />
@@ -259,24 +319,12 @@
 			</Card.Header>
 			<Card.Content class="py-6">
 				{#if housingOwnershipData.length > 0}
-					<div style="height: 280px;">
-						<DonutChart
-							data={housingOwnershipData}
-							centerValue={formatNumber(sitio.households)}
-							centerLabel="Households"
-							height={280}
-						/>
-					</div>
-					<!-- Legend -->
-					<div class="mt-4 grid grid-cols-2 gap-2">
-						{#each housingOwnershipData as item}
-							<div class="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2 text-sm">
-								<div class="h-3 w-3 rounded-full" style="background-color: {item.color}"></div>
-								<span class="truncate text-slate-600">{item.label}</span>
-								<span class="ml-auto font-semibold text-slate-900">{item.value}</span>
-							</div>
-						{/each}
-					</div>
+					<DonutChart
+						data={housingOwnershipData}
+						centerValue={formatNumber(sitio.households)}
+						centerLabel="Households"
+						height={320}
+					/>
 				{:else}
 					<div class="flex flex-col items-center justify-center py-12 text-center">
 						<Home class="size-16 text-slate-200" />
@@ -450,7 +498,7 @@
 		</Card.Root>
 	</div>
 
-	<!-- Utilities Access Matrix (Radar Chart) -->
+	<!-- Utilities Access Overview -->
 	<Card.Root class="gap-0 py-0 shadow-sm">
 		<Card.Header class="border-b bg-slate-50/50 py-6">
 			<div class="flex items-center gap-2">
@@ -458,57 +506,111 @@
 					<CheckCircle class="size-4 text-indigo-600" />
 				</div>
 				<div>
-					<Card.Title class="text-lg">Utilities Access Matrix</Card.Title>
-					<Card.Description>Deprivation check: A perfect shape means 100% access</Card.Description>
+					<Card.Title class="text-lg">Utilities Access Overview</Card.Title>
+					<Card.Description>
+						Coverage assessment across essential utilities for this sitio
+					</Card.Description>
 				</div>
 			</div>
 		</Card.Header>
 		<Card.Content class="py-6">
 			<div class="grid gap-6 lg:grid-cols-2">
-				<div>
-					<RadarChart
-						data={utilitiesRadarData}
-						height={320}
-						title="Access Rate"
-						color="hsl(217, 91%, 60%)"
-						fillOpacity={0.3}
-					/>
-				</div>
-				<div class="space-y-4">
-					<p class="text-sm text-slate-600">
-						This radar chart visualizes the household access to basic utilities. Dips in the shape
-						indicate infrastructure gaps that need attention.
-					</p>
-					<div class="space-y-3">
-						{#each utilitiesRadarData as item}
-							{@const status =
-								item.value >= 80 ? 'good' : item.value >= 50 ? 'moderate' : 'critical'}
-							<div class="flex items-center justify-between rounded-lg bg-slate-50 p-3">
-								<span class="text-sm font-medium text-slate-700">{item.label}</span>
+				<!-- Utilities Progress Bars -->
+				<div class="space-y-5">
+					{#each utilitiesData as item}
+						<div class="space-y-2">
+							<div class="flex items-center justify-between">
 								<div class="flex items-center gap-2">
-									<div class="h-2 w-24 overflow-hidden rounded-full bg-slate-200">
-										<div
-											class="h-full rounded-full transition-all {status === 'good'
-												? 'bg-emerald-500'
-												: status === 'moderate'
-													? 'bg-amber-500'
-													: 'bg-red-500'}"
-											style="width: {item.value}%"
-										></div>
+									<div class="rounded-md p-1.5 {item.iconBg}">
+										<item.icon class="size-4 {item.iconColor}" />
 									</div>
-									<span
-										class="text-sm font-semibold {status === 'good'
-											? 'text-emerald-600'
-											: status === 'moderate'
-												? 'text-amber-600'
-												: 'text-red-600'}"
-									>
+									<span class="text-sm font-medium text-slate-700">{item.label}</span>
+								</div>
+								<div class="flex items-center gap-2">
+									<Badge variant="secondary" class={item.status.badgeClass}>
+										{item.status.status}
+									</Badge>
+									<span class="text-sm font-semibold {item.status.textClass}">
 										{item.value.toFixed(0)}%
 									</span>
 								</div>
 							</div>
-						{/each}
+							<Progress value={item.value} class="h-2.5 {item.status.progressClass}" />
+						</div>
+					{/each}
+				</div>
+
+				<!-- Summary & Insights -->
+				<div class="space-y-4">
+					<p class="text-sm text-slate-600">
+						This overview shows household access to basic utilities. Lower percentages indicate
+						infrastructure gaps that may need prioritization.
+					</p>
+
+					<!-- Quick Stats -->
+					<div class="grid grid-cols-3 gap-3">
+						<div class="rounded-lg bg-amber-50 p-3 text-center ring-1 ring-amber-100">
+							<p class="text-lg font-bold text-amber-700">
+								{formatNumber(sitio.utilities?.households_with_electricity || 0)}
+							</p>
+							<p class="text-xs text-amber-600">w/ Electricity</p>
+						</div>
+						<div class="rounded-lg bg-cyan-50 p-3 text-center ring-1 ring-cyan-100">
+							<p class="text-lg font-bold text-cyan-700">
+								{sitio.water_sanitation?.water_systems_count || 0}
+							</p>
+							<p class="text-xs text-cyan-600">Water Systems</p>
+						</div>
+						<div class="rounded-lg bg-purple-50 p-3 text-center ring-1 ring-purple-100">
+							<p class="text-lg font-bold text-purple-700">
+								{formatNumber(
+									sitio.households - (sitio.water_sanitation?.households_without_toilet || 0)
+								)}
+							</p>
+							<p class="text-xs text-purple-600">w/ Toilet</p>
+						</div>
 					</div>
+
+					<!-- Priority Areas -->
+					{#if criticalAreas.length > 0}
+						<div class="rounded-lg border border-red-200 bg-red-50/50 p-4">
+							<div class="flex items-start gap-2">
+								<TrendingDown class="mt-0.5 size-4 text-red-600" />
+								<div>
+									<p class="text-sm font-medium text-red-700">Priority Areas</p>
+									<p class="text-xs text-red-600">
+										{criticalAreas.map((a) => a.label).join(', ')} need{criticalAreas.length === 1
+											? 's'
+											: ''} immediate attention
+									</p>
+								</div>
+							</div>
+						</div>
+					{:else if moderateAreas.length > 0}
+						<div class="rounded-lg border border-amber-200 bg-amber-50/50 p-4">
+							<div class="flex items-start gap-2">
+								<Zap class="mt-0.5 size-4 text-amber-600" />
+								<div>
+									<p class="text-sm font-medium text-amber-700">Areas for Improvement</p>
+									<p class="text-xs text-amber-600">
+										{moderateAreas.map((a) => a.label).join(', ')} could benefit from upgrades
+									</p>
+								</div>
+							</div>
+						</div>
+					{:else}
+						<div class="rounded-lg border border-emerald-200 bg-emerald-50/50 p-4">
+							<div class="flex items-start gap-2">
+								<CheckCircle class="mt-0.5 size-4 text-emerald-600" />
+								<div>
+									<p class="text-sm font-medium text-emerald-700">Excellent Coverage</p>
+									<p class="text-xs text-emerald-600">
+										All utilities have good coverage in this sitio
+									</p>
+								</div>
+							</div>
+						</div>
+					{/if}
 				</div>
 			</div>
 		</Card.Content>

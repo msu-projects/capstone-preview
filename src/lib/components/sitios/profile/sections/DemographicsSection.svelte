@@ -240,59 +240,20 @@
 	<!-- Charts Row -->
 	<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
 		<!-- Gender Distribution -->
-		<Card.Root class="gap-0 py-0 shadow-sm">
-			<Card.Header class="border-b bg-slate-50/50 py-6">
-				<div class="flex items-center justify-between">
-					<div class="flex items-center gap-2">
-						<div class="rounded-lg bg-indigo-100 p-1.5">
-							<Users class="size-4 text-indigo-600" />
-						</div>
-						<Card.Title class="text-lg">Gender Distribution</Card.Title>
-					</div>
-				</div>
+		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50">
+			<Card.Header>
+				<Card.Title class="flex items-center gap-2 text-base">
+					<Activity class="size-5 text-slate-500" />
+					Gender Distribution
+				</Card.Title>
 			</Card.Header>
-			<Card.Content class="py-6">
-				<!-- Visual Gender Bar -->
-				<div class="mb-6">
-					<div class="flex h-4 overflow-hidden rounded-full">
-						<div
-							class="bg-blue-500 transition-all duration-500"
-							style="width: {malePercentage}%"
-						></div>
-						<div
-							class="bg-pink-500 transition-all duration-500"
-							style="width: {femalePercentage}%"
-						></div>
-					</div>
-					<div class="mt-3 flex justify-between text-sm">
-						<div class="flex items-center gap-2">
-							<div class="h-3 w-3 rounded-full bg-blue-500"></div>
-							<span class="text-slate-600">Male</span>
-							<span class="font-semibold text-slate-900">{malePercentage.toFixed(1)}%</span>
-						</div>
-						<div class="flex items-center gap-2">
-							<div class="h-3 w-3 rounded-full bg-pink-500"></div>
-							<span class="text-slate-600">Female</span>
-							<span class="font-semibold text-slate-900">{femalePercentage.toFixed(1)}%</span>
-						</div>
-					</div>
-				</div>
-
-				<!-- Gender Count Cards -->
-				<div class="grid grid-cols-2 gap-4">
-					<div class="rounded-xl bg-blue-50 p-4 text-center ring-1 ring-blue-100">
-						<div class="text-3xl font-bold text-blue-700">
-							{formatNumber(sitio.demographics.male)}
-						</div>
-						<div class="mt-1 text-sm text-blue-600">Male</div>
-					</div>
-					<div class="rounded-xl bg-pink-50 p-4 text-center ring-1 ring-pink-100">
-						<div class="text-3xl font-bold text-pink-700">
-							{formatNumber(sitio.demographics.female)}
-						</div>
-						<div class="mt-1 text-sm text-pink-600">Female</div>
-					</div>
-				</div>
+			<Card.Content>
+				<DonutChart
+					data={genderChartData}
+					centerLabel="Total"
+					centerValue={formatNumber(sitio.population)}
+					height={0}
+				/>
 			</Card.Content>
 		</Card.Root>
 

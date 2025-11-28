@@ -1,16 +1,10 @@
 <script lang="ts">
 	import DonutChart from '$lib/components/charts/DonutChart.svelte';
-	import RadarChart from '$lib/components/charts/RadarChart.svelte';
-	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';
 	import { Progress } from '$lib/components/ui/progress';
 	import type { Sitio } from '$lib/types';
 	import { formatNumber } from '$lib/utils/formatters';
-	import {
-		aggregateInfrastructure,
-		mapToChartData,
-		toUtilitiesRadarData
-	} from '$lib/utils/sitio-aggregation';
+	import { aggregateInfrastructure, mapToChartData } from '$lib/utils/sitio-aggregation';
 	import { Bath, Building, Droplets, Home, Recycle, Zap } from '@lucide/svelte';
 
 	interface Props {
@@ -23,21 +17,54 @@
 	const infrastructure = $derived(aggregateInfrastructure(sitios));
 
 	// Chart data
-	const utilitiesRadarData = $derived(toUtilitiesRadarData(infrastructure));
 	const housingQualityData = $derived(mapToChartData(infrastructure.housingQualityDistribution));
 	const housingOwnershipData = $derived(
 		mapToChartData(infrastructure.housingOwnershipDistribution)
 	);
 
-	// Coverage status helpers
-	function getCoverageStatus(percent: number) {
-		if (percent >= 80) return { status: 'High', color: 'emerald' };
-		if (percent >= 50) return { status: 'Moderate', color: 'amber' };
-		return { status: 'Low', color: 'red' };
+	// Coverage status helpers with proper badge classes
+	type CoverageStatus = {
+		status: string;
+		badgeClass: string;
+		progressClass: string;
+		textClass: string;
+		bgClass: string;
+	};
+
+	function getCoverageStatus(percent: number): CoverageStatus {
+		if (percent >= 80)
+			return {
+				status: 'High',
+				badgeClass: 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100',
+				progressClass: '[&>div]:bg-emerald-500',
+				textClass: 'text-emerald-600',
+				bgClass: 'bg-emerald-500'
+			};
+		if (percent >= 50)
+			return {
+				status: 'Moderate',
+				badgeClass: 'bg-amber-100 text-amber-700 hover:bg-amber-100',
+				progressClass: '[&>div]:bg-amber-500',
+				textClass: 'text-amber-600',
+				bgClass: 'bg-amber-500'
+			};
+		return {
+			status: 'Low',
+			badgeClass: 'bg-red-100 text-red-700 hover:bg-red-100',
+			progressClass: '[&>div]:bg-red-500',
+			textClass: 'text-red-600',
+			bgClass: 'bg-red-500'
+		};
 	}
 
 	const electricityStatus = $derived(getCoverageStatus(infrastructure.electricityCoveragePercent));
 	const toiletStatus = $derived(getCoverageStatus(infrastructure.toiletCoveragePercent));
+
+	// Estimate water access based on water systems
+	const waterAccessPercent = $derived(
+		Math.min(100, infrastructure.totalWaterSystems > 0 ? infrastructure.totalWaterSystems * 10 : 0)
+	);
+	const waterStatus = $derived(getCoverageStatus(waterAccessPercent));
 </script>
 
 <div class="space-y-6">
@@ -160,17 +187,91 @@
 
 	<!-- Charts Row -->
 	<div class="grid gap-6 lg:grid-cols-3">
-		<!-- Utilities Access Matrix -->
+		<!-- Utilities Access Overview - Improved visualization -->
 		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50">
 			<Card.Header>
 				<Card.Title class="flex items-center gap-2 text-base">
 					<Zap class="size-5 text-slate-500" />
-					Utilities Access Matrix
+					Utilities Coverage
 				</Card.Title>
-				<Card.Description>Coverage percentage across utility types</Card.Description>
+				<Card.Description>Access percentage across utility types</Card.Description>
 			</Card.Header>
-			<Card.Content>
-				<RadarChart data={utilitiesRadarData} height={250} />
+			<Card.Content class="space-y-4">
+				<!-- Electricity -->
+				<div class="space-y-2">
+					<div class="flex items-center justify-between">
+						<div class="flex items-center gap-2">
+							<div class="rounded-md bg-amber-100 p-1.5">
+								<Zap class="size-3.5 text-amber-600" />
+							</div>
+							<span class="text-sm font-medium text-slate-700">Electricity</span>
+						</div>
+						<span class="text-sm font-semibold {electricityStatus.textClass}">
+							{infrastructure.electricityCoveragePercent.toFixed(0)}%
+						</span>
+					</div>
+					<Progress
+						value={infrastructure.electricityCoveragePercent}
+						class="h-2 {electricityStatus.progressClass}"
+					/>
+				</div>
+
+				<!-- Water Access -->
+				<div class="space-y-2">
+					<div class="flex items-center justify-between">
+						<div class="flex items-center gap-2">
+							<div class="rounded-md bg-cyan-100 p-1.5">
+								<Droplets class="size-3.5 text-cyan-600" />
+							</div>
+							<span class="text-sm font-medium text-slate-700">Water Access</span>
+						</div>
+						<span class="text-sm font-semibold {waterStatus.textClass}">
+							{waterAccessPercent.toFixed(0)}%
+						</span>
+					</div>
+					<Progress value={waterAccessPercent} class="h-2 {waterStatus.progressClass}" />
+				</div>
+
+				<!-- Sanitary Toilet -->
+				<div class="space-y-2">
+					<div class="flex items-center justify-between">
+						<div class="flex items-center gap-2">
+							<div class="rounded-md bg-emerald-100 p-1.5">
+								<Bath class="size-3.5 text-emerald-600" />
+							</div>
+							<span class="text-sm font-medium text-slate-700">Sanitary Toilet</span>
+						</div>
+						<span class="text-sm font-semibold {toiletStatus.textClass}">
+							{infrastructure.toiletCoveragePercent.toFixed(0)}%
+						</span>
+					</div>
+					<Progress
+						value={infrastructure.toiletCoveragePercent}
+						class="h-2 {toiletStatus.progressClass}"
+					/>
+				</div>
+
+				<!-- Summary Stats -->
+				<div class="mt-4 grid grid-cols-3 gap-2 border-t border-slate-100 pt-4">
+					<div class="text-center">
+						<p class="text-lg font-bold text-slate-900">
+							{formatNumber(infrastructure.householdsWithElectricity)}
+						</p>
+						<p class="text-xs text-slate-500">w/ Electricity</p>
+					</div>
+					<div class="text-center">
+						<p class="text-lg font-bold text-slate-900">{infrastructure.totalWaterSystems}</p>
+						<p class="text-xs text-slate-500">Water Systems</p>
+					</div>
+					<div class="text-center">
+						<p class="text-lg font-bold text-slate-900">
+							{formatNumber(
+								infrastructure.totalHouseholds - infrastructure.householdsWithoutToilet
+							)}
+						</p>
+						<p class="text-xs text-slate-500">w/ Toilet</p>
+					</div>
+				</div>
 			</Card.Content>
 		</Card.Root>
 
@@ -224,83 +325,4 @@
 			</Card.Content>
 		</Card.Root>
 	</div>
-
-	<!-- Coverage Details -->
-	<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50">
-		<Card.Header>
-			<Card.Title class="text-base">Infrastructure Coverage Details</Card.Title>
-			<Card.Description>
-				Detailed breakdown of infrastructure coverage across {sitios.length} sitios
-			</Card.Description>
-		</Card.Header>
-		<Card.Content>
-			<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-				<!-- Electricity Details -->
-				<div class="space-y-3 rounded-lg bg-slate-50 p-4">
-					<div class="flex items-center justify-between">
-						<div class="flex items-center gap-2">
-							<Zap class="size-5 text-amber-600" />
-							<span class="font-medium">Electricity</span>
-						</div>
-						<Badge
-							variant="secondary"
-							class="bg-{electricityStatus.color}-50 text-{electricityStatus.color}-700"
-						>
-							{electricityStatus.status}
-						</Badge>
-					</div>
-					<Progress value={infrastructure.electricityCoveragePercent} class="h-3" />
-					<div class="flex justify-between text-sm text-slate-600">
-						<span>
-							{formatNumber(infrastructure.householdsWithElectricity)} with electricity
-						</span>
-						<span class="font-medium">
-							{infrastructure.electricityCoveragePercent.toFixed(1)}%
-						</span>
-					</div>
-				</div>
-
-				<!-- Sanitation Details -->
-				<div class="space-y-3 rounded-lg bg-slate-50 p-4">
-					<div class="flex items-center justify-between">
-						<div class="flex items-center gap-2">
-							<Bath class="size-5 text-emerald-600" />
-							<span class="font-medium">Sanitation</span>
-						</div>
-						<Badge
-							variant="secondary"
-							class="bg-{toiletStatus.color}-50 text-{toiletStatus.color}-700"
-						>
-							{toiletStatus.status}
-						</Badge>
-					</div>
-					<Progress value={infrastructure.toiletCoveragePercent} class="h-3" />
-					<div class="flex justify-between text-sm text-slate-600">
-						<span>
-							{formatNumber(infrastructure.householdsWithoutToilet)} without toilet
-						</span>
-						<span class="font-medium">{infrastructure.toiletCoveragePercent.toFixed(1)}%</span>
-					</div>
-				</div>
-
-				<!-- Water Systems Details -->
-				<div class="space-y-3 rounded-lg bg-slate-50 p-4">
-					<div class="flex items-center justify-between">
-						<div class="flex items-center gap-2">
-							<Droplets class="size-5 text-cyan-600" />
-							<span class="font-medium">Water Systems</span>
-						</div>
-						<Badge variant="secondary" class="bg-cyan-50 text-cyan-700">
-							{infrastructure.totalWaterSystems} total
-						</Badge>
-					</div>
-					<div class="pt-2 text-sm text-slate-600">
-						<p>
-							Total water systems across all sitios providing clean water access to communities.
-						</p>
-					</div>
-				</div>
-			</div>
-		</Card.Content>
-	</Card.Root>
 </div>
