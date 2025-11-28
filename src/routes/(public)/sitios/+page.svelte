@@ -16,10 +16,10 @@
 	import * as Card from '$lib/components/ui/card';
 	import * as Select from '$lib/components/ui/select';
 	import * as Tabs from '$lib/components/ui/tabs';
-	import type { Sitio } from '$lib/types';
+	import type { Project, Sitio } from '$lib/types';
 	import toTitleCase from '$lib/utils/common';
 	import { formatNumber } from '$lib/utils/formatters';
-	import { loadSitios } from '$lib/utils/storage';
+	import { loadProjects, loadSitios } from '$lib/utils/storage';
 	import {
 		Briefcase,
 		Building2,
@@ -47,6 +47,7 @@
 	const { data }: Props = $props();
 
 	let sitios = $state<Sitio[]>([]);
+	let projects = $state<Project[]>([]);
 	let isLoading = $state(true);
 
 	// Filter state synced with URL
@@ -63,6 +64,7 @@
 
 	onMount(() => {
 		sitios = loadSitios();
+		projects = loadProjects();
 		isLoading = false;
 	});
 
@@ -90,6 +92,25 @@
 				return false;
 			}
 			return true;
+		});
+	});
+
+	// Filter projects based on their associated sitios matching the selected filters
+	const filteredProjects = $derived.by(() => {
+		if (selectedMunicipality === 'all' && selectedBarangay === 'all') {
+			return projects;
+		}
+		return projects.filter((p) => {
+			if (!p.project_sitios || p.project_sitios.length === 0) return false;
+			return p.project_sitios.some((ps) => {
+				if (selectedMunicipality !== 'all' && ps.municipality !== selectedMunicipality) {
+					return false;
+				}
+				if (selectedBarangay !== 'all' && ps.barangay !== selectedBarangay) {
+					return false;
+				}
+				return true;
+			});
 		});
 	});
 
@@ -373,7 +394,7 @@
 							value="overview"
 							class="animate-in duration-300 fade-in slide-in-from-bottom-2"
 						>
-							<AggregatedOverviewSection sitios={filteredSitios} />
+							<AggregatedOverviewSection sitios={filteredSitios} projects={filteredProjects} />
 						</Tabs.Content>
 
 						<Tabs.Content

@@ -166,6 +166,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Sitio Management</title>
+</svelte:head>
+
 <div class="flex min-h-screen flex-col bg-muted/30">
 	<!-- Header -->
 	<AdminHeader title="Sitios" description="Manage sitio data and demographics">

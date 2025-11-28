@@ -113,8 +113,10 @@
 	<div class="sticky top-0 z-10 border-b bg-white/80 backdrop-blur-sm">
 		<div class="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
 			<nav class="flex items-center gap-2 text-sm">
-				<Sidebar.Trigger class="-ml-1" />
-				<Separator orientation="vertical" class="mr-2 h-6" />
+				{#if isAdminView}
+					<Sidebar.Trigger class="-ml-1" />
+				{/if}
+				<Separator orientation="vertical" class="h-6" />
 				<a
 					href={isAdminView ? '/admin' : '/'}
 					class="text-slate-500 transition-colors hover:text-slate-700"

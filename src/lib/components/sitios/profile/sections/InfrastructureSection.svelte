@@ -335,88 +335,20 @@
 		</Card.Root>
 	</div>
 
-	<!-- Utilities Section -->
-	<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-		<!-- Electricity -->
-		<Card.Root class="gap-0 py-0 shadow-sm">
-			<Card.Header class="border-b bg-amber-50/50 py-6">
-				<div class="flex items-center gap-2">
-					<div class="rounded-lg bg-amber-100 p-1.5">
-						<Zap class="size-4 text-amber-600" />
-					</div>
-					<Card.Title class="text-lg">Electricity Access</Card.Title>
+	<!-- Water & Sanitation Section -->
+	<Card.Root class="gap-0 py-0 shadow-sm">
+		<Card.Header class="border-b bg-cyan-50/50 py-6">
+			<div class="flex items-center gap-2">
+				<div class="rounded-lg bg-cyan-100 p-1.5">
+					<Droplets class="size-4 text-cyan-600" />
 				</div>
-			</Card.Header>
-			<Card.Content class="py-6">
-				{#if sitio.utilities}
-					<div class="space-y-4">
-						<!-- Coverage Bar -->
-						<div>
-							<div class="mb-2 flex justify-between text-sm">
-								<span class="text-slate-600">Households with Electricity</span>
-								<span class="font-semibold text-slate-900">{electricityCoverage.toFixed(1)}%</span>
-							</div>
-							<Progress value={electricityCoverage} class="h-3" />
-							<div class="mt-2 text-xs text-slate-500">
-								{formatNumber(sitio.utilities.households_with_electricity)} of {formatNumber(
-									sitio.households
-								)} households
-							</div>
-						</div>
-
-						<!-- Alternative Sources -->
-						{#if sitio.utilities.alternative_electricity_sources && sitio.utilities.alternative_electricity_sources.length > 0}
-							<div class="mt-4">
-								<div class="mb-2 text-xs font-medium tracking-wider text-slate-400 uppercase">
-									Alternative Sources
-								</div>
-								<div class="flex flex-wrap gap-2">
-									{#each sitio.utilities.alternative_electricity_sources as source}
-										<Badge variant="secondary" class="bg-amber-50 text-amber-700">
-											{source}
-										</Badge>
-									{/each}
-								</div>
-							</div>
-						{/if}
-
-						<!-- Status Indicator -->
-						<div class="rounded-lg border border-amber-200 bg-amber-50/50 p-4">
-							<div class="flex items-center gap-2">
-								{#if electricityCoverage >= 80}
-									<CheckCircle class="size-5 text-emerald-600" />
-									<span class="text-sm font-medium text-emerald-700">Good Coverage</span>
-								{:else if electricityCoverage >= 50}
-									<Zap class="size-5 text-amber-600" />
-									<span class="text-sm font-medium text-amber-700">Moderate Coverage</span>
-								{:else}
-									<Zap class="size-5 text-red-600" />
-									<span class="text-sm font-medium text-red-700">Low Coverage - Priority Area</span>
-								{/if}
-							</div>
-						</div>
-					</div>
-				{:else}
-					<div class="flex flex-col items-center justify-center py-12 text-center">
-						<Zap class="size-16 text-slate-200" />
-						<p class="mt-4 text-sm text-slate-500">No electricity data available</p>
-					</div>
-				{/if}
-			</Card.Content>
-		</Card.Root>
-
-		<!-- Water & Sanitation -->
-		<Card.Root class="gap-0 py-0 shadow-sm">
-			<Card.Header class="border-b bg-cyan-50/50 py-6">
-				<div class="flex items-center gap-2">
-					<div class="rounded-lg bg-cyan-100 p-1.5">
-						<Droplets class="size-4 text-cyan-600" />
-					</div>
-					<Card.Title class="text-lg">Water & Sanitation</Card.Title>
-				</div>
-			</Card.Header>
-			<Card.Content class="py-6">
-				{#if sitio.water_sanitation}
+				<Card.Title class="text-lg">Water & Sanitation</Card.Title>
+			</div>
+		</Card.Header>
+		<Card.Content class="py-6">
+			{#if sitio.water_sanitation}
+				<div class="grid gap-6 lg:grid-cols-2">
+					<!-- Left Column: Water Systems & Sources -->
 					<div class="space-y-4">
 						<!-- Water Systems -->
 						<div class="rounded-lg bg-cyan-50 p-4 ring-1 ring-cyan-100">
@@ -453,18 +385,35 @@
 								</div>
 							</div>
 						{/if}
+					</div>
 
+					<!-- Right Column: Sanitation Stats -->
+					<div class="space-y-4">
 						<!-- Sanitation Stats -->
 						<div class="grid grid-cols-2 gap-3">
-							<div class="rounded-lg bg-purple-50 p-3 text-center ring-1 ring-purple-100">
-								<div class="text-xl font-bold text-purple-700">
+							<div class="rounded-lg bg-purple-50 p-4 text-center ring-1 ring-purple-100">
+								<div class="text-2xl font-bold text-purple-700">
 									{sitio.water_sanitation.households_without_toilet}
 								</div>
 								<div class="text-xs text-purple-600">HHs Without Toilet</div>
 							</div>
-							<div class="rounded-lg bg-emerald-50 p-3 text-center ring-1 ring-emerald-100">
-								<div class="text-xl font-bold text-emerald-700">{toiletCoverage.toFixed(0)}%</div>
+							<div class="rounded-lg bg-emerald-50 p-4 text-center ring-1 ring-emerald-100">
+								<div class="text-2xl font-bold text-emerald-700">{toiletCoverage.toFixed(0)}%</div>
 								<div class="text-xs text-emerald-600">Toilet Coverage</div>
+							</div>
+						</div>
+
+						<!-- Toilet Coverage Progress -->
+						<div>
+							<div class="mb-2 flex justify-between text-sm">
+								<span class="text-slate-600">Toilet Coverage</span>
+								<span class="font-semibold text-slate-900">{toiletCoverage.toFixed(1)}%</span>
+							</div>
+							<Progress value={toiletCoverage} class="h-3 {toiletStatus.progressClass}" />
+							<div class="mt-2 text-xs text-slate-500">
+								{formatNumber(
+									sitio.households - (sitio.water_sanitation?.households_without_toilet || 0)
+								)} of {formatNumber(sitio.households)} households
 							</div>
 						</div>
 
@@ -488,15 +437,15 @@
 							</div>
 						{/if}
 					</div>
-				{:else}
-					<div class="flex flex-col items-center justify-center py-12 text-center">
-						<Droplets class="size-16 text-slate-200" />
-						<p class="mt-4 text-sm text-slate-500">No water & sanitation data available</p>
-					</div>
-				{/if}
-			</Card.Content>
-		</Card.Root>
-	</div>
+				</div>
+			{:else}
+				<div class="flex flex-col items-center justify-center py-12 text-center">
+					<Droplets class="size-16 text-slate-200" />
+					<p class="mt-4 text-sm text-slate-500">No water & sanitation data available</p>
+				</div>
+			{/if}
+		</Card.Content>
+	</Card.Root>
 
 	<!-- Utilities Access Overview -->
 	<Card.Root class="gap-0 py-0 shadow-sm">

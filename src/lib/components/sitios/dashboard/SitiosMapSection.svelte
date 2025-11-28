@@ -97,11 +97,11 @@
 	</Card.Root>
 
 	<!-- Map Legend / Help -->
-	<Card.Root class="border-0 bg-slate-50 shadow-sm ring-1 ring-slate-200/50">
+	<Card.Root class="border-0 bg-slate-50 py-0 shadow-sm ring-1 ring-slate-200/50">
 		<Card.Content class="p-4">
 			<div class="flex flex-wrap items-center gap-4 text-sm">
 				<div class="flex items-center gap-2">
-					<div class="h-6 w-4 rounded-sm bg-blue-500"></div>
+					<MapPin class="size-3 text-primary" />
 					<span class="text-slate-600">Sitio Location</span>
 				</div>
 				<div class="text-slate-400">•</div>

@@ -1,9 +1,10 @@
 <script lang="ts">
 	import BarChart from '$lib/components/charts/BarChart.svelte';
+	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';
 	import { Progress } from '$lib/components/ui/progress';
-	import type { Sitio } from '$lib/types';
-	import { formatNumber } from '$lib/utils/formatters';
+	import type { Project, Sitio } from '$lib/types';
+	import { formatCurrency, formatNumber } from '$lib/utils/formatters';
 	import {
 		aggregateDemographics,
 		aggregateInfrastructure,
@@ -13,6 +14,7 @@
 	} from '$lib/utils/sitio-aggregation';
 	import {
 		Building2,
+		FolderKanban,
 		Heart,
 		Home,
 		Landmark,
@@ -25,10 +27,18 @@
 
 	interface Props {
 		sitios: Sitio[];
+		projects?: Project[];
 		filterLabel?: string;
 	}
 
-	const { sitios, filterLabel = 'All Sitios' }: Props = $props();
+	const { sitios, projects = [], filterLabel = 'All Sitios' }: Props = $props();
+
+	// Project aggregations
+	const totalBudget = $derived(projects.reduce((sum, p) => sum + p.total_budget, 0));
+	const activeProjects = $derived(projects.filter((p) => p.status === 'in-progress').length);
+	const completedProjects = $derived(projects.filter((p) => p.status === 'completed').length);
+	const planningProjects = $derived(projects.filter((p) => p.status === 'planning').length);
+	const suspendedProjects = $derived(projects.filter((p) => p.status === 'suspended').length);
 
 	// Compute aggregations
 	const demographics = $derived(aggregateDemographics(sitios));
@@ -227,4 +237,51 @@
 			</Card.Content>
 		</Card.Root>
 	</div>
+
+	<!-- Development Projects Section -->
+	{#if projects.length > 0}
+		<Card.Root class="gap-0 border-0 py-0 shadow-sm ring-1 ring-slate-200/50">
+			<Card.Header class="border-b bg-slate-50/50 py-6">
+				<div class="flex items-center justify-between">
+					<div class="flex items-center gap-2">
+						<div class="rounded-lg bg-blue-100 p-1.5">
+							<FolderKanban class="size-4 text-blue-600" />
+						</div>
+						<Card.Title class="text-lg">Development Projects</Card.Title>
+					</div>
+					<Badge variant="outline" class="bg-blue-50 text-blue-700">
+						{projects.length} Total
+					</Badge>
+				</div>
+				<Card.Description>Project overview across {filterLabel}</Card.Description>
+			</Card.Header>
+			<Card.Content class="py-6">
+				<div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+					<div class="rounded-xl bg-amber-50 p-4 text-center ring-1 ring-amber-100">
+						<div class="text-3xl font-bold text-amber-700">{activeProjects}</div>
+						<div class="mt-1 text-xs font-medium text-amber-600">In Progress</div>
+					</div>
+					<div class="rounded-xl bg-emerald-50 p-4 text-center ring-1 ring-emerald-100">
+						<div class="text-3xl font-bold text-emerald-700">{completedProjects}</div>
+						<div class="mt-1 text-xs font-medium text-emerald-600">Completed</div>
+					</div>
+					<div class="rounded-xl bg-blue-50 p-4 text-center ring-1 ring-blue-100">
+						<div class="text-3xl font-bold text-blue-700">{planningProjects}</div>
+						<div class="mt-1 text-xs font-medium text-blue-600">Planning</div>
+					</div>
+					<div class="rounded-xl bg-slate-50 p-4 text-center ring-1 ring-slate-200">
+						<div class="text-3xl font-bold text-slate-700">{suspendedProjects}</div>
+						<div class="mt-1 text-xs font-medium text-slate-600">Suspended</div>
+					</div>
+				</div>
+
+				<div class="mt-6 border-t pt-4">
+					<div class="flex items-center justify-between">
+						<span class="text-sm text-slate-600">Total Investment</span>
+						<span class="text-lg font-bold text-slate-900">{formatCurrency(totalBudget)}</span>
+					</div>
+				</div>
+			</Card.Content>
+		</Card.Root>
+	{/if}
 </div>
