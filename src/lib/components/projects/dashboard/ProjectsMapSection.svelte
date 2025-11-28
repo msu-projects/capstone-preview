@@ -5,19 +5,21 @@
 	import { formatCurrency, formatNumber } from '$lib/utils/formatters';
 	import { aggregateByMunicipality } from '$lib/utils/project-aggregation';
 	import { Map as MapIcon, MapPin, Navigation } from '@lucide/svelte';
-	import { onDestroy, onMount } from 'svelte';
+	import { onDestroy } from 'svelte';
 
 	interface Props {
 		projects: Project[];
 		sitios?: Sitio[];
 		filterLabel?: string;
+		currentTab?: string;
 	}
 
-	const { projects, sitios = [], filterLabel = 'All Projects' }: Props = $props();
+	const { projects, sitios = [], filterLabel = 'All Projects', currentTab }: Props = $props();
 
-	let mapContainer: HTMLDivElement;
+	let mapContainer: HTMLDivElement | undefined = $state();
 	let map: L.Map | undefined;
 	let L: typeof import('leaflet') | undefined;
+	let mapInitialized = $state(false);
 
 	// Aggregate by municipality
 	const geoDist = $derived(aggregateByMunicipality(projects));
@@ -39,7 +41,9 @@
 		return lookup;
 	});
 
-	onMount(async () => {
+	async function initializeMap() {
+		if (!mapContainer || mapInitialized) return;
+
 		// Import Leaflet dynamically (browser-only)
 		L = await import('leaflet');
 
@@ -131,6 +135,18 @@
 			const group = L.featureGroup(markers);
 			map.fitBounds(group.getBounds().pad(0.1));
 		}
+
+		mapInitialized = true;
+	}
+
+	// Initialize map only when tab becomes active
+	$effect(() => {
+		if (currentTab === 'map' && mapContainer && !mapInitialized) {
+			// Small delay to ensure DOM is ready
+			setTimeout(() => {
+				initializeMap();
+			}, 50);
+		}
 	});
 
 	onDestroy(() => {
@@ -201,8 +217,8 @@
 	</div>
 
 	<!-- Map Container -->
-	<Card.Root class="overflow-hidden border-0 shadow-sm ring-1 ring-slate-200/50">
-		<Card.Header class="border-b bg-slate-50/50 pb-3">
+	<Card.Root class="gap-0 overflow-hidden border-0 py-0 shadow-sm ring-1 ring-slate-200/50">
+		<Card.Header class="border-b bg-slate-50/50 pt-6">
 			<div class="flex items-center justify-between">
 				<div>
 					<Card.Title class="flex items-center gap-2 text-base">
@@ -221,7 +237,7 @@
 			</div>
 		</Card.Header>
 		<Card.Content class="p-0">
-			<div bind:this={mapContainer} class="h-[500px] w-full rounded-b-lg"></div>
+			<div bind:this={mapContainer} class="h-[500px] w-full rounded-t-none! rounded-b-lg"></div>
 		</Card.Content>
 	</Card.Root>
 

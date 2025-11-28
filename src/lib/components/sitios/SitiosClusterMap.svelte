@@ -2,19 +2,21 @@
 	import type { Sitio } from '$lib/types';
 	import { cn } from '$lib/utils';
 	import type { Map as LeafletMap, Marker } from 'leaflet';
-	import { onMount } from 'svelte';
+	import { onDestroy } from 'svelte';
 
 	interface Props {
 		sitios: Sitio[];
 		height?: string;
 		class?: string;
+		currentTab?: string;
 	}
 
-	let { sitios, height = '400px', class: className }: Props = $props();
+	let { sitios, height = '400px', class: className, currentTab }: Props = $props();
 
-	let mapContainer: HTMLDivElement;
+	let mapContainer: HTMLDivElement | undefined = $state();
 	let map: LeafletMap | null = null;
 	let markers: Marker[] = [];
+	let mapInitialized = $state(false);
 
 	// Get valid sitios with coordinates
 	const validSitios = $derived(
@@ -88,37 +90,51 @@
 		});
 	}
 
-	onMount(() => {
+	async function initializeMap() {
+		if (!mapContainer || mapInitialized) return;
+
 		// Dynamically import Leaflet to avoid SSR issues
-		import('leaflet').then((L) => {
-			// Import Leaflet CSS
-			const link = document.createElement('link');
-			link.rel = 'stylesheet';
-			link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-			document.head.appendChild(link);
+		const L = await import('leaflet');
 
-			// Default center (South Cotabato approximate center)
-			const defaultCenter: [number, number] = [6.2, 124.85];
-			const defaultZoom = 10;
+		// Import Leaflet CSS
+		const link = document.createElement('link');
+		link.rel = 'stylesheet';
+		link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+		document.head.appendChild(link);
 
-			// Initialize map
-			map = L.map(mapContainer).setView(defaultCenter, defaultZoom);
+		// Default center (South Cotabato approximate center)
+		const defaultCenter: [number, number] = [6.2, 124.85];
+		const defaultZoom = 10;
 
-			// Add OpenStreetMap tile layer
-			L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-				attribution:
-					'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-			}).addTo(map);
+		// Initialize map
+		map = L.map(mapContainer).setView(defaultCenter, defaultZoom);
 
-			// Add markers if sitios already loaded
-			if (validSitios.length > 0) {
-				updateMarkers();
-			}
-		});
+		// Add OpenStreetMap tile layer
+		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+			attribution:
+				'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+		}).addTo(map);
 
-		return () => {
-			map?.remove();
-		};
+		// Add markers if sitios already loaded
+		if (validSitios.length > 0) {
+			updateMarkers();
+		}
+
+		mapInitialized = true;
+	}
+
+	// Initialize map only when tab becomes active
+	$effect(() => {
+		if (currentTab === 'map' && mapContainer && !mapInitialized) {
+			// Small delay to ensure DOM is ready
+			setTimeout(() => {
+				initializeMap();
+			}, 50);
+		}
+	});
+
+	onDestroy(() => {
+		map?.remove();
 	});
 </script>
 

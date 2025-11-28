@@ -8,9 +8,10 @@
 	interface Props {
 		sitios: Sitio[];
 		filterLabel?: string;
+		currentTab?: string;
 	}
 
-	const { sitios, filterLabel = 'All Sitios' }: Props = $props();
+	const { sitios, filterLabel = 'All Sitios', currentTab }: Props = $props();
 
 	// Count sitios with valid coordinates
 	const sitiosWithCoords = $derived(
@@ -72,8 +73,8 @@
 	</div>
 
 	<!-- Map Container -->
-	<Card.Root class="overflow-hidden border-0 shadow-sm ring-1 ring-slate-200/50">
-		<Card.Header class="border-b bg-slate-50/50 pb-3">
+	<Card.Root class="gap-0 overflow-hidden border-0 py-0 shadow-sm ring-1 ring-slate-200/50">
+		<Card.Header class="border-b bg-slate-50/50 pt-6">
 			<div class="flex items-center justify-between">
 				<div>
 					<Card.Title class="flex items-center gap-2 text-base">
@@ -92,7 +93,7 @@
 			</div>
 		</Card.Header>
 		<Card.Content class="p-0">
-			<SitiosClusterMap {sitios} height="500px" class="rounded-b-lg" />
+			<SitiosClusterMap {sitios} {currentTab} height="500px" class="rounded-t-none! rounded-b-lg" />
 		</Card.Content>
 	</Card.Root>
 

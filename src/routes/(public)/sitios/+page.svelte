@@ -429,7 +429,7 @@
 							value="map"
 							class="animate-in duration-300 fade-in slide-in-from-bottom-2"
 						>
-							<SitiosMapSection sitios={filteredSitios} />
+							<SitiosMapSection sitios={filteredSitios} currentTab={activeTab} />
 						</Tabs.Content>
 					</div>
 				</Tabs.Root>

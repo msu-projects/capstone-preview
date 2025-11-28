@@ -439,7 +439,7 @@
 				</Card.Root>
 			{:else}
 				<!-- Tabs -->
-				<Tabs.Root value={activeTab} onValueChange={handleTabChange}>
+				<Tabs.Root bind:value={activeTab} onValueChange={handleTabChange}>
 					<div
 						class="sticky top-0 z-50 -mx-4 bg-linear-to-b from-slate-50 to-transparent px-4 pt-2 pb-2 sm:-mx-6 sm:px-6"
 					>
@@ -484,7 +484,12 @@
 							value="map"
 							class="animate-in duration-300 fade-in slide-in-from-bottom-2"
 						>
-							<ProjectsMapSection projects={filteredProjects} {sitios} {filterLabel} />
+							<ProjectsMapSection
+								projects={filteredProjects}
+								currentTab={activeTab}
+								{sitios}
+								{filterLabel}
+							/>
 						</Tabs.Content>
 					</div>
 				</Tabs.Root>
