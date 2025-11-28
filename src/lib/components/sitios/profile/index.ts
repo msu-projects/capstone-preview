@@ -1,4 +1,5 @@
 // Sitio Profile Components
+export { default as SitioKPICards } from './SitioKPICards.svelte';
 export { default as SitioProfileHeader } from './SitioProfileHeader.svelte';
 export { default as SitioProfileView } from './SitioProfileView.svelte';
 export { default as TrendBadge } from './TrendBadge.svelte';

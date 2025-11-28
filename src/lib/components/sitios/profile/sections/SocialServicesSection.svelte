@@ -1,4 +1,5 @@
 <script lang="ts">
+	import StackedBarChart from '$lib/components/charts/StackedBarChart.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';
 	import { Progress } from '$lib/components/ui/progress';
@@ -13,6 +14,7 @@
 		Heart,
 		Megaphone,
 		Radio,
+		ShieldCheck,
 		Sprout,
 		Syringe,
 		Users,
@@ -68,6 +70,44 @@
 			return { status: 'Limited', color: 'red', description: 'Opportunity for improvement' };
 		}
 	});
+
+	// Voter registration rate
+	const voterRegistrationRate = $derived(
+		sitio.social_services && sitio.demographics.age_15_64 > 0
+			? Math.min(
+					100,
+					(sitio.social_services.registered_voters / sitio.demographics.age_15_64) * 100
+				)
+			: 0
+	);
+
+	// Senior citizen rate
+	const seniorRate = $derived(
+		sitio.population > 0 ? (sitio.demographics.age_65_above / sitio.population) * 100 : 0
+	);
+
+	// Social Safety Net Coverage - Stacked bar chart data
+	const safetyNetCategories = $derived(['Registered Voters', 'PhilHealth', '4Ps']);
+	const safetyNetSeries = $derived([
+		{
+			name: 'Covered',
+			data: [
+				Math.round(voterRegistrationRate),
+				Math.round(philhealthCoverage),
+				Math.round(fourpsCoverage)
+			],
+			color: 'hsl(142, 71%, 45%)'
+		},
+		{
+			name: 'Not Covered',
+			data: [
+				Math.round(100 - voterRegistrationRate),
+				Math.round(100 - philhealthCoverage),
+				Math.round(100 - fourpsCoverage)
+			],
+			color: 'hsl(0, 84%, 60%)'
+		}
+	]);
 </script>
 
 <div class="space-y-6">
@@ -186,6 +226,58 @@
 			</Card.Content>
 		</Card.Root>
 	</div>
+
+	<!-- Social Safety Net Coverage Chart -->
+	<Card.Root class="gap-0 py-0 shadow-sm">
+		<Card.Header class="border-b bg-slate-50/50 py-6">
+			<div class="flex items-center gap-2">
+				<div class="rounded-lg bg-indigo-100 p-1.5">
+					<ShieldCheck class="size-4 text-indigo-600" />
+				</div>
+				<div>
+					<Card.Title class="text-lg">Social Safety Net Coverage</Card.Title>
+					<Card.Description>Coverage gaps in government service registration</Card.Description>
+				</div>
+			</div>
+		</Card.Header>
+		<Card.Content class="py-6">
+			<div style="height: 280px;">
+				<StackedBarChart
+					series={safetyNetSeries}
+					categories={safetyNetCategories}
+					height={280}
+					stacked100={true}
+					orientation="horizontal"
+				/>
+			</div>
+			<!-- Insights -->
+			<div class="mt-4 space-y-2">
+				{#if 100 - philhealthCoverage > 30}
+					<div class="flex items-start gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+						<span class="font-semibold">⚠️</span>
+						<span
+							>{(100 - philhealthCoverage).toFixed(0)}% of the population lacks PhilHealth coverage.</span
+						>
+					</div>
+				{/if}
+				{#if 100 - fourpsCoverage > 50}
+					<div class="flex items-start gap-2 rounded-lg bg-amber-50 p-3 text-sm text-amber-700">
+						<span class="font-semibold">📋</span>
+						<span>{(100 - fourpsCoverage).toFixed(0)}% of households are not enrolled in 4Ps.</span>
+					</div>
+				{/if}
+				{#if 100 - voterRegistrationRate > 40}
+					<div class="flex items-start gap-2 rounded-lg bg-blue-50 p-3 text-sm text-blue-700">
+						<span class="font-semibold">🗳️</span>
+						<span
+							>{(100 - voterRegistrationRate).toFixed(0)}% of eligible population are not registered
+							voters.</span
+						>
+					</div>
+				{/if}
+			</div>
+		</Card.Content>
+	</Card.Root>
 
 	<!-- Health & Social Services -->
 	<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">

@@ -146,6 +146,11 @@
 		{isCurrentYearSaved}
 	/>
 
+	<!-- KPI Cards Section -->
+	<!-- <div class="mx-auto -mt-4 mb-6 max-w-7xl px-4 sm:px-6 lg:px-8">
+		<SitioKPICards {sitio} />
+	</div> -->
+
 	<!-- Main Content -->
 	<main class="mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8">
 		<!-- Tab Navigation -->

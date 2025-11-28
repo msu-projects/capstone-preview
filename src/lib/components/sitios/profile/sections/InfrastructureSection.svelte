@@ -1,5 +1,6 @@
 <script lang="ts">
 	import DonutChart from '$lib/components/charts/DonutChart.svelte';
+	import RadarChart from '$lib/components/charts/RadarChart.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';
 	import { Progress } from '$lib/components/ui/progress';
@@ -69,6 +70,24 @@
 			.length || 0
 	);
 	const totalWaterSources = $derived(sitio.water_sanitation?.water_sources?.length || 0);
+
+	// Water access percentage (estimate based on water systems)
+	const waterAccessPercentage = $derived(
+		sitio.water_sanitation?.water_systems_count
+			? Math.min(100, sitio.water_sanitation.water_systems_count * 20)
+			: 0
+	);
+
+	// Radar chart data for utilities access matrix
+	const utilitiesRadarData = $derived([
+		{ label: 'Electricity', value: electricityCoverage },
+		{ label: 'Water Access', value: waterAccessPercentage },
+		{ label: 'Sanitary Toilet', value: toiletCoverage }
+		// {
+		// 	label: 'Waste Segregation',
+		// 	value: sitio.water_sanitation?.waste_segregation_practice ? 100 : 0
+		// }
+	]);
 </script>
 
 <div class="space-y-6">
@@ -430,4 +449,68 @@
 			</Card.Content>
 		</Card.Root>
 	</div>
+
+	<!-- Utilities Access Matrix (Radar Chart) -->
+	<Card.Root class="gap-0 py-0 shadow-sm">
+		<Card.Header class="border-b bg-slate-50/50 py-6">
+			<div class="flex items-center gap-2">
+				<div class="rounded-lg bg-indigo-100 p-1.5">
+					<CheckCircle class="size-4 text-indigo-600" />
+				</div>
+				<div>
+					<Card.Title class="text-lg">Utilities Access Matrix</Card.Title>
+					<Card.Description>Deprivation check: A perfect shape means 100% access</Card.Description>
+				</div>
+			</div>
+		</Card.Header>
+		<Card.Content class="py-6">
+			<div class="grid gap-6 lg:grid-cols-2">
+				<div>
+					<RadarChart
+						data={utilitiesRadarData}
+						height={320}
+						title="Access Rate"
+						color="hsl(217, 91%, 60%)"
+						fillOpacity={0.3}
+					/>
+				</div>
+				<div class="space-y-4">
+					<p class="text-sm text-slate-600">
+						This radar chart visualizes the household access to basic utilities. Dips in the shape
+						indicate infrastructure gaps that need attention.
+					</p>
+					<div class="space-y-3">
+						{#each utilitiesRadarData as item}
+							{@const status =
+								item.value >= 80 ? 'good' : item.value >= 50 ? 'moderate' : 'critical'}
+							<div class="flex items-center justify-between rounded-lg bg-slate-50 p-3">
+								<span class="text-sm font-medium text-slate-700">{item.label}</span>
+								<div class="flex items-center gap-2">
+									<div class="h-2 w-24 overflow-hidden rounded-full bg-slate-200">
+										<div
+											class="h-full rounded-full transition-all {status === 'good'
+												? 'bg-emerald-500'
+												: status === 'moderate'
+													? 'bg-amber-500'
+													: 'bg-red-500'}"
+											style="width: {item.value}%"
+										></div>
+									</div>
+									<span
+										class="text-sm font-semibold {status === 'good'
+											? 'text-emerald-600'
+											: status === 'moderate'
+												? 'text-amber-600'
+												: 'text-red-600'}"
+									>
+										{item.value.toFixed(0)}%
+									</span>
+								</div>
+							</div>
+						{/each}
+					</div>
+				</div>
+			</div>
+		</Card.Content>
+	</Card.Root>
 </div>

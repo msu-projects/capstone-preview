@@ -205,19 +205,19 @@ export function generateSitios(count: number = 50, seed: number = 42): Sitio[] {
 					})),
 				income_brackets: [
 					{
-						bracket: 'Below ₱5,000',
+						bracket: 'Below ₱100',
 						households: Math.round(households * (0.2 + rng.next() * 0.2))
 					},
 					{
-						bracket: '₱5,000 - ₱10,000',
+						bracket: '₱100 - ₱300',
 						households: Math.round(households * (0.3 + rng.next() * 0.2))
 					},
 					{
-						bracket: '₱10,000 - ₱20,000',
+						bracket: '₱300 - ₱500',
 						households: Math.round(households * (0.15 + rng.next() * 0.15))
 					},
 					{
-						bracket: 'Above ₱20,000',
+						bracket: 'Above ₱500',
 						households: Math.round(households * (0.05 + rng.next() * 0.1))
 					}
 				]

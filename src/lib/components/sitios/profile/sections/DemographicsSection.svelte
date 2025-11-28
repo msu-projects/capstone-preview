@@ -1,5 +1,6 @@
 <script lang="ts">
 	import DonutChart from '$lib/components/charts/DonutChart.svelte';
+	import PopulationPyramid from '$lib/components/charts/PopulationPyramid.svelte';
 	import TrendBadge from '$lib/components/sitios/profile/TrendBadge.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';
@@ -68,6 +69,31 @@
 			color: 'hsl(142, 71%, 45%)'
 		},
 		{ label: 'Seniors (65+)', value: sitio.demographics.age_65_above, color: 'hsl(24, 95%, 53%)' }
+	]);
+
+	// Population pyramid data (simulated distribution based on available data)
+	// We estimate male/female split per age group using the overall gender ratio
+	const maleRatio = $derived(
+		sitio.population > 0 ? sitio.demographics.male / sitio.population : 0.5
+	);
+	const femaleRatio = $derived(1 - maleRatio);
+
+	const populationPyramidData = $derived([
+		{
+			ageGroup: '65+',
+			male: Math.round(sitio.demographics.age_65_above * maleRatio),
+			female: Math.round(sitio.demographics.age_65_above * femaleRatio)
+		},
+		{
+			ageGroup: '15-64',
+			male: Math.round(sitio.demographics.age_15_64 * maleRatio),
+			female: Math.round(sitio.demographics.age_15_64 * femaleRatio)
+		},
+		{
+			ageGroup: '0-14',
+			male: Math.round(sitio.demographics.age_0_14 * maleRatio),
+			female: Math.round(sitio.demographics.age_0_14 * femaleRatio)
+		}
 	]);
 
 	// Dependency ratio interpretation
@@ -318,6 +344,51 @@
 			</Card.Content>
 		</Card.Root>
 	</div>
+
+	<!-- Population Pyramid -->
+	<Card.Root class="gap-0 py-0 shadow-sm">
+		<Card.Header class="border-b bg-slate-50/50 py-6">
+			<div class="flex items-center gap-2">
+				<div class="rounded-lg bg-purple-100 p-1.5">
+					<Users class="size-4 text-purple-600" />
+				</div>
+				<div>
+					<Card.Title class="text-lg">Population Pyramid</Card.Title>
+					<Card.Description>Age-sex distribution showing demographic structure</Card.Description>
+				</div>
+			</div>
+		</Card.Header>
+		<Card.Content class="py-6">
+			<div class="grid gap-6 lg:grid-cols-2">
+				<div style="height: 300px;">
+					<PopulationPyramid data={populationPyramidData} height={300} />
+				</div>
+				<div class="space-y-4">
+					<p class="text-sm text-slate-600">
+						The population pyramid shows the age and gender distribution of the community. A wide
+						base indicates a young population, while a wider top suggests an aging population.
+					</p>
+					<div class="space-y-3">
+						{#each populationPyramidData as group}
+							<div class="rounded-lg bg-slate-50 p-3">
+								<div class="mb-2 text-sm font-medium text-slate-700">{group.ageGroup} years</div>
+								<div class="flex items-center gap-4">
+									<div class="flex items-center gap-2">
+										<div class="h-3 w-3 rounded-full bg-blue-500"></div>
+										<span class="text-sm text-slate-600">Male: {formatNumber(group.male)}</span>
+									</div>
+									<div class="flex items-center gap-2">
+										<div class="h-3 w-3 rounded-full bg-pink-500"></div>
+										<span class="text-sm text-slate-600">Female: {formatNumber(group.female)}</span>
+									</div>
+								</div>
+							</div>
+						{/each}
+					</div>
+				</div>
+			</div>
+		</Card.Content>
+	</Card.Root>
 
 	<!-- Dependency Ratio Analysis -->
 	<Card.Root class="gap-0 py-0 shadow-sm">

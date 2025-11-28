@@ -1,6 +1,6 @@
 <script lang="ts">
-	import BarChart from '$lib/components/charts/BarChart.svelte';
-	import DonutChart from '$lib/components/charts/DonutChart.svelte';
+	import HistogramChart from '$lib/components/charts/HistogramChart.svelte';
+	import TreemapChart from '$lib/components/charts/TreemapChart.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';
 	import type { Sitio } from '$lib/types';
@@ -58,7 +58,12 @@
 	);
 
 	// Top employment type
-	const topEmployment = $derived(sitio.economic_condition?.employments?.[0]?.type || 'N/A');
+	const topEmployment = $derived.by((): string => {
+		const emps = sitio.economic_condition?.employments;
+		if (!emps || emps.length === 0) return 'N/A';
+		const max = emps.reduce((a, b) => (b.count > a.count ? b : a));
+		return max.type ?? 'N/A';
+	});
 
 	// Livestock data
 	const livestockData = $derived.by(() => {
@@ -79,6 +84,41 @@
 	});
 
 	const totalLivestock = $derived(livestockData.reduce((sum, l) => sum + l.value, 0));
+
+	$inspect(sitio);
+
+	// Treemap data for employment types (better than bar chart for many categories)
+	const treemapEmploymentData = $derived(
+		sitio.economic_condition?.employments
+			? sitio.economic_condition.employments
+					.filter((e) => e.count > 0)
+					.sort((a, b) => b.count - a.count)
+					.map((e, i) => ({
+						label: e.type,
+						value: e.count,
+						color: [
+							'hsl(217, 91%, 60%)',
+							'hsl(142, 71%, 45%)',
+							'hsl(24, 95%, 53%)',
+							'hsl(262, 83%, 58%)',
+							'hsl(189, 85%, 45%)',
+							'hsl(340, 82%, 52%)',
+							'hsl(173, 80%, 40%)',
+							'hsl(199, 89%, 48%)'
+						][i % 8]
+					}))
+			: []
+	);
+
+	// Histogram data for income distribution
+	const incomeHistogramData = $derived(
+		sitio.economic_condition?.income_brackets
+			? sitio.economic_condition.income_brackets.map((ib) => ({
+					bracket: formatIncomeBracket(ib.bracket),
+					count: ib.households
+				}))
+			: []
+	);
 
 	function formatIncomeBracket(bracket: string): string {
 		switch (bracket) {
@@ -206,7 +246,7 @@
 
 	<!-- Employment and Income Charts -->
 	<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-		<!-- Employment Types -->
+		<!-- Employment Types - Treemap -->
 		<Card.Root class="gap-0 py-0 shadow-sm">
 			<Card.Header class="border-b bg-slate-50/50 py-6">
 				<div class="flex items-center justify-between">
@@ -214,19 +254,20 @@
 						<div class="rounded-lg bg-blue-100 p-1.5">
 							<Briefcase class="size-4 text-blue-600" />
 						</div>
-						<Card.Title class="text-lg">Employment Types</Card.Title>
+						<Card.Title class="text-lg">Livelihood Landscape</Card.Title>
 					</div>
 					{#if totalEmployed > 0}
 						<Badge variant="outline" class="bg-blue-50 text-blue-700">
-							{formatNumber(totalEmployed)} Total
+							{formatNumber(totalEmployed)} Employed
 						</Badge>
 					{/if}
 				</div>
+				<Card.Description>Employment distribution by job type</Card.Description>
 			</Card.Header>
 			<Card.Content class="py-6">
-				{#if employmentData.length > 0}
+				{#if treemapEmploymentData.length > 0}
 					<div style="height: 300px;">
-						<BarChart data={employmentData} orientation="horizontal" height={300} />
+						<TreemapChart data={treemapEmploymentData} height={300} />
 					</div>
 				{:else}
 					<div class="flex flex-col items-center justify-center py-12 text-center">
@@ -237,7 +278,7 @@
 			</Card.Content>
 		</Card.Root>
 
-		<!-- Income Distribution -->
+		<!-- Income Distribution - Histogram -->
 		<Card.Root class="gap-0 py-0 shadow-sm">
 			<Card.Header class="border-b bg-slate-50/50 py-6">
 				<div class="flex items-center gap-2">
@@ -246,27 +287,34 @@
 					</div>
 					<Card.Title class="text-lg">Income Distribution</Card.Title>
 				</div>
-				<Card.Description>Daily income brackets by household</Card.Description>
+				<Card.Description>Household count by daily income bracket</Card.Description>
 			</Card.Header>
 			<Card.Content class="py-6">
-				{#if incomeData.length > 0}
+				{#if incomeHistogramData.length > 0}
 					<div style="height: 280px;">
-						<DonutChart
-							data={incomeData}
-							centerValue={formatNumber(sitio.households)}
-							centerLabel="Households"
+						<HistogramChart
+							data={incomeHistogramData}
 							height={280}
+							title="Households"
+							color="hsl(142, 71%, 45%)"
+							highlightFirstBar={true}
+							highlightColor="hsl(0, 84%, 60%)"
 						/>
 					</div>
-					<!-- Income Legend -->
-					<div class="mt-4 grid grid-cols-2 gap-2">
-						{#each incomeData as income, i}
-							<div class="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2 text-sm">
-								<div class="h-3 w-3 rounded-full" style="background-color: {income.color}"></div>
-								<span class="truncate text-slate-600">{income.label}</span>
-								<span class="ml-auto font-semibold text-slate-900">{income.value}</span>
+					<!-- Summary stats -->
+					<div class="mt-4 grid grid-cols-2 gap-3">
+						<div class="rounded-lg bg-red-50 p-3 text-center">
+							<div class="text-lg font-bold text-red-700">
+								{incomeHistogramData[0]?.count || 0}
 							</div>
-						{/each}
+							<div class="text-xs text-red-600">Below ₱100/day (Poverty)</div>
+						</div>
+						<div class="rounded-lg bg-emerald-50 p-3 text-center">
+							<div class="text-lg font-bold text-emerald-700">
+								{incomeHistogramData.slice(1).reduce((sum, d) => sum + d.count, 0)}
+							</div>
+							<div class="text-xs text-emerald-600">Above ₱100/day</div>
+						</div>
 					</div>
 				{:else}
 					<div class="flex flex-col items-center justify-center py-12 text-center">
