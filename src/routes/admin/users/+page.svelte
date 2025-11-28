@@ -13,7 +13,7 @@
 	import * as Table from '$lib/components/ui/table';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import type { User, UserPermissions, UserRole } from '$lib/types';
-	import { logAuditAction } from '$lib/utils/audit';
+	import { calculateChanges, logAuditAction } from '$lib/utils/audit';
 	import toTitleCase from '$lib/utils/common';
 	import {
 		addUser,
@@ -210,15 +210,26 @@
 			updates.password_hash = formData.password;
 		}
 
+		// Calculate changes for audit log
+		const changes = calculateChanges(selectedUser, updates, [
+			'name',
+			'email',
+			'role',
+			'department',
+			'is_active'
+		]);
+
 		const success = updateUser(selectedUser.id, updates);
 
 		if (success) {
+			const changedFields = changes.map((c) => c.field).join(', ');
 			logAuditAction(
 				'update',
 				'user',
 				selectedUser.id,
 				formData.name,
-				`Updated user: ${formData.email}`
+				changedFields ? `Updated: ${changedFields}` : `Updated user: ${formData.email}`,
+				changes
 			);
 			toast.success(`User "${formData.name}" updated successfully`);
 			refreshUsers();

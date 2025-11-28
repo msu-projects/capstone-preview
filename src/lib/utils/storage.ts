@@ -1,7 +1,7 @@
 import type { Project, Sitio } from '$lib/types';
 import type { SitioYearlySnapshot } from '$lib/types/sitio-yearly';
 import { createSnapshotFromSitio } from '$lib/types/sitio-yearly';
-import { logAuditAction } from './audit';
+import { calculateChanges, logAuditAction } from './audit';
 import { getCategoryName } from './project-calculations';
 
 const SITIOS_STORAGE_KEY = 'sccdp_sitios';
@@ -113,16 +113,29 @@ export function updateSitio(id: number, updates: Partial<Sitio>): boolean {
 		return false;
 	}
 
-	const sitioName = updates.name || sitios[index].name;
+	const oldSitio = sitios[index];
+	const sitioName = updates.name || oldSitio.name;
+
+	// Calculate what fields changed
+	const changes = calculateChanges(oldSitio, updates);
+
 	sitios[index] = {
-		...sitios[index],
+		...oldSitio,
 		...updates,
 		updated_at: new Date().toISOString()
 	};
 
 	const success = saveSitios(sitios);
 	if (success) {
-		logAuditAction('update', 'sitio', id, sitioName, `Updated sitio information`);
+		const changedFields = changes.map((c) => c.field).join(', ');
+		logAuditAction(
+			'update',
+			'sitio',
+			id,
+			sitioName,
+			changedFields ? `Updated: ${changedFields}` : 'Updated sitio information',
+			changes
+		);
 	}
 	return success;
 }
@@ -262,23 +275,29 @@ export function updateProject(id: number, updates: Partial<Project>): boolean {
 		return false;
 	}
 
-	const projectTitle = updates.title || projects[index].title;
-	const oldStatus = projects[index].status;
-	const newStatus = updates.status || oldStatus;
+	const oldProject = projects[index];
+	const projectTitle = updates.title || oldProject.title;
+
+	// Calculate what fields changed
+	const changes = calculateChanges(oldProject, updates);
 
 	projects[index] = {
-		...projects[index],
+		...oldProject,
 		...updates,
 		updated_at: new Date().toISOString()
 	};
 
 	const success = saveProjects(projects);
 	if (success) {
-		const details =
-			oldStatus !== newStatus
-				? `Status changed: ${oldStatus} → ${newStatus}`
-				: `Updated project information`;
-		logAuditAction('update', 'project', id, projectTitle, details);
+		const changedFields = changes.map((c) => c.field).join(', ');
+		logAuditAction(
+			'update',
+			'project',
+			id,
+			projectTitle,
+			changedFields ? `Updated: ${changedFields}` : 'Updated project information',
+			changes
+		);
 	}
 	return success;
 }

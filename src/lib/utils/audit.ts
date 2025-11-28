@@ -1,4 +1,4 @@
-import type { AuditAction, AuditLog, AuditResourceType } from '$lib/types';
+import type { AuditAction, AuditFieldChange, AuditLog, AuditResourceType } from '$lib/types';
 import { nanoid } from 'nanoid';
 
 const AUDIT_LOGS_STORAGE_KEY = 'sccdp_audit_logs';
@@ -42,7 +42,8 @@ export function logAuditAction(
 	resourceType: AuditResourceType,
 	resourceId?: number | string,
 	resourceName?: string,
-	details?: string
+	details?: string,
+	changes?: AuditFieldChange[]
 ): AuditLog | null {
 	if (typeof window === 'undefined') return null;
 
@@ -72,6 +73,7 @@ export function logAuditAction(
 		resource_id: resourceId,
 		resource_name: resourceName,
 		details,
+		changes,
 		ip_address: '127.0.0.1', // Placeholder for prototype
 		timestamp: new Date().toISOString()
 	};
@@ -81,6 +83,39 @@ export function logAuditAction(
 	saveAuditLogs(logs);
 
 	return auditLog;
+}
+
+/**
+ * Calculate field changes between two objects
+ */
+export function calculateChanges<T extends object>(
+	oldObj: T,
+	newObj: Partial<T>,
+	fieldsToTrack?: (keyof T)[]
+): AuditFieldChange[] {
+	const changes: AuditFieldChange[] = [];
+	const keys = fieldsToTrack || (Object.keys(newObj) as (keyof T)[]);
+
+	for (const key of keys) {
+		if (key in newObj) {
+			const oldValue = oldObj[key];
+			const newValue = newObj[key];
+
+			// Deep comparison for objects/arrays
+			const oldStr = JSON.stringify(oldValue);
+			const newStr = JSON.stringify(newValue);
+
+			if (oldStr !== newStr) {
+				changes.push({
+					field: String(key),
+					oldValue,
+					newValue
+				});
+			}
+		}
+	}
+
+	return changes;
 }
 
 /**

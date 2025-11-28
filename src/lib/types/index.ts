@@ -325,6 +325,12 @@ export type AuditAction =
 
 export type AuditResourceType = 'user' | 'sitio' | 'project' | 'system';
 
+export interface AuditFieldChange {
+	field: string;
+	oldValue: unknown;
+	newValue: unknown;
+}
+
 export interface AuditLog {
 	id: string;
 	user_id: number;
@@ -334,6 +340,7 @@ export interface AuditLog {
 	resource_id?: number | string;
 	resource_name?: string;
 	details?: string;
+	changes?: AuditFieldChange[];
 	ip_address?: string;
 	timestamp: string;
 }
