@@ -14,9 +14,17 @@
 		centerValue?: string;
 		height?: number;
 		showLegend?: boolean;
+		valueFormatter?: (value: number) => string;
 	}
 
-	let { data, centerLabel, centerValue, height = 300, showLegend = true }: Props = $props();
+	let {
+		data,
+		centerLabel,
+		centerValue,
+		height = 300,
+		showLegend = true,
+		valueFormatter = (v: number) => v.toLocaleString()
+	}: Props = $props();
 
 	// Track hovered segment
 	let hoveredIndex = $state<number | null>(null);
@@ -27,8 +35,8 @@
 	// Get the current display value and label based on hover state
 	const displayValue = $derived(
 		hoveredIndex !== null && hoveredIndex >= 0 && hoveredIndex < data.length
-			? data[hoveredIndex].value.toLocaleString()
-			: centerValue || total.toLocaleString()
+			? valueFormatter(data[hoveredIndex].value)
+			: centerValue || valueFormatter(total)
 	);
 
 	const displayLabel = $derived(
@@ -127,13 +135,13 @@
 			formatter: (seriesName, opts) => {
 				const value = opts.w.globals.series[opts.seriesIndex];
 				const percentage = ((value / total) * 100).toFixed(1);
-				return `${seriesName}: ${value.toLocaleString()} (${percentage}%)`;
+				return `${seriesName}: ${valueFormatter(value)} (${percentage}%)`;
 			}
 		},
 		tooltip: {
 			enabled: true,
 			y: {
-				formatter: (val) => val.toLocaleString()
+				formatter: (val) => valueFormatter(val)
 			}
 		},
 		stroke: {

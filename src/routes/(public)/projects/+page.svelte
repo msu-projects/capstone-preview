@@ -1,257 +1,496 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+	import {
+		AggregatedProjectBudgetSection,
+		AggregatedProjectOverviewSection,
+		AggregatedProjectProgressSection,
+		ProjectDashboardSkeleton,
+		ProjectsMapSection
+	} from '$lib/components/projects/dashboard';
+	import PublicFooter from '$lib/components/public/PublicFooter.svelte';
+	import PublicHeader from '$lib/components/public/PublicHeader.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
-	import { Input } from '$lib/components/ui/input';
-	import { Progress } from '$lib/components/ui/progress';
 	import * as Select from '$lib/components/ui/select';
+	import * as Tabs from '$lib/components/ui/tabs';
 	import { categories } from '$lib/config/project-categories';
-	import { getStatusBadgeVariant, getStatusLabel } from '$lib/config/status-config';
-	import { projects } from '$lib/mock-data';
-	import type { CategoryKey, ProjectStatus } from '$lib/types';
-	import { formatCurrency } from '$lib/utils/formatters';
-	import { getCategoryName, getCompletionPercentage } from '$lib/utils/project-calculations';
-	import { Eye, Search, X } from '@lucide/svelte';
+	import type { Project, Sitio } from '$lib/types';
+	import toTitleCase from '$lib/utils/common';
+	import { formatCurrency, formatNumber } from '$lib/utils/formatters';
+	import {
+		aggregateByStatus,
+		aggregateProjectStats,
+		getUniqueMunicipalities,
+		getUniqueYears
+	} from '$lib/utils/project-aggregation';
+	import { loadProjects, loadSitios } from '$lib/utils/storage';
+	import {
+		Banknote,
+		FileText,
+		FolderKanban,
+		Gauge,
+		List,
+		Map,
+		TrendingUp,
+		Users,
+		X
+	} from '@lucide/svelte';
+	import { onMount } from 'svelte';
 
-	// State
-	let searchQuery = $state('');
-	let statusFilter = $state<string>('');
-	let categoryFilter = $state<CategoryKey | ''>('');
-	let currentPage = $state(1);
-	const itemsPerPage = 12;
+	// Props from +page.ts
+	interface Props {
+		data: {
+			municipality: string;
+			category: string;
+			status: string;
+			year: string;
+			tab: string;
+		};
+	}
 
-	// Get unique categories from config
-	const categoryOptions = categories.map((c) => ({ key: c.key, name: c.name }));
+	const { data }: Props = $props();
 
-	// Filter projects
+	let projects = $state<Project[]>([]);
+	let sitios = $state<Sitio[]>([]);
+	let isLoading = $state(true);
+
+	// Filter state synced with URL
+	let selectedMunicipality = $state(data.municipality);
+	let selectedCategory = $state(data.category);
+	let selectedStatus = $state(data.status);
+	let selectedYear = $state(data.year);
+	let activeTab = $state(data.tab);
+
+	// Sync state when data changes (e.g., browser back/forward)
+	$effect(() => {
+		selectedMunicipality = data.municipality;
+		selectedCategory = data.category;
+		selectedStatus = data.status;
+		selectedYear = data.year;
+		activeTab = data.tab;
+	});
+
+	onMount(() => {
+		projects = loadProjects();
+		sitios = loadSitios();
+		isLoading = false;
+	});
+
+	// Derived values for filter options
+	const uniqueYears = $derived(getUniqueYears(projects));
+	const uniqueMunicipalities = $derived(getUniqueMunicipalities(projects));
+
+	// Filter projects based on selections
 	const filteredProjects = $derived.by(() => {
-		return projects.filter((project) => {
-			const matchesSearch =
-				!searchQuery ||
-				project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-				(project.project_sitios?.some(
-					(s) =>
-						s.sitio_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-						s.municipality.toLowerCase().includes(searchQuery.toLowerCase())
-				) ??
-					false);
+		return projects.filter((p) => {
+			// Year filter
+			if (selectedYear !== 'all' && p.project_year.toString() !== selectedYear) {
+				return false;
+			}
 
-			const matchesStatus = !statusFilter || project.status === statusFilter;
-			const matchesCategory = !categoryFilter || project.category_key === categoryFilter;
+			// Category filter
+			if (selectedCategory !== 'all' && p.category_key !== selectedCategory) {
+				return false;
+			}
 
-			return matchesSearch && matchesStatus && matchesCategory;
+			// Status filter
+			if (selectedStatus !== 'all' && p.status !== selectedStatus) {
+				return false;
+			}
+
+			// Municipality filter (via project_sitios)
+			if (selectedMunicipality !== 'all') {
+				if (!p.project_sitios || p.project_sitios.length === 0) {
+					return false;
+				}
+				const hasMunicipality = p.project_sitios.some(
+					(s) => s.municipality === selectedMunicipality
+				);
+				if (!hasMunicipality) {
+					return false;
+				}
+			}
+
+			return true;
 		});
 	});
 
-	// Paginate
-	const paginatedProjects = $derived.by(() => {
-		const start = (currentPage - 1) * itemsPerPage;
-		return filteredProjects.slice(start, start + itemsPerPage);
+	// Create filter label for display
+	const filterLabel = $derived.by(() => {
+		const parts: string[] = [];
+
+		if (selectedYear !== 'all') {
+			parts.push(selectedYear);
+		}
+		if (selectedMunicipality !== 'all') {
+			parts.push(selectedMunicipality);
+		}
+		if (selectedCategory !== 'all') {
+			const cat = categories.find((c) => c.key === selectedCategory);
+			parts.push(cat?.name ?? selectedCategory);
+		}
+		if (selectedStatus !== 'all') {
+			parts.push(toTitleCase(selectedStatus.replace('-', ' ')));
+		}
+
+		return parts.length > 0 ? parts.join(' • ') : 'All Projects';
 	});
 
-	const totalPages = $derived(Math.ceil(filteredProjects.length / itemsPerPage));
+	// Check if filters are active
+	const hasActiveFilters = $derived(
+		selectedMunicipality !== 'all' ||
+			selectedCategory !== 'all' ||
+			selectedStatus !== 'all' ||
+			selectedYear !== 'all'
+	);
 
-	function resetFilters() {
-		searchQuery = '';
-		statusFilter = '';
-		categoryFilter = '';
-		currentPage = 1;
+	// Summary stats
+	const stats = $derived(aggregateProjectStats(filteredProjects));
+	const statusDist = $derived(aggregateByStatus(filteredProjects));
+	const activeProjectsCount = $derived(
+		statusDist.find((s) => s.status === 'in-progress')?.count ?? 0
+	);
+
+	// Update URL when filters or tab change
+	function updateUrl() {
+		const params = new URLSearchParams();
+		if (selectedMunicipality !== 'all') params.set('municipality', selectedMunicipality);
+		if (selectedCategory !== 'all') params.set('category', selectedCategory);
+		if (selectedStatus !== 'all') params.set('status', selectedStatus);
+		if (selectedYear !== 'all') params.set('year', selectedYear);
+		if (activeTab !== 'overview') params.set('tab', activeTab);
+
+		const queryString = params.toString();
+		goto(`/projects${queryString ? `?${queryString}` : ''}`, {
+			replaceState: true,
+			noScroll: true
+		});
 	}
+
+	// Handle filter changes
+	function handleMunicipalityChange(value: string | undefined) {
+		selectedMunicipality = value || 'all';
+		updateUrl();
+	}
+
+	function handleCategoryChange(value: string | undefined) {
+		selectedCategory = value || 'all';
+		updateUrl();
+	}
+
+	function handleStatusChange(value: string | undefined) {
+		selectedStatus = value || 'all';
+		updateUrl();
+	}
+
+	function handleYearChange(value: string | undefined) {
+		selectedYear = value || 'all';
+		updateUrl();
+	}
+
+	function handleTabChange(value: string) {
+		activeTab = value;
+		updateUrl();
+	}
+
+	function clearFilters() {
+		selectedMunicipality = 'all';
+		selectedCategory = 'all';
+		selectedStatus = 'all';
+		selectedYear = 'all';
+		updateUrl();
+	}
+
+	// Tab configuration
+	const tabs = [
+		{ id: 'overview', label: 'Overview', icon: FileText },
+		{ id: 'budget', label: 'Budget', icon: Banknote },
+		{ id: 'progress', label: 'Progress', icon: Gauge },
+		{ id: 'map', label: 'Map', icon: Map }
+	];
 </script>
 
 <svelte:head>
-	<title>Projects - South Cotabato Data Bank</title>
+	<title>Projects Dashboard - South Cotabato Data Bank</title>
+	<meta
+		name="description"
+		content="Explore aggregated development project data and analytics across South Cotabato"
+	/>
 </svelte:head>
 
-<div class="flex min-h-screen flex-col bg-muted/30">
-	<!-- Header -->
-	<header class="border-b bg-card">
-		<div class="p-6">
-			<h1 class="mb-2 text-3xl font-bold">Development Projects</h1>
-			<p class="text-muted-foreground">Browse all development projects across South Cotabato</p>
-		</div>
-	</header>
+<div class="flex min-h-screen flex-col">
+	<PublicHeader />
 
-	<!-- Content -->
-	<div class="flex-1 space-y-6 p-6">
-		<!-- Filters -->
-		<Card.Card class="shadow-sm">
-			<Card.CardContent class="">
-				<div class="flex flex-wrap gap-4">
-					<!-- Search -->
-					<div class="min-w-[300px] flex-1">
-						<div class="relative">
-							<Search
-								class="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
-							/>
-							<Input
-								type="text"
-								placeholder="Search projects..."
-								bind:value={searchQuery}
-								class="pl-9"
-							/>
-						</div>
-					</div>
+	<main class="flex-1">
+		<!-- Hero Section -->
+		<section
+			class="relative overflow-hidden bg-linear-to-br from-slate-50 via-white to-blue-50/30 py-8 md:py-12"
+		>
+			<div
+				class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMwMDAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50"
+			></div>
 
-					<!-- Status Filter -->
-					<div class="w-[180px]">
-						<Select.Root type="single" bind:value={statusFilter}>
-							<Select.Trigger class="w-full">
-								{statusFilter ? getStatusLabel(statusFilter as ProjectStatus) : 'All Status'}
-							</Select.Trigger>
-							<Select.Content>
-								<Select.Item value="" label="All Status">All Status</Select.Item>
-								<Select.Item value="planning" label="Planning">Planning</Select.Item>
-								<Select.Item value="in-progress" label="In Progress">In Progress</Select.Item>
-								<Select.Item value="completed" label="Completed">Completed</Select.Item>
-								<Select.Item value="suspended" label="Suspended">Suspended</Select.Item>
-							</Select.Content>
-						</Select.Root>
-					</div>
+			<div class="relative container mx-auto px-4">
+				<div class="mx-auto max-w-3xl text-center">
+					<Badge variant="secondary" class="mb-4 gap-1.5 bg-blue-50 text-blue-700">
+						<FolderKanban class="size-3" />
+						{filterLabel} Dashboard
+					</Badge>
+					<h1 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl lg:text-5xl">
+						Projects Dashboard
+					</h1>
+					<p class="mt-4 text-lg text-slate-600">
+						Aggregated development project data across South Cotabato. Filter by year, municipality,
+						or category to explore specific projects.
+					</p>
+				</div>
+
+				<!-- Quick Stats -->
+				<div class="mx-auto mt-8 hidden max-w-6xl grid-cols-2 gap-4 sm:grid-cols-4">
+					<Card.Root class="relative overflow-hidden border-0 shadow-sm">
+						<div
+							class="absolute top-0 left-0 h-1 w-full bg-linear-to-r from-blue-500 to-blue-600"
+						></div>
+						<Card.Content class="pt-5 pb-4">
+							<div class="flex items-start justify-between">
+								<div class="space-y-1">
+									<p class="text-sm font-medium text-slate-500">
+										{hasActiveFilters ? 'Filtered' : 'Total'} Projects
+									</p>
+									<p class="text-2xl font-bold tracking-tight text-slate-900">
+										{filteredProjects.length}
+									</p>
+								</div>
+								<div class="rounded-xl bg-blue-100 p-2.5">
+									<FolderKanban class="size-5 text-blue-600" />
+								</div>
+							</div>
+						</Card.Content>
+					</Card.Root>
+					<Card.Root class="relative overflow-hidden border-0 shadow-sm">
+						<div
+							class="absolute top-0 left-0 h-1 w-full bg-linear-to-r from-emerald-500 to-emerald-600"
+						></div>
+						<Card.Content class="pt-5 pb-4">
+							<div class="flex items-start justify-between">
+								<div class="space-y-1">
+									<p class="text-sm font-medium text-slate-500">Total Budget</p>
+									<p class="text-2xl font-bold tracking-tight text-slate-900">
+										{formatCurrency(stats.totalBudget)}
+									</p>
+								</div>
+								<div class="rounded-xl bg-emerald-100 p-2.5">
+									<Banknote class="size-5 text-emerald-600" />
+								</div>
+							</div>
+						</Card.Content>
+					</Card.Root>
+					<Card.Root class="relative overflow-hidden border-0 shadow-sm">
+						<div
+							class="absolute top-0 left-0 h-1 w-full bg-linear-to-r from-indigo-500 to-indigo-600"
+						></div>
+						<Card.Content class="pt-5 pb-4">
+							<div class="flex items-start justify-between">
+								<div class="space-y-1">
+									<p class="text-sm font-medium text-slate-500">Beneficiaries</p>
+									<p class="text-2xl font-bold tracking-tight text-slate-900">
+										{formatNumber(stats.totalBeneficiaries)}
+									</p>
+								</div>
+								<div class="rounded-xl bg-indigo-100 p-2.5">
+									<Users class="size-5 text-indigo-600" />
+								</div>
+							</div>
+						</Card.Content>
+					</Card.Root>
+					<Card.Root class="relative overflow-hidden border-0 shadow-sm">
+						<div
+							class="absolute top-0 left-0 h-1 w-full bg-linear-to-r from-amber-500 to-amber-600"
+						></div>
+						<Card.Content class="pt-5 pb-4">
+							<div class="flex items-start justify-between">
+								<div class="space-y-1">
+									<p class="text-sm font-medium text-slate-500">Active Projects</p>
+									<p class="text-2xl font-bold tracking-tight text-slate-900">
+										{activeProjectsCount}
+									</p>
+								</div>
+								<div class="rounded-xl bg-amber-100 p-2.5">
+									<TrendingUp class="size-5 text-amber-600" />
+								</div>
+							</div>
+						</Card.Content>
+					</Card.Root>
+				</div>
+			</div>
+		</section>
+
+		<!-- Filter Bar & Tabs -->
+		<section class="container mx-auto px-4 py-6">
+			<!-- Filter Bar -->
+			<div class="mb-3 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+				<div class="flex flex-wrap items-center gap-3">
+					<!-- Year Filter -->
+					<Select.Root type="single" value={selectedYear} onValueChange={handleYearChange}>
+						<Select.Trigger class="w-full sm:w-[120px]">
+							{selectedYear === 'all' ? 'All Years' : selectedYear}
+						</Select.Trigger>
+						<Select.Content>
+							<Select.Item value="all">All Years</Select.Item>
+							{#each uniqueYears as year}
+								<Select.Item value={year.toString()}>{year}</Select.Item>
+							{/each}
+						</Select.Content>
+					</Select.Root>
+
+					<!-- Municipality Filter -->
+					<Select.Root
+						type="single"
+						value={selectedMunicipality}
+						onValueChange={handleMunicipalityChange}
+					>
+						<Select.Trigger class="w-full sm:w-[180px]">
+							{selectedMunicipality === 'all' ? 'All Municipalities' : selectedMunicipality}
+						</Select.Trigger>
+						<Select.Content>
+							<Select.Item value="all">All Municipalities</Select.Item>
+							{#each uniqueMunicipalities as municipality}
+								<Select.Item value={municipality}>{municipality}</Select.Item>
+							{/each}
+						</Select.Content>
+					</Select.Root>
 
 					<!-- Category Filter -->
-					<div class="w-[200px]">
-						<Select.Root type="single" bind:value={categoryFilter}>
-							<Select.Trigger class="w-full">
-								{categoryFilter ? getCategoryName(categoryFilter as CategoryKey) : 'All Categories'}
-							</Select.Trigger>
-							<Select.Content>
-								<Select.Item value="" label="All Categories">All Categories</Select.Item>
-								{#each categoryOptions as category (category.key)}
-									<Select.Item value={category.key} label={category.name}
-										>{category.name}</Select.Item
-									>
-								{/each}
-							</Select.Content>
-						</Select.Root>
-					</div>
+					<Select.Root type="single" value={selectedCategory} onValueChange={handleCategoryChange}>
+						<Select.Trigger class="w-full sm:w-40">
+							{selectedCategory === 'all'
+								? 'All Categories'
+								: (categories.find((c) => c.key === selectedCategory)?.name ?? selectedCategory)}
+						</Select.Trigger>
+						<Select.Content>
+							<Select.Item value="all">All Categories</Select.Item>
+							{#each categories as category}
+								<Select.Item value={category.key}>{category.name}</Select.Item>
+							{/each}
+						</Select.Content>
+					</Select.Root>
 
-					<!-- Clear Button -->
-					<Button variant="ghost" size="sm" onclick={resetFilters}>
-						<X class="mr-2 size-4" />
-						Clear
+					<!-- Status Filter -->
+					<Select.Root type="single" value={selectedStatus} onValueChange={handleStatusChange}>
+						<Select.Trigger class="w-full sm:w-[140px]">
+							{selectedStatus === 'all'
+								? 'All Status'
+								: toTitleCase(selectedStatus.replace('-', ' '))}
+						</Select.Trigger>
+						<Select.Content>
+							<Select.Item value="all">All Status</Select.Item>
+							<Select.Item value="planning">Planning</Select.Item>
+							<Select.Item value="in-progress">In Progress</Select.Item>
+							<Select.Item value="completed">Completed</Select.Item>
+							<Select.Item value="suspended">Suspended</Select.Item>
+						</Select.Content>
+					</Select.Root>
+
+					<!-- Clear Filters -->
+					{#if hasActiveFilters}
+						<Button variant="ghost" size="sm" onclick={clearFilters} class="gap-1.5">
+							<X class="size-4" />
+							Clear Filters
+						</Button>
+					{/if}
+				</div>
+
+				<div class="flex items-center gap-3">
+					<!-- Current filter label -->
+					{#if hasActiveFilters}
+						<Badge variant="secondary" class="gap-1.5">
+							<FolderKanban class="size-3" />
+							{filterLabel}
+						</Badge>
+					{/if}
+
+					<!-- View Project List Button -->
+					<Button href="/projects/list" variant="outline" size="sm" class="gap-1.5">
+						<List class="size-4" />
+						View Project List
 					</Button>
 				</div>
-			</Card.CardContent>
-		</Card.Card>
-
-		<!-- Results Count -->
-		<div class="text-sm text-muted-foreground">
-			Showing {paginatedProjects.length} of {filteredProjects.length} projects
-		</div>
-
-		<!-- Projects Grid -->
-		{#if paginatedProjects.length === 0}
-			<Card.Card class="shadow-sm">
-				<Card.CardContent class="py-12 text-center">
-					<p class="text-muted-foreground">No projects found matching your criteria</p>
-				</Card.CardContent>
-			</Card.Card>
-		{:else}
-			<div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-				{#each paginatedProjects as project (project.id)}
-					{@const completionPct = getCompletionPercentage(project)}
-					<Card.Card class="group overflow-hidden transition-shadow hover:shadow-lg">
-						<Card.CardHeader class="space-y-2">
-							<div class="flex items-start justify-between gap-2">
-								<Badge variant={getStatusBadgeVariant(project.status)}>
-									{getStatusLabel(project.status)}
-								</Badge>
-								<Badge variant="outline" class="text-xs">
-									{getCategoryName(project.category_key)}
-								</Badge>
-							</div>
-							<Card.CardTitle class="line-clamp-2 text-lg leading-tight group-hover:text-primary">
-								{project.title}
-							</Card.CardTitle>
-						</Card.CardHeader>
-
-						<Card.CardContent class="space-y-4">
-							<p class="line-clamp-3 text-sm text-muted-foreground">
-								{project.description}
-							</p>
-
-							<div class="space-y-2 text-sm">
-								<div class="flex justify-between">
-									<span class="text-muted-foreground">Location</span>
-									<span class="font-medium">
-										{#if project.project_sitios && project.project_sitios.length > 0}
-											{project.project_sitios[0].municipality}
-											{#if project.project_sitios.length > 1}
-												+{project.project_sitios.length - 1} more
-											{/if}
-										{:else}
-											N/A
-										{/if}
-									</span>
-								</div>
-								<div class="flex justify-between">
-									<span class="text-muted-foreground">Budget</span>
-									<span class="font-medium">{formatCurrency(project.total_budget)}</span>
-								</div>
-								<div class="flex justify-between">
-									<span class="text-muted-foreground">Beneficiaries</span>
-									<span class="font-medium">{project.beneficiaries.toLocaleString()} people</span>
-								</div>
-							</div>
-
-							<div>
-								<div class="mb-2 flex items-center justify-between text-sm">
-									<span class="text-muted-foreground">Progress</span>
-									<span class="font-medium">
-										{completionPct.toFixed(0)}%
-									</span>
-								</div>
-								<Progress value={Math.min(100, completionPct)} class="h-2" />
-							</div>
-						</Card.CardContent>
-
-						<Card.CardFooter>
-							<Button href="/projects/{project.id}" variant="outline" class="w-full">
-								<Eye class="mr-2 size-4" />
-								View Details
-							</Button>
-						</Card.CardFooter>
-					</Card.Card>
-				{/each}
 			</div>
-		{/if}
 
-		<!-- Pagination -->
-		{#if totalPages > 1}
-			<div class="flex justify-center gap-2">
-				<Button
-					variant="outline"
-					size="sm"
-					disabled={currentPage === 1}
-					onclick={() => (currentPage = Math.max(1, currentPage - 1))}
-				>
-					Previous
-				</Button>
-				<div class="flex items-center gap-1">
-					{#each Array(totalPages) as _, i (i)}
-						{#if i + 1 === 1 || i + 1 === totalPages || (i + 1 >= currentPage - 1 && i + 1 <= currentPage + 1)}
-							<Button
-								variant={currentPage === i + 1 ? 'default' : 'outline'}
-								size="sm"
-								onclick={() => (currentPage = i + 1)}
-							>
-								{i + 1}
-							</Button>
-						{:else if i + 1 === currentPage - 2 || i + 1 === currentPage + 2}
-							<span class="px-2">...</span>
-						{/if}
-					{/each}
-				</div>
-				<Button
-					variant="outline"
-					size="sm"
-					disabled={currentPage === totalPages}
-					onclick={() => (currentPage = Math.min(totalPages, currentPage + 1))}
-				>
-					Next
-				</Button>
-			</div>
-		{/if}
-	</div>
+			<!-- Loading State -->
+			{#if isLoading}
+				<ProjectDashboardSkeleton />
+			{:else if filteredProjects.length === 0}
+				<!-- Empty State -->
+				<Card.Root class="py-16 text-center">
+					<Card.Content>
+						<div
+							class="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-slate-100"
+						>
+							<FolderKanban class="size-8 text-slate-400" />
+						</div>
+						<h3 class="text-lg font-semibold text-slate-900">No Projects Found</h3>
+						<p class="mt-2 text-slate-500">
+							No projects match your current filter criteria. Try adjusting your filters.
+						</p>
+						<Button onclick={clearFilters} class="mt-4">Clear Filters</Button>
+					</Card.Content>
+				</Card.Root>
+			{:else}
+				<!-- Tabs -->
+				<Tabs.Root value={activeTab} onValueChange={handleTabChange}>
+					<div
+						class="sticky top-0 z-50 -mx-4 bg-linear-to-b from-slate-50 to-transparent px-4 pt-2 pb-2 sm:-mx-6 sm:px-6"
+					>
+						<Tabs.List
+							class="inline-flex h-auto w-full justify-start gap-1 overflow-x-auto rounded-xl bg-white p-1.5 shadow-sm ring-1 ring-slate-200/50"
+						>
+							{#each tabs as tab}
+								<Tabs.Trigger
+									value={tab.id}
+									class="inline-flex shrink-0 items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-slate-600 transition-all hover:bg-slate-50 hover:text-slate-900 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-sm"
+								>
+									<tab.icon class="size-4" />
+									<span class="hidden sm:inline">{tab.label}</span>
+								</Tabs.Trigger>
+							{/each}
+						</Tabs.List>
+					</div>
+
+					<div class="mt-3">
+						<Tabs.Content
+							value="overview"
+							class="animate-in duration-300 fade-in slide-in-from-bottom-2"
+						>
+							<AggregatedProjectOverviewSection projects={filteredProjects} {filterLabel} />
+						</Tabs.Content>
+
+						<Tabs.Content
+							value="budget"
+							class="animate-in duration-300 fade-in slide-in-from-bottom-2"
+						>
+							<AggregatedProjectBudgetSection projects={filteredProjects} {filterLabel} />
+						</Tabs.Content>
+
+						<Tabs.Content
+							value="progress"
+							class="animate-in duration-300 fade-in slide-in-from-bottom-2"
+						>
+							<AggregatedProjectProgressSection projects={filteredProjects} {filterLabel} />
+						</Tabs.Content>
+
+						<Tabs.Content
+							value="map"
+							class="animate-in duration-300 fade-in slide-in-from-bottom-2"
+						>
+							<ProjectsMapSection projects={filteredProjects} {sitios} {filterLabel} />
+						</Tabs.Content>
+					</div>
+				</Tabs.Root>
+			{/if}
+		</section>
+	</main>
+
+	<PublicFooter />
 </div>

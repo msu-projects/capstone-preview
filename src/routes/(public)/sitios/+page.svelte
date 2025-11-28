@@ -209,7 +209,7 @@
 				</div>
 
 				<!-- Quick Stats -->
-				<div class="mx-auto mt-8 grid max-w-4xl grid-cols-2 gap-4 sm:grid-cols-4">
+				<div class="mx-auto mt-8 hidden max-w-4xl grid-cols-2 gap-4 sm:grid-cols-4">
 					<Card.Root class="relative overflow-hidden border-0 shadow-sm">
 						<div
 							class="absolute top-0 left-0 h-1 w-full bg-linear-to-r from-blue-500 to-blue-600"

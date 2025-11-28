@@ -1,0 +1,323 @@
+<script lang="ts">
+	import PublicFooter from '$lib/components/public/PublicFooter.svelte';
+	import PublicHeader from '$lib/components/public/PublicHeader.svelte';
+	import { Badge } from '$lib/components/ui/badge';
+	import { Button } from '$lib/components/ui/button';
+	import * as Card from '$lib/components/ui/card';
+	import { Input } from '$lib/components/ui/input';
+	import { Progress } from '$lib/components/ui/progress';
+	import * as Select from '$lib/components/ui/select';
+	import { categories } from '$lib/config/project-categories';
+	import { getStatusBadgeVariant, getStatusLabel } from '$lib/config/status-config';
+	import type { CategoryKey, Project, ProjectStatus } from '$lib/types';
+	import { formatCurrency } from '$lib/utils/formatters';
+	import { getCategoryName, getCompletionPercentage } from '$lib/utils/project-calculations';
+	import { loadProjects } from '$lib/utils/storage';
+	import { BarChart3, Eye, FolderKanban, Search, X } from '@lucide/svelte';
+	import { onMount } from 'svelte';
+
+	let projects = $state<Project[]>([]);
+	let isLoading = $state(true);
+
+	// State
+	let searchQuery = $state('');
+	let statusFilter = $state<string>('');
+	let categoryFilter = $state<CategoryKey | ''>('');
+	let currentPage = $state(1);
+	const itemsPerPage = 12;
+
+	onMount(() => {
+		projects = loadProjects();
+		isLoading = false;
+	});
+
+	// Get unique categories from config
+	const categoryOptions = categories.map((c) => ({ key: c.key, name: c.name }));
+
+	// Filter projects
+	const filteredProjects = $derived.by(() => {
+		return projects.filter((project) => {
+			const matchesSearch =
+				!searchQuery ||
+				project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+				(project.project_sitios?.some(
+					(s) =>
+						s.sitio_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+						s.municipality.toLowerCase().includes(searchQuery.toLowerCase())
+				) ??
+					false);
+
+			const matchesStatus = !statusFilter || project.status === statusFilter;
+			const matchesCategory = !categoryFilter || project.category_key === categoryFilter;
+
+			return matchesSearch && matchesStatus && matchesCategory;
+		});
+	});
+
+	// Paginate
+	const paginatedProjects = $derived.by(() => {
+		const start = (currentPage - 1) * itemsPerPage;
+		return filteredProjects.slice(start, start + itemsPerPage);
+	});
+
+	const totalPages = $derived(Math.ceil(filteredProjects.length / itemsPerPage));
+
+	function resetFilters() {
+		searchQuery = '';
+		statusFilter = '';
+		categoryFilter = '';
+		currentPage = 1;
+	}
+</script>
+
+<svelte:head>
+	<title>Project List - South Cotabato Data Bank</title>
+	<meta name="description" content="Browse all development projects across South Cotabato" />
+</svelte:head>
+
+<div class="flex min-h-screen flex-col">
+	<PublicHeader />
+
+	<main class="flex-1 bg-muted/30">
+		<!-- Header -->
+		<header class="border-b bg-card">
+			<div class="container mx-auto px-4 py-6">
+				<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+					<div>
+						<h1 class="mb-2 text-3xl font-bold">Development Projects</h1>
+						<p class="text-muted-foreground">
+							Browse all development projects across South Cotabato
+						</p>
+					</div>
+					<Button href="/projects" variant="outline" class="gap-2">
+						<BarChart3 class="size-4" />
+						View Dashboard
+					</Button>
+				</div>
+			</div>
+		</header>
+
+		<!-- Content -->
+		<div class="container mx-auto flex-1 space-y-6 px-4 py-6">
+			<!-- Filters -->
+			<Card.Root class="border-0 shadow-sm">
+				<Card.Content class="pt-6">
+					<div class="flex flex-wrap gap-4">
+						<!-- Search -->
+						<div class="min-w-[300px] flex-1">
+							<div class="relative">
+								<Search
+									class="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+								/>
+								<Input
+									type="text"
+									placeholder="Search projects..."
+									bind:value={searchQuery}
+									class="pl-9"
+								/>
+							</div>
+						</div>
+
+						<!-- Status Filter -->
+						<div class="w-[180px]">
+							<Select.Root type="single" bind:value={statusFilter}>
+								<Select.Trigger class="w-full">
+									{statusFilter ? getStatusLabel(statusFilter as ProjectStatus) : 'All Status'}
+								</Select.Trigger>
+								<Select.Content>
+									<Select.Item value="" label="All Status">All Status</Select.Item>
+									<Select.Item value="planning" label="Planning">Planning</Select.Item>
+									<Select.Item value="in-progress" label="In Progress">In Progress</Select.Item>
+									<Select.Item value="completed" label="Completed">Completed</Select.Item>
+									<Select.Item value="suspended" label="Suspended">Suspended</Select.Item>
+								</Select.Content>
+							</Select.Root>
+						</div>
+
+						<!-- Category Filter -->
+						<div class="w-[200px]">
+							<Select.Root type="single" bind:value={categoryFilter}>
+								<Select.Trigger class="w-full">
+									{categoryFilter
+										? getCategoryName(categoryFilter as CategoryKey)
+										: 'All Categories'}
+								</Select.Trigger>
+								<Select.Content>
+									<Select.Item value="" label="All Categories">All Categories</Select.Item>
+									{#each categoryOptions as category (category.key)}
+										<Select.Item value={category.key} label={category.name}
+											>{category.name}</Select.Item
+										>
+									{/each}
+								</Select.Content>
+							</Select.Root>
+						</div>
+
+						<!-- Clear Button -->
+						<Button variant="ghost" size="sm" onclick={resetFilters}>
+							<X class="mr-2 size-4" />
+							Clear
+						</Button>
+					</div>
+				</Card.Content>
+			</Card.Root>
+
+			<!-- Results Count -->
+			<div class="text-sm text-muted-foreground">
+				Showing {paginatedProjects.length} of {filteredProjects.length} projects
+			</div>
+
+			<!-- Loading State -->
+			{#if isLoading}
+				<div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+					{#each Array(6) as _}
+						<Card.Root class="overflow-hidden">
+							<Card.Header class="space-y-2">
+								<div class="flex items-start justify-between gap-2">
+									<div class="h-5 w-20 animate-pulse rounded bg-slate-200"></div>
+									<div class="h-5 w-24 animate-pulse rounded bg-slate-200"></div>
+								</div>
+								<div class="h-6 w-full animate-pulse rounded bg-slate-200"></div>
+							</Card.Header>
+							<Card.Content class="space-y-4">
+								<div class="h-16 w-full animate-pulse rounded bg-slate-200"></div>
+								<div class="space-y-2">
+									<div class="h-4 w-full animate-pulse rounded bg-slate-200"></div>
+									<div class="h-4 w-3/4 animate-pulse rounded bg-slate-200"></div>
+								</div>
+								<div class="h-2 w-full animate-pulse rounded bg-slate-200"></div>
+							</Card.Content>
+							<Card.Footer>
+								<div class="h-9 w-full animate-pulse rounded bg-slate-200"></div>
+							</Card.Footer>
+						</Card.Root>
+					{/each}
+				</div>
+			{:else if paginatedProjects.length === 0}
+				<!-- Empty State -->
+				<Card.Root class="border-0 py-16 text-center shadow-sm">
+					<Card.Content>
+						<div
+							class="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-slate-100"
+						>
+							<FolderKanban class="size-8 text-slate-400" />
+						</div>
+						<h3 class="text-lg font-semibold text-slate-900">No Projects Found</h3>
+						<p class="mt-2 text-muted-foreground">No projects match your search criteria</p>
+						<Button onclick={resetFilters} class="mt-4">Clear Filters</Button>
+					</Card.Content>
+				</Card.Root>
+			{:else}
+				<!-- Projects Grid -->
+				<div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+					{#each paginatedProjects as project (project.id)}
+						{@const completionPct = getCompletionPercentage(project)}
+						<Card.Root
+							class="group overflow-hidden border-0 shadow-sm transition-shadow hover:shadow-lg"
+						>
+							<Card.Header class="space-y-2">
+								<div class="flex items-start justify-between gap-2">
+									<Badge variant={getStatusBadgeVariant(project.status)}>
+										{getStatusLabel(project.status)}
+									</Badge>
+									<Badge variant="outline" class="text-xs">
+										{getCategoryName(project.category_key)}
+									</Badge>
+								</div>
+								<Card.Title class="line-clamp-2 text-lg leading-tight group-hover:text-primary">
+									{project.title}
+								</Card.Title>
+							</Card.Header>
+
+							<Card.Content class="space-y-4">
+								<p class="line-clamp-3 text-sm text-muted-foreground">
+									{project.description}
+								</p>
+
+								<div class="space-y-2 text-sm">
+									<div class="flex justify-between">
+										<span class="text-muted-foreground">Location</span>
+										<span class="font-medium">
+											{#if project.project_sitios && project.project_sitios.length > 0}
+												{project.project_sitios[0].municipality}
+												{#if project.project_sitios.length > 1}
+													+{project.project_sitios.length - 1} more
+												{/if}
+											{:else}
+												N/A
+											{/if}
+										</span>
+									</div>
+									<div class="flex justify-between">
+										<span class="text-muted-foreground">Budget</span>
+										<span class="font-medium">{formatCurrency(project.total_budget)}</span>
+									</div>
+									<div class="flex justify-between">
+										<span class="text-muted-foreground">Beneficiaries</span>
+										<span class="font-medium">{project.beneficiaries.toLocaleString()} people</span>
+									</div>
+								</div>
+
+								<div>
+									<div class="mb-2 flex items-center justify-between text-sm">
+										<span class="text-muted-foreground">Progress</span>
+										<span class="font-medium">
+											{completionPct.toFixed(0)}%
+										</span>
+									</div>
+									<Progress value={Math.min(100, completionPct)} class="h-2" />
+								</div>
+							</Card.Content>
+
+							<Card.Footer>
+								<Button href="/projects/{project.id}" variant="outline" class="w-full">
+									<Eye class="mr-2 size-4" />
+									View Details
+								</Button>
+							</Card.Footer>
+						</Card.Root>
+					{/each}
+				</div>
+
+				<!-- Pagination -->
+				{#if totalPages > 1}
+					<div class="flex justify-center gap-2">
+						<Button
+							variant="outline"
+							size="sm"
+							disabled={currentPage === 1}
+							onclick={() => (currentPage = Math.max(1, currentPage - 1))}
+						>
+							Previous
+						</Button>
+						<div class="flex items-center gap-1">
+							{#each Array(totalPages) as _, i (i)}
+								{#if i + 1 === 1 || i + 1 === totalPages || (i + 1 >= currentPage - 1 && i + 1 <= currentPage + 1)}
+									<Button
+										variant={currentPage === i + 1 ? 'default' : 'outline'}
+										size="sm"
+										onclick={() => (currentPage = i + 1)}
+									>
+										{i + 1}
+									</Button>
+								{:else if i + 1 === currentPage - 2 || i + 1 === currentPage + 2}
+									<span class="px-2">...</span>
+								{/if}
+							{/each}
+						</div>
+						<Button
+							variant="outline"
+							size="sm"
+							disabled={currentPage === totalPages}
+							onclick={() => (currentPage = Math.min(totalPages, currentPage + 1))}
+						>
+							Next
+						</Button>
+					</div>
+				{/if}
+			{/if}
+		</div>
+	</main>
+
+	<PublicFooter />
+</div>

@@ -78,3 +78,23 @@ export function formatRelativeTime(dateString: string | Date): string {
 export function truncateText(text: string, maxLength: number): string {
 	return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
 }
+
+/**
+ * Formats a number as compact Philippine Peso currency (e.g., ₱14.5M, ₱2.3K)
+ * @param amount - The amount to format
+ */
+export function formatCurrencyCompact(amount: number): string {
+	const absAmount = Math.abs(amount);
+	const sign = amount < 0 ? '-' : '';
+
+	if (absAmount >= 1_000_000_000) {
+		return `${sign}₱${(absAmount / 1_000_000_000).toFixed(1)}B`;
+	}
+	if (absAmount >= 1_000_000) {
+		return `${sign}₱${(absAmount / 1_000_000).toFixed(1)}M`;
+	}
+	if (absAmount >= 1_000) {
+		return `${sign}₱${(absAmount / 1_000).toFixed(1)}K`;
+	}
+	return `${sign}₱${absAmount.toFixed(0)}`;
+}
