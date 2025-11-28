@@ -4,7 +4,7 @@
 	import * as Sidebar from '$lib/components/ui/sidebar';
 	import type { Project } from '$lib/types';
 	import { getCategoryName } from '$lib/utils/project-calculations';
-	import { ArrowLeft } from '@lucide/svelte';
+	import { ChevronRight } from '@lucide/svelte';
 
 	interface Props {
 		project: Project;
@@ -14,31 +14,35 @@
 	const { project, isAdminView = false }: Props = $props();
 </script>
 
-<!-- Top Navigation / Breadcrumb Area -->
-<div class="sticky top-0 z-10 border-b border-slate-200 bg-white">
-	<div class="w-full px-4 sm:px-6 lg:px-8">
-		<div class="flex h-16 items-center gap-4">
-			<Sidebar.Trigger class="-ml-1" />
-			<Separator orientation="vertical" class="mr-2 h-6" />
-			<Button
-				variant="ghost"
-				size="icon"
-				class="-ml-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-				href={isAdminView ? '/admin/projects' : '/projects'}
-			>
-				<ArrowLeft class="size-5" />
-			</Button>
-			<div class="flex flex-col">
-				<div class="flex items-center gap-2 text-sm text-slate-500">
-					<span>Projects</span>
-					<span class="text-slate-300">/</span>
-					<span>{getCategoryName(project.category_key)}</span>
-					<span class="text-slate-300">/</span>
-					<span class="font-medium text-slate-800">PROJ-{project.id}</span>
-				</div>
-			</div>
-			<div class="ml-auto flex items-center gap-3">
+<!-- Breadcrumb Navigation -->
+<div class="sticky top-0 z-10 border-b bg-white/80 backdrop-blur-sm">
+	<div class="w-full px-4 py-3 sm:px-6 lg:px-8">
+		<div class="flex items-center justify-between">
+			<nav class="flex items-center gap-2 text-sm">
 				{#if isAdminView}
+					<Sidebar.Trigger class="-ml-1" />
+				{/if}
+				<Separator orientation="vertical" class="h-6" />
+				<a
+					href={isAdminView ? '/admin' : '/'}
+					class="text-slate-500 transition-colors hover:text-slate-700"
+				>
+					{isAdminView ? 'Admin' : 'Home'}
+				</a>
+				<ChevronRight class="size-4 text-slate-400" />
+				<a
+					href={isAdminView ? '/admin/projects' : '/projects'}
+					class="text-slate-500 transition-colors hover:text-slate-700"
+				>
+					Projects
+				</a>
+				<ChevronRight class="size-4 text-slate-400" />
+				<span class="text-slate-500">{getCategoryName(project.category_key)}</span>
+				<ChevronRight class="size-4 text-slate-400" />
+				<span class="font-medium text-slate-900">PROJ-{project.id}</span>
+			</nav>
+			{#if isAdminView}
+				<div class="flex items-center gap-3">
 					<Button
 						variant="outline"
 						size="sm"
@@ -48,8 +52,8 @@
 						Edit Project
 					</Button>
 					<Button size="sm" class="shadow-sm shadow-blue-200">Generate Report</Button>
-				{/if}
-			</div>
+				</div>
+			{/if}
 		</div>
 	</div>
 </div>
