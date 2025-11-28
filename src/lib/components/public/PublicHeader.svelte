@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import logo from '$lib/assets/logo.png';
 	import { Button } from '$lib/components/ui/button';
-	import { FolderKanban, LogIn, MapPin, Menu, Users, X } from '@lucide/svelte';
+	import { FolderKanban, Home, LogIn, Menu, Users, X } from '@lucide/svelte';
 
 	let mobileMenuOpen = $state(false);
 
 	const navLinks = [
-		{ href: '/', label: 'Home', icon: MapPin },
+		{ href: '/', label: 'Home', icon: Home },
 		{ href: '/projects', label: 'Projects', icon: FolderKanban },
 		{ href: '/sitios', label: 'Sitios', icon: Users }
 	];
@@ -33,11 +34,9 @@
 	<div class="container mx-auto flex h-16 items-center justify-between px-4">
 		<!-- Logo & Title -->
 		<a href="/" class="flex items-center gap-2">
-			<div class="flex size-9 items-center justify-center rounded-lg bg-primary">
-				<MapPin class="size-5 text-primary-foreground" />
-			</div>
+			<img src={logo} alt="CATCH-UP Logo" class="size-9 rounded-lg object-contain" />
 			<div class="hidden flex-col sm:flex">
-				<span class="text-sm leading-tight font-bold">South Cotabato</span>
+				<span class="text-sm leading-tight font-bold">South Cotabato CATCH-UP</span>
 				<span class="text-xs leading-tight text-muted-foreground">Convergence Data Bank</span>
 			</div>
 		</a>

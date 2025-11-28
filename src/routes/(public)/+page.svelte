@@ -107,10 +107,10 @@
 </script>
 
 <svelte:head>
-	<title>South Cotabato Convergence Data Bank</title>
+	<title>South Cotabato CATCH-UP | Convergence Data Bank</title>
 	<meta
 		name="description"
-		content="Government transparency portal for tracking development projects in vulnerable communities within South Cotabato Province."
+		content="South Cotabato CATCH-UP - Convergence Approach for Transformation and CHange - Unification Program. Tracking development projects in vulnerable communities."
 	/>
 </svelte:head>
 
