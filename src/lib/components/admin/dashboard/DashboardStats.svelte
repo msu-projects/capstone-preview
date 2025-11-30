@@ -3,7 +3,16 @@
 	import { Skeleton } from '$lib/components/ui/skeleton';
 	import type { Stats } from '$lib/types';
 	import { formatNumber } from '$lib/utils/formatters';
-	import { Activity, Banknote, CircleCheckBig, MapPin, TrendingUp, Users } from '@lucide/svelte';
+	import {
+		Activity,
+		Banknote,
+		CircleCheckBig,
+		MapPin,
+		TrendingUp,
+		Users,
+		type IconProps
+	} from '@lucide/svelte';
+	import type { Component } from 'svelte';
 
 	interface Props {
 		stats: Stats;
@@ -21,6 +30,70 @@
 			maximumFractionDigits: 1
 		}).format(num);
 	}
+
+	interface StatCard {
+		title: string;
+		value: string;
+		subtitle: string;
+		subtitleClass: string;
+		icon: Component<IconProps>;
+		iconClass: string;
+		iconBgClass: string;
+		href: string;
+	}
+
+	const statCards: StatCard[] = $derived([
+		{
+			title: 'Total Sitios',
+			value: formatNumber(stats.total_sitios),
+			subtitle: '5 added this month',
+			subtitleClass: 'text-green-600',
+			icon: MapPin,
+			iconClass: 'text-blue-600',
+			iconBgClass: 'bg-blue-500/10',
+			href: '/admin/sitios'
+		},
+		{
+			title: 'Active Projects',
+			value: formatNumber(stats.active_projects),
+			subtitle: 'In progress',
+			subtitleClass: 'text-green-600',
+			icon: Activity,
+			iconClass: 'text-yellow-600',
+			iconBgClass: 'bg-yellow-500/10',
+			href: '/admin/projects?status=in-progress'
+		},
+		{
+			title: 'Completed Projects',
+			value: formatNumber(stats.completed_projects),
+			subtitle: 'This year',
+			subtitleClass: 'text-green-600',
+			icon: CircleCheckBig,
+			iconClass: 'text-green-600',
+			iconBgClass: 'bg-green-500/10',
+			href: '/admin/projects?status=completed'
+		},
+		{
+			title: 'Total Beneficiaries',
+			value: formatNumber(stats.total_beneficiaries),
+			subtitle: 'Across all projects',
+			subtitleClass: 'text-green-600',
+			icon: Users,
+			iconClass: 'text-purple-600',
+			iconBgClass: 'bg-purple-500/10',
+			href: '/admin/projects'
+		},
+		{
+			title: 'Total Budget',
+			value: formatCompactCurrency(stats.total_budget),
+			subtitle: 'Allocated funds',
+			subtitleClass: 'text-muted-foreground',
+			icon: Banknote,
+			iconClass: 'text-emerald-600',
+			iconBgClass: 'bg-emerald-500/10',
+			href: '/admin/projects'
+		}
+	]);
 </script>
 
 <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
@@ -38,87 +111,30 @@
 			</Card.Card>
 		{/each}
 	{:else}
-		<Card.Card class="shadow-sm">
-			<Card.CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-				<Card.CardTitle class="text-sm font-medium text-muted-foreground"
-					>Total Sitios</Card.CardTitle
+		{#each statCards as card (card.title)}
+			<a href={card.href} class="group">
+				<Card.Card
+					class="shadow-sm transition-colors duration-200 group-hover:bg-muted/50 group-hover:shadow-md"
 				>
-				<div class="rounded-full bg-blue-500/10 p-2">
-					<MapPin class="size-5 text-blue-600" />
-				</div>
-			</Card.CardHeader>
-			<Card.CardContent>
-				<div class="text-3xl font-bold">{formatNumber(stats.total_sitios)}</div>
-				<p class="mt-1 text-xs text-green-600">
-					<TrendingUp class="mr-1 inline size-3" />5 added this month
-				</p>
-			</Card.CardContent>
-		</Card.Card>
-
-		<Card.Card class="shadow-sm">
-			<Card.CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-				<Card.CardTitle class="text-sm font-medium text-muted-foreground"
-					>Active Projects</Card.CardTitle
-				>
-				<div class="rounded-full bg-yellow-500/10 p-2">
-					<Activity class="size-5 text-yellow-600" />
-				</div>
-			</Card.CardHeader>
-			<Card.CardContent>
-				<div class="text-3xl font-bold">{formatNumber(stats.active_projects)}</div>
-				<p class="mt-1 text-xs text-green-600">
-					<TrendingUp class="mr-1 inline size-3" />In progress
-				</p>
-			</Card.CardContent>
-		</Card.Card>
-
-		<Card.Card class="shadow-sm">
-			<Card.CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-				<Card.CardTitle class="text-sm font-medium text-muted-foreground"
-					>Completed Projects</Card.CardTitle
-				>
-				<div class="rounded-full bg-green-500/10 p-2">
-					<CircleCheckBig class="size-5 text-green-600" />
-				</div>
-			</Card.CardHeader>
-			<Card.CardContent>
-				<div class="text-3xl font-bold">{formatNumber(stats.completed_projects)}</div>
-				<p class="mt-1 text-xs text-green-600">
-					<TrendingUp class="mr-1 inline size-3" />This year
-				</p>
-			</Card.CardContent>
-		</Card.Card>
-
-		<Card.Card class="shadow-sm">
-			<Card.CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-				<Card.CardTitle class="text-sm font-medium text-muted-foreground"
-					>Total Beneficiaries</Card.CardTitle
-				>
-				<div class="rounded-full bg-purple-500/10 p-2">
-					<Users class="size-5 text-purple-600" />
-				</div>
-			</Card.CardHeader>
-			<Card.CardContent>
-				<div class="text-3xl font-bold">{formatNumber(stats.total_beneficiaries)}</div>
-				<p class="mt-1 text-xs text-green-600">
-					<TrendingUp class="mr-1 inline size-3" />Across all projects
-				</p>
-			</Card.CardContent>
-		</Card.Card>
-
-		<Card.Card class="shadow-sm">
-			<Card.CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-				<Card.CardTitle class="text-sm font-medium text-muted-foreground"
-					>Total Budget</Card.CardTitle
-				>
-				<div class="rounded-full bg-emerald-500/10 p-2">
-					<Banknote class="size-5 text-emerald-600" />
-				</div>
-			</Card.CardHeader>
-			<Card.CardContent>
-				<div class="text-3xl font-bold">{formatCompactCurrency(stats.total_budget)}</div>
-				<p class="mt-1 text-xs text-muted-foreground">Allocated funds</p>
-			</Card.CardContent>
-		</Card.Card>
+					<Card.CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+						<Card.CardTitle class="text-sm font-medium text-muted-foreground"
+							>{card.title}</Card.CardTitle
+						>
+						<div class="rounded-full p-2 {card.iconBgClass}">
+							<card.icon class="size-5 {card.iconClass}" />
+						</div>
+					</Card.CardHeader>
+					<Card.CardContent>
+						<div class="text-3xl font-bold">{card.value}</div>
+						<p class="mt-1 text-xs {card.subtitleClass}">
+							{#if card.subtitleClass.includes('green')}
+								<TrendingUp class="mr-1 inline size-3" />
+							{/if}
+							{card.subtitle}
+						</p>
+					</Card.CardContent>
+				</Card.Card>
+			</a>
+		{/each}
 	{/if}
 </div>

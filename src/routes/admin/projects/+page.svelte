@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { replaceState } from '$app/navigation';
+	import { page } from '$app/stores';
 	import AdminHeader from '$lib/components/admin/AdminHeader.svelte';
 	import DeleteProjectDialog from '$lib/components/admin/projects/DeleteProjectDialog.svelte';
 	import ProjectsFilters from '$lib/components/admin/projects/ProjectsFilters.svelte';
@@ -9,6 +11,7 @@
 	import { downloadProjectMonitoringPDF, downloadSingleProjectPDF } from '$lib/utils/pdf-generator';
 	import { getCategoryName, getCompletionPercentage } from '$lib/utils/project-calculations';
 	import { Download, Plus } from '@lucide/svelte';
+	import { onMount, tick, untrack } from 'svelte';
 
 	// State
 	let searchQuery = $state('');
@@ -23,6 +26,60 @@
 
 	// Get unique categories from config
 	const categoryOptions = categories.map((c) => c.name);
+
+	// Initialize filters from URL query params
+	function initFromUrl() {
+		const params = $page.url.searchParams;
+		searchQuery = params.get('search') || '';
+		statusFilter = params.get('status') || '';
+		categoryFilter = params.get('category') || '';
+		currentPage = parseInt(params.get('page') || '1', 10);
+		const urlSortBy = params.get('sortBy');
+		if (urlSortBy && ['title', 'budget', 'progress', 'status', 'updated'].includes(urlSortBy)) {
+			sortBy = urlSortBy as typeof sortBy;
+		}
+		const urlSortOrder = params.get('sortOrder');
+		if (urlSortOrder && ['asc', 'desc'].includes(urlSortOrder)) {
+			sortOrder = urlSortOrder as 'asc' | 'desc';
+		}
+	}
+
+	// Sync filters to URL
+	function syncToUrl() {
+		const params = new URLSearchParams();
+		if (searchQuery) params.set('search', searchQuery);
+		if (statusFilter) params.set('status', statusFilter);
+		if (categoryFilter) params.set('category', categoryFilter);
+		if (currentPage > 1) params.set('page', currentPage.toString());
+		if (sortBy !== 'updated') params.set('sortBy', sortBy);
+		if (sortOrder !== 'desc') params.set('sortOrder', sortOrder);
+
+		const queryString = params.toString();
+		const newUrl = queryString ? `?${queryString}` : $page.url.pathname;
+
+		tick().then(() => {
+			replaceState(newUrl, {});
+		});
+	}
+
+	// Sync URL when filters change
+	$effect(() => {
+		// Track all filter values
+		searchQuery;
+		statusFilter;
+		categoryFilter;
+		currentPage;
+		sortBy;
+		sortOrder;
+		// Only sync after initial mount
+		untrack(() => {
+			syncToUrl();
+		});
+	});
+
+	onMount(() => {
+		initFromUrl();
+	});
 
 	// Filter and sort projects
 	const filteredProjects = $derived.by(() => {

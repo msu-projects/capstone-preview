@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { goto, replaceState } from '$app/navigation';
+	import { page } from '$app/state';
 	import AdminHeader from '$lib/components/admin/AdminHeader.svelte';
 	import SitiosTable from '$lib/components/admin/sitios/SitiosTable.svelte';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
@@ -10,7 +11,7 @@
 	import type { Sitio } from '$lib/types';
 	import { deleteSitio, loadSitios } from '$lib/utils/storage';
 	import { Plus, Search, Upload } from '@lucide/svelte';
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 
 	let sitios = $state<Sitio[]>([]);
 	let searchTerm = $state('');
@@ -24,6 +25,7 @@
 	const itemsPerPage = 10;
 	let deleteDialogOpen = $state(false);
 	let sitioToDelete = $state<Sitio | null>(null);
+	let initialized = $state(false);
 
 	// Derived values for filter options
 	let uniqueMunicipalities = $derived(
@@ -39,8 +41,62 @@
 		).sort()
 	);
 
+	// Initialize filters from URL query params
+	function initFromUrl() {
+		const params = page.url.searchParams;
+		searchTerm = params.get('search') || '';
+		selectedMunicipality = params.get('municipality') || 'all';
+		selectedBarangay = params.get('barangay') || 'all';
+		currentPage = parseInt(params.get('page') || '1', 10);
+		const urlSortBy = params.get('sortBy');
+		if (
+			urlSortBy &&
+			['name', 'municipality', 'barangay', 'population', 'households'].includes(urlSortBy)
+		) {
+			sortBy = urlSortBy as typeof sortBy;
+		}
+		const urlSortOrder = params.get('sortOrder');
+		if (urlSortOrder && ['asc', 'desc'].includes(urlSortOrder)) {
+			sortOrder = urlSortOrder as 'asc' | 'desc';
+		}
+		initialized = true;
+	}
+
+	// Sync filters to URL
+	function syncToUrl() {
+		const params = new URLSearchParams();
+		if (searchTerm) params.set('search', searchTerm);
+		if (selectedMunicipality !== 'all') params.set('municipality', selectedMunicipality);
+		if (selectedBarangay !== 'all') params.set('barangay', selectedBarangay);
+		if (currentPage > 1) params.set('page', currentPage.toString());
+		if (sortBy !== 'households') params.set('sortBy', sortBy);
+		if (sortOrder !== 'asc') params.set('sortOrder', sortOrder);
+
+		const queryString = params.toString();
+		const newUrl = queryString ? `?${queryString}` : page.url.pathname;
+
+		tick().then(() => {
+			replaceState(newUrl, {});
+		});
+	}
+
+	// Sync URL when filters change
+	$effect(() => {
+		// Track all filter values
+		searchTerm;
+		selectedMunicipality;
+		selectedBarangay;
+		currentPage;
+		sortBy;
+		sortOrder;
+		// Only sync after initial mount
+
+		syncToUrl();
+	});
+
 	onMount(() => {
 		loadData();
+		initFromUrl();
 	});
 
 	function loadData() {
