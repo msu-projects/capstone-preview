@@ -16,7 +16,7 @@
 	import { loadAuditLogs } from '$lib/utils/audit';
 	import toTitleCase from '$lib/utils/common';
 	import { downloadProjectMonitoringPDF } from '$lib/utils/pdf-generator';
-	import { ChartColumn, Download, Plus } from '@lucide/svelte';
+	import { ChartColumn, Download, ExternalLink, Plus } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 
 	// Loading state for async data simulation
@@ -235,8 +235,19 @@
 						<Card.CardDescription>Comprehensive project and resource analytics</Card.CardDescription
 						>
 					</div>
-					<div class="rounded-full bg-primary/10 p-2">
-						<ChartColumn class="size-5 text-primary" />
+					<div class="flex items-center gap-2">
+						<Button
+							variant="outline"
+							size="sm"
+							href={activeTab === 'sitios' ? '/sitios' : '/projects'}
+							target="_blank"
+						>
+							<ExternalLink class="mr-2 size-4" />
+							View More Info
+						</Button>
+						<div class="rounded-full bg-primary/10 p-2">
+							<ChartColumn class="size-5 text-primary" />
+						</div>
 					</div>
 				</div>
 			</Card.CardHeader>
