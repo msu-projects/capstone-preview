@@ -1,7 +1,10 @@
 <script lang="ts">
+	import ActivityFeed from '$lib/components/admin/dashboard/ActivityFeed.svelte';
+	import RecentProjectsTable from '$lib/components/admin/dashboard/RecentProjectsTable.svelte';
 	import BarChart from '$lib/components/charts/BarChart.svelte';
 	import DonutChart from '$lib/components/charts/DonutChart.svelte';
 	import LineChart from '$lib/components/charts/LineChart.svelte';
+	import type { AuditLog, Project } from '$lib/types';
 
 	interface ChartData {
 		label: string;
@@ -15,6 +18,9 @@
 		monthlyProgressSeries: { name: string; data: number[] }[];
 		monthlyProgressCategories: string[];
 		totalProjects: number;
+		recentProjects: Project[];
+		activities: AuditLog[];
+		isLoading?: boolean;
 	}
 
 	let {
@@ -22,7 +28,10 @@
 		categoryChartData,
 		monthlyProgressSeries,
 		monthlyProgressCategories,
-		totalProjects
+		totalProjects,
+		recentProjects,
+		activities,
+		isLoading = false
 	}: Props = $props();
 </script>
 
@@ -54,4 +63,10 @@
 <div class="mt-6 rounded-lg border bg-card p-4">
 	<h3 class="mb-4 text-lg font-semibold">Projects by Category</h3>
 	<BarChart data={categoryChartData} orientation="horizontal" height={320} title="Projects" />
+</div>
+
+<!-- Recent Projects and Activity Feed -->
+<div class="mt-6 grid gap-6 lg:grid-cols-3">
+	<RecentProjectsTable projects={recentProjects} {isLoading} />
+	<ActivityFeed {activities} {isLoading} />
 </div>

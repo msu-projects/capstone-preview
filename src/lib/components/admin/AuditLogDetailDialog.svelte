@@ -283,5 +283,5 @@
 				</div>
 			</ScrollArea>
 		{/if}
-	</Dialog.Content>>
+	</Dialog.Content>
 </Dialog.Root>

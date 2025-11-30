@@ -1,12 +1,10 @@
 <script lang="ts">
 	import AdminHeader from '$lib/components/admin/AdminHeader.svelte';
-	import ActivityFeed from '$lib/components/admin/dashboard/ActivityFeed.svelte';
 	import BudgetTab from '$lib/components/admin/dashboard/BudgetTab.svelte';
 	import DashboardStats from '$lib/components/admin/dashboard/DashboardStats.svelte';
 	import EmploymentTab from '$lib/components/admin/dashboard/EmploymentTab.svelte';
 	import GeographicTab from '$lib/components/admin/dashboard/GeographicTab.svelte';
 	import OverviewTab from '$lib/components/admin/dashboard/OverviewTab.svelte';
-	import RecentProjectsTable from '$lib/components/admin/dashboard/RecentProjectsTable.svelte';
 	import SitiosTab from '$lib/components/admin/dashboard/SitiosTab.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
@@ -264,6 +262,9 @@
 								{monthlyProgressSeries}
 								{monthlyProgressCategories}
 								totalProjects={stats.total_projects ?? 0}
+								{recentProjects}
+								{activities}
+								{isLoading}
 							/>
 						</Tabs.Content>
 
@@ -302,14 +303,5 @@
 				{/if}
 			</Card.CardContent>
 		</Card.Card>
-
-		<!-- Main Grid -->
-		<div class="grid gap-6 lg:grid-cols-3">
-			<!-- Recent Projects -->
-			<RecentProjectsTable projects={recentProjects} {isLoading} />
-
-			<!-- Activity Feed -->
-			<ActivityFeed {activities} {isLoading} />
-		</div>
 	</div>
 </div>
