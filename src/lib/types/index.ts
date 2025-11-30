@@ -156,11 +156,28 @@ export interface Category {
 	icon: string;
 }
 
+export interface PerformanceIndicator {
+	id: string;
+	name: string;
+	unit: string;
+	description: string;
+}
+
 export interface ProjectType {
 	id: number;
 	category_key: CategoryKey;
 	name: string;
 	description: string;
+	default_indicators?: PerformanceIndicator[];
+}
+
+export interface PerformanceTarget {
+	id: number;
+	project_id: number;
+	indicator_type: string;
+	indicator_name: string;
+	target_value: number;
+	unit_of_measure: string;
 }
 
 export interface ProjectSitio {

@@ -16,6 +16,7 @@
 		CategoryKey,
 		FundingSource,
 		MonthlyTarget,
+		PerformanceTarget,
 		Project,
 		ProjectSitio,
 		ProjectStatus
@@ -97,6 +98,7 @@
 	let showSitioSelection = $state(false);
 
 	// Tab 3: Performance Targets
+	let performanceTargets = $state<Omit<PerformanceTarget, 'id' | 'project_id'>[]>([]);
 	let targetStartDate = $state<DateValue | undefined>(
 		existingProject?.start_date ? parseDate(existingProject.start_date) : today(getLocalTimeZone())
 	);
@@ -422,6 +424,8 @@
 
 				<Tabs.Content value="performance">
 					<PerformanceTargetsTab
+						selectedProjectTypeId={selectedProjectType}
+						bind:performanceTargets
 						bind:targetStartDate
 						bind:durationInCalendarDays
 						bind:totalBudget
