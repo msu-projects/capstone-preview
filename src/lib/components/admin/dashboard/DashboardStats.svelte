@@ -17,9 +17,10 @@
 	interface Props {
 		stats: Stats;
 		isLoading?: boolean;
+		onTabChange?: (tab: string) => void;
 	}
 
-	let { stats, isLoading = false }: Props = $props();
+	let { stats, isLoading = false, onTabChange }: Props = $props();
 
 	// Compact currency format for dashboard
 	function formatCompactCurrency(num: number): string {
@@ -39,7 +40,8 @@
 		icon: Component<IconProps>;
 		iconClass: string;
 		iconBgClass: string;
-		href: string;
+		href?: string;
+		tabTarget?: string;
 	}
 
 	const statCards: StatCard[] = $derived([
@@ -81,7 +83,7 @@
 			icon: Users,
 			iconClass: 'text-purple-600',
 			iconBgClass: 'bg-purple-500/10',
-			href: '/admin/projects'
+			tabTarget: 'sitios'
 		},
 		{
 			title: 'Total Budget',
@@ -91,9 +93,15 @@
 			icon: Banknote,
 			iconClass: 'text-emerald-600',
 			iconBgClass: 'bg-emerald-500/10',
-			href: '/admin/projects'
+			tabTarget: 'budget'
 		}
 	]);
+
+	function handleCardClick(card: StatCard) {
+		if (card.tabTarget && onTabChange) {
+			onTabChange(card.tabTarget);
+		}
+	}
 </script>
 
 <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
@@ -112,29 +120,55 @@
 		{/each}
 	{:else}
 		{#each statCards as card (card.title)}
-			<a href={card.href} class="group">
-				<Card.Card
-					class="shadow-sm transition-colors duration-200 group-hover:bg-muted/50 group-hover:shadow-md"
-				>
-					<Card.CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-						<Card.CardTitle class="text-sm font-medium text-muted-foreground"
-							>{card.title}</Card.CardTitle
-						>
-						<div class="rounded-full p-2 {card.iconBgClass}">
-							<card.icon class="size-5 {card.iconClass}" />
-						</div>
-					</Card.CardHeader>
-					<Card.CardContent>
-						<div class="text-3xl font-bold">{card.value}</div>
-						<p class="mt-1 text-xs {card.subtitleClass}">
-							{#if card.subtitleClass.includes('green')}
-								<TrendingUp class="mr-1 inline size-3" />
-							{/if}
-							{card.subtitle}
-						</p>
-					</Card.CardContent>
-				</Card.Card>
-			</a>
+			{#if card.href}
+				<a href={card.href} class="group">
+					<Card.Card
+						class="shadow-sm transition-colors duration-200 group-hover:bg-muted/50 group-hover:shadow-md"
+					>
+						<Card.CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+							<Card.CardTitle class="text-sm font-medium text-muted-foreground"
+								>{card.title}</Card.CardTitle
+							>
+							<div class="rounded-full p-2 {card.iconBgClass}">
+								<card.icon class="size-5 {card.iconClass}" />
+							</div>
+						</Card.CardHeader>
+						<Card.CardContent>
+							<div class="text-3xl font-bold">{card.value}</div>
+							<p class="mt-1 text-xs {card.subtitleClass}">
+								{#if card.subtitleClass.includes('green')}
+									<TrendingUp class="mr-1 inline size-3" />
+								{/if}
+								{card.subtitle}
+							</p>
+						</Card.CardContent>
+					</Card.Card>
+				</a>
+			{:else}
+				<button type="button" class="group w-full text-left" onclick={() => handleCardClick(card)}>
+					<Card.Card
+						class="shadow-sm transition-colors duration-200 group-hover:bg-muted/50 group-hover:shadow-md"
+					>
+						<Card.CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+							<Card.CardTitle class="text-sm font-medium text-muted-foreground"
+								>{card.title}</Card.CardTitle
+							>
+							<div class="rounded-full p-2 {card.iconBgClass}">
+								<card.icon class="size-5 {card.iconClass}" />
+							</div>
+						</Card.CardHeader>
+						<Card.CardContent>
+							<div class="text-3xl font-bold">{card.value}</div>
+							<p class="mt-1 text-xs {card.subtitleClass}">
+								{#if card.subtitleClass.includes('green')}
+									<TrendingUp class="mr-1 inline size-3" />
+								{/if}
+								{card.subtitle}
+							</p>
+						</Card.CardContent>
+					</Card.Card>
+				</button>
+			{/if}
 		{/each}
 	{/if}
 </div>

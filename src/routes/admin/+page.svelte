@@ -22,6 +22,7 @@
 	// Loading state for async data simulation
 	let isLoading = $state(false);
 	let activities = $state<AuditLog[]>([]);
+	let activeTab = $state('overview');
 
 	onMount(() => {
 		// Load recent audit logs (most recent first, limited to 10)
@@ -223,7 +224,7 @@
 	<!-- Content -->
 	<div class="flex-1 space-y-6 p-6">
 		<!-- Stats Grid -->
-		<DashboardStats {stats} {isLoading} />
+		<DashboardStats {stats} {isLoading} onTabChange={(tab) => (activeTab = tab)} />
 
 		<!-- Charts Section with Tabs -->
 		<Card.Card class="shadow-sm">
@@ -246,7 +247,7 @@
 						<Skeleton class="h-[300px] w-full rounded-lg" />
 					</div>
 				{:else}
-					<Tabs.Root value="overview" class="w-full">
+					<Tabs.Root bind:value={activeTab} class="w-full">
 						<Tabs.List class="grid w-full grid-cols-5">
 							<Tabs.Trigger value="overview">Overview</Tabs.Trigger>
 							<Tabs.Trigger value="sitios">Sitios</Tabs.Trigger>
