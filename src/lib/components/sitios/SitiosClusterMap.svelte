@@ -30,9 +30,16 @@
 		)
 	);
 
-	// Update markers when sitios change
+	// Update markers when sitios change - track validSitios.length and sitio IDs to detect changes
 	$effect(() => {
-		if (map && validSitios) {
+		// Access validSitios to create dependency
+		const sitioIds = validSitios.map((s) => s.id).join(',');
+		const count = validSitios.length;
+
+		if (map && mapInitialized) {
+			// Use the tracked values to ensure reactivity
+			void sitioIds;
+			void count;
 			updateMarkers();
 		}
 	});
