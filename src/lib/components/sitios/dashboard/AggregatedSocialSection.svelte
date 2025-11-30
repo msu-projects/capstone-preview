@@ -75,7 +75,10 @@
 						<p
 							class="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl"
 						>
-							{social.philhealthCoveragePercent.toFixed(0)}%
+							{formatNumber(social.philhealthBeneficiaries)}
+						</p>
+						<p class="text-xs text-slate-400">
+							{social.philhealthCoveragePercent.toFixed(1)}% of population
 						</p>
 					</div>
 				</div>
@@ -102,7 +105,10 @@
 						<p
 							class="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl"
 						>
-							{social.fourpsCoveragePercent.toFixed(0)}%
+							{formatNumber(social.fourpsBeneficiaries)}
+						</p>
+						<p class="text-xs text-slate-400">
+							{social.fourpsCoveragePercent.toFixed(1)}% of households
 						</p>
 					</div>
 				</div>
@@ -112,6 +118,9 @@
 		<!-- Registered Voters -->
 		<Card.Root
 			class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50"
+			title="{formatNumber(social.registeredVoters)} out of {formatNumber(
+				social.totalPopulation
+			)} people"
 		>
 			<div
 				class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-blue-50 opacity-50"
@@ -128,6 +137,9 @@
 						>
 							{formatNumber(social.registeredVoters)}
 						</p>
+						<p class="text-xs text-slate-400">
+							{social.voterRegistrationPercent.toFixed(1)}% of population
+						</p>
 					</div>
 				</div>
 			</Card.Content>
@@ -136,6 +148,9 @@
 		<!-- Backyard Gardens -->
 		<Card.Root
 			class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50"
+			title="{formatNumber(social.householdsWithBackyardGarden)} out of {formatNumber(
+				social.totalHouseholds
+			)} households"
 		>
 			<div
 				class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-green-50 opacity-50"
@@ -150,7 +165,10 @@
 						<p
 							class="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl"
 						>
-							{social.backyardGardenPercent.toFixed(0)}%
+							{formatNumber(social.householdsWithBackyardGarden)}
+						</p>
+						<p class="text-xs text-slate-400">
+							{social.backyardGardenPercent.toFixed(1)}% of households
 						</p>
 					</div>
 				</div>
