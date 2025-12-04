@@ -22,7 +22,7 @@
 			</Button>
 			<Button size="sm" href="/admin/projects/new">
 				<Plus class="mr-2" />
-				Add Project
+				New Project
 			</Button>
 		</div>
 	</div>

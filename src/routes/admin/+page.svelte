@@ -210,7 +210,7 @@
 	<!-- Header -->
 	<AdminHeader title="Dashboard" description="Overview of projects, sitios, and activities">
 		{#snippet actions()}
-			<Button variant="outline" size="sm" onclick={handleExportReport}>
+			<Button variant="outline" size="sm" class="hidden" onclick={handleExportReport}>
 				<Download class="size-4 sm:mr-2" />
 				<span class="hidden sm:inline">Export Report</span>
 			</Button>
@@ -240,7 +240,6 @@
 							variant="outline"
 							size="sm"
 							href={activeTab === 'sitios' ? '/sitios' : '/projects'}
-							target="_blank"
 						>
 							<ExternalLink class="mr-2 size-4" />
 							View More Info

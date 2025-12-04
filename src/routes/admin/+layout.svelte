@@ -9,6 +9,8 @@
 	let isLoading = $state(true);
 
 	onMount(() => {
+		authStore.initialize();
+
 		if (!authStore.isAuthenticated) {
 			goto('/login');
 			return;

@@ -215,7 +215,7 @@
 			</Button>
 			<Button size="sm" href="/admin/projects/new">
 				<Plus class="size-4 sm:mr-2" />
-				<span class="hidden sm:inline">Add Project</span>
+				<span class="hidden sm:inline">New Project</span>
 			</Button>
 		{/snippet}
 	</AdminHeader>
