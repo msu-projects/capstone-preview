@@ -6,6 +6,7 @@ import type {
 	FundingSource,
 	MonthlyProgress,
 	MonthlyTarget,
+	PerformanceTarget,
 	PriorityLevel,
 	Project,
 	ProjectSitio,
@@ -132,6 +133,143 @@ const GARDEN_COMMODITIES = [
 ];
 const INFO_METHODS = ['Barangay Assembly', 'Text/Call', 'Social Media', 'House-to-House'];
 const TRANSPORT_METHODS = ['Habal-habal', 'Tricycle', 'Walking', 'Private Vehicle'];
+
+// ===== SITIO ADDITIONAL DATA =====
+
+const ETHNICITIES = [
+	'Blaan',
+	'Tboli',
+	'Maguindanaon',
+	'Ilocano',
+	'Cebuano',
+	'Ilonggo',
+	'Tagalog',
+	'Bicolano',
+	'Waray',
+	'Maranao'
+];
+
+const RELIGIONS = [
+	'Roman Catholic',
+	'Islam',
+	'Iglesia ni Cristo',
+	'Protestant',
+	'Evangelical',
+	'Seventh-day Adventist',
+	'Baptist',
+	'Born Again Christian',
+	'Indigenous Beliefs'
+];
+
+const FIRST_NAMES = [
+	'Juan',
+	'Maria',
+	'Pedro',
+	'Jose',
+	'Ana',
+	'Ricardo',
+	'Elena',
+	'Roberto',
+	'Carmen',
+	'Antonio',
+	'Rosa',
+	'Fernando',
+	'Lourdes',
+	'Manuel',
+	'Gloria',
+	'Eduardo',
+	'Teresita',
+	'Reynaldo',
+	'Corazon',
+	'Danilo'
+];
+
+const LAST_NAMES = [
+	'Santos',
+	'Reyes',
+	'Cruz',
+	'Garcia',
+	'Bautista',
+	'Mendoza',
+	'Ramos',
+	'Gonzales',
+	'Dela Cruz',
+	'Villanueva',
+	'Fernandez',
+	'Lopez',
+	'Martinez',
+	'Aquino',
+	'Pascual',
+	'Soriano',
+	'Mercado',
+	'Castillo',
+	'Rivera',
+	'Navarro'
+];
+
+const LOCAL_OFFICIAL_POSITIONS = [
+	'Barangay Captain',
+	'Barangay Kagawad',
+	'SK Chairman',
+	'Barangay Secretary',
+	'Barangay Treasurer'
+];
+
+const RST_POSITIONS = [
+	'RST Team Leader',
+	'RST Assistant Team Leader',
+	'RST Secretary',
+	'RST Member',
+	'RST Health Coordinator',
+	'RST Education Coordinator',
+	'RST Livelihood Coordinator'
+];
+
+const ISSUES_CONCERNS = [
+	'Lack of potable water supply',
+	'Poor road conditions',
+	'Limited access to health services',
+	'Inadequate school facilities',
+	'High unemployment rate',
+	'Lack of livelihood opportunities',
+	'Poor drainage system causing flooding',
+	'Limited electricity coverage',
+	'Absence of proper waste management',
+	'Lack of day care center',
+	'No barangay health station',
+	'Limited public transportation',
+	'Poor internet connectivity',
+	'Lack of farm-to-market roads',
+	'Insufficient irrigation facilities',
+	'High incidence of malnutrition',
+	'Limited access to clean sanitation',
+	'Absence of multi-purpose hall',
+	'Lack of streetlights',
+	'No proper evacuation center'
+];
+
+const PROPOSED_PPAS = [
+	'Water System Level II Installation',
+	'Farm-to-Market Road Concreting',
+	'Barangay Health Station Construction',
+	'School Building Rehabilitation',
+	'Skills Training Program',
+	'Livelihood Assistance Program',
+	'Drainage System Construction',
+	'Solar Street Lighting Installation',
+	'Materials Recovery Facility Construction',
+	'Day Care Center Construction',
+	'Multi-Purpose Hall Construction',
+	'Footbridge Construction',
+	'Irrigation System Development',
+	'Feeding Program Implementation',
+	'Toilet Facility Construction',
+	'Evacuation Center Construction',
+	'Agricultural Equipment Distribution',
+	'Medical Mission Program',
+	'Educational Assistance Program',
+	'Tree Planting Activity'
+];
 
 // ===== SITIO GENERATOR =====
 
@@ -284,6 +422,32 @@ export function generateSitios(count: number = 50, seed: number = 42): Sitio[] {
 				households_with_electricity: Math.round(households * (0.7 + rng.next() * 0.25)),
 				alternative_electricity_sources: rng.next() > 0.5 ? ['Solar', 'Generator'] : ['Solar']
 			},
+
+			// Ethnicity and Religion
+			ethnicities: rng.shuffle(ETHNICITIES).slice(0, rng.nextInt(1, 3)),
+			religions: rng.shuffle(RELIGIONS).slice(0, rng.nextInt(1, 3)),
+
+			// Local Officials (3-5 officials)
+			local_officials: LOCAL_OFFICIAL_POSITIONS.slice(0, rng.nextInt(3, 5)).map((position) => ({
+				name: `${rng.pick(FIRST_NAMES)} ${rng.pick(LAST_NAMES)}`,
+				position
+			})),
+
+			// RST Officials (3-5 officials)
+			rst_officials: rng
+				.shuffle(RST_POSITIONS)
+				.slice(0, rng.nextInt(3, 5))
+				.map((position) => ({
+					name: `${rng.pick(FIRST_NAMES)} ${rng.pick(LAST_NAMES)}`,
+					position
+				})),
+
+			// Issues & Concerns (2-4 items)
+			issues_concerns: rng.shuffle(ISSUES_CONCERNS).slice(0, rng.nextInt(2, 4)),
+
+			// Proposed PPAs (2-4 items)
+			proposed_ppas: rng.shuffle(PROPOSED_PPAS).slice(0, rng.nextInt(2, 4)),
+
 			created_at: new Date(2024, rng.nextInt(0, 11), rng.nextInt(1, 28)).toISOString(),
 			updated_at: new Date().toISOString()
 		};
@@ -368,6 +532,259 @@ const AGENCIES = [
 	'Provincial Health Office',
 	'Provincial Social Welfare Office'
 ];
+
+const CATCH_UP_PLANS = [
+	'Deploy additional workforce to accelerate construction',
+	'Extend working hours to 12-hour shifts',
+	'Engage additional contractors for parallel work',
+	'Prioritize critical path activities',
+	'Request budget augmentation for expedited procurement',
+	'Conduct weekend operations to recover lost time',
+	'Fast-track material procurement through emergency purchase',
+	'Mobilize provincial equipment pool for support',
+	'Implement double-shifting for construction crews',
+	'Coordinate with LGU for streamlined permit processing'
+];
+
+// Performance indicator templates by category
+const PERFORMANCE_INDICATORS_BY_CATEGORY: Record<
+	CategoryKey,
+	Array<{
+		type: string;
+		name: string;
+		unit: string;
+		baseValue: number;
+		scaleFactor: 'budget' | 'beneficiaries' | 'fixed';
+	}>
+> = {
+	infrastructure: [
+		{
+			type: 'output',
+			name: 'Length of Road Constructed',
+			unit: 'kilometers',
+			baseValue: 1,
+			scaleFactor: 'budget'
+		},
+		{
+			type: 'output',
+			name: 'Buildings Constructed',
+			unit: 'units',
+			baseValue: 1,
+			scaleFactor: 'fixed'
+		},
+		{
+			type: 'output',
+			name: 'Floor Area Completed',
+			unit: 'sq. meters',
+			baseValue: 100,
+			scaleFactor: 'budget'
+		},
+		{
+			type: 'outcome',
+			name: 'Households Served',
+			unit: 'households',
+			baseValue: 50,
+			scaleFactor: 'beneficiaries'
+		}
+	],
+	agriculture: [
+		{
+			type: 'output',
+			name: 'Seedlings Distributed',
+			unit: 'seedlings',
+			baseValue: 1000,
+			scaleFactor: 'budget'
+		},
+		{
+			type: 'output',
+			name: 'Farm Equipment Provided',
+			unit: 'units',
+			baseValue: 10,
+			scaleFactor: 'budget'
+		},
+		{
+			type: 'output',
+			name: 'Farmers Trained',
+			unit: 'farmers',
+			baseValue: 30,
+			scaleFactor: 'beneficiaries'
+		},
+		{
+			type: 'outcome',
+			name: 'Hectares Covered',
+			unit: 'hectares',
+			baseValue: 50,
+			scaleFactor: 'budget'
+		}
+	],
+	education: [
+		{
+			type: 'output',
+			name: 'Students Provided Supplies',
+			unit: 'students',
+			baseValue: 100,
+			scaleFactor: 'beneficiaries'
+		},
+		{
+			type: 'output',
+			name: 'Classrooms Equipped',
+			unit: 'classrooms',
+			baseValue: 5,
+			scaleFactor: 'budget'
+		},
+		{
+			type: 'output',
+			name: 'Teachers Trained',
+			unit: 'teachers',
+			baseValue: 20,
+			scaleFactor: 'beneficiaries'
+		},
+		{
+			type: 'outcome',
+			name: 'Schools Benefited',
+			unit: 'schools',
+			baseValue: 3,
+			scaleFactor: 'fixed'
+		}
+	],
+	health: [
+		{
+			type: 'output',
+			name: 'Patients Served',
+			unit: 'patients',
+			baseValue: 200,
+			scaleFactor: 'beneficiaries'
+		},
+		{
+			type: 'output',
+			name: 'Medical Equipment Provided',
+			unit: 'units',
+			baseValue: 10,
+			scaleFactor: 'budget'
+		},
+		{
+			type: 'output',
+			name: 'Health Workers Trained',
+			unit: 'health workers',
+			baseValue: 15,
+			scaleFactor: 'beneficiaries'
+		},
+		{
+			type: 'outcome',
+			name: 'Barangays Covered',
+			unit: 'barangays',
+			baseValue: 5,
+			scaleFactor: 'fixed'
+		}
+	],
+	livelihood: [
+		{
+			type: 'output',
+			name: 'Beneficiaries Trained',
+			unit: 'beneficiaries',
+			baseValue: 50,
+			scaleFactor: 'beneficiaries'
+		},
+		{
+			type: 'output',
+			name: 'Starter Kits Distributed',
+			unit: 'kits',
+			baseValue: 30,
+			scaleFactor: 'budget'
+		},
+		{
+			type: 'output',
+			name: 'Cooperatives Organized',
+			unit: 'cooperatives',
+			baseValue: 2,
+			scaleFactor: 'fixed'
+		},
+		{
+			type: 'outcome',
+			name: 'Jobs Generated',
+			unit: 'jobs',
+			baseValue: 25,
+			scaleFactor: 'beneficiaries'
+		}
+	],
+	environment: [
+		{
+			type: 'output',
+			name: 'Seedlings Planted',
+			unit: 'seedlings',
+			baseValue: 5000,
+			scaleFactor: 'budget'
+		},
+		{
+			type: 'output',
+			name: 'Hectares Reforested',
+			unit: 'hectares',
+			baseValue: 10,
+			scaleFactor: 'budget'
+		},
+		{
+			type: 'output',
+			name: 'Volunteers Mobilized',
+			unit: 'volunteers',
+			baseValue: 100,
+			scaleFactor: 'beneficiaries'
+		},
+		{
+			type: 'outcome',
+			name: 'Communities Covered',
+			unit: 'communities',
+			baseValue: 3,
+			scaleFactor: 'fixed'
+		}
+	]
+};
+
+function generatePerformanceTargets(
+	projectId: number,
+	categoryKey: CategoryKey,
+	beneficiaries: number,
+	budget: number,
+	rng: SeededRandom
+): PerformanceTarget[] {
+	const indicators = PERFORMANCE_INDICATORS_BY_CATEGORY[categoryKey];
+	const numTargets = rng.nextInt(2, 4);
+	const selectedIndicators = rng.shuffle(indicators).slice(0, numTargets);
+
+	return selectedIndicators.map((indicator, index) => {
+		let targetValue: number;
+
+		switch (indicator.scaleFactor) {
+			case 'budget':
+				// Scale based on budget (per million pesos)
+				targetValue = Math.round(
+					indicator.baseValue * (budget / 1000000) * (0.8 + rng.next() * 0.4)
+				);
+				break;
+			case 'beneficiaries':
+				// Scale based on beneficiaries count
+				targetValue = Math.round(
+					indicator.baseValue * (beneficiaries / 100) * (0.8 + rng.next() * 0.4)
+				);
+				break;
+			case 'fixed':
+				// Fixed value with slight variation
+				targetValue = Math.round(indicator.baseValue * (0.8 + rng.next() * 0.4));
+				break;
+		}
+
+		// Ensure minimum value of 1
+		targetValue = Math.max(1, targetValue);
+
+		return {
+			id: projectId * 100 + index,
+			project_id: projectId,
+			indicator_type: indicator.type,
+			indicator_name: indicator.name,
+			target_value: targetValue,
+			unit_of_measure: indicator.unit
+		};
+	});
+}
 
 function generateMonthlyProgress(
 	projectId: number,
@@ -668,6 +1085,9 @@ export function generateProjects(
 				])
 			: undefined;
 
+		// Catch-up plan for projects with issues
+		const catch_up_plan = hasIssues ? rng.pick(CATCH_UP_PLANS) : undefined;
+
 		const project: Project = {
 			id: i,
 			title: `${title} - ${selectedSitios[0].municipality}`,
@@ -683,10 +1103,18 @@ export function generateProjects(
 			project_year: year,
 			issues,
 			recommendations,
+			catch_up_plan,
 			project_sitios: projectSitios,
 			monthly_progress:
 				monthsElapsed > 0 ? generateMonthlyProgress(i, budget, startDate, monthsElapsed, rng) : [],
 			monthly_targets: generateMonthlyTargets(budget, startDate, durationMonths),
+			performance_targets: generatePerformanceTargets(
+				i,
+				categoryKey,
+				totalBeneficiaries,
+				budget,
+				rng
+			),
 			funding_sources: generateFundingSources(i, budget, rng),
 			budget_components: generateBudgetComponents(i, budget, categoryKey, rng),
 			employment_generated: {
