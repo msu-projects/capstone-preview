@@ -5,11 +5,13 @@
 	interface Props extends Omit<HTMLInputAttributes, 'type' | 'value' | 'files'> {
 		value?: number;
 		clearZeroOnFocus?: boolean;
+		onvaluechange?: (value: number) => void;
 	}
 
 	let {
 		value = $bindable(0),
 		clearZeroOnFocus = true,
+		onvaluechange,
 		class: className,
 		onfocus,
 		onblur,
@@ -69,9 +71,11 @@
 
 		if (!isNaN(numValue)) {
 			value = numValue;
+			onvaluechange?.(numValue);
 		} else if (filtered === '' || filtered === '-') {
 			// Allow empty or just minus sign during typing
 			value = 0;
+			onvaluechange?.(0);
 		}
 
 		oninput?.(e);

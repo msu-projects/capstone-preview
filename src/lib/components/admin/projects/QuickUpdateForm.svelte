@@ -5,6 +5,7 @@
 	import CurrencyInput from '$lib/components/ui/currency-input/currency-input.svelte';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
+	import NumberInput from '$lib/components/ui/number-input/NumberInput.svelte';
 	import * as Select from '$lib/components/ui/select';
 	import { Textarea } from '$lib/components/ui/textarea';
 	import type { PerformanceTarget, PhotoDocumentation, ProjectStatus } from '$lib/types';
@@ -34,12 +35,12 @@
 	interface Props {
 		// Existing fields
 		status: ProjectStatus;
-		physicalActual: string;
+		physicalActual: number;
 		issues: string;
 		recommendations: string;
 		catchUpPlan: string;
-		maleEmployment: string;
-		femaleEmployment: string;
+		maleEmployment: number;
+		femaleEmployment: number;
 		// New fields - Financial
 		totalBudget: number;
 		budgetDisbursed: string; // Cumulative (read-only)
@@ -57,7 +58,7 @@
 		// Photo Documentation
 		photoDocumentation: PhotoDocumentation[];
 		// Performance Indicators
-		achievedOutputs: Record<string, string>;
+		achievedOutputs: Record<string, number>;
 		performanceTargets: PerformanceTarget[];
 		// Callback
 		onSwitchToFull: () => void;
@@ -91,12 +92,12 @@
 		monthlyDisbursement = String(targetDisbursementThisMonth);
 	}
 
-	if (physicalActual === '0') {
-		physicalActual = plannedPercentage;
+	if (physicalActual === 0) {
+		physicalActual = Number(plannedPercentage) || 0;
 	}
 
 	// Derived computed values - Employment
-	let totalEmployment = $derived(Number(maleEmployment || 0) + Number(femaleEmployment || 0));
+	let totalEmployment = $derived(maleEmployment + femaleEmployment);
 
 	// Derived computed values - Budget
 	// Calculate the new cumulative disbursement including this month's input
@@ -128,7 +129,7 @@
 
 	// Derived computed values - Progress slippage
 	let slippageMetrics = $derived(
-		calculateProgressSlippage(Number(plannedPercentage || 0), Number(physicalActual || 0))
+		calculateProgressSlippage(Number(plannedPercentage || 0), physicalActual)
 	);
 
 	// Get status label for display
@@ -448,11 +449,10 @@
 				<div class="space-y-2">
 					<Label for="completion">Actual Progress (%)</Label>
 					<div class="relative">
-						<Input
+						<NumberInput
 							id="completion"
-							type="number"
-							min="0"
-							max="100"
+							min={0}
+							max={100}
 							bind:value={physicalActual}
 							placeholder="0"
 						/>
@@ -494,7 +494,7 @@
 			{/if}
 
 			<!-- Progress warnings -->
-			{#if Number(physicalActual || 0) > 100}
+			{#if physicalActual > 100}
 				<div class="flex items-start gap-2 rounded-lg border border-warning bg-warning/10 p-3">
 					<AlertTriangle class="mt-0.5 size-4 text-warning" />
 					<div class="flex-1 text-xs text-warning">
@@ -649,7 +649,7 @@
 			</div>
 
 			<!-- Beneficiary warnings -->
-			{#if beneficiaryMetrics.status === 'below-target' && Number(physicalActual || 0) > 70}
+			{#if beneficiaryMetrics.status === 'below-target' && physicalActual > 70}
 				<div class="flex items-start gap-2 rounded-lg border border-warning bg-warning/10 p-3">
 					<AlertTriangle class="mt-0.5 size-4 text-warning" />
 					<div class="flex-1 text-xs text-warning">
@@ -671,10 +671,9 @@
 				<!-- Male Employment -->
 				<div class="space-y-2">
 					<Label for="male-employment">Male</Label>
-					<Input
+					<NumberInput
 						id="male-employment"
-						type="number"
-						min="0"
+						min={0}
 						bind:value={maleEmployment}
 						placeholder="0"
 					/>
@@ -683,10 +682,9 @@
 				<!-- Female Employment -->
 				<div class="space-y-2">
 					<Label for="female-employment">Female</Label>
-					<Input
+					<NumberInput
 						id="female-employment"
-						type="number"
-						min="0"
+						min={0}
 						bind:value={femaleEmployment}
 						placeholder="0"
 					/>
@@ -722,7 +720,7 @@
 			<Card.Content class="space-y-4">
 				<div class="grid gap-4 md:grid-cols-2">
 					{#each performanceTargets as target (target.indicator_type)}
-						{@const achieved = Number(achievedOutputs[target.indicator_type] || 0)}
+						{@const achieved = achievedOutputs[target.indicator_type] || 0}
 						{@const progressPct =
 							target.target_value > 0 ? (achieved / target.target_value) * 100 : 0}
 						{@const progressStatus =
@@ -764,15 +762,14 @@
 								<div class="space-y-1">
 									<span class="text-xs text-muted-foreground">Achieved</span>
 									<div class="relative">
-										<Input
+										<NumberInput
 											id="indicator-{target.indicator_type}"
-											type="number"
-											min="0"
-											value={achievedOutputs[target.indicator_type] || '0'}
-											oninput={(e) => {
+											min={0}
+											value={achievedOutputs[target.indicator_type] || 0}
+											onvaluechange={(val) => {
 												achievedOutputs = {
 													...achievedOutputs,
-													[target.indicator_type]: e.currentTarget.value
+													[target.indicator_type]: val
 												};
 											}}
 											class="pr-12 text-sm"

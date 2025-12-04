@@ -19,14 +19,14 @@ import { getCompletionPercentage, getCurrentMonth } from './project-calculations
 export interface QuickUpdateFormData {
 	// Progress & Status
 	status: Project['status'];
-	physicalActual: string;
+	physicalActual: number;
 	plannedPercentage: string;
 	issues: string;
 	recommendations: string;
 	catchUpPlan: string;
 	// Employment
-	maleEmployment: string;
-	femaleEmployment: string;
+	maleEmployment: number;
+	femaleEmployment: number;
 	// Financial
 	totalBudget: number;
 	budgetDisbursed: string; // Cumulative (read-only, for display)
@@ -42,7 +42,7 @@ export interface QuickUpdateFormData {
 	// Photo Documentation
 	photoDocumentation: PhotoDocumentation[];
 	// Performance Indicators
-	achievedOutputs: Record<string, string>; // { 'indicator_id': '50' } - strings for form binding
+	achievedOutputs: Record<string, number>; // { 'indicator_id': 50 } - numbers for type safety
 	performanceTargets: PerformanceTarget[]; // Read-only reference for display
 }
 
@@ -85,14 +85,14 @@ export function projectToQuickUpdate(project: Project): QuickUpdateFormData {
 	return {
 		// Progress & Status
 		status: project.status,
-		physicalActual: completionPct.toString(),
+		physicalActual: completionPct,
 		plannedPercentage: plannedPercentage?.toString() || '0',
 		issues: project.issues || '',
 		recommendations: project.recommendations || '',
 		catchUpPlan: project.catch_up_plan || '',
 		// Employment
-		maleEmployment: project.employment_generated?.male?.toString() || '0',
-		femaleEmployment: project.employment_generated?.female?.toString() || '0',
+		maleEmployment: project.employment_generated?.male || 0,
+		femaleEmployment: project.employment_generated?.female || 0,
 		// Financial
 		totalBudget: project.total_budget || 0,
 		budgetDisbursed: cumulativeDisbursed.toString(), // Cumulative total
@@ -112,7 +112,7 @@ export function projectToQuickUpdate(project: Project): QuickUpdateFormData {
 		photoDocumentation: latestMonthlyProgress?.photo_documentation || [],
 		// Performance Indicators
 		achievedOutputs: Object.fromEntries(
-			Object.entries(latestMonthlyProgress?.achieved_outputs || {}).map(([k, v]) => [k, String(v)])
+			Object.entries(latestMonthlyProgress?.achieved_outputs || {}).map(([k, v]) => [k, Number(v) || 0])
 		),
 		performanceTargets: project.performance_targets || []
 	};
@@ -129,7 +129,7 @@ export function applyQuickUpdateToProject(
 
 	// Calculate slippage
 	const plannedPct = Number(formData.plannedPercentage || 0);
-	const actualPct = Number(formData.physicalActual || 0);
+	const actualPct = formData.physicalActual;
 	const slippage = plannedPct - actualPct;
 
 	const monthlyAmount = Number(formData.monthlyDisbursement || 0);
@@ -151,9 +151,7 @@ export function applyQuickUpdateToProject(
 						beneficiaries_reached: Number(formData.currentBeneficiaries || 0),
 						issues_encountered: formData.issues,
 						photo_documentation: formData.photoDocumentation,
-						achieved_outputs: Object.fromEntries(
-							Object.entries(formData.achievedOutputs || {}).map(([k, v]) => [k, Number(v) || 0])
-						),
+						achieved_outputs: { ...formData.achievedOutputs },
 						status: slippage > 10 ? 'delayed' : slippage < -5 ? 'ahead' : ('on-track' as const),
 						updated_at: new Date().toISOString()
 					}
@@ -167,9 +165,7 @@ export function applyQuickUpdateToProject(
 			month_year: currentMonth,
 			physical_progress_percentage: actualPct,
 			budget_utilized: monthlyAmount,
-			achieved_outputs: Object.fromEntries(
-				Object.entries(formData.achievedOutputs || {}).map(([k, v]) => [k, Number(v) || 0])
-			),
+			achieved_outputs: { ...formData.achievedOutputs },
 			beneficiaries_reached: Number(formData.currentBeneficiaries || 0),
 			issues_encountered: formData.issues,
 			photo_documentation: formData.photoDocumentation,
@@ -190,8 +186,8 @@ export function applyQuickUpdateToProject(
 		catch_up_plan: formData.catchUpPlan,
 		monthly_progress: updatedMonthlyProgress,
 		employment_generated: {
-			male: Number(formData.maleEmployment || 0),
-			female: Number(formData.femaleEmployment || 0)
+			male: formData.maleEmployment,
+			female: formData.femaleEmployment
 		},
 		updated_at: new Date().toISOString()
 	};
@@ -208,7 +204,7 @@ export function validateQuickUpdateData(formData: QuickUpdateFormData): {
 	const errors: string[] = [];
 
 	// Validate progress percentages
-	const actualPct = Number(formData.physicalActual || 0);
+	const actualPct = formData.physicalActual;
 	const plannedPct = Number(formData.plannedPercentage || 0);
 
 	if (actualPct < 0 || actualPct > 100) {
@@ -231,14 +227,11 @@ export function validateQuickUpdateData(formData: QuickUpdateFormData): {
 	}
 
 	// Validate employment
-	const male = Number(formData.maleEmployment || 0);
-	const female = Number(formData.femaleEmployment || 0);
-
-	if (male < 0) {
+	if (formData.maleEmployment < 0) {
 		errors.push('Male employment cannot be negative');
 	}
 
-	if (female < 0) {
+	if (formData.femaleEmployment < 0) {
 		errors.push('Female employment cannot be negative');
 	}
 
