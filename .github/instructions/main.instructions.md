@@ -11,3 +11,4 @@ applyTo: '**'
 - make sure to keep all views mobile responsive and work well on mobile, tablet, and desktop screen sizes.
 - make sure to keep all views light and dark mode friendly, based on the user's system settings.
 - reference the docs/project-process-overview.md for more details about the project
+- reference the .github/frontend-designer-skill.md if you are designing the frontend.
