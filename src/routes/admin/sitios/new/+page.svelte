@@ -381,6 +381,7 @@
 						bind:ducks={livestock_poultry.ducks}
 						bind:households_with_backyard_garden={food_security.households_with_backyard_garden}
 						bind:common_garden_commodities={food_security.common_garden_commodities}
+						{households}
 					/>
 				{:else if activeStep === 'infrastructure'}
 					<InfrastructureHousingTab

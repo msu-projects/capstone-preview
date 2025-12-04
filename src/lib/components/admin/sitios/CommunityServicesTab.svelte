@@ -1,13 +1,24 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
-	import * as Card from '$lib/components/ui/card';
 	import { Checkbox } from '$lib/components/ui/checkbox';
+	import FormSection from '$lib/components/ui/form-section/form-section.svelte';
+	import HelpTooltip from '$lib/components/ui/help-tooltip/help-tooltip.svelte';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { NumberInput } from '$lib/components/ui/number-input';
 	import * as Select from '$lib/components/ui/select';
 	import { Textarea } from '$lib/components/ui/textarea';
-	import { Plus, Trash2 } from '@lucide/svelte';
+	import {
+		AlertTriangle,
+		Bus,
+		Cat,
+		Dog,
+		Megaphone,
+		Plus,
+		Target,
+		Trash2,
+		Users
+	} from '@lucide/svelte';
 
 	let {
 		sectoral_organizations = $bindable(0),
@@ -125,19 +136,22 @@
 	}
 </script>
 
-<Card.Root>
-	<Card.Header>
-		<Card.Title>Community Services</Card.Title>
-		<Card.Description>
-			Community empowerment, communication, transportation, and public health
-		</Card.Description>
-	</Card.Header>
-	<Card.Content class="space-y-6">
-		<!-- Community Empowerment -->
-		<div class="space-y-4">
-			<h3 class="text-lg font-semibold">Community Empowerment</h3>
+<div class="space-y-6">
+	<!-- Community Empowerment -->
+	<FormSection
+		title="Community Empowerment"
+		description="Sectoral organizations and community structures"
+		icon={Users}
+		variant="default"
+	>
+		<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 			<div class="space-y-2">
-				<Label for="sectoral_organizations">Sectoral Organizations</Label>
+				<Label for="sectoral_organizations" class="flex items-center gap-1.5">
+					Sectoral Organizations
+					<HelpTooltip
+						content="Number of community-based sectoral organizations (e.g., women's group, youth group, farmers' association)"
+					/>
+				</Label>
 				<NumberInput
 					id="sectoral_organizations"
 					bind:value={sectoral_organizations}
@@ -146,15 +160,28 @@
 				/>
 			</div>
 		</div>
+	</FormSection>
 
-		<!-- Information Dissemination -->
+	<!-- Information Dissemination & Transportation -->
+	<FormSection
+		title="Communication & Transportation"
+		description="Methods of information sharing and available transport"
+		icon={Megaphone}
+		variant="info"
+		defaultOpen={false}
+	>
 		<div class="space-y-4">
-			<h3 class="text-lg font-semibold">Information Dissemination</h3>
 			<div class="space-y-3">
-				<Label>Available Methods</Label>
-				<div class="grid grid-cols-2 gap-3">
+				<Label>Information Dissemination Methods</Label>
+				<div class="flex flex-wrap gap-2">
 					{#each infoDisseminationMethods as method}
-						<div class="flex items-center space-x-2">
+						<div
+							class="flex items-center gap-2 rounded-lg border px-3 py-2 transition-colors hover:bg-muted/50 {info_dissemination_methods.includes(
+								method
+							)
+								? 'bg-info/10 border-info/30'
+								: ''}"
+						>
 							<Checkbox
 								id={`info_${method}`}
 								checked={info_dissemination_methods.includes(method)}
@@ -162,21 +189,28 @@
 									info_dissemination_methods = toggleItem(info_dissemination_methods, method);
 								}}
 							/>
-							<Label for={`info_${method}`} class="cursor-pointer font-normal">{method}</Label>
+							<Label for={`info_${method}`} class="cursor-pointer text-sm font-normal"
+								>{method}</Label
+							>
 						</div>
 					{/each}
 				</div>
 			</div>
-		</div>
 
-		<!-- Transportation -->
-		<div class="space-y-4">
-			<h3 class="text-lg font-semibold">Transportation</h3>
 			<div class="space-y-3">
-				<Label>Available Methods</Label>
-				<div class="grid grid-cols-2 gap-3">
+				<Label class="flex items-center gap-1.5">
+					<Bus class="size-4" />
+					Transportation Methods
+				</Label>
+				<div class="flex flex-wrap gap-2">
 					{#each transportationMethods as method}
-						<div class="flex items-center space-x-2">
+						<div
+							class="flex items-center gap-2 rounded-lg border px-3 py-2 transition-colors hover:bg-muted/50 {transportation_methods.includes(
+								method
+							)
+								? 'bg-info/10 border-info/30'
+								: ''}"
+						>
 							<Checkbox
 								id={`transport_${method}`}
 								checked={transportation_methods.includes(method)}
@@ -184,253 +218,351 @@
 									transportation_methods = toggleItem(transportation_methods, method);
 								}}
 							/>
-							<Label for={`transport_${method}`} class="cursor-pointer font-normal">{method}</Label>
+							<Label for={`transport_${method}`} class="cursor-pointer text-sm font-normal"
+								>{method}</Label
+							>
 						</div>
 					{/each}
 				</div>
 			</div>
 		</div>
+	</FormSection>
 
-		<!-- Domestic Animals (Public Health) -->
-		<div class="space-y-4">
-			<h3 class="text-lg font-semibold">Domestic Animals (Public Health)</h3>
-			<p class="text-sm text-muted-foreground">
-				Track domestic animals for rabies control and public health monitoring
-			</p>
-
-			<!-- Dogs -->
-			<div class="space-y-2">
-				<Label class="text-base">Dogs</Label>
-				<div class="flex items-center gap-4">
-					<div class="flex items-center gap-2">
-						<Label for="dogs" class="whitespace-nowrap">Total:</Label>
-						<NumberInput id="dogs" bind:value={dogs} placeholder="0" min={0} class="w-24" />
+	<!-- Domestic Animals (Public Health) -->
+	<FormSection
+		title="Domestic Animals"
+		description="Track animals for rabies control and public health"
+		icon={Dog}
+		variant="warning"
+	>
+		<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+			<!-- Dogs Card -->
+			<div class="rounded-lg border bg-muted/20 p-4">
+				<div class="mb-3 flex items-center gap-2">
+					<Dog class="size-5 text-muted-foreground" />
+					<Label class="text-base font-medium">Dogs</Label>
+				</div>
+				<div class="grid grid-cols-2 gap-3">
+					<div class="space-y-1.5">
+						<Label for="dogs" class="text-xs font-normal text-muted-foreground">Total</Label>
+						<NumberInput id="dogs" bind:value={dogs} placeholder="0" min={0} />
 					</div>
-					<div class="flex items-center gap-2">
-						<Label for="dogs_vaccinated" class="whitespace-nowrap">Vaccinated:</Label>
+					<div class="space-y-1.5">
+						<Label for="dogs_vaccinated" class="text-xs font-normal text-muted-foreground"
+							>Vaccinated</Label
+						>
 						<NumberInput
 							id="dogs_vaccinated"
 							bind:value={dogs_vaccinated}
 							placeholder="0"
 							min={0}
 							max={dogs}
-							class="w-24"
 						/>
 					</div>
-					{#if dogs > 0}
-						<span class="text-sm text-muted-foreground">({dog_vaccination_rate}% vaccinated)</span>
-					{/if}
 				</div>
+				{#if dogs > 0}
+					<p class="mt-2 text-xs text-muted-foreground">
+						{dog_vaccination_rate}% vaccination rate
+					</p>
+				{/if}
 			</div>
 
-			<!-- Cats -->
-			<div class="space-y-2">
-				<Label class="text-base">Cats</Label>
-				<div class="flex items-center gap-4">
-					<div class="flex items-center gap-2">
-						<Label for="cats" class="whitespace-nowrap">Total:</Label>
-						<NumberInput id="cats" bind:value={cats} placeholder="0" min={0} class="w-24" />
+			<!-- Cats Card -->
+			<div class="rounded-lg border bg-muted/20 p-4">
+				<div class="mb-3 flex items-center gap-2">
+					<Cat class="size-5 text-muted-foreground" />
+					<Label class="text-base font-medium">Cats</Label>
+				</div>
+				<div class="grid grid-cols-2 gap-3">
+					<div class="space-y-1.5">
+						<Label for="cats" class="text-xs font-normal text-muted-foreground">Total</Label>
+						<NumberInput id="cats" bind:value={cats} placeholder="0" min={0} />
 					</div>
-					<div class="flex items-center gap-2">
-						<Label for="cats_vaccinated" class="whitespace-nowrap">Vaccinated:</Label>
+					<div class="space-y-1.5">
+						<Label for="cats_vaccinated" class="text-xs font-normal text-muted-foreground"
+							>Vaccinated</Label
+						>
 						<NumberInput
 							id="cats_vaccinated"
 							bind:value={cats_vaccinated}
 							placeholder="0"
 							min={0}
 							max={cats}
-							class="w-24"
 						/>
 					</div>
-					{#if cats > 0}
-						<span class="text-sm text-muted-foreground">({cat_vaccination_rate}% vaccinated)</span>
-					{/if}
 				</div>
-			</div>
-
-			<!-- Summary -->
-			<div class="rounded-md border bg-muted/50 p-4">
-				<div class="flex items-center justify-between">
-					<div>
-						<p class="text-sm font-medium">Total Domestic Animals</p>
-						<p class="text-2xl font-bold">{total_count}</p>
-					</div>
-					<div class="text-right">
-						<p class="text-sm font-medium">Overall Vaccination Rate</p>
-						<p class="text-2xl font-bold">{overall_vaccination_rate}%</p>
-						<p class="text-xs text-muted-foreground">
-							{dogs_vaccinated + cats_vaccinated} of {total_count} vaccinated
-						</p>
-					</div>
-				</div>
+				{#if cats > 0}
+					<p class="mt-2 text-xs text-muted-foreground">
+						{cat_vaccination_rate}% vaccination rate
+					</p>
+				{/if}
 			</div>
 		</div>
 
-		<!-- Local Officials -->
-		<div class="space-y-4">
+		<!-- Summary Stats -->
+		<div class="rounded-lg border bg-linear-to-r from-warning/5 to-success/5 p-4">
 			<div class="flex items-center justify-between">
 				<div>
-					<h3 class="text-lg font-semibold">Sitio/Purok Officials</h3>
-					<p class="text-sm text-muted-foreground">Local leaders and officers of the sitio</p>
+					<p class="text-xs text-muted-foreground">Total Domestic Animals</p>
+					<p class="text-2xl font-bold">{total_count}</p>
 				</div>
-				<Button type="button" variant="outline" size="sm" onclick={addLocalOfficial}>
-					<Plus class="mr-1 size-4" />
-					Add Official
+				<div class="text-right">
+					<p class="text-xs text-muted-foreground">Overall Vaccination Rate</p>
+					<p class="text-2xl font-bold">{overall_vaccination_rate}%</p>
+					<p class="text-xs text-muted-foreground">
+						{dogs_vaccinated + cats_vaccinated} of {total_count} vaccinated
+					</p>
+				</div>
+			</div>
+		</div>
+	</FormSection>
+
+	<!-- Local Officials -->
+	<FormSection
+		title="Sitio/Purok Officials"
+		description="Local leaders and officers"
+		icon={Users}
+		variant="success"
+	>
+		<div class="space-y-3">
+			<div class="flex items-center justify-between">
+				<Label>Officials List</Label>
+				<Button
+					type="button"
+					variant="outline"
+					size="sm"
+					onclick={addLocalOfficial}
+					class="h-8 gap-1.5"
+				>
+					<Plus class="size-3.5" />
+					Add
 				</Button>
 			</div>
 
 			{#if local_officials.length === 0}
-				<p class="text-sm text-muted-foreground italic">No officials added yet.</p>
+				<div
+					class="flex flex-col items-center gap-2 rounded-lg border border-dashed py-6 text-center"
+				>
+					<Users class="size-6 text-muted-foreground/50" />
+					<p class="text-sm text-muted-foreground">No officials added yet</p>
+				</div>
 			{:else}
-				<div class="space-y-3">
-					{#each local_officials as official, i (i)}
-						<div class="flex items-center gap-3">
-							<Input bind:value={official.name} placeholder="Official name" class="flex-1" />
-							<Select.Root
-								type="single"
-								value={official.position}
-								onValueChange={(v) => (official.position = v)}
-							>
-								<Select.Trigger class="w-48">
-									{official.position || 'Select position...'}
-								</Select.Trigger>
-								<Select.Content>
-									{#each localOfficialPositions as position}
-										<Select.Item value={position}>{position}</Select.Item>
-									{/each}
-								</Select.Content>
-							</Select.Root>
-							<Button
-								type="button"
-								variant="ghost"
-								size="icon"
-								onclick={() => removeLocalOfficial(i)}
-							>
-								<Trash2 class="size-4 text-destructive" />
-							</Button>
-						</div>
-					{/each}
+				<div class="rounded-lg border">
+					<table class="w-full">
+						<thead>
+							<tr class="border-b bg-muted/30">
+								<th class="px-3 py-2 text-left text-sm font-medium">Name</th>
+								<th class="w-48 px-3 py-2 text-left text-sm font-medium">Position</th>
+								<th class="w-10"></th>
+							</tr>
+						</thead>
+						<tbody>
+							{#each local_officials as official, i (i)}
+								<tr class="border-b last:border-0">
+									<td class="px-3 py-2">
+										<Input bind:value={official.name} placeholder="Official name" />
+									</td>
+									<td class="px-3 py-2">
+										<Select.Root
+											type="single"
+											value={official.position}
+											onValueChange={(v) => (official.position = v ?? '')}
+										>
+											<Select.Trigger class="w-full">
+												{official.position || 'Select position'}
+											</Select.Trigger>
+											<Select.Content>
+												{#each localOfficialPositions as position}
+													<Select.Item value={position}>{position}</Select.Item>
+												{/each}
+											</Select.Content>
+										</Select.Root>
+									</td>
+									<td class="px-1 py-2">
+										<Button
+											type="button"
+											variant="ghost"
+											size="icon"
+											class="size-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+											onclick={() => removeLocalOfficial(i)}
+										>
+											<Trash2 class="size-4" />
+										</Button>
+									</td>
+								</tr>
+							{/each}
+						</tbody>
+					</table>
 				</div>
 			{/if}
 		</div>
+	</FormSection>
 
-		<!-- RST Officials -->
-		<div class="space-y-4">
+	<!-- RST Officials -->
+	<FormSection
+		title="RST Officials"
+		description="Resident Support Team members"
+		icon={Users}
+		variant="default"
+		defaultOpen={false}
+	>
+		<div class="space-y-3">
 			<div class="flex items-center justify-between">
-				<div>
-					<h3 class="text-lg font-semibold">RST (Resident Support Team) Officials</h3>
-					<p class="text-sm text-muted-foreground">Members of the Resident Support Team</p>
-				</div>
-				<Button type="button" variant="outline" size="sm" onclick={addRstOfficial}>
-					<Plus class="mr-1 size-4" />
-					Add RST Official
+				<Label class="flex items-center gap-1.5">
+					Officials List
+					<HelpTooltip
+						content="Resident Support Team - community volunteers assisting in local governance"
+					/>
+				</Label>
+				<Button
+					type="button"
+					variant="outline"
+					size="sm"
+					onclick={addRstOfficial}
+					class="h-8 gap-1.5"
+				>
+					<Plus class="size-3.5" />
+					Add
 				</Button>
 			</div>
 
 			{#if rst_officials.length === 0}
-				<p class="text-sm text-muted-foreground italic">No RST officials added yet.</p>
+				<div
+					class="flex flex-col items-center gap-2 rounded-lg border border-dashed py-6 text-center"
+				>
+					<Users class="size-6 text-muted-foreground/50" />
+					<p class="text-sm text-muted-foreground">No RST officials added yet</p>
+				</div>
 			{:else}
-				<div class="space-y-3">
-					{#each rst_officials as official, i (i)}
-						<div class="flex items-center gap-3">
-							<Input bind:value={official.name} placeholder="Official name" class="flex-1" />
-							<Select.Root
-								type="single"
-								value={official.position}
-								onValueChange={(v) => (official.position = v)}
-							>
-								<Select.Trigger class="w-48">
-									{official.position || 'Select position...'}
-								</Select.Trigger>
-								<Select.Content>
-									{#each rstOfficialPositions as position}
-										<Select.Item value={position}>{position}</Select.Item>
-									{/each}
-								</Select.Content>
-							</Select.Root>
-							<Button
-								type="button"
-								variant="ghost"
-								size="icon"
-								onclick={() => removeRstOfficial(i)}
-							>
-								<Trash2 class="size-4 text-destructive" />
-							</Button>
-						</div>
-					{/each}
+				<div class="rounded-lg border">
+					<table class="w-full">
+						<thead>
+							<tr class="border-b bg-muted/30">
+								<th class="px-3 py-2 text-left text-sm font-medium">Name</th>
+								<th class="w-48 px-3 py-2 text-left text-sm font-medium">Position</th>
+								<th class="w-10"></th>
+							</tr>
+						</thead>
+						<tbody>
+							{#each rst_officials as official, i (i)}
+								<tr class="border-b last:border-0">
+									<td class="px-3 py-2">
+										<Input bind:value={official.name} placeholder="Official name" />
+									</td>
+									<td class="px-3 py-2">
+										<Select.Root
+											type="single"
+											value={official.position}
+											onValueChange={(v) => (official.position = v ?? '')}
+										>
+											<Select.Trigger class="w-full">
+												{official.position || 'Select position'}
+											</Select.Trigger>
+											<Select.Content>
+												{#each rstOfficialPositions as position}
+													<Select.Item value={position}>{position}</Select.Item>
+												{/each}
+											</Select.Content>
+										</Select.Root>
+									</td>
+									<td class="px-1 py-2">
+										<Button
+											type="button"
+											variant="ghost"
+											size="icon"
+											class="size-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+											onclick={() => removeRstOfficial(i)}
+										>
+											<Trash2 class="size-4" />
+										</Button>
+									</td>
+								</tr>
+							{/each}
+						</tbody>
+					</table>
 				</div>
 			{/if}
 		</div>
+	</FormSection>
 
-		<!-- Issues & Concerns -->
-		<div class="space-y-4">
-			<div>
-				<h3 class="text-lg font-semibold">Issues & Concerns</h3>
-				<p class="text-sm text-muted-foreground">
-					Primary issues identified by the community (e.g., Flooding, No Water System)
-				</p>
+	<!-- Issues & Concerns -->
+	<FormSection
+		title="Issues & Concerns"
+		description="Primary community issues (e.g., Flooding, No Water System)"
+		icon={AlertTriangle}
+		variant="warning"
+	>
+		{#if issues_concerns.length > 0}
+			<div class="flex flex-wrap gap-2">
+				{#each issues_concerns as issue, i (i)}
+					<div class="flex items-center gap-1.5 rounded-lg border bg-warning/5 py-1.5 pr-1.5 pl-3">
+						<span class="text-sm">{issue}</span>
+						<Button
+							type="button"
+							variant="ghost"
+							size="icon"
+							class="size-6 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+							onclick={() => removeIssue(i)}
+						>
+							<Trash2 class="size-3.5" />
+						</Button>
+					</div>
+				{/each}
 			</div>
+		{/if}
 
-			{#if issues_concerns.length > 0}
-				<div class="space-y-2">
-					{#each issues_concerns as issue, i (i)}
-						<div class="flex items-center gap-2">
-							<span class="flex-1 rounded-md border bg-muted/50 px-3 py-2 text-sm">{issue}</span>
-							<Button type="button" variant="ghost" size="icon" onclick={() => removeIssue(i)}>
-								<Trash2 class="size-4 text-destructive" />
-							</Button>
-						</div>
-					{/each}
-				</div>
-			{/if}
-
-			<div class="flex items-center gap-2">
-				<Input
-					bind:value={newIssue}
-					placeholder="Add an issue or concern..."
-					class="flex-1"
-					onkeydown={(e) => e.key === 'Enter' && (e.preventDefault(), addIssue())}
-				/>
-				<Button type="button" variant="outline" size="sm" onclick={addIssue}>
-					<Plus class="mr-1 size-4" />
-					Add
-				</Button>
-			</div>
+		<div class="flex items-center gap-2">
+			<Input
+				bind:value={newIssue}
+				placeholder="Add an issue or concern..."
+				class="flex-1"
+				onkeydown={(e) => e.key === 'Enter' && (e.preventDefault(), addIssue())}
+			/>
+			<Button type="button" variant="outline" size="sm" onclick={addIssue} class="h-9 gap-1.5">
+				<Plus class="size-3.5" />
+				Add
+			</Button>
 		</div>
+	</FormSection>
 
-		<!-- Proposed PPAs -->
-		<div class="space-y-4">
-			<div>
-				<h3 class="text-lg font-semibold">Proposed PPAs (Programs, Projects, and Activities)</h3>
-				<p class="text-sm text-muted-foreground">
-					General proposed interventions to address community needs
-				</p>
-			</div>
-
-			{#if proposed_ppas.length > 0}
-				<div class="space-y-2">
-					{#each proposed_ppas as ppa, i (i)}
-						<div class="flex items-start gap-2">
-							<span class="flex-1 rounded-md border bg-muted/50 px-3 py-2 text-sm">{ppa}</span>
-							<Button type="button" variant="ghost" size="icon" onclick={() => removePpa(i)}>
-								<Trash2 class="size-4 text-destructive" />
-							</Button>
+	<!-- Proposed PPAs -->
+	<FormSection
+		title="Proposed PPAs"
+		description="Programs, Projects, and Activities to address community needs"
+		icon={Target}
+		variant="success"
+	>
+		{#if proposed_ppas.length > 0}
+			<div class="space-y-2">
+				{#each proposed_ppas as ppa, i (i)}
+					<div class="flex items-start gap-2">
+						<div class="flex-1 rounded-lg border bg-success/5 px-3 py-2 text-sm">
+							{ppa}
 						</div>
-					{/each}
-				</div>
-			{/if}
-
-			<div class="flex items-start gap-2">
-				<Textarea
-					bind:value={newPpa}
-					placeholder="Add a proposed PPA..."
-					class="min-h-[60px] flex-1"
-				/>
-				<Button type="button" variant="outline" size="sm" onclick={addPpa} class="mt-1">
-					<Plus class="mr-1 size-4" />
-					Add
-				</Button>
+						<Button
+							type="button"
+							variant="ghost"
+							size="icon"
+							class="size-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+							onclick={() => removePpa(i)}
+						>
+							<Trash2 class="size-4" />
+						</Button>
+					</div>
+				{/each}
 			</div>
+		{/if}
+
+		<div class="flex items-start gap-2">
+			<Textarea
+				bind:value={newPpa}
+				placeholder="Add a proposed PPA..."
+				class="min-h-[60px] flex-1"
+			/>
+			<Button type="button" variant="outline" size="sm" onclick={addPpa} class="mt-1 gap-1.5">
+				<Plus class="size-3.5" />
+				Add
+			</Button>
 		</div>
-	</Card.Content>
-</Card.Root>
+	</FormSection>
+</div>

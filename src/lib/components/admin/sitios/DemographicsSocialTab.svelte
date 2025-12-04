@@ -1,11 +1,22 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
-	import * as Card from '$lib/components/ui/card';
 	import * as Command from '$lib/components/ui/command';
+	import { FormSection } from '$lib/components/ui/form-section';
+	import { HelpTooltip } from '$lib/components/ui/help-tooltip';
 	import { Label } from '$lib/components/ui/label';
 	import { NumberInput } from '$lib/components/ui/number-input';
 	import * as Popover from '$lib/components/ui/popover';
-	import { AlertCircle, CheckCircle2, ChevronsUpDown, Plus, Trash2 } from '@lucide/svelte';
+	import { cn } from '$lib/utils';
+	import {
+		AlertCircle,
+		Baby,
+		CheckCircle2,
+		Church,
+		HeartHandshake,
+		Plus,
+		Users,
+		X
+	} from '@lucide/svelte';
 
 	let {
 		male = $bindable(0),
@@ -49,6 +60,14 @@
 	// Validate against population (the source of truth)
 	const isGenderValid = $derived(genderTotal === population);
 	const isAgeValid = $derived(ageTotal === population);
+
+	// Section completion checks
+	const isGenderComplete = $derived(hasGenderData && (!hasPopulation || isGenderValid));
+	const isAgeComplete = $derived(hasAgeData && (!hasPopulation || isAgeValid));
+	const isSocialComplete = $derived(
+		registered_voters > 0 || philhealth_beneficiaries > 0 || fourps_beneficiaries > 0
+	);
+	const isCultureComplete = $derived(ethnicities.length > 0 || religions.length > 0);
 
 	// Predefined options for ethnicities and religions
 	const ethnicityOptions = [
@@ -127,280 +146,411 @@
 	}
 </script>
 
-<Card.Root>
-	<Card.Header>
-		<Card.Title>Demographics & Social Services</Card.Title>
-		<Card.Description>
-			Population breakdown by gender and age groups, plus social service coverage
-		</Card.Description>
-	</Card.Header>
-	<Card.Content class="space-y-6">
-		<!-- Gender Distribution -->
-		<div class="space-y-4">
-			<div class="flex items-center justify-between">
-				<h3 class="text-lg font-semibold">Gender Distribution</h3>
-				{#if hasGenderData && hasPopulation}
-					{#if isGenderValid}
-						<div class="flex items-center gap-2 text-sm text-success">
-							<CheckCircle2 class="size-4" />
-							<span>Matches population ({genderTotal.toLocaleString()})</span>
-						</div>
-					{:else}
-						<div class="flex items-center gap-2 text-sm text-destructive">
-							<AlertCircle class="size-4" />
-							<span
-								>Must equal {population.toLocaleString()} (currently {genderTotal.toLocaleString()})</span
-							>
-						</div>
-					{/if}
-				{/if}
-			</div>
-			<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-				<div class="space-y-2">
-					<Label for="male">Male</Label>
-					<NumberInput id="male" bind:value={male} placeholder="0" min={0} />
-				</div>
-				<div class="space-y-2">
-					<Label for="female">Female</Label>
-					<NumberInput id="female" bind:value={female} placeholder="0" min={0} />
-				</div>
-				<div class="space-y-2">
-					<Label for="total">Total (Auto-calculated)</Label>
-					<NumberInput id="total" value={total} placeholder="0" disabled />
-				</div>
-			</div>
-			{#if hasGenderData && hasPopulation && !isGenderValid}
-				<div class="rounded-md border border-destructive/50 bg-destructive/10 p-3">
-					<div class="flex gap-2">
-						<AlertCircle class="mt-0.5 size-4 shrink-0 text-destructive" />
-						<div class="text-sm">
-							<p class="font-medium text-destructive">
-								Gender distribution must equal total population
-							</p>
-							<p class="mt-1 text-muted-foreground">
-								Male ({male}) + Female ({female}) = {genderTotal}, but Population is {population}
-							</p>
-						</div>
+<div class="space-y-4">
+	<!-- Gender Distribution -->
+	<FormSection
+		title="Gender Distribution"
+		description="Breakdown of population by gender"
+		icon={Users}
+		accent="blue"
+		isComplete={isGenderComplete}
+	>
+		{#snippet actions()}
+			{#if hasGenderData && hasPopulation}
+				{#if isGenderValid}
+					<div
+						class="flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-600"
+					>
+						<CheckCircle2 class="size-3.5" />
+						<span class="hidden sm:inline">Matches population</span>
+						<span class="sm:hidden">Valid</span>
 					</div>
-				</div>
-			{/if}
-		</div>
-
-		<!-- Age Distribution -->
-		<div class="space-y-4">
-			<div class="flex items-center justify-between">
-				<h3 class="text-lg font-semibold">Age Distribution</h3>
-				{#if hasAgeData && hasPopulation}
-					{#if isAgeValid}
-						<div class="flex items-center gap-2 text-sm text-success">
-							<CheckCircle2 class="size-4" />
-							<span>Matches population ({ageTotal.toLocaleString()})</span>
-						</div>
-					{:else}
-						<div class="flex items-center gap-2 text-sm text-destructive">
-							<AlertCircle class="size-4" />
-							<span
-								>Must equal {population.toLocaleString()} (currently {ageTotal.toLocaleString()})</span
-							>
-						</div>
-					{/if}
-				{/if}
-			</div>
-			<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-				<div class="space-y-2">
-					<Label for="age_0_14">0-14 years</Label>
-					<NumberInput id="age_0_14" bind:value={age_0_14} placeholder="0" min={0} />
-				</div>
-				<div class="space-y-2">
-					<Label for="age_15_64">15-64 years</Label>
-					<NumberInput id="age_15_64" bind:value={age_15_64} placeholder="0" min={0} />
-				</div>
-				<div class="space-y-2">
-					<Label for="age_65_above">65+ years</Label>
-					<NumberInput id="age_65_above" bind:value={age_65_above} placeholder="0" min={0} />
-				</div>
-			</div>
-			{#if hasAgeData && hasPopulation && !isAgeValid}
-				<div class="hidden rounded-md border border-destructive/50 bg-destructive/10 p-3">
-					<div class="flex gap-2">
-						<AlertCircle class="mt-0.5 size-4 shrink-0 text-destructive" />
-						<div class="text-sm">
-							<p class="font-medium text-destructive">
-								Age distribution must equal total population
-							</p>
-							<p class="mt-1 text-muted-foreground">
-								Age 0-14 ({age_0_14}) + Age 15-64 ({age_15_64}) + Age 65+ ({age_65_above}) =
-								{ageTotal}, but Population is {population}
-							</p>
-						</div>
+				{:else}
+					<div
+						class="flex items-center gap-1.5 rounded-full bg-destructive/10 px-2.5 py-1 text-xs font-medium text-destructive"
+					>
+						<AlertCircle class="size-3.5" />
+						<span class="hidden sm:inline">Should equal {population.toLocaleString()}</span>
+						<span class="sm:hidden">Mismatch</span>
 					</div>
-				</div>
+				{/if}
 			{/if}
-		</div>
+		{/snippet}
 
-		<!-- Social Services -->
-		<div class="space-y-4">
-			<h3 class="text-lg font-semibold">Social Services Coverage</h3>
-			<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-				<div class="space-y-2">
-					<Label for="registered_voters">Registered Voters</Label>
+		<!-- Compact table layout for gender -->
+		<div class="overflow-hidden rounded-lg border">
+			<div class="grid grid-cols-3 divide-x bg-muted/50">
+				<div class="p-3 text-center">
+					<Label for="male" class="text-xs font-medium text-muted-foreground">Male</Label>
+				</div>
+				<div class="p-3 text-center">
+					<Label for="female" class="text-xs font-medium text-muted-foreground">Female</Label>
+				</div>
+				<div class="p-3 text-center">
+					<Label for="total" class="text-xs font-medium text-muted-foreground">Total</Label>
+				</div>
+			</div>
+			<div class="grid grid-cols-3 divide-x">
+				<div class="p-2">
 					<NumberInput
-						id="registered_voters"
-						bind:value={registered_voters}
+						id="male"
+						bind:value={male}
 						placeholder="0"
 						min={0}
+						class={cn('text-center', male > 0 && 'border-primary/30 bg-primary/5')}
 					/>
 				</div>
-				<div class="space-y-2">
-					<Label for="philhealth">PhilHealth Beneficiaries</Label>
+				<div class="p-2">
 					<NumberInput
-						id="philhealth"
-						bind:value={philhealth_beneficiaries}
+						id="female"
+						bind:value={female}
 						placeholder="0"
 						min={0}
+						class={cn('text-center', female > 0 && 'border-primary/30 bg-primary/5')}
 					/>
 				</div>
-				<div class="space-y-2">
-					<Label for="fourps">4Ps Beneficiaries</Label>
-					<NumberInput id="fourps" bind:value={fourps_beneficiaries} placeholder="0" min={0} />
+				<div class="p-2">
+					<NumberInput
+						id="total"
+						value={total}
+						placeholder="0"
+						disabled
+						class="bg-muted/30 text-center"
+					/>
 				</div>
 			</div>
 		</div>
 
-		<!-- Ethnicity -->
-		<div class="space-y-4">
-			<div class="flex items-center justify-between">
-				<div>
-					<h3 class="text-lg font-semibold">Ethnicity</h3>
-					<p class="text-sm text-muted-foreground">Add ethnic groups present in the sitio</p>
-				</div>
-				<Popover.Root bind:open={ethnicityOpen}>
-					<Popover.Trigger>
-						<Button type="button" variant="outline" size="sm" class="gap-2">
-							<Plus class="size-4" />
-							Add Ethnicity
-							<ChevronsUpDown class="size-4 opacity-50" />
-						</Button>
-					</Popover.Trigger>
-					<Popover.Content class="w-64 p-0" align="end">
-						<Command.Root shouldFilter={false}>
-							<Command.Input placeholder="Search ethnicity..." bind:value={ethnicitySearch} />
-							<Command.List>
-								{#if filteredEthnicities.length === 0 && !isCustomEthnicity}
-									<Command.Empty>No ethnicity found.</Command.Empty>
-								{/if}
-								<Command.Group>
-									{#each filteredEthnicities as ethnicity}
-										<Command.Item value={ethnicity} onSelect={() => addEthnicity(ethnicity)}>
-											{ethnicity}
-										</Command.Item>
-									{/each}
-									{#if isCustomEthnicity}
-										{#if filteredEthnicities.length > 0}
-											<Command.Separator />
-										{/if}
-										<Command.Item value="__custom__" onSelect={() => addEthnicity(ethnicitySearch)}>
-											<Plus class="mr-2 size-4" />
-											Add "{ethnicitySearch}" as custom
-										</Command.Item>
-									{/if}
-								</Command.Group>
-							</Command.List>
-						</Command.Root>
-					</Popover.Content>
-				</Popover.Root>
-			</div>
-
-			<!-- Selected ethnicities list -->
-			{#if ethnicities.length === 0}
-				<p class="text-sm text-muted-foreground italic">No ethnicities added yet.</p>
-			{:else}
-				<div class="space-y-2">
-					{#each ethnicities as ethnicity, i (ethnicity)}
-						<div class="flex items-center justify-between rounded-md border bg-muted/30 px-3 py-2">
-							<span class="text-sm">{ethnicity}</span>
-							<Button
-								type="button"
-								variant="ghost"
-								size="icon"
-								class="size-7"
-								onclick={() => removeEthnicity(ethnicity)}
-							>
-								<Trash2 class="size-4 text-destructive" />
-							</Button>
-						</div>
-					{/each}
-				</div>
-			{/if}
-		</div>
-
-		<!-- Religion -->
-		<div class="space-y-4">
-			<div class="flex items-center justify-between">
-				<div>
-					<h3 class="text-lg font-semibold">Religion</h3>
-					<p class="text-sm text-muted-foreground">
-						Add religious affiliations present in the sitio
+		{#if hasGenderData && hasPopulation && !isGenderValid}
+			<div
+				class="mt-3 flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/5 p-3"
+			>
+				<AlertCircle class="mt-0.5 size-4 shrink-0 text-destructive" />
+				<div class="text-sm">
+					<p class="font-medium text-destructive">Gender distribution must equal population</p>
+					<p class="mt-0.5 text-muted-foreground">
+						Male ({male.toLocaleString()}) + Female ({female.toLocaleString()}) = {genderTotal.toLocaleString()},
+						but Population is {population.toLocaleString()}
 					</p>
 				</div>
-				<Popover.Root bind:open={religionOpen}>
-					<Popover.Trigger>
-						<Button type="button" variant="outline" size="sm" class="gap-2">
-							<Plus class="size-4" />
-							Add Religion
-							<ChevronsUpDown class="size-4 opacity-50" />
-						</Button>
-					</Popover.Trigger>
-					<Popover.Content class="w-64 p-0" align="end">
-						<Command.Root shouldFilter={false}>
-							<Command.Input placeholder="Search religion..." bind:value={religionSearch} />
-							<Command.List>
-								{#if filteredReligions.length === 0 && !isCustomReligion}
-									<Command.Empty>No religion found.</Command.Empty>
-								{/if}
-								<Command.Group>
-									{#each filteredReligions as religion}
-										<Command.Item value={religion} onSelect={() => addReligion(religion)}>
-											{religion}
-										</Command.Item>
-									{/each}
-									{#if isCustomReligion}
-										{#if filteredReligions.length > 0}
-											<Command.Separator />
-										{/if}
-										<Command.Item value="__custom__" onSelect={() => addReligion(religionSearch)}>
-											<Plus class="mr-2 size-4" />
-											Add "{religionSearch}" as custom
-										</Command.Item>
+			</div>
+		{/if}
+	</FormSection>
+
+	<!-- Age Distribution -->
+	<FormSection
+		title="Age Distribution"
+		description="Breakdown of population by age groups"
+		icon={Baby}
+		accent="purple"
+		isComplete={isAgeComplete}
+	>
+		{#snippet actions()}
+			{#if hasAgeData && hasPopulation}
+				{#if isAgeValid}
+					<div
+						class="flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-600"
+					>
+						<CheckCircle2 class="size-3.5" />
+						<span class="hidden sm:inline">Matches population</span>
+						<span class="sm:hidden">Valid</span>
+					</div>
+				{:else}
+					<div
+						class="flex items-center gap-1.5 rounded-full bg-destructive/10 px-2.5 py-1 text-xs font-medium text-destructive"
+					>
+						<AlertCircle class="size-3.5" />
+						<span class="hidden sm:inline">Should equal {population.toLocaleString()}</span>
+						<span class="sm:hidden">Mismatch</span>
+					</div>
+				{/if}
+			{/if}
+		{/snippet}
+
+		<!-- Compact table layout for age -->
+		<div class="overflow-hidden rounded-lg border">
+			<div class="grid grid-cols-3 divide-x bg-muted/50">
+				<div class="p-3 text-center">
+					<Label for="age_0_14" class="text-xs font-medium text-muted-foreground">0-14 years</Label>
+					<p class="text-[10px] text-muted-foreground/70">Children</p>
+				</div>
+				<div class="p-3 text-center">
+					<Label for="age_15_64" class="text-xs font-medium text-muted-foreground"
+						>15-64 years</Label
+					>
+					<p class="text-[10px] text-muted-foreground/70">Working Age</p>
+				</div>
+				<div class="p-3 text-center">
+					<Label for="age_65_above" class="text-xs font-medium text-muted-foreground"
+						>65+ years</Label
+					>
+					<p class="text-[10px] text-muted-foreground/70">Senior</p>
+				</div>
+			</div>
+			<div class="grid grid-cols-3 divide-x">
+				<div class="p-2">
+					<NumberInput
+						id="age_0_14"
+						bind:value={age_0_14}
+						placeholder="0"
+						min={0}
+						class={cn('text-center', age_0_14 > 0 && 'border-primary/30 bg-primary/5')}
+					/>
+				</div>
+				<div class="p-2">
+					<NumberInput
+						id="age_15_64"
+						bind:value={age_15_64}
+						placeholder="0"
+						min={0}
+						class={cn('text-center', age_15_64 > 0 && 'border-primary/30 bg-primary/5')}
+					/>
+				</div>
+				<div class="p-2">
+					<NumberInput
+						id="age_65_above"
+						bind:value={age_65_above}
+						placeholder="0"
+						min={0}
+						class={cn('text-center', age_65_above > 0 && 'border-primary/30 bg-primary/5')}
+					/>
+				</div>
+			</div>
+			<!-- Total row -->
+			<div class="border-t bg-muted/30 px-3 py-2 text-center text-sm">
+				<span class="text-muted-foreground">Total: </span>
+				<span class="font-semibold">{ageTotal.toLocaleString()}</span>
+			</div>
+		</div>
+
+		{#if hasAgeData && hasPopulation && !isAgeValid}
+			<div
+				class="mt-3 flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/5 p-3"
+			>
+				<AlertCircle class="mt-0.5 size-4 shrink-0 text-destructive" />
+				<div class="text-sm">
+					<p class="font-medium text-destructive">Age distribution must equal population</p>
+					<p class="mt-0.5 text-muted-foreground">
+						Sum of age groups = {ageTotal.toLocaleString()}, but Population is {population.toLocaleString()}
+					</p>
+				</div>
+			</div>
+		{/if}
+	</FormSection>
+
+	<!-- Social Services -->
+	<FormSection
+		title="Social Services Coverage"
+		description="Government program beneficiaries and voter registration"
+		icon={HeartHandshake}
+		accent="green"
+		isComplete={isSocialComplete}
+	>
+		<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+			<div class="space-y-2">
+				<Label for="registered_voters" class="flex items-center gap-1.5">
+					Registered Voters
+					<HelpTooltip content="Number of individuals registered to vote in elections" />
+				</Label>
+				<NumberInput
+					id="registered_voters"
+					bind:value={registered_voters}
+					placeholder="0"
+					min={0}
+					class={cn('transition-all', registered_voters > 0 && 'border-primary/30 bg-primary/5')}
+				/>
+			</div>
+			<div class="space-y-2">
+				<Label for="philhealth" class="flex items-center gap-1.5">
+					PhilHealth Beneficiaries
+					<HelpTooltip
+						content="Members of the Philippine Health Insurance Corporation (PhilHealth) who have health coverage"
+					/>
+				</Label>
+				<NumberInput
+					id="philhealth"
+					bind:value={philhealth_beneficiaries}
+					placeholder="0"
+					min={0}
+					class={cn(
+						'transition-all',
+						philhealth_beneficiaries > 0 && 'border-primary/30 bg-primary/5'
+					)}
+				/>
+			</div>
+			<div class="space-y-2">
+				<Label for="fourps" class="flex items-center gap-1.5">
+					4Ps Beneficiaries
+					<HelpTooltip
+						content="Pantawid Pamilyang Pilipino Program (4Ps) is a conditional cash transfer program for poor households with children"
+					/>
+				</Label>
+				<NumberInput
+					id="fourps"
+					bind:value={fourps_beneficiaries}
+					placeholder="0"
+					min={0}
+					class={cn('transition-all', fourps_beneficiaries > 0 && 'border-primary/30 bg-primary/5')}
+				/>
+			</div>
+		</div>
+	</FormSection>
+
+	<!-- Cultural Identity -->
+	<FormSection
+		title="Cultural Identity"
+		description="Ethnic groups and religious affiliations in the community"
+		icon={Church}
+		accent="amber"
+		collapsible
+		defaultOpen={isCultureComplete}
+		isComplete={isCultureComplete}
+	>
+		<div class="space-y-6">
+			<!-- Ethnicity -->
+			<div class="space-y-3">
+				<div class="flex items-center justify-between">
+					<div>
+						<Label class="text-sm font-medium">Ethnicity</Label>
+						<p class="text-xs text-muted-foreground">Ethnic groups present in the sitio</p>
+					</div>
+					<Popover.Root bind:open={ethnicityOpen}>
+						<Popover.Trigger>
+							<Button type="button" variant="outline" size="sm" class="gap-2">
+								<Plus class="size-4" />
+								<span class="hidden sm:inline">Add Ethnicity</span>
+								<span class="sm:hidden">Add</span>
+							</Button>
+						</Popover.Trigger>
+						<Popover.Content class="max-w-[min(280px,calc(100vw-2rem))] p-0" align="end">
+							<Command.Root shouldFilter={false}>
+								<Command.Input placeholder="Search ethnicity..." bind:value={ethnicitySearch} />
+								<Command.List>
+									{#if filteredEthnicities.length === 0 && !isCustomEthnicity}
+										<Command.Empty>No ethnicity found.</Command.Empty>
 									{/if}
-								</Command.Group>
-							</Command.List>
-						</Command.Root>
-					</Popover.Content>
-				</Popover.Root>
+									<Command.Group>
+										{#each filteredEthnicities as ethnicity}
+											<Command.Item value={ethnicity} onSelect={() => addEthnicity(ethnicity)}>
+												{ethnicity}
+											</Command.Item>
+										{/each}
+										{#if isCustomEthnicity}
+											{#if filteredEthnicities.length > 0}
+												<Command.Separator />
+											{/if}
+											<Command.Item
+												value="__custom__"
+												onSelect={() => addEthnicity(ethnicitySearch)}
+											>
+												<Plus class="mr-2 size-4" />
+												Add "{ethnicitySearch}"
+											</Command.Item>
+										{/if}
+									</Command.Group>
+								</Command.List>
+							</Command.Root>
+						</Popover.Content>
+					</Popover.Root>
+				</div>
+
+				<!-- Selected ethnicities as tags -->
+				{#if ethnicities.length === 0}
+					<div
+						class="flex items-center justify-center rounded-lg border border-dashed bg-muted/20 px-4 py-6 text-sm text-muted-foreground"
+					>
+						<p>No ethnicities added yet</p>
+					</div>
+				{:else}
+					<div class="flex flex-wrap gap-2">
+						{#each ethnicities as ethnicity (ethnicity)}
+							<div
+								class="group flex items-center gap-1.5 rounded-full border bg-muted/50 py-1 pr-1 pl-3 text-sm transition-all hover:bg-muted"
+							>
+								<span>{ethnicity}</span>
+								<button
+									type="button"
+									onclick={() => removeEthnicity(ethnicity)}
+									class="flex size-5 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+								>
+									<X class="size-3" />
+								</button>
+							</div>
+						{/each}
+					</div>
+				{/if}
 			</div>
 
-			<!-- Selected religions list -->
-			{#if religions.length === 0}
-				<p class="text-sm text-muted-foreground italic">No religions added yet.</p>
-			{:else}
-				<div class="space-y-2">
-					{#each religions as religion, i (religion)}
-						<div class="flex items-center justify-between rounded-md border bg-muted/30 px-3 py-2">
-							<span class="text-sm">{religion}</span>
-							<Button
-								type="button"
-								variant="ghost"
-								size="icon"
-								class="size-7"
-								onclick={() => removeReligion(religion)}
-							>
-								<Trash2 class="size-4 text-destructive" />
+			<!-- Religion -->
+			<div class="space-y-3">
+				<div class="flex items-center justify-between">
+					<div>
+						<Label class="text-sm font-medium">Religion</Label>
+						<p class="text-xs text-muted-foreground">Religious affiliations in the sitio</p>
+					</div>
+					<Popover.Root bind:open={religionOpen}>
+						<Popover.Trigger>
+							<Button type="button" variant="outline" size="sm" class="gap-2">
+								<Plus class="size-4" />
+								<span class="hidden sm:inline">Add Religion</span>
+								<span class="sm:hidden">Add</span>
 							</Button>
-						</div>
-					{/each}
+						</Popover.Trigger>
+						<Popover.Content class="max-w-[min(280px,calc(100vw-2rem))] p-0" align="end">
+							<Command.Root shouldFilter={false}>
+								<Command.Input placeholder="Search religion..." bind:value={religionSearch} />
+								<Command.List>
+									{#if filteredReligions.length === 0 && !isCustomReligion}
+										<Command.Empty>No religion found.</Command.Empty>
+									{/if}
+									<Command.Group>
+										{#each filteredReligions as religion}
+											<Command.Item value={religion} onSelect={() => addReligion(religion)}>
+												{religion}
+											</Command.Item>
+										{/each}
+										{#if isCustomReligion}
+											{#if filteredReligions.length > 0}
+												<Command.Separator />
+											{/if}
+											<Command.Item value="__custom__" onSelect={() => addReligion(religionSearch)}>
+												<Plus class="mr-2 size-4" />
+												Add "{religionSearch}"
+											</Command.Item>
+										{/if}
+									</Command.Group>
+								</Command.List>
+							</Command.Root>
+						</Popover.Content>
+					</Popover.Root>
 				</div>
-			{/if}
+
+				<!-- Selected religions as tags -->
+				{#if religions.length === 0}
+					<div
+						class="flex items-center justify-center rounded-lg border border-dashed bg-muted/20 px-4 py-6 text-sm text-muted-foreground"
+					>
+						<p>No religions added yet</p>
+					</div>
+				{:else}
+					<div class="flex flex-wrap gap-2">
+						{#each religions as religion (religion)}
+							<div
+								class="group flex items-center gap-1.5 rounded-full border bg-muted/50 py-1 pr-1 pl-3 text-sm transition-all hover:bg-muted"
+							>
+								<span>{religion}</span>
+								<button
+									type="button"
+									onclick={() => removeReligion(religion)}
+									class="flex size-5 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+								>
+									<X class="size-3" />
+								</button>
+							</div>
+						{/each}
+					</div>
+				{/if}
+			</div>
 		</div>
-	</Card.Content>
-</Card.Root>
+	</FormSection>
+</div>
