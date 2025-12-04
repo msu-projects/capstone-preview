@@ -13,6 +13,7 @@
 		Droplets,
 		Home,
 		Recycle,
+		Sun,
 		TrendingDown,
 		Zap
 	} from '@lucide/svelte';
@@ -436,6 +437,28 @@
 								</Badge>
 							</div>
 						{/if}
+
+						<!-- Toilet Facility Types -->
+						{#if sitio.water_sanitation.toilet_facility_types && sitio.water_sanitation.toilet_facility_types.length > 0}
+							<div class="space-y-2">
+								<div class="flex items-center gap-2">
+									<Bath class="size-4 text-purple-500" />
+									<span class="text-xs font-medium tracking-wider text-slate-400 uppercase"
+										>Toilet Facility Types</span
+									>
+								</div>
+								<div class="flex flex-wrap gap-2">
+									{#each sitio.water_sanitation.toilet_facility_types as facilityType}
+										<Badge
+											variant="secondary"
+											class="bg-purple-50 text-purple-700 ring-1 ring-purple-200"
+										>
+											{facilityType}
+										</Badge>
+									{/each}
+								</div>
+							</div>
+						{/if}
 					</div>
 				</div>
 			{:else}
@@ -519,6 +542,26 @@
 							<p class="text-xs text-purple-600">w/ Toilet</p>
 						</div>
 					</div>
+
+					<!-- Alternative Electricity Sources -->
+					{#if sitio.utilities?.alternative_electricity_sources && sitio.utilities.alternative_electricity_sources.length > 0}
+						<div class="space-y-2 rounded-lg border border-amber-200 bg-amber-50/30 p-3">
+							<div class="flex items-center gap-2">
+								<Sun class="size-4 text-amber-600" />
+								<span class="text-sm font-medium text-amber-700">Alternative Power Sources</span>
+							</div>
+							<div class="flex flex-wrap gap-2">
+								{#each sitio.utilities.alternative_electricity_sources as source}
+									<Badge
+										variant="secondary"
+										class="bg-amber-100 text-amber-700 ring-1 ring-amber-200"
+									>
+										{source}
+									</Badge>
+								{/each}
+							</div>
+						</div>
+					{/if}
 
 					<!-- Priority Areas -->
 					{#if criticalAreas.length > 0}

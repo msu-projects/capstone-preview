@@ -12,6 +12,8 @@
 		Activity,
 		Baby,
 		Briefcase,
+		Church,
+		Globe,
 		Home,
 		PersonStanding,
 		TrendingUp,
@@ -454,4 +456,84 @@
 			</div>
 		</Card.Content>
 	</Card.Root>
+
+	<!-- Cultural Diversity -->
+	{#if (sitio.ethnicities && sitio.ethnicities.length > 0) || (sitio.religions && sitio.religions.length > 0)}
+		<Card.Root class="gap-0 py-0 shadow-sm">
+			<Card.Header class="border-b bg-linear-to-r from-violet-50/50 to-pink-50/50 py-6">
+				<div class="flex items-center gap-2">
+					<div class="rounded-lg bg-linear-to-br from-violet-100 to-pink-100 p-1.5">
+						<Globe class="size-4 text-violet-600" />
+					</div>
+					<div>
+						<Card.Title class="text-lg">Cultural Diversity</Card.Title>
+						<Card.Description>Ethnic and religious composition of the community</Card.Description>
+					</div>
+				</div>
+			</Card.Header>
+			<Card.Content class="py-6">
+				<div class="grid gap-6 md:grid-cols-2">
+					<!-- Ethnicities -->
+					{#if sitio.ethnicities && sitio.ethnicities.length > 0}
+						<div class="space-y-3">
+							<div class="flex items-center gap-2">
+								<Globe class="size-4 text-violet-500" />
+								<span class="text-sm font-medium text-slate-700">Ethnicities</span>
+								<Badge variant="outline" class="ml-auto text-xs">
+									{sitio.ethnicities.length} groups
+								</Badge>
+							</div>
+							<div class="flex flex-wrap gap-2">
+								{#each sitio.ethnicities as ethnicity, i}
+									{@const colors = [
+										'bg-violet-100 text-violet-700 ring-violet-200',
+										'bg-purple-100 text-purple-700 ring-purple-200',
+										'bg-fuchsia-100 text-fuchsia-700 ring-fuchsia-200',
+										'bg-pink-100 text-pink-700 ring-pink-200',
+										'bg-rose-100 text-rose-700 ring-rose-200'
+									]}
+									<Badge
+										variant="secondary"
+										class="{colors[i % colors.length]} ring-1 transition-transform hover:scale-105"
+									>
+										{ethnicity}
+									</Badge>
+								{/each}
+							</div>
+						</div>
+					{/if}
+
+					<!-- Religions -->
+					{#if sitio.religions && sitio.religions.length > 0}
+						<div class="space-y-3">
+							<div class="flex items-center gap-2">
+								<Church class="size-4 text-amber-500" />
+								<span class="text-sm font-medium text-slate-700">Religions</span>
+								<Badge variant="outline" class="ml-auto text-xs">
+									{sitio.religions.length} faiths
+								</Badge>
+							</div>
+							<div class="flex flex-wrap gap-2">
+								{#each sitio.religions as religion, i}
+									{@const colors = [
+										'bg-amber-100 text-amber-700 ring-amber-200',
+										'bg-orange-100 text-orange-700 ring-orange-200',
+										'bg-yellow-100 text-yellow-700 ring-yellow-200',
+										'bg-lime-100 text-lime-700 ring-lime-200',
+										'bg-teal-100 text-teal-700 ring-teal-200'
+									]}
+									<Badge
+										variant="secondary"
+										class="{colors[i % colors.length]} ring-1 transition-transform hover:scale-105"
+									>
+										{religion}
+									</Badge>
+								{/each}
+							</div>
+						</div>
+					{/if}
+				</div>
+			</Card.Content>
+		</Card.Root>
+	{/if}
 </div>

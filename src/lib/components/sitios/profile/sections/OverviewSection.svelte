@@ -6,13 +6,17 @@
 	import type { SitioYearlySnapshot } from '$lib/types/sitio-yearly';
 	import { formatCurrency, formatNumber } from '$lib/utils/formatters';
 	import {
+		AlertTriangle,
 		ArrowUpRight,
 		Building2,
+		Crown,
 		FolderKanban,
 		Heart,
 		Home,
 		Leaf,
+		Lightbulb,
 		MapPin,
+		Shield,
 		Sparkles,
 		TrendingUp,
 		Users,
@@ -306,6 +310,156 @@
 			</div>
 		</Card.Content>
 	</Card.Root>
+
+	<!-- Community Leadership -->
+	{#if (sitio.local_officials && sitio.local_officials.length > 0) || (sitio.rst_officials && sitio.rst_officials.length > 0)}
+		<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+			<!-- Local Officials -->
+			{#if sitio.local_officials && sitio.local_officials.length > 0}
+				<Card.Root class="gap-0 py-0 shadow-sm">
+					<Card.Header class="border-b bg-amber-50/50 py-6">
+						<div class="flex items-center gap-2">
+							<div class="rounded-lg bg-amber-100 p-1.5">
+								<Crown class="size-4 text-amber-600" />
+							</div>
+							<Card.Title class="text-lg">Local Officials</Card.Title>
+						</div>
+						<Card.Description>Community leaders and barangay officials</Card.Description>
+					</Card.Header>
+					<Card.Content class="p-0">
+						<div class="divide-y divide-slate-100">
+							{#each sitio.local_officials as official}
+								<div class="flex items-center justify-between px-4 py-3 sm:px-6">
+									<div class="flex items-center gap-3">
+										<div
+											class="flex size-9 items-center justify-center rounded-full bg-amber-100 text-sm font-semibold text-amber-700"
+										>
+											{official.name.charAt(0).toUpperCase()}
+										</div>
+										<span class="font-medium text-slate-900">{official.name}</span>
+									</div>
+									<Badge variant="secondary" class="bg-amber-50 text-amber-700">
+										{official.position}
+									</Badge>
+								</div>
+							{/each}
+						</div>
+					</Card.Content>
+				</Card.Root>
+			{/if}
+
+			<!-- RST Officials -->
+			{#if sitio.rst_officials && sitio.rst_officials.length > 0}
+				<Card.Root class="gap-0 py-0 shadow-sm">
+					<Card.Header class="border-b bg-indigo-50/50 py-6">
+						<div class="flex items-center gap-2">
+							<div class="rounded-lg bg-indigo-100 p-1.5">
+								<Shield class="size-4 text-indigo-600" />
+							</div>
+							<Card.Title class="text-lg">RST Officials</Card.Title>
+						</div>
+						<Card.Description>Resident Support Team members</Card.Description>
+					</Card.Header>
+					<Card.Content class="p-0">
+						<div class="divide-y divide-slate-100">
+							{#each sitio.rst_officials as official}
+								<div class="flex items-center justify-between px-4 py-3 sm:px-6">
+									<div class="flex items-center gap-3">
+										<div
+											class="flex size-9 items-center justify-center rounded-full bg-indigo-100 text-sm font-semibold text-indigo-700"
+										>
+											{official.name.charAt(0).toUpperCase()}
+										</div>
+										<span class="font-medium text-slate-900">{official.name}</span>
+									</div>
+									<Badge variant="secondary" class="bg-indigo-50 text-indigo-700">
+										{official.position}
+									</Badge>
+								</div>
+							{/each}
+						</div>
+					</Card.Content>
+				</Card.Root>
+			{/if}
+		</div>
+	{/if}
+
+	<!-- Community Priorities -->
+	{#if (sitio.issues_concerns && sitio.issues_concerns.length > 0) || (sitio.proposed_ppas && sitio.proposed_ppas.length > 0)}
+		<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+			<!-- Issues & Concerns -->
+			{#if sitio.issues_concerns && sitio.issues_concerns.length > 0}
+				<Card.Root class="gap-0 py-0 shadow-sm">
+					<Card.Header class="border-b bg-rose-50/50 py-6">
+						<div class="flex items-center justify-between">
+							<div class="flex items-center gap-2">
+								<div class="rounded-lg bg-rose-100 p-1.5">
+									<AlertTriangle class="size-4 text-rose-600" />
+								</div>
+								<Card.Title class="text-lg">Issues & Concerns</Card.Title>
+							</div>
+							<Badge variant="outline" class="bg-rose-50 text-rose-700">
+								{sitio.issues_concerns.length} Items
+							</Badge>
+						</div>
+						<Card.Description>Priority areas identified by the community</Card.Description>
+					</Card.Header>
+					<Card.Content class="py-4">
+						<ul class="space-y-2">
+							{#each sitio.issues_concerns as issue, i}
+								<li
+									class="flex items-start gap-3 rounded-lg bg-rose-50/50 px-3 py-2.5 ring-1 ring-rose-100"
+								>
+									<span
+										class="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-rose-200 text-xs font-semibold text-rose-700"
+									>
+										{i + 1}
+									</span>
+									<span class="text-sm text-slate-700">{issue}</span>
+								</li>
+							{/each}
+						</ul>
+					</Card.Content>
+				</Card.Root>
+			{/if}
+
+			<!-- Proposed PPAs -->
+			{#if sitio.proposed_ppas && sitio.proposed_ppas.length > 0}
+				<Card.Root class="gap-0 py-0 shadow-sm">
+					<Card.Header class="border-b bg-emerald-50/50 py-6">
+						<div class="flex items-center justify-between">
+							<div class="flex items-center gap-2">
+								<div class="rounded-lg bg-emerald-100 p-1.5">
+									<Lightbulb class="size-4 text-emerald-600" />
+								</div>
+								<Card.Title class="text-lg">Proposed Programs & Activities</Card.Title>
+							</div>
+							<Badge variant="outline" class="bg-emerald-50 text-emerald-700">
+								{sitio.proposed_ppas.length} PPAs
+							</Badge>
+						</div>
+						<Card.Description>Community-proposed interventions</Card.Description>
+					</Card.Header>
+					<Card.Content class="py-4">
+						<ul class="space-y-2">
+							{#each sitio.proposed_ppas as ppa, i}
+								<li
+									class="flex items-start gap-3 rounded-lg bg-emerald-50/50 px-3 py-2.5 ring-1 ring-emerald-100"
+								>
+									<span
+										class="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-emerald-200 text-xs font-semibold text-emerald-700"
+									>
+										{i + 1}
+									</span>
+									<span class="text-sm text-slate-700">{ppa}</span>
+								</li>
+							{/each}
+						</ul>
+					</Card.Content>
+				</Card.Root>
+			{/if}
+		</div>
+	{/if}
 
 	<!-- Bottom Row: Projects Summary and Additional Info -->
 	<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
