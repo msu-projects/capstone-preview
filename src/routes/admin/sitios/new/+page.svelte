@@ -121,7 +121,7 @@
 
 	let food_security = $state({
 		households_with_backyard_garden: 0,
-		common_garden_commodities: ['', '', '']
+		common_garden_commodities: []
 	});
 
 	// Ethnicity and Religion
@@ -212,6 +212,11 @@
 			? steps[currentStepIndex - 1]?.shortLabel || steps[currentStepIndex - 1]?.label
 			: null
 	);
+
+	$effect(() => {
+		currentStepIndex;
+		scrollTo({ top: 0 });
+	});
 
 	function nextStep() {
 		if (canGoNext) {

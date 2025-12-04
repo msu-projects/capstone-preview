@@ -1,22 +1,17 @@
 <script lang="ts">
-	import { Button } from '$lib/components/ui/button';
+	import { ComboboxMultiSelect, ComboboxWithCount } from '$lib/components/ui/combobox-multi-select';
 	import FormSection from '$lib/components/ui/form-section/form-section.svelte';
 	import HelpTooltip from '$lib/components/ui/help-tooltip/help-tooltip.svelte';
-	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { NumberInput } from '$lib/components/ui/number-input';
-	import * as Select from '$lib/components/ui/select';
 	import { cn } from '$lib/utils';
 	import {
 		AlertCircle,
 		Briefcase,
 		CheckCircle2,
 		Coins,
-		Leaf,
 		PawPrint,
-		Plus,
 		Sprout,
-		Trash2,
 		Wheat
 	} from '@lucide/svelte';
 
@@ -26,7 +21,7 @@
 		farmers_count = $bindable(0),
 		farmer_associations = $bindable(0),
 		farm_area_hectares = $bindable(0),
-		top_crops = $bindable(['']),
+		top_crops = $bindable([]),
 		pigs = $bindable(0),
 		cows = $bindable(0),
 		carabaos = $bindable(0),
@@ -35,7 +30,7 @@
 		chickens = $bindable(0),
 		ducks = $bindable(0),
 		households_with_backyard_garden = $bindable(0),
-		common_garden_commodities = $bindable(['', '', '']),
+		common_garden_commodities = $bindable([]),
 		households = 0
 	}: {
 		employments: Array<{ type: string; count: number }>;
@@ -104,27 +99,39 @@
 		return incomeBrackets.find((v) => v.value === value)?.label ?? 'Unknown';
 	}
 
-	// Helper functions for employment management
-	function addEmployment() {
-		employments.push({ type: '', count: 0 });
-		employments = employments;
-	}
+	// Predefined garden commodities
+	const gardenCommodityOptions = [
+		'Tomatoes',
+		'Eggplant',
+		'Kangkong',
+		'Pechay',
+		'Squash',
+		'String Beans',
+		'Okra',
+		'Ampalaya',
+		'Pepper',
+		'Onion',
+		'Garlic',
+		'Ginger'
+	];
 
-	function removeEmployment(index: number) {
-		employments.splice(index, 1);
-		employments = employments;
-	}
-
-	// Helper functions for top crops management
-	function addCrop() {
-		top_crops.push('');
-		top_crops = top_crops;
-	}
-
-	function removeCrop(index: number) {
-		top_crops.splice(index, 1);
-		top_crops = top_crops;
-	}
+	// Predefined crop options
+	const cropOptions = [
+		'Rice',
+		'Corn',
+		'Coconut',
+		'Banana',
+		'Sugarcane',
+		'Coffee',
+		'Cacao',
+		'Abaca',
+		'Cassava',
+		'Sweet Potato',
+		'Mango',
+		'Pineapple',
+		'Rubber',
+		'Oil Palm'
+	];
 </script>
 
 <div class="space-y-6">
@@ -136,98 +143,21 @@
 		variant="default"
 	>
 		<!-- Employment Types -->
-		<div class="space-y-3">
-			<div class="flex items-center justify-between">
+		<ComboboxWithCount
+			bind:items={employments}
+			options={employmentTypes}
+			placeholder="Search employment type..."
+			addLabel="Add"
+			emptyMessage="No employments added yet"
+			emptyIcon={Briefcase}
+		>
+			{#snippet label()}
 				<Label class="flex items-center gap-1.5">
 					Employment Types
 					<HelpTooltip content="Track the main types of employment in this sitio with counts" />
 				</Label>
-				<Button
-					type="button"
-					variant="outline"
-					size="sm"
-					onclick={addEmployment}
-					class="h-8 gap-1.5"
-				>
-					<Plus class="size-3.5" />
-					Add
-				</Button>
-			</div>
-
-			{#if employments.length === 0}
-				<div
-					class="flex flex-col items-center gap-2 rounded-lg border border-dashed py-8 text-center"
-				>
-					<Briefcase class="size-8 text-muted-foreground/50" />
-					<p class="text-sm text-muted-foreground">No employments added yet</p>
-				</div>
-			{:else}
-				<div class="rounded-lg border">
-					<table class="w-full">
-						<thead>
-							<tr class="border-b bg-muted/30">
-								<th class="px-3 py-2 text-left text-sm font-medium">Type</th>
-								<th class="w-32 px-3 py-2 text-left text-sm font-medium">Count</th>
-								<th class="w-10"></th>
-							</tr>
-						</thead>
-						<tbody>
-							{#each employments as employment, i}
-								<tr class="border-b last:border-0">
-									<td class="px-3 py-2">
-										<Select.Root
-											type="single"
-											value={employment.type}
-											onValueChange={(val) => {
-												if (val) employment.type = val;
-											}}
-										>
-											<Select.Trigger id="employment_type_{i}" class="w-full">
-												{employment.type || 'Select type'}
-											</Select.Trigger>
-											<Select.Content>
-												{#each employmentTypes as type}
-													<Select.Item value={type}>{type}</Select.Item>
-												{/each}
-												<Select.Separator />
-												<div class="p-2">
-													<Label for="custom_employment_{i}" class="text-xs">Custom</Label>
-													<Input
-														id="custom_employment_{i}"
-														bind:value={employment.type}
-														placeholder="Enter custom type"
-														class="mt-1"
-													/>
-												</div>
-											</Select.Content>
-										</Select.Root>
-									</td>
-									<td class="px-3 py-2">
-										<NumberInput
-											id="employment_count_{i}"
-											bind:value={employment.count}
-											placeholder="0"
-											min={0}
-										/>
-									</td>
-									<td class="px-1 py-2">
-										<Button
-											type="button"
-											variant="ghost"
-											size="icon"
-											class="size-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
-											onclick={() => removeEmployment(i)}
-										>
-											<Trash2 class="size-4" />
-										</Button>
-									</td>
-								</tr>
-							{/each}
-						</tbody>
-					</table>
-				</div>
-			{/if}
-		</div>
+			{/snippet}
+		</ComboboxWithCount>
 	</FormSection>
 
 	<!-- Income Brackets Section -->
@@ -341,44 +271,14 @@
 
 		<!-- Top Crops -->
 		<div class="space-y-3">
-			<div class="flex items-center justify-between">
-				<Label>Top Crops</Label>
-				<Button type="button" variant="outline" size="sm" onclick={addCrop} class="h-8 gap-1.5">
-					<Plus class="size-3.5" />
-					Add
-				</Button>
-			</div>
-
-			{#if top_crops.length === 0}
-				<div
-					class="flex flex-col items-center gap-2 rounded-lg border border-dashed py-6 text-center"
-				>
-					<Leaf class="size-6 text-muted-foreground/50" />
-					<p class="text-sm text-muted-foreground">No crops added</p>
-				</div>
-			{:else}
-				<div class="flex flex-wrap gap-2">
-					{#each top_crops as crop, i}
-						<div class="flex items-center gap-1 rounded-lg border bg-background p-1 pr-1.5">
-							<Input
-								id={`crop_${i}`}
-								bind:value={top_crops[i]}
-								placeholder="Crop name"
-								class="h-8 w-32 border-0 bg-transparent px-2 focus-visible:ring-0 focus-visible:ring-offset-0"
-							/>
-							<Button
-								type="button"
-								variant="ghost"
-								size="icon"
-								class="size-6 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-								onclick={() => removeCrop(i)}
-							>
-								<Trash2 class="size-3.5" />
-							</Button>
-						</div>
-					{/each}
-				</div>
-			{/if}
+			<Label>Top Crops</Label>
+			<ComboboxMultiSelect
+				bind:values={top_crops}
+				options={cropOptions}
+				placeholder="Search crop..."
+				addLabel="Add Crop"
+				emptyMessage="No crops added"
+			/>
 		</div>
 	</FormSection>
 
@@ -464,32 +364,33 @@
 		variant="success"
 		defaultOpen={false}
 	>
-		<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-			<div class="space-y-2">
-				<Label for="households_with_backyard_garden" class="flex items-center gap-1.5">
-					Households with Backyard Garden
-					<HelpTooltip
-						content="Number of households that maintain a backyard garden for food production"
+		<div class="flex flex-col gap-4">
+			<div class="grid grid-cols-1 md:grid-cols-2">
+				<div class="space-y-2">
+					<Label for="households_with_backyard_garden" class="flex items-center gap-1.5">
+						Households with Backyard Garden
+						<HelpTooltip
+							content="Number of households that maintain a backyard garden for food production"
+						/>
+					</Label>
+					<NumberInput
+						id="households_with_backyard_garden"
+						bind:value={households_with_backyard_garden}
+						placeholder="0"
+						min={0}
 					/>
-				</Label>
-				<NumberInput
-					id="households_with_backyard_garden"
-					bind:value={households_with_backyard_garden}
-					placeholder="0"
-					min={0}
-				/>
+				</div>
 			</div>
-		</div>
 
-		<div class="space-y-3">
-			<Label>Common Garden Commodities</Label>
-			<div class="grid grid-cols-1 gap-3 md:grid-cols-3">
-				{#each common_garden_commodities as commodity, i}
-					<Input
-						bind:value={common_garden_commodities[i]}
-						placeholder={`Commodity ${i + 1} (e.g., Tomatoes)`}
-					/>
-				{/each}
+			<div class="space-y-3">
+				<Label>Common Garden Commodities</Label>
+				<ComboboxMultiSelect
+					bind:values={common_garden_commodities}
+					options={gardenCommodityOptions}
+					placeholder="Search commodity..."
+					addLabel="Add Commodity"
+					emptyMessage="No commodities added"
+				/>
 			</div>
 		</div>
 	</FormSection>

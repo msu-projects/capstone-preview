@@ -207,9 +207,9 @@
 	$effect(() => {
 		// Update search query based on municipality and barangay
 		if (municipality && barangay) {
-			searchQuery = `${barangay}, ${municipality}, South Cotabato, Philippines`;
+			searchQuery = `${barangay}, ${municipality}, South Cotabato`;
 		} else if (municipality) {
-			searchQuery = `${municipality}, South Cotabato, Philippines`;
+			searchQuery = `${municipality}, South Cotabato`;
 		}
 
 		if (!map) return;

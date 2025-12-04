@@ -1,22 +1,11 @@
 <script lang="ts">
-	import { Button } from '$lib/components/ui/button';
-	import * as Command from '$lib/components/ui/command';
+	import { ComboboxMultiSelect } from '$lib/components/ui/combobox-multi-select';
 	import { FormSection } from '$lib/components/ui/form-section';
 	import { HelpTooltip } from '$lib/components/ui/help-tooltip';
 	import { Label } from '$lib/components/ui/label';
 	import { NumberInput } from '$lib/components/ui/number-input';
-	import * as Popover from '$lib/components/ui/popover';
 	import { cn } from '$lib/utils';
-	import {
-		AlertCircle,
-		Baby,
-		CheckCircle2,
-		Church,
-		HeartHandshake,
-		Plus,
-		Users,
-		X
-	} from '@lucide/svelte';
+	import { AlertCircle, Baby, CheckCircle2, Church, HeartHandshake, Users } from '@lucide/svelte';
 
 	let {
 		male = $bindable(0),
@@ -90,60 +79,6 @@
 		'Seventh Day Adventist',
 		"Jehovah's Witness"
 	];
-
-	// Combobox states
-	let ethnicityOpen = $state(false);
-	let religionOpen = $state(false);
-	let ethnicitySearch = $state('');
-	let religionSearch = $state('');
-
-	// Filter available options (exclude already selected)
-	const availableEthnicities = $derived(ethnicityOptions.filter((e) => !ethnicities.includes(e)));
-	const availableReligions = $derived(religionOptions.filter((r) => !religions.includes(r)));
-
-	// Filtered by search
-	const filteredEthnicities = $derived(
-		availableEthnicities.filter((e) => e.toLowerCase().includes(ethnicitySearch.toLowerCase()))
-	);
-	const filteredReligions = $derived(
-		availableReligions.filter((r) => r.toLowerCase().includes(religionSearch.toLowerCase()))
-	);
-
-	// Check if search is a custom entry
-	const isCustomEthnicity = $derived(
-		ethnicitySearch.trim() !== '' &&
-			!ethnicityOptions.some((e) => e.toLowerCase() === ethnicitySearch.toLowerCase()) &&
-			!ethnicities.some((e) => e.toLowerCase() === ethnicitySearch.toLowerCase())
-	);
-	const isCustomReligion = $derived(
-		religionSearch.trim() !== '' &&
-			!religionOptions.some((r) => r.toLowerCase() === religionSearch.toLowerCase()) &&
-			!religions.some((r) => r.toLowerCase() === religionSearch.toLowerCase())
-	);
-
-	function addEthnicity(value: string) {
-		if (value.trim() && !ethnicities.includes(value.trim())) {
-			ethnicities = [...ethnicities, value.trim()];
-		}
-		ethnicitySearch = '';
-		ethnicityOpen = false;
-	}
-
-	function removeEthnicity(value: string) {
-		ethnicities = ethnicities.filter((e) => e !== value);
-	}
-
-	function addReligion(value: string) {
-		if (value.trim() && !religions.includes(value.trim())) {
-			religions = [...religions, value.trim()];
-		}
-		religionSearch = '';
-		religionOpen = false;
-	}
-
-	function removeReligion(value: string) {
-		religions = religions.filter((r) => r !== value);
-	}
 </script>
 
 <div class="space-y-4">
@@ -409,147 +344,32 @@
 		<div class="space-y-6">
 			<!-- Ethnicity -->
 			<div class="space-y-3">
-				<div class="flex items-center justify-between">
-					<div>
-						<Label class="text-sm font-medium">Ethnicity</Label>
-						<p class="text-xs text-muted-foreground">Ethnic groups present in the sitio</p>
-					</div>
-					<Popover.Root bind:open={ethnicityOpen}>
-						<Popover.Trigger>
-							<Button type="button" variant="outline" size="sm" class="gap-2">
-								<Plus class="size-4" />
-								<span class="hidden sm:inline">Add Ethnicity</span>
-								<span class="sm:hidden">Add</span>
-							</Button>
-						</Popover.Trigger>
-						<Popover.Content class="max-w-[min(280px,calc(100vw-2rem))] p-0" align="end">
-							<Command.Root shouldFilter={false}>
-								<Command.Input placeholder="Search ethnicity..." bind:value={ethnicitySearch} />
-								<Command.List>
-									{#if filteredEthnicities.length === 0 && !isCustomEthnicity}
-										<Command.Empty>No ethnicity found.</Command.Empty>
-									{/if}
-									<Command.Group>
-										{#each filteredEthnicities as ethnicity}
-											<Command.Item value={ethnicity} onSelect={() => addEthnicity(ethnicity)}>
-												{ethnicity}
-											</Command.Item>
-										{/each}
-										{#if isCustomEthnicity}
-											{#if filteredEthnicities.length > 0}
-												<Command.Separator />
-											{/if}
-											<Command.Item
-												value="__custom__"
-												onSelect={() => addEthnicity(ethnicitySearch)}
-											>
-												<Plus class="mr-2 size-4" />
-												Add "{ethnicitySearch}"
-											</Command.Item>
-										{/if}
-									</Command.Group>
-								</Command.List>
-							</Command.Root>
-						</Popover.Content>
-					</Popover.Root>
+				<div>
+					<Label class="text-sm font-medium">Ethnicity</Label>
+					<p class="text-xs text-muted-foreground">Ethnic groups present in the sitio</p>
 				</div>
-
-				<!-- Selected ethnicities as tags -->
-				{#if ethnicities.length === 0}
-					<div
-						class="flex items-center justify-center rounded-lg border border-dashed bg-muted/20 px-4 py-6 text-sm text-muted-foreground"
-					>
-						<p>No ethnicities added yet</p>
-					</div>
-				{:else}
-					<div class="flex flex-wrap gap-2">
-						{#each ethnicities as ethnicity (ethnicity)}
-							<div
-								class="group flex items-center gap-1.5 rounded-full border bg-muted/50 py-1 pr-1 pl-3 text-sm transition-all hover:bg-muted"
-							>
-								<span>{ethnicity}</span>
-								<button
-									type="button"
-									onclick={() => removeEthnicity(ethnicity)}
-									class="flex size-5 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-								>
-									<X class="size-3" />
-								</button>
-							</div>
-						{/each}
-					</div>
-				{/if}
+				<ComboboxMultiSelect
+					bind:values={ethnicities}
+					options={ethnicityOptions}
+					placeholder="Search ethnicity..."
+					addLabel="Add Ethnicity"
+					emptyMessage="No ethnicities added yet"
+				/>
 			</div>
 
 			<!-- Religion -->
 			<div class="space-y-3">
-				<div class="flex items-center justify-between">
-					<div>
-						<Label class="text-sm font-medium">Religion</Label>
-						<p class="text-xs text-muted-foreground">Religious affiliations in the sitio</p>
-					</div>
-					<Popover.Root bind:open={religionOpen}>
-						<Popover.Trigger>
-							<Button type="button" variant="outline" size="sm" class="gap-2">
-								<Plus class="size-4" />
-								<span class="hidden sm:inline">Add Religion</span>
-								<span class="sm:hidden">Add</span>
-							</Button>
-						</Popover.Trigger>
-						<Popover.Content class="max-w-[min(280px,calc(100vw-2rem))] p-0" align="end">
-							<Command.Root shouldFilter={false}>
-								<Command.Input placeholder="Search religion..." bind:value={religionSearch} />
-								<Command.List>
-									{#if filteredReligions.length === 0 && !isCustomReligion}
-										<Command.Empty>No religion found.</Command.Empty>
-									{/if}
-									<Command.Group>
-										{#each filteredReligions as religion}
-											<Command.Item value={religion} onSelect={() => addReligion(religion)}>
-												{religion}
-											</Command.Item>
-										{/each}
-										{#if isCustomReligion}
-											{#if filteredReligions.length > 0}
-												<Command.Separator />
-											{/if}
-											<Command.Item value="__custom__" onSelect={() => addReligion(religionSearch)}>
-												<Plus class="mr-2 size-4" />
-												Add "{religionSearch}"
-											</Command.Item>
-										{/if}
-									</Command.Group>
-								</Command.List>
-							</Command.Root>
-						</Popover.Content>
-					</Popover.Root>
+				<div>
+					<Label class="text-sm font-medium">Religion</Label>
+					<p class="text-xs text-muted-foreground">Religious affiliations in the sitio</p>
 				</div>
-
-				<!-- Selected religions as tags -->
-				{#if religions.length === 0}
-					<div
-						class="flex items-center justify-center rounded-lg border border-dashed bg-muted/20 px-4 py-6 text-sm text-muted-foreground"
-					>
-						<p>No religions added yet</p>
-					</div>
-				{:else}
-					<div class="flex flex-wrap gap-2">
-						{#each religions as religion (religion)}
-							<div
-								class="group flex items-center gap-1.5 rounded-full border bg-muted/50 py-1 pr-1 pl-3 text-sm transition-all hover:bg-muted"
-							>
-								<span>{religion}</span>
-								<button
-									type="button"
-									onclick={() => removeReligion(religion)}
-									class="flex size-5 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-								>
-									<X class="size-3" />
-								</button>
-							</div>
-						{/each}
-					</div>
-				{/if}
+				<ComboboxMultiSelect
+					bind:values={religions}
+					options={religionOptions}
+					placeholder="Search religion..."
+					addLabel="Add Religion"
+					emptyMessage="No religions added yet"
+				/>
 			</div>
 		</div>
 	</FormSection>

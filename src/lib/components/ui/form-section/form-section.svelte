@@ -171,7 +171,7 @@
 		)}
 	>
 		<div class="overflow-hidden">
-			<div class="p-4 pt-0">
+			<div class="space-y-4 p-4 pt-0">
 				{@render children()}
 			</div>
 		</div>
