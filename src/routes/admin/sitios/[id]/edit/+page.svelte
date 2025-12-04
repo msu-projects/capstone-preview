@@ -145,6 +145,20 @@
 		common_garden_commodities: ['', '', '']
 	});
 
+	// Ethnicity and Religion
+	let ethnicities = $state<string[]>([]);
+	let religions = $state<string[]>([]);
+
+	// Local Officials
+	let local_officials = $state<Array<{ name: string; position: string }>>([]);
+	let rst_officials = $state<Array<{ name: string; position: string }>>([]);
+
+	// Primary Priorities - Issues & Concerns
+	let issues_concerns = $state<string[]>([]);
+
+	// Proposed PPAs (Programs, Projects, and Activities)
+	let proposed_ppas = $state<string[]>([]);
+
 	// Load sitio data on mount
 	onMount(() => {
 		const id = $page.params.id;
@@ -263,6 +277,14 @@
 			common_garden_commodities: sitio.food_security?.common_garden_commodities || ['', '', '']
 		};
 
+		// Load new fields
+		ethnicities = sitio.ethnicities || [];
+		religions = sitio.religions || [];
+		local_officials = sitio.local_officials || [];
+		rst_officials = sitio.rst_officials || [];
+		issues_concerns = sitio.issues_concerns || [];
+		proposed_ppas = sitio.proposed_ppas || [];
+
 		isLoading = false;
 	});
 
@@ -331,7 +353,13 @@
 			community_empowerment,
 			housing,
 			domestic_animals,
-			food_security
+			food_security,
+			ethnicities,
+			religions,
+			local_officials,
+			rst_officials,
+			issues_concerns,
+			proposed_ppas
 		};
 
 		const success = updateSitio(sitioId, updatedSitio);
@@ -463,6 +491,8 @@
 							bind:registered_voters={social_services.registered_voters}
 							bind:philhealth_beneficiaries={social_services.philhealth_beneficiaries}
 							bind:fourps_beneficiaries={social_services.fourps_beneficiaries}
+							bind:ethnicities
+							bind:religions
 							{population}
 						/>
 					</Tabs.Content>
@@ -510,6 +540,10 @@
 							bind:cats={domestic_animals.cats}
 							bind:dogs_vaccinated={domestic_animals.dogs_vaccinated}
 							bind:cats_vaccinated={domestic_animals.cats_vaccinated}
+							bind:local_officials
+							bind:rst_officials
+							bind:issues_concerns
+							bind:proposed_ppas
 						/>
 					</Tabs.Content>
 				</Tabs.Root>

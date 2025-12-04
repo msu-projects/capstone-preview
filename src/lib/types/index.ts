@@ -109,6 +109,28 @@ export interface Sitio {
 		alternative_electricity_sources: string[];
 	};
 
+	// Ethnicity and Religion
+	ethnicities?: string[];
+	religions?: string[];
+
+	// Local Officials
+	local_officials?: Array<{
+		name: string;
+		position: string;
+	}>;
+
+	// RST (Resident Support Team) Officials
+	rst_officials?: Array<{
+		name: string;
+		position: string;
+	}>;
+
+	// Primary Priorities - Issues & Concerns
+	issues_concerns?: string[];
+
+	// Proposed PPAs (Programs, Projects, and Activities)
+	proposed_ppas?: string[];
+
 	// Metadata
 	created_at: string;
 	updated_at?: string;
