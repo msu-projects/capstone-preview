@@ -255,9 +255,9 @@
 							class="pl-10"
 						/>
 					</div>
-					<div class="flex gap-2">
+					<div class="flex flex-col gap-2 sm:flex-row">
 						<Select.Root type="single" bind:value={selectedMunicipality}>
-							<Select.Trigger class="w-[200px]">
+							<Select.Trigger class="w-full sm:w-[200px]">
 								{selectedMunicipality === 'all' ? 'All Municipalities' : selectedMunicipality}
 							</Select.Trigger>
 							<Select.Content>
@@ -269,7 +269,7 @@
 						</Select.Root>
 
 						<Select.Root type="single" bind:value={selectedBarangay}>
-							<Select.Trigger class="w-[200px]">
+							<Select.Trigger class="w-full sm:w-[200px]">
 								{selectedBarangay === 'all' ? 'All Barangays' : selectedBarangay}
 							</Select.Trigger>
 							<Select.Content>
