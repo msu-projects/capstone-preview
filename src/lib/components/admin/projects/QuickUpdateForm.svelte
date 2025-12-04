@@ -671,12 +671,7 @@
 				<!-- Male Employment -->
 				<div class="space-y-2">
 					<Label for="male-employment">Male</Label>
-					<NumberInput
-						id="male-employment"
-						min={0}
-						bind:value={maleEmployment}
-						placeholder="0"
-					/>
+					<NumberInput id="male-employment" min={0} bind:value={maleEmployment} placeholder="0" />
 				</div>
 
 				<!-- Female Employment -->

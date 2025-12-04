@@ -112,7 +112,10 @@ export function projectToQuickUpdate(project: Project): QuickUpdateFormData {
 		photoDocumentation: latestMonthlyProgress?.photo_documentation || [],
 		// Performance Indicators
 		achievedOutputs: Object.fromEntries(
-			Object.entries(latestMonthlyProgress?.achieved_outputs || {}).map(([k, v]) => [k, Number(v) || 0])
+			Object.entries(latestMonthlyProgress?.achieved_outputs || {}).map(([k, v]) => [
+				k,
+				Number(v) || 0
+			])
 		),
 		performanceTargets: project.performance_targets || []
 	};
