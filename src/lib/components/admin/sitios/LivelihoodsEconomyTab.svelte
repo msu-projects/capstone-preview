@@ -1,9 +1,16 @@
 <script lang="ts">
-	import { ComboboxMultiSelect, ComboboxWithCount } from '$lib/components/ui/combobox-multi-select';
+	import { ComboboxMultiSelect, ComboboxWithCount } from '$lib/components/ui/combobox';
 	import FormSection from '$lib/components/ui/form-section/form-section.svelte';
 	import HelpTooltip from '$lib/components/ui/help-tooltip/help-tooltip.svelte';
 	import { Label } from '$lib/components/ui/label';
 	import { NumberInput } from '$lib/components/ui/number-input';
+	import {
+		cropOptions,
+		employmentTypeOptions,
+		gardenCommodityOptions,
+		incomeBracketOptions,
+		livestockTypes
+	} from '$lib/config/sitio-options';
 	import { cn } from '$lib/utils';
 	import {
 		AlertCircle,
@@ -59,79 +66,16 @@
 	const hasIncomeData = $derived(totalIncomeHouseholds > 0);
 	const isIncomeDistributionSynced = $derived(households === totalIncomeHouseholds);
 
-	// Employment types (predefined options)
-	const employmentTypes = [
-		'Vendor',
-		'Laborer',
-		'Farmer',
-		'Tricycle Driver',
-		'Construction Worker',
-		'Charcoal Maker'
-	];
-
-	// Income brackets (daily income in PHP) - static
-	const incomeBrackets = [
-		{ label: 'Below ₱100', value: '<=100' },
-		{ label: '₱101 - ₱300', value: '100-300' },
-		{ label: '₱301 - ₱500', value: '300-500' },
-		{ label: 'Above ₱500', value: '>=500' }
-	];
-
-	// Livestock types for compact grid
-	const livestockTypes = [
-		{ id: 'pigs', label: 'Pigs', icon: '🐷' },
-		{ id: 'cows', label: 'Cows', icon: '🐄' },
-		{ id: 'carabaos', label: 'Carabaos', icon: '🦬' },
-		{ id: 'horses', label: 'Horses', icon: '🐴' },
-		{ id: 'goats', label: 'Goats', icon: '🐐' },
-		{ id: 'chickens', label: 'Chickens', icon: '🐔' },
-		{ id: 'ducks', label: 'Ducks', icon: '🦆' }
-	] as const;
-
 	// Initialize income_brackets if empty
 	$effect(() => {
 		if (income_brackets.length === 0) {
-			income_brackets = incomeBrackets.map((b) => ({ bracket: b.value, households: 0 }));
+			income_brackets = incomeBracketOptions.map((b) => ({ bracket: b.value, households: 0 }));
 		}
 	});
 
 	function getLabel(value: string) {
-		return incomeBrackets.find((v) => v.value === value)?.label ?? 'Unknown';
+		return incomeBracketOptions.find((v) => v.value === value)?.label ?? 'Unknown';
 	}
-
-	// Predefined garden commodities
-	const gardenCommodityOptions = [
-		'Tomatoes',
-		'Eggplant',
-		'Kangkong',
-		'Pechay',
-		'Squash',
-		'String Beans',
-		'Okra',
-		'Ampalaya',
-		'Pepper',
-		'Onion',
-		'Garlic',
-		'Ginger'
-	];
-
-	// Predefined crop options
-	const cropOptions = [
-		'Rice',
-		'Corn',
-		'Coconut',
-		'Banana',
-		'Sugarcane',
-		'Coffee',
-		'Cacao',
-		'Abaca',
-		'Cassava',
-		'Sweet Potato',
-		'Mango',
-		'Pineapple',
-		'Rubber',
-		'Oil Palm'
-	];
 </script>
 
 <div class="space-y-6">
@@ -145,7 +89,7 @@
 		<!-- Employment Types -->
 		<ComboboxWithCount
 			bind:items={employments}
-			options={employmentTypes}
+			options={employmentTypeOptions}
 			placeholder="Search employment type..."
 			addLabel="Add"
 			emptyMessage="No employments added yet"

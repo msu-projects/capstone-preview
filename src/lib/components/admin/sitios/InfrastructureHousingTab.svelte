@@ -1,12 +1,21 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
 	import { Checkbox } from '$lib/components/ui/checkbox';
+	import { Combobox } from '$lib/components/ui/combobox';
 	import FormSection from '$lib/components/ui/form-section/form-section.svelte';
 	import HelpTooltip from '$lib/components/ui/help-tooltip/help-tooltip.svelte';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { NumberInput } from '$lib/components/ui/number-input';
 	import * as Select from '$lib/components/ui/select';
+	import {
+		alternativeElectricitySourceOptions,
+		housingOwnershipOptions,
+		housingQualityOptions,
+		toiletFacilityTypeOptions,
+		waterSourceOptions,
+		waterStatusOptions
+	} from '$lib/config/sitio-options';
 	import { Droplets, Home, Plus, Recycle, Trash2, Zap } from '@lucide/svelte';
 
 	let {
@@ -31,28 +40,6 @@
 		ownership_types: Array<{ type: string; count: number }>;
 	} = $props();
 
-	const toiletFacilityTypes = ['Water Sealed', 'Open Pit', 'Pour Flush', 'Composting'];
-	const alternativeElectricitySources = ['Solar', 'Generator', 'Battery'];
-	const housingQualityOptions = ['Concrete', 'Wood', 'Half-Concrete', 'Makeshift'];
-	const housingOwnershipOptions = [
-		'Owned',
-		'Rented',
-		'Protected Land',
-		'Informal Settler',
-		'Owner Consent'
-	];
-	const waterStatusOptions = [
-		'Good',
-		'Needs Repair',
-		'Rehabilitation',
-		'Not Functioning',
-		'Private'
-	];
-
-	// Track which water sources are using custom status
-	let customStatuses = $state<Record<number, boolean>>({});
-	let customInputValues = $state<Record<number, string>>({});
-
 	// Initialize quality_types with default values if empty
 	$effect(() => {
 		if (quality_types.length === 0) {
@@ -67,49 +54,12 @@
 		}
 	});
 
-	// Initialize custom status tracking for existing water sources
-	$effect(() => {
-		water_sources.forEach((source, i) => {
-			if (source.status && !waterStatusOptions.includes(source.status)) {
-				customStatuses[i] = true;
-				customInputValues[i] = source.status;
-			}
-		});
-	});
-
 	function addWaterSource() {
 		water_sources = [...water_sources, { source: '', status: '' }];
 	}
 
 	function removeWaterSource(index: number) {
 		water_sources = water_sources.filter((_, i) => i !== index);
-		// Clean up tracking objects
-		const newCustomStatuses: Record<number, boolean> = {};
-		const newCustomInputValues: Record<number, string> = {};
-		Object.keys(customStatuses).forEach((key) => {
-			const idx = parseInt(key);
-			if (idx < index) {
-				newCustomStatuses[idx] = customStatuses[idx];
-				newCustomInputValues[idx] = customInputValues[idx];
-			} else if (idx > index) {
-				newCustomStatuses[idx - 1] = customStatuses[idx];
-				newCustomInputValues[idx - 1] = customInputValues[idx];
-			}
-		});
-		customStatuses = newCustomStatuses;
-		customInputValues = newCustomInputValues;
-	}
-
-	function handleStatusChange(index: number, value: string | undefined) {
-		if (value) {
-			customStatuses[index] = false;
-			water_sources[index].status = value;
-		}
-	}
-
-	function handleCustomStatusInput(index: number, value: string) {
-		customInputValues[index] = value;
-		water_sources[index].status = value;
 	}
 
 	function addQualityType() {
@@ -212,52 +162,20 @@
 							{#each water_sources as source, i (i)}
 								<tr class="border-b last:border-0">
 									<td class="px-3 py-2">
-										<Input
-											id={`source_${i}`}
+										<Combobox
 											bind:value={source.source}
-											placeholder="e.g., Deep Well, Spring"
+											options={waterSourceOptions}
+											placeholder="Select source"
+											searchPlaceholder="Search source..."
 										/>
 									</td>
 									<td class="px-3 py-2">
-										{#if customStatuses[i]}
-											<Input
-												id={`status_${i}`}
-												value={customInputValues[i] || ''}
-												oninput={(e) => handleCustomStatusInput(i, e.currentTarget.value)}
-												placeholder="Custom status"
-											/>
-										{:else}
-											<Select.Root
-												type="single"
-												value={waterStatusOptions.includes(source.status)
-													? source.status
-													: undefined}
-												onValueChange={(v) => handleStatusChange(i, v)}
-											>
-												<Select.Trigger id={`status_${i}`} class="w-full">
-													{source.status || 'Status'}
-												</Select.Trigger>
-												<Select.Content>
-													{#each waterStatusOptions as option (option)}
-														<Select.Item value={option}>{option}</Select.Item>
-													{/each}
-													<Select.Separator />
-													<div class="p-2">
-														<Label for="custom_status_{i}" class="text-xs">Custom</Label>
-														<Input
-															id="custom_status_{i}"
-															value={customInputValues[i] || ''}
-															oninput={(e) => {
-																handleCustomStatusInput(i, e.currentTarget.value);
-																customStatuses[i] = true;
-															}}
-															placeholder="Enter custom"
-															class="mt-1"
-														/>
-													</div>
-												</Select.Content>
-											</Select.Root>
-										{/if}
+										<Combobox
+											bind:value={source.status}
+											options={waterStatusOptions}
+											placeholder="Condition"
+											searchPlaceholder="Search condition..."
+										/>
 									</td>
 									<td class="px-1 py-2">
 										<Button
@@ -332,7 +250,7 @@
 		<div class="space-y-3">
 			<Label>Toilet Facility Types</Label>
 			<div class="grid grid-cols-2 gap-2 md:grid-cols-4">
-				{#each toiletFacilityTypes as type}
+				{#each toiletFacilityTypeOptions as type}
 					<div
 						class="flex items-center gap-2 rounded-lg border p-3 transition-colors hover:bg-muted/50 {toilet_facility_types.includes(
 							type
@@ -374,7 +292,7 @@
 		<div class="space-y-3">
 			<Label>Alternative Electricity Sources</Label>
 			<div class="flex flex-wrap gap-2">
-				{#each alternativeElectricitySources as source}
+				{#each alternativeElectricitySourceOptions as source}
 					<div
 						class="flex items-center gap-2 rounded-lg border px-3 py-2 transition-colors hover:bg-muted/50 {alternative_electricity_sources.includes(
 							source

@@ -71,13 +71,13 @@
 		farmers_count: 0,
 		farmer_associations: 0,
 		farm_area_hectares: 0,
-		top_crops: ['']
+		top_crops: []
 	});
 
 	// Tab 6: Water & Sanitation
 	let water_sanitation = $state({
 		water_systems_count: 0,
-		water_sources: [{ source: '', status: '' }],
+		water_sources: [],
 		households_without_toilet: 0,
 		toilet_facility_types: [],
 		waste_segregation_practice: null

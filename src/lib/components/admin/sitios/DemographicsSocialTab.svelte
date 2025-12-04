@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { ComboboxMultiSelect } from '$lib/components/ui/combobox-multi-select';
+	import { ComboboxMultiSelect } from '$lib/components/ui/combobox';
 	import { FormSection } from '$lib/components/ui/form-section';
 	import { HelpTooltip } from '$lib/components/ui/help-tooltip';
 	import { Label } from '$lib/components/ui/label';
 	import { NumberInput } from '$lib/components/ui/number-input';
+	import { ethnicityOptions, religionOptions } from '$lib/config/sitio-options';
 	import { cn } from '$lib/utils';
 	import { AlertCircle, Baby, CheckCircle2, Church, HeartHandshake, Users } from '@lucide/svelte';
 
@@ -57,28 +58,6 @@
 		registered_voters > 0 || philhealth_beneficiaries > 0 || fourps_beneficiaries > 0
 	);
 	const isCultureComplete = $derived(ethnicities.length > 0 || religions.length > 0);
-
-	// Predefined options for ethnicities and religions
-	const ethnicityOptions = [
-		'Ilonggo',
-		'Cebuano',
-		'Tagalog',
-		'Ilocano',
-		'Waray',
-		'Muslim',
-		"T'boli",
-		"B'laan"
-	];
-
-	const religionOptions = [
-		'Roman Catholic',
-		'Alliance',
-		'Baptist',
-		'Iglesia ni Cristo',
-		'Islam',
-		'Seventh Day Adventist',
-		"Jehovah's Witness"
-	];
 </script>
 
 <div class="space-y-4">
