@@ -53,18 +53,22 @@
 
 	// Income brackets (daily income in PHP) - static
 	const incomeBrackets = [
-		{ label: '≤100', value: '<=100' },
-		{ label: '100-300', value: '100-300' },
-		{ label: '300-500', value: '300-500' },
-		{ label: '≥500', value: '>=500' }
+		{ label: 'Below ₱100', value: '<=100' },
+		{ label: '₱101 to ₱300', value: '100-300' },
+		{ label: '₱301 to ₱500', value: '300-500' },
+		{ label: 'Above ₱500', value: '>=500' }
 	];
 
 	// Initialize income_brackets if empty
 	$effect(() => {
 		if (income_brackets.length === 0) {
-			income_brackets = incomeBrackets.map((b) => ({ bracket: b.value, households: 0 }));
+			income_brackets = incomeBrackets.map((b) => ({ bracket: b.label, households: 0 }));
 		}
 	});
+
+	function getLabel(value: string) {
+		return incomeBrackets.find((v) => v.value === value)?.label ?? 'Unknown';
+	}
 
 	// Helper functions for employment management
 	function addEmployment() {
@@ -196,7 +200,7 @@
 								<div
 									class="flex h-10 items-center rounded-md border border-input bg-muted px-3 text-sm"
 								>
-									{bracket.bracket}
+									{getLabel(bracket.bracket)}
 								</div>
 							</div>
 							<div class="flex-1">
