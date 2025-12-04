@@ -190,6 +190,7 @@
 						bind:totalBudget={quickUpdateData.totalBudget}
 						bind:budgetDisbursed={quickUpdateData.budgetDisbursed}
 						bind:monthlyDisbursement={quickUpdateData.monthlyDisbursement}
+						targetDisbursementThisMonth={quickUpdateData.targetDisbursementThisMonth}
 						bind:startDate={quickUpdateData.startDate}
 						bind:contractDuration={quickUpdateData.contractDuration}
 						bind:targetBeneficiaries={quickUpdateData.targetBeneficiaries}

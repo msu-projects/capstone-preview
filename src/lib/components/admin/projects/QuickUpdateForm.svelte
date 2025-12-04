@@ -43,6 +43,7 @@
 		totalBudget: number;
 		budgetDisbursed: string; // Cumulative (read-only)
 		monthlyDisbursement: string; // This month only (editable)
+		targetDisbursementThisMonth: number; // Planned budget for this month
 		// New fields - Timeline
 		startDate: string;
 		contractDuration: string;
@@ -69,6 +70,7 @@
 		totalBudget = $bindable(),
 		budgetDisbursed = $bindable(),
 		monthlyDisbursement = $bindable(),
+		targetDisbursementThisMonth,
 		startDate = $bindable(),
 		contractDuration = $bindable(),
 		targetBeneficiaries = $bindable(),
@@ -78,6 +80,14 @@
 		photoDocumentation = $bindable(),
 		onSwitchToFull
 	}: Props = $props();
+
+	if (monthlyDisbursement === '0') {
+		monthlyDisbursement = String(targetDisbursementThisMonth);
+	}
+
+	if (physicalActual === '0') {
+		physicalActual = plannedPercentage;
+	}
 
 	// Derived computed values - Employment
 	let totalEmployment = $derived(Number(maleEmployment || 0) + Number(femaleEmployment || 0));
@@ -239,14 +249,33 @@
 					{/if}
 				</div>
 
+				<!-- Target Disbursement This Month (Read-only) -->
+				<div class="space-y-2">
+					<Label for="target-disbursement" class="flex items-center gap-2">
+						<Badge variant="outline" class="gap-1.5">
+							<Calendar class="size-3" />
+							{currentMonthFormatted}
+						</Badge>
+						Target Amount
+					</Label>
+					<Input
+						id="target-disbursement"
+						type="text"
+						value={formatCurrency(targetDisbursementThisMonth)}
+						disabled
+						class="font-medium opacity-75"
+					/>
+					<p class="text-xs text-muted-foreground">Planned disbursement for this month</p>
+				</div>
+
 				<!-- Monthly Disbursement (Input for THIS month) -->
-				<div class="space-y-2 md:col-span-2">
+				<div class="space-y-2">
 					<Label for="monthly-disbursement" class="flex items-center gap-2">
 						<Badge variant="default" class="gap-1.5">
 							<Calendar class="size-3" />
 							{currentMonthFormatted}
 						</Badge>
-						Amount Disbursed This Month
+						Amount Disbursed
 					</Label>
 					<div class="relative">
 						<CurrencyInput
@@ -259,7 +288,26 @@
 							>PHP</span
 						>
 					</div>
-					<p class="text-xs text-muted-foreground"></p>
+					{#if targetDisbursementThisMonth > 0}
+						{@const disbursedAmount = Number(monthlyDisbursement || 0)}
+						{@const variance = disbursedAmount - targetDisbursementThisMonth}
+						{@const variancePercentage = (disbursedAmount / targetDisbursementThisMonth) * 100}
+						<p class="text-xs text-muted-foreground">
+							{#if variance === 0}
+								On target
+							{:else if variance > 0}
+								<span class="text-primary"
+									>{formatCurrency(variance)} above target ({variancePercentage.toFixed(1)}%)</span
+								>
+							{:else}
+								<span class="text-muted-foreground"
+									>{formatCurrency(Math.abs(variance))} below target ({variancePercentage.toFixed(
+										1
+									)}%)</span
+								>
+							{/if}
+						</p>
+					{/if}
 				</div>
 
 				<!-- Auto-calculated: Balance Remaining -->
@@ -534,7 +582,7 @@
 	</Card.Root>
 
 	<!-- Beneficiaries Section -->
-	<Card.Root>
+	<Card.Root class="hidden">
 		<Card.Header class="flex flex-row items-center justify-between">
 			<div class="space-y-1.5">
 				<div class="flex items-center gap-2">

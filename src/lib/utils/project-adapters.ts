@@ -30,6 +30,7 @@ export interface QuickUpdateFormData {
 	totalBudget: number;
 	budgetDisbursed: string; // Cumulative (read-only, for display)
 	monthlyDisbursement: string; // Amount disbursed THIS month only
+	targetDisbursementThisMonth: number; // Planned budget for THIS month (from MonthlyTarget)
 	// Timeline
 	startDate: string;
 	contractDuration: string;
@@ -71,6 +72,9 @@ export function projectToQuickUpdate(project: Project): QuickUpdateFormData {
 	// Get THIS month's disbursement only (not cumulative)
 	const monthlyDisbursement = latestMonthlyProgress?.budget_utilized || 0;
 
+	// Get target disbursement for this month from monthly_targets
+	const targetDisbursementThisMonth = monthlyTarget?.planned_budget || 0;
+
 	// Get completion percentage from latest monthly progress
 	const completionPct = getCompletionPercentage(project);
 
@@ -89,6 +93,7 @@ export function projectToQuickUpdate(project: Project): QuickUpdateFormData {
 		totalBudget: project.total_budget || 0,
 		budgetDisbursed: cumulativeDisbursed.toString(), // Cumulative total
 		monthlyDisbursement: monthlyDisbursement.toString(), // This month only
+		targetDisbursementThisMonth: targetDisbursementThisMonth, // Planned for this month
 		// Timeline
 		startDate: project.start_date || '',
 		contractDuration: project.contract_duration || '',
