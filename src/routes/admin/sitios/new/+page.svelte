@@ -9,7 +9,6 @@
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
-	import { IsMobile } from '$lib/hooks/is-mobile.svelte';
 	import type { Sitio } from '$lib/types';
 	import { logAuditAction } from '$lib/utils/audit';
 	import { validateDemographics } from '$lib/utils/demographic-validation';
@@ -26,8 +25,6 @@
 		X
 	} from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
-
-	const isMobile = new IsMobile();
 
 	let isSaving = $state(false);
 	let activeStep = $state('basic');

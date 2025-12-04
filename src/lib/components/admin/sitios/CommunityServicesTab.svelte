@@ -1,13 +1,18 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
-	import { Checkbox } from '$lib/components/ui/checkbox';
+	import { Combobox, ComboboxMultiSelect } from '$lib/components/ui/combobox';
 	import FormSection from '$lib/components/ui/form-section/form-section.svelte';
 	import HelpTooltip from '$lib/components/ui/help-tooltip/help-tooltip.svelte';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { NumberInput } from '$lib/components/ui/number-input';
-	import * as Select from '$lib/components/ui/select';
 	import { Textarea } from '$lib/components/ui/textarea';
+	import {
+		infoDisseminationMethodOptions,
+		localOfficialPositionOptions,
+		rstOfficialPositionOptions,
+		transportationMethodOptions
+	} from '$lib/config/sitio-options';
 	import {
 		AlertTriangle,
 		Bus,
@@ -57,38 +62,6 @@
 	const overall_vaccination_rate = $derived(
 		total_count > 0 ? (((dogs_vaccinated + cats_vaccinated) / total_count) * 100).toFixed(1) : '0'
 	);
-
-	const infoDisseminationMethods = [
-		'Radio',
-		'Signages',
-		'Person in Authority',
-		'Assembly',
-		'Newspaper',
-		'TV',
-		'Internet/Social Media'
-	];
-	const transportationMethods = ['Motorcycle', 'Tricycle', '4-Wheels', 'Boat'];
-
-	const localOfficialPositions = [
-		'Sitio/Purok Leader',
-		'Vice-President',
-		'Secretary',
-		'Treasurer',
-		'Auditor',
-		'PIO',
-		'PIO/Bus. Manager',
-		'Business Manager'
-	];
-
-	const rstOfficialPositions = ['Team Leader', 'Assistant Team Leader', 'Secretary', 'Member'];
-
-	function toggleItem(arr: string[], item: string) {
-		if (arr.includes(item)) {
-			return arr.filter((i) => i !== item);
-		} else {
-			return [...arr, item];
-		}
-	}
 
 	// Local Officials management
 	function addLocalOfficial() {
@@ -173,28 +146,14 @@
 		<div class="space-y-4">
 			<div class="space-y-3">
 				<Label>Information Dissemination Methods</Label>
-				<div class="flex flex-wrap gap-2">
-					{#each infoDisseminationMethods as method}
-						<div
-							class="flex items-center gap-2 rounded-lg border px-3 py-2 transition-colors hover:bg-muted/50 {info_dissemination_methods.includes(
-								method
-							)
-								? 'bg-info/10 border-info/30'
-								: ''}"
-						>
-							<Checkbox
-								id={`info_${method}`}
-								checked={info_dissemination_methods.includes(method)}
-								onCheckedChange={() => {
-									info_dissemination_methods = toggleItem(info_dissemination_methods, method);
-								}}
-							/>
-							<Label for={`info_${method}`} class="cursor-pointer text-sm font-normal"
-								>{method}</Label
-							>
-						</div>
-					{/each}
-				</div>
+				<ComboboxMultiSelect
+					bind:values={info_dissemination_methods}
+					options={infoDisseminationMethodOptions}
+					placeholder="Search methods..."
+					addLabel="Add Method"
+					emptyMessage="No methods selected"
+					allowCustom
+				/>
 			</div>
 
 			<div class="space-y-3">
@@ -202,28 +161,14 @@
 					<Bus class="size-4" />
 					Transportation Methods
 				</Label>
-				<div class="flex flex-wrap gap-2">
-					{#each transportationMethods as method}
-						<div
-							class="flex items-center gap-2 rounded-lg border px-3 py-2 transition-colors hover:bg-muted/50 {transportation_methods.includes(
-								method
-							)
-								? 'bg-info/10 border-info/30'
-								: ''}"
-						>
-							<Checkbox
-								id={`transport_${method}`}
-								checked={transportation_methods.includes(method)}
-								onCheckedChange={() => {
-									transportation_methods = toggleItem(transportation_methods, method);
-								}}
-							/>
-							<Label for={`transport_${method}`} class="cursor-pointer text-sm font-normal"
-								>{method}</Label
-							>
-						</div>
-					{/each}
-				</div>
+				<ComboboxMultiSelect
+					bind:values={transportation_methods}
+					options={transportationMethodOptions}
+					placeholder="Search transportation..."
+					addLabel="Add Transport"
+					emptyMessage="No transportation methods selected"
+					allowCustom
+				/>
 			</div>
 		</div>
 	</FormSection>
@@ -363,20 +308,13 @@
 										<Input bind:value={official.name} placeholder="Official name" />
 									</td>
 									<td class="px-3 py-2">
-										<Select.Root
-											type="single"
-											value={official.position}
-											onValueChange={(v) => (official.position = v ?? '')}
-										>
-											<Select.Trigger class="w-full">
-												{official.position || 'Select position'}
-											</Select.Trigger>
-											<Select.Content>
-												{#each localOfficialPositions as position}
-													<Select.Item value={position}>{position}</Select.Item>
-												{/each}
-											</Select.Content>
-										</Select.Root>
+										<Combobox
+											bind:value={official.position}
+											options={localOfficialPositionOptions}
+											placeholder="Select position"
+											searchPlaceholder="Search position..."
+											allowCustom
+										/>
 									</td>
 									<td class="px-1 py-2">
 										<Button
@@ -450,20 +388,13 @@
 										<Input bind:value={official.name} placeholder="Official name" />
 									</td>
 									<td class="px-3 py-2">
-										<Select.Root
-											type="single"
-											value={official.position}
-											onValueChange={(v) => (official.position = v ?? '')}
-										>
-											<Select.Trigger class="w-full">
-												{official.position || 'Select position'}
-											</Select.Trigger>
-											<Select.Content>
-												{#each rstOfficialPositions as position}
-													<Select.Item value={position}>{position}</Select.Item>
-												{/each}
-											</Select.Content>
-										</Select.Root>
+										<Combobox
+											bind:value={official.position}
+											options={rstOfficialPositionOptions}
+											placeholder="Select position"
+											searchPlaceholder="Search position..."
+											allowCustom
+										/>
 									</td>
 									<td class="px-1 py-2">
 										<Button

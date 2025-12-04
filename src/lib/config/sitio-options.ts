@@ -141,3 +141,41 @@ export const housingOwnershipOptions = [
 	'Informal Settler',
 	'Owner Consent'
 ];
+
+// ============================================
+// Community Services Tab Options
+// ============================================
+
+/** Information dissemination methods */
+export const infoDisseminationMethodOptions = [
+	'Radio',
+	'Signages',
+	'Person in Authority',
+	'Assembly',
+	'Newspaper',
+	'TV',
+	'Internet/Social Media'
+];
+
+/** Transportation methods available in the area */
+export const transportationMethodOptions = ['Motorcycle', 'Tricycle', '4-Wheels', 'Boat'];
+
+/** Local sitio/purok official positions */
+export const localOfficialPositionOptions = [
+	'Sitio/Purok Leader',
+	'Vice-President',
+	'Secretary',
+	'Treasurer',
+	'Auditor',
+	'PIO',
+	'PIO/Bus. Manager',
+	'Business Manager'
+];
+
+/** RST (Resident Support Team) official positions */
+export const rstOfficialPositionOptions = [
+	'Team Leader',
+	'Assistant Team Leader',
+	'Secretary',
+	'Member'
+];
