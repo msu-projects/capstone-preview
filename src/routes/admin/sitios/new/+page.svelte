@@ -318,13 +318,13 @@
 	<!-- Header -->
 	<AdminHeader sticky title="Create New Sitio" description="Enter sitio data step by step">
 		{#snippet actions()}
-			<Button variant="outline" onclick={handleCancel} disabled={isSaving} class="gap-2">
+			<Button variant="outline" onclick={handleCancel} disabled={isSaving} class="gap-2" size="sm">
 				<X class="size-4" />
-				Cancel
+				<span class="hidden sm:inline">Cancel</span>
 			</Button>
-			<Button onclick={handleSave} disabled={!canSave || isSaving} class="gap-2">
+			<Button onclick={handleSave} disabled={!canSave || isSaving} class="gap-2" size="sm">
 				<Save class="size-4" />
-				{isSaving ? 'Saving...' : 'Create Sitio'}
+				<span class="hidden sm:inline">{isSaving ? 'Saving...' : 'Create Sitio'}</span>
 			</Button>
 		{/snippet}
 	</AdminHeader>

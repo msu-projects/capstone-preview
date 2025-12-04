@@ -210,12 +210,12 @@
 	<AdminHeader title="Project Management" description="Manage and monitor all projects">
 		{#snippet actions()}
 			<Button variant="outline" size="sm" onclick={handleExport}>
-				<Download class="mr-2" />
-				Export
+				<Download class="size-4 sm:mr-2" />
+				<span class="hidden sm:inline">Export</span>
 			</Button>
 			<Button size="sm" href="/admin/projects/new">
-				<Plus class="mr-2" />
-				Add Project
+				<Plus class="size-4 sm:mr-2" />
+				<span class="hidden sm:inline">Add Project</span>
 			</Button>
 		{/snippet}
 	</AdminHeader>

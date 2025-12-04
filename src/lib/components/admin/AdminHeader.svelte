@@ -16,51 +16,63 @@
 
 {#if sticky}
 	<div class="sticky top-0 z-10 border-b border-border bg-background shadow-sm">
-		<div class="flex items-center justify-between p-4">
-			<div class="flex items-center gap-4">
-				<Sidebar.Trigger class="-ml-1" />
-				<Separator orientation="vertical" class="mr-2 h-6" />
-				<div>
-					<div class="flex items-center gap-3">
-						<h1 class="text-2xl font-bold">{title}</h1>
-						{#if badges}
-							{@render badges()}
-						{/if}
+		<div class="flex flex-col gap-3 p-3 sm:p-4">
+			<!-- Top row: sidebar trigger, title, and actions -->
+			<div class="flex items-center justify-between gap-2">
+				<div class="flex min-w-0 items-center gap-2 sm:gap-4">
+					<Sidebar.Trigger class="-ml-1 shrink-0" />
+					<Separator orientation="vertical" class="hidden h-6 sm:block" />
+					<div class="min-w-0 flex-1">
+						<div class="flex flex-wrap items-center gap-2 sm:gap-3">
+							<h1 class="truncate text-lg font-bold sm:text-xl md:text-2xl">{title}</h1>
+							{#if badges}
+								<div class="flex shrink-0 items-center gap-1">
+									{@render badges()}
+								</div>
+							{/if}
+						</div>
 					</div>
-					{#if description}
-						<p class="mt-1 text-sm text-muted-foreground">{description}</p>
-					{/if}
 				</div>
+				{#if actions}
+					<div class="flex shrink-0 items-center gap-1.5 sm:gap-2">
+						{@render actions()}
+					</div>
+				{/if}
 			</div>
-			{#if actions}
-				<div class="flex items-center gap-2">
-					{@render actions()}
-				</div>
+			<!-- Description row (if present) -->
+			{#if description}
+				<p class="pl-8 text-xs text-muted-foreground sm:pl-12 sm:text-sm">{description}</p>
 			{/if}
 		</div>
 	</div>
 {:else}
 	<header class="border-b bg-card">
-		<div class="flex items-center justify-between p-6">
-			<div class="flex items-center gap-4">
-				<Sidebar.Trigger class="-ml-1" />
-				<Separator orientation="vertical" class="mr-2 h-6" />
-				<div>
-					<div class="flex items-center gap-3">
-						<h1 class="text-3xl font-bold">{title}</h1>
-						{#if badges}
-							{@render badges()}
-						{/if}
+		<div class="flex flex-col gap-3 p-4 sm:p-6">
+			<!-- Top row: sidebar trigger, title, and actions -->
+			<div class="flex items-center justify-between gap-2">
+				<div class="flex min-w-0 items-center gap-2 sm:gap-4">
+					<Sidebar.Trigger class="-ml-1 shrink-0" />
+					<Separator orientation="vertical" class="hidden h-6 sm:block" />
+					<div class="min-w-0 flex-1">
+						<div class="flex flex-wrap items-center gap-2 sm:gap-3">
+							<h1 class="truncate text-xl font-bold sm:text-2xl md:text-3xl">{title}</h1>
+							{#if badges}
+								<div class="flex shrink-0 items-center gap-1">
+									{@render badges()}
+								</div>
+							{/if}
+						</div>
 					</div>
-					{#if description}
-						<p class="text-muted-foreground">{description}</p>
-					{/if}
 				</div>
+				{#if actions}
+					<div class="flex shrink-0 items-center gap-1.5 sm:gap-2">
+						{@render actions()}
+					</div>
+				{/if}
 			</div>
-			{#if actions}
-				<div class="flex gap-2">
-					{@render actions()}
-				</div>
+			<!-- Description row (if present) -->
+			{#if description}
+				<p class="pl-8 text-xs text-muted-foreground sm:pl-12 sm:text-sm">{description}</p>
 			{/if}
 		</div>
 	</header>

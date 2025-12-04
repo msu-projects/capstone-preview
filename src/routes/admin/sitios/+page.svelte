@@ -230,13 +230,13 @@
 	<!-- Header -->
 	<AdminHeader title="Sitios" description="Manage sitio data and demographics">
 		{#snippet actions()}
-			<Button variant="outline" onclick={() => goto('/admin/import')}>
-				<Upload class="mr-2 size-4" />
-				Import Data
+			<Button variant="outline" onclick={() => goto('/admin/import')} size="sm">
+				<Upload class="size-4 sm:mr-2" />
+				<span class="hidden sm:inline">Import Data</span>
 			</Button>
-			<Button onclick={() => goto('/admin/sitios/new')}>
-				<Plus class="mr-2 size-4" />
-				Add Sitio
+			<Button onclick={() => goto('/admin/sitios/new')} size="sm">
+				<Plus class="size-4 sm:mr-2" />
+				<span class="hidden sm:inline">Add Sitio</span>
 			</Button>
 		{/snippet}
 	</AdminHeader>

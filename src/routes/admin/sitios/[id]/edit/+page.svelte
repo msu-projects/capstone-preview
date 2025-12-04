@@ -484,13 +484,19 @@
 			description="Update information for {name || 'this sitio'}"
 		>
 			{#snippet actions()}
-				<Button variant="outline" onclick={handleCancel} disabled={isSaving} class="gap-2">
+				<Button
+					variant="outline"
+					onclick={handleCancel}
+					disabled={isSaving}
+					class="gap-2"
+					size="sm"
+				>
 					<X class="size-4" />
-					Cancel
+					<span class="hidden sm:inline">Cancel</span>
 				</Button>
-				<Button onclick={handleSave} disabled={!canSave || isSaving} class="gap-2">
+				<Button onclick={handleSave} disabled={!canSave || isSaving} class="gap-2" size="sm">
 					<Save class="size-4" />
-					{isSaving ? 'Saving...' : 'Update Sitio'}
+					<span class="hidden sm:inline">{isSaving ? 'Saving...' : 'Update Sitio'}</span>
 				</Button>
 			{/snippet}
 		</AdminHeader>

@@ -222,13 +222,13 @@
 	<!-- Header -->
 	<AdminHeader title="Audit Logs" description="Track all system activities and user actions">
 		{#snippet actions()}
-			<Button variant="outline" onclick={exportLogs}>
-				<Download class="mr-2 h-4 w-4" />
-				Export CSV
+			<Button variant="outline" onclick={exportLogs} size="sm">
+				<Download class="size-4 sm:mr-2" />
+				<span class="hidden sm:inline">Export CSV</span>
 			</Button>
-			<Button variant="outline" onclick={refreshLogs}>
-				<RefreshCw class="mr-2 h-4 w-4" />
-				Refresh
+			<Button variant="outline" onclick={refreshLogs} size="sm">
+				<RefreshCw class="size-4 sm:mr-2" />
+				<span class="hidden sm:inline">Refresh</span>
 			</Button>
 		{/snippet}
 	</AdminHeader>

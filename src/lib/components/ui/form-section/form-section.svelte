@@ -46,7 +46,7 @@
 	// Support both variant and accent (deprecated) props
 	const effectiveVariant = $derived(variantProp ?? accent ?? 'default');
 
-	let isOpen = $state(defaultOpen);
+	let isOpen = $state(true);
 
 	const variantColors: Record<Variant, string> = {
 		default: 'border-l-muted-foreground/30',

@@ -277,9 +277,9 @@
 	<AdminHeader title="User Management" description="Manage user accounts and permissions">
 		{#snippet actions()}
 			{#if canManageUsers}
-				<Button onclick={openCreateDialog}>
-					<Plus class="mr-2 h-4 w-4" />
-					Add User
+				<Button onclick={openCreateDialog} size="sm">
+					<Plus class="size-4 sm:mr-2" />
+					<span class="hidden sm:inline">Add User</span>
 				</Button>
 			{/if}
 		{/snippet}

@@ -211,12 +211,12 @@
 	<AdminHeader title="Dashboard" description="Overview of projects, sitios, and activities">
 		{#snippet actions()}
 			<Button variant="outline" size="sm" onclick={handleExportReport}>
-				<Download class="mr-2" />
-				Export Report
+				<Download class="size-4 sm:mr-2" />
+				<span class="hidden sm:inline">Export Report</span>
 			</Button>
 			<Button size="sm" href="/admin/projects/new">
-				<Plus class="mr-2" />
-				New Project
+				<Plus class="size-4 sm:mr-2" />
+				<span class="hidden sm:inline">New Project</span>
 			</Button>
 		{/snippet}
 	</AdminHeader>
