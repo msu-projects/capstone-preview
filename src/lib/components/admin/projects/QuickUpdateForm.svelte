@@ -330,6 +330,137 @@
 		</Card.Content>
 	</Card.Root>
 
+	<!-- Enhanced Progress Section -->
+	<Card.Root>
+		<Card.Header class="flex flex-row items-center justify-between">
+			<div class="space-y-1.5">
+				<Card.Title>Physical Progress & Status</Card.Title>
+				<Card.Description>Update project status, progress, and current stage</Card.Description>
+			</div>
+			{#if slippageMetrics.status !== 'on-track'}
+				<Badge variant={getBadgeVariant(slippageMetrics.status)}>
+					{#if slippageMetrics.status === 'ahead'}
+						<TrendingUp class="mr-1 size-3" />
+					{:else}
+						<TrendingDown class="mr-1 size-3" />
+					{/if}
+					{slippageMetrics.formattedMessage}
+				</Badge>
+			{:else}
+				<Badge variant="default">
+					<CheckCircle class="mr-1 size-3" />
+					On Schedule
+				</Badge>
+			{/if}
+		</Card.Header>
+		<Card.Content class="space-y-4">
+			<div class="grid gap-4 md:grid-cols-2">
+				<!-- Status -->
+				<div class="space-y-2">
+					<Label for="status">Project Status</Label>
+					<Select.Root type="single" bind:value={status}>
+						<Select.Trigger id="status" class="w-full">
+							{getStatusLabel(status)}
+						</Select.Trigger>
+						<Select.Content>
+							<Select.Item value="planning" label="Planning">Planning</Select.Item>
+							<Select.Item value="in-progress" label="In Progress">In Progress</Select.Item>
+							<Select.Item value="completed" label="Completed">Completed</Select.Item>
+							<Select.Item value="suspended" label="Suspended">Suspended</Select.Item>
+						</Select.Content>
+					</Select.Root>
+				</div>
+
+				<!-- Planned Percentage (for comparison) -->
+				<div class="space-y-2">
+					<Label for="planned-percentage">Planned Progress (%)</Label>
+					<div class="relative">
+						<Input
+							id="planned-percentage"
+							type="number"
+							min="0"
+							max="100"
+							bind:value={plannedPercentage}
+							placeholder="0"
+							disabled={true}
+						/>
+						<span class="pointer-events-none absolute top-2.5 right-3 text-sm text-muted-foreground"
+							>%</span
+						>
+					</div>
+				</div>
+
+				<!-- Actual Completion Percentage -->
+				<div class="space-y-2">
+					<Label for="completion">Actual Progress (%)</Label>
+					<div class="relative">
+						<Input
+							id="completion"
+							type="number"
+							min="0"
+							max="100"
+							bind:value={physicalActual}
+							placeholder="0"
+						/>
+						<span class="pointer-events-none absolute top-2.5 right-3 text-sm text-muted-foreground"
+							>%</span
+						>
+					</div>
+				</div>
+			</div>
+
+			<!-- Slippage indicator -->
+			{#if slippageMetrics.slippage !== 0}
+				<div class="rounded-lg border bg-muted/30 p-3">
+					<div class="mb-1 text-xs font-medium text-muted-foreground">Schedule Variance</div>
+					<div class="flex items-center gap-2">
+						{#if slippageMetrics.status === 'ahead'}
+							<TrendingUp class="size-4 text-primary" />
+							<span class="text-sm font-semibold text-primary">
+								{Math.abs(slippageMetrics.slippage).toFixed(2)}% ahead of schedule
+							</span>
+						{:else if slippageMetrics.status === 'behind'}
+							{#if slippageMetrics.severity === 'severe'}
+								<TrendingDown class="size-4 text-destructive" />
+								<span class="text-sm font-semibold text-destructive">
+									{Math.abs(slippageMetrics.slippage).toFixed(2)}% behind schedule (Severe)
+								</span>
+							{:else}
+								<TrendingDown class="size-4 text-muted-foreground" />
+								<span class="text-sm font-semibold text-muted-foreground">
+									{Math.abs(slippageMetrics.slippage).toFixed(2)}% behind schedule
+									{#if slippageMetrics.severity === 'moderate'}
+										(Moderate)
+									{/if}
+								</span>
+							{/if}
+						{/if}
+					</div>
+				</div>
+			{/if}
+
+			<!-- Progress warnings -->
+			{#if Number(physicalActual || 0) > 100}
+				<div class="flex items-start gap-2 rounded-lg border border-warning bg-warning/10 p-3">
+					<AlertTriangle class="mt-0.5 size-4 text-warning" />
+					<div class="flex-1 text-xs text-warning">
+						<strong>Invalid Progress:</strong> Progress percentage cannot exceed 100%.
+					</div>
+				</div>
+			{:else if slippageMetrics.severity === 'severe'}
+				<div
+					class="flex items-start gap-2 rounded-lg border border-destructive bg-destructive/10 p-3"
+				>
+					<AlertTriangle class="mt-0.5 size-4 text-destructive" />
+					<div class="flex-1 text-xs text-destructive">
+						<strong>Severe Delay:</strong> Project is significantly behind schedule. Review catch-up
+						plan below.
+					</div>
+				</div>
+			{/if}
+		</Card.Content>
+	</Card.Root>
+
 	<!-- Timeline Section -->
 	<Card.Root>
 		<Card.Header class="flex flex-row items-center justify-between">
@@ -444,18 +575,6 @@
 					/>
 				</div>
 
-				<!-- Households Reached -->
-				<!-- <div class="space-y-2">
-					<Label for="households-reached">Households Reached</Label>
-					<Input
-						id="households-reached"
-						type="number"
-						min="0"
-						bind:value={householdsReached}
-						placeholder="0"
-					/>
-				</div> -->
-
 				<!-- Auto-calculated: Remaining -->
 				<div class="space-y-2 md:col-span-3">
 					<Label class="flex items-center gap-1.5">
@@ -485,177 +604,6 @@
 					</div>
 				</div>
 			{/if}
-		</Card.Content>
-	</Card.Root>
-
-	<!-- Enhanced Progress Section -->
-	<Card.Root>
-		<Card.Header class="flex flex-row items-center justify-between">
-			<div class="space-y-1.5">
-				<Card.Title>Physical Progress & Status</Card.Title>
-				<Card.Description>Update project status, progress, and current stage</Card.Description>
-			</div>
-			{#if slippageMetrics.status !== 'on-track'}
-				<Badge variant={getBadgeVariant(slippageMetrics.status)}>
-					{#if slippageMetrics.status === 'ahead'}
-						<TrendingUp class="mr-1 size-3" />
-					{:else}
-						<TrendingDown class="mr-1 size-3" />
-					{/if}
-					{slippageMetrics.formattedMessage}
-				</Badge>
-			{:else}
-				<Badge variant="default">
-					<CheckCircle class="mr-1 size-3" />
-					On Schedule
-				</Badge>
-			{/if}
-		</Card.Header>
-		<Card.Content class="space-y-4">
-			<div class="grid gap-4 md:grid-cols-2">
-				<!-- Status -->
-				<div class="space-y-2">
-					<Label for="status">Project Status</Label>
-					<Select.Root type="single" bind:value={status}>
-						<Select.Trigger id="status" class="w-full">
-							{getStatusLabel(status)}
-						</Select.Trigger>
-						<Select.Content>
-							<Select.Item value="planning" label="Planning">Planning</Select.Item>
-							<Select.Item value="in-progress" label="In Progress">In Progress</Select.Item>
-							<Select.Item value="completed" label="Completed">Completed</Select.Item>
-							<Select.Item value="suspended" label="Suspended">Suspended</Select.Item>
-						</Select.Content>
-					</Select.Root>
-				</div>
-
-				<!-- Planned Percentage (for comparison) -->
-				<div class="space-y-2">
-					<Label for="planned-percentage">Planned Progress (%)</Label>
-					<div class="relative">
-						<Input
-							id="planned-percentage"
-							type="number"
-							min="0"
-							max="100"
-							bind:value={plannedPercentage}
-							placeholder="0"
-						/>
-						<span class="pointer-events-none absolute top-2.5 right-3 text-sm text-muted-foreground"
-							>%</span
-						>
-					</div>
-				</div>
-
-				<!-- Actual Completion Percentage -->
-				<div class="space-y-2">
-					<Label for="completion">Actual Progress (%)</Label>
-					<div class="relative">
-						<Input
-							id="completion"
-							type="number"
-							min="0"
-							max="100"
-							bind:value={physicalActual}
-							placeholder="0"
-						/>
-						<span class="pointer-events-none absolute top-2.5 right-3 text-sm text-muted-foreground"
-							>%</span
-						>
-					</div>
-				</div>
-			</div>
-
-			<!-- Slippage indicator -->
-			{#if slippageMetrics.slippage !== 0}
-				<div class="rounded-lg border bg-muted/30 p-3">
-					<div class="mb-1 text-xs font-medium text-muted-foreground">Schedule Variance</div>
-					<div class="flex items-center gap-2">
-						{#if slippageMetrics.status === 'ahead'}
-							<TrendingUp class="size-4 text-primary" />
-							<span class="text-sm font-semibold text-primary">
-								{Math.abs(slippageMetrics.slippage).toFixed(2)}% ahead of schedule
-							</span>
-						{:else if slippageMetrics.status === 'behind'}
-							{#if slippageMetrics.severity === 'severe'}
-								<TrendingDown class="size-4 text-destructive" />
-								<span class="text-sm font-semibold text-destructive">
-									{Math.abs(slippageMetrics.slippage).toFixed(2)}% behind schedule (Severe)
-								</span>
-							{:else}
-								<TrendingDown class="size-4 text-muted-foreground" />
-								<span class="text-sm font-semibold text-muted-foreground">
-									{Math.abs(slippageMetrics.slippage).toFixed(2)}% behind schedule
-									{#if slippageMetrics.severity === 'moderate'}
-										(Moderate)
-									{/if}
-								</span>
-							{/if}
-						{/if}
-					</div>
-				</div>
-			{/if}
-
-			<!-- Progress warnings -->
-			{#if Number(physicalActual || 0) > 100}
-				<div class="flex items-start gap-2 rounded-lg border border-warning bg-warning/10 p-3">
-					<AlertTriangle class="mt-0.5 size-4 text-warning" />
-					<div class="flex-1 text-xs text-warning">
-						<strong>Invalid Progress:</strong> Progress percentage cannot exceed 100%.
-					</div>
-				</div>
-			{:else if slippageMetrics.severity === 'severe'}
-				<div
-					class="flex items-start gap-2 rounded-lg border border-destructive bg-destructive/10 p-3"
-				>
-					<AlertTriangle class="mt-0.5 size-4 text-destructive" />
-					<div class="flex-1 text-xs text-destructive">
-						<strong>Severe Delay:</strong> Project is significantly behind schedule. Review catch-up
-						plan below.
-					</div>
-				</div>
-			{/if}
-		</Card.Content>
-	</Card.Root>
-
-	<Card.Root>
-		<Card.Header>
-			<Card.Title>Status Summary</Card.Title>
-			<Card.Description>Document issues, recommendations, and catch-up plans</Card.Description>
-		</Card.Header>
-		<Card.Content class="space-y-4">
-			<!-- Issues -->
-			<div class="space-y-2">
-				<Label for="issues">Issues Encountered</Label>
-				<Textarea
-					id="issues"
-					bind:value={issues}
-					placeholder="Describe any issues or challenges encountered during implementation"
-					rows={3}
-				/>
-			</div>
-
-			<!-- Recommendations -->
-			<div class="space-y-2">
-				<Label for="recommendations">Recommendations</Label>
-				<Textarea
-					id="recommendations"
-					bind:value={recommendations}
-					placeholder="Provide recommendations for addressing issues or improving implementation"
-					rows={3}
-				/>
-			</div>
-
-			<!-- Catch-Up Plan -->
-			<div class="space-y-2">
-				<Label for="catchup-plan">Catch-Up Plan</Label>
-				<Textarea
-					id="catchup-plan"
-					bind:value={catchUpPlan}
-					placeholder="Outline action plans to address delays or improve progress"
-					rows={3}
-				/>
-			</div>
 		</Card.Content>
 	</Card.Root>
 
@@ -701,6 +649,50 @@
 						class="opacity-75"
 					/>
 				</div>
+			</div>
+		</Card.Content>
+	</Card.Root>
+
+	<Card.Root>
+		<Card.Header>
+			<Card.Title>Status Summary</Card.Title>
+			<Card.Description>Document issues, recommendations, and catch-up plans</Card.Description>
+		</Card.Header>
+		<Card.Content class="space-y-4">
+			<!-- Issues -->
+			<div class="space-y-2">
+				<Label for="issues">Issues Encountered</Label>
+				<Textarea
+					id="issues"
+					bind:value={issues}
+					placeholder="Describe any issues or challenges encountered during implementation"
+					rows={3}
+					class="h-25"
+				/>
+			</div>
+
+			<!-- Recommendations -->
+			<div class="space-y-2">
+				<Label for="recommendations">Recommendations</Label>
+				<Textarea
+					id="recommendations"
+					bind:value={recommendations}
+					placeholder="Provide recommendations for addressing issues or improving implementation"
+					rows={3}
+					class="h-25"
+				/>
+			</div>
+
+			<!-- Catch-Up Plan -->
+			<div class="space-y-2">
+				<Label for="catchup-plan">Catch-Up Plan</Label>
+				<Textarea
+					id="catchup-plan"
+					bind:value={catchUpPlan}
+					placeholder="Outline action plans to address delays or improve progress"
+					rows={3}
+					class="h-25"
+				/>
 			</div>
 		</Card.Content>
 	</Card.Root>

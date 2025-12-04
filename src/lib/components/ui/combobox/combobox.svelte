@@ -77,7 +77,11 @@
 				{/if}
 				<Command.Group>
 					{#each filteredOptions as option (option)}
-						<Command.Item value={option} onSelect={() => selectValue(option)}>
+						<Command.Item
+							value={option}
+							onSelect={() => selectValue(option)}
+							class="cursor-pointer"
+						>
 							<Check class={cn('mr-2 size-4', value === option ? 'opacity-100' : 'opacity-0')} />
 							{option}
 						</Command.Item>

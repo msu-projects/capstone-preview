@@ -119,22 +119,12 @@
 		}
 	});
 
-	// Check if a tab can be accessed (all previous tabs must be valid)
-	const canAccessTab = $derived((tabName: string) => {
-		const tabIndex = tabOrder.indexOf(tabName);
-		if (tabIndex === 0) return true; // First tab is always accessible
-		if (tabIndex === 1) return isTab1Valid;
-		if (tabIndex === 2) return isTab1Valid && isTab2Valid;
-		if (tabIndex === 3) return isTab1Valid && isTab2Valid && isTab3Valid;
-		if (tabIndex === 4) return isTab1Valid && isTab2Valid && isTab3Valid && isTab4Valid;
-		return false;
+	// Check if a tab can be accessed (all tabs are freely accessible)
+	const canAccessTab = $derived((_tabName: string) => {
+		return true;
 	});
 
 	function nextTab() {
-		if (!getCurrentTabValid()) {
-			toast.error('Please complete all required fields before proceeding');
-			return;
-		}
 		if (canGoNext) {
 			activeTab = tabOrder[currentTabIndex + 1];
 		}
@@ -148,20 +138,6 @@
 
 	function handleTabChange(newTab: string | undefined) {
 		if (!newTab) return;
-
-		// Allow going back to any previous tab
-		const newTabIndex = tabOrder.indexOf(newTab);
-		if (newTabIndex <= currentTabIndex) {
-			activeTab = newTab;
-			return;
-		}
-
-		// For going forward, check if we can access the tab
-		if (!canAccessTab(newTab)) {
-			toast.error('Please complete previous sections before accessing this tab');
-			return;
-		}
-
 		activeTab = newTab;
 	}
 
@@ -306,44 +282,28 @@
 									<CircleAlert class="size-3 text-destructive" />
 								{/if}
 							</Tabs.Trigger>
-							<Tabs.Trigger
-								value="location"
-								disabled={!canAccessTab('location')}
-								class="flex items-center gap-2 text-xs"
-							>
+							<Tabs.Trigger value="location" class="flex items-center gap-2 text-xs">
 								<MapPin class="size-4" />
 								<span class="hidden lg:inline">Location &</span> Beneficiaries
 								{#if !isTab2Valid && activeTab !== 'location'}
 									<CircleAlert class="size-3 text-destructive" />
 								{/if}
 							</Tabs.Trigger>
-							<Tabs.Trigger
-								value="performance"
-								disabled={!canAccessTab('performance')}
-								class="flex items-center gap-2 text-xs"
-							>
+							<Tabs.Trigger value="performance" class="flex items-center gap-2 text-xs">
 								<Target class="size-4" />
 								<span class="hidden lg:inline">Performance</span> Targets
 								{#if !isTab3Valid && activeTab !== 'performance'}
 									<CircleAlert class="size-3 text-destructive" />
 								{/if}
 							</Tabs.Trigger>
-							<Tabs.Trigger
-								value="budget"
-								disabled={!canAccessTab('budget')}
-								class="flex items-center gap-2 text-xs"
-							>
+							<Tabs.Trigger value="budget" class="flex items-center gap-2 text-xs">
 								<Banknote class="size-4" />
 								<span class="hidden lg:inline">Budget &</span> Resources
 								{#if !isTab4Valid && activeTab !== 'budget'}
 									<CircleAlert class="size-3 text-destructive" />
 								{/if}
 							</Tabs.Trigger>
-							<Tabs.Trigger
-								value="monthly"
-								disabled={!canAccessTab('monthly')}
-								class="flex items-center gap-2 text-xs"
-							>
+							<Tabs.Trigger value="monthly" class="flex items-center gap-2 text-xs">
 								<Calendar class="size-4" />
 								<span class="hidden lg:inline">Monthly</span> Planning
 								{#if !isTab5Valid && activeTab !== 'monthly'}
@@ -421,12 +381,7 @@
 							{isSaving ? 'Saving...' : 'Save Project'}
 						</Button>
 					{:else}
-						<Button
-							variant="outline"
-							onclick={nextTab}
-							disabled={!canGoNext || !getCurrentTabValid()}
-							class="gap-2"
-						>
+						<Button variant="outline" onclick={nextTab} disabled={!canGoNext} class="gap-2">
 							Next
 							<ArrowRight class="size-4" />
 						</Button>

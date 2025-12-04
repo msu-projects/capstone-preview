@@ -2,8 +2,8 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
+	import { Combobox } from '$lib/components/ui/combobox';
 	import { CurrencyInput } from '$lib/components/ui/currency-input';
-	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import * as Select from '$lib/components/ui/select';
 	import * as Table from '$lib/components/ui/table';
@@ -26,14 +26,10 @@
 		'provincial'
 	);
 	let newSourceAmount = $state('');
-	let isCustomSourceName = $state(false);
-	let selectedSourceNameOption = $state('');
 
 	// Budget Component Form
 	let newComponentName = $state('');
 	let newComponentAmount = $state('');
-	let isCustomComponentName = $state(false);
-	let selectedComponentNameOption = $state('');
 
 	const totalBudgetAmount = $derived(Number(totalBudget) || 0);
 
@@ -56,40 +52,24 @@
 	];
 
 	const sourceNameOptions = [
-		{ value: 'Provincial Local Development Fund (LDF)', label: 'Provincial LDF' },
-		{ value: 'National Government Allocation', label: 'National Government Allocation' },
-		{ value: 'Partner Organization Funding', label: 'Partner Organization Funding' },
-		{ value: 'LGU Counterpart', label: 'LGU Counterpart' },
-		{ value: 'custom', label: 'Custom...' }
+		'Provincial Local Development Fund (LDF)',
+		'National Government Allocation',
+		'Partner Organization Funding',
+		'LGU Counterpart'
 	];
 
 	const componentNameOptions = [
-		{ value: 'Contract Cost', label: 'Contract Cost' },
-		{ value: 'Materials/Supplies', label: 'Materials/Supplies' },
-		{ value: 'Labor/Services', label: 'Labor/Services' },
-		{ value: 'Equipment Rental', label: 'Equipment Rental' },
-		{ value: 'Training/Capacity Building', label: 'Training/Capacity Building' },
-		{ value: 'Administrative Costs', label: 'Administrative Costs' },
-		{ value: 'Contingency', label: 'Contingency' },
-		{ value: 'custom', label: 'Custom...' }
+		'Contract Cost',
+		'Materials/Supplies',
+		'Labor/Services',
+		'Equipment Rental',
+		'Training/Capacity Building',
+		'Administrative Costs',
+		'Contingency'
 	];
 
 	const sourceTypeLabel = $derived(
 		sourceTypeOptions.find((opt) => opt.value === newSourceType)?.label ?? 'Select Type'
-	);
-
-	const sourceNameLabel = $derived(
-		isCustomSourceName
-			? 'Custom...'
-			: (sourceNameOptions.find((opt) => opt.value === selectedSourceNameOption)?.label ??
-					'Select Source')
-	);
-
-	const componentNameLabel = $derived(
-		isCustomComponentName
-			? 'Custom...'
-			: (componentNameOptions.find((opt) => opt.value === selectedComponentNameOption)?.label ??
-					'Select Component')
 	);
 
 	function addFundingSource() {
@@ -111,8 +91,6 @@
 		newSourceName = '';
 		newSourceAmount = '';
 		newSourceType = 'provincial';
-		isCustomSourceName = false;
-		selectedSourceNameOption = '';
 	}
 
 	function removeFundingSource(index: number) {
@@ -136,34 +114,10 @@
 
 		newComponentName = '';
 		newComponentAmount = '';
-		isCustomComponentName = false;
-		selectedComponentNameOption = '';
 	}
 
 	function removeBudgetComponent(index: number) {
 		budgetComponents = budgetComponents.filter((_: BudgetComponent, i: number) => i !== index);
-	}
-
-	function handleSourceNameChange(value: string) {
-		selectedSourceNameOption = value;
-		if (value === 'custom') {
-			isCustomSourceName = true;
-			newSourceName = '';
-		} else {
-			isCustomSourceName = false;
-			newSourceName = value;
-		}
-	}
-
-	function handleComponentNameChange(value: string) {
-		selectedComponentNameOption = value;
-		if (value === 'custom') {
-			isCustomComponentName = true;
-			newComponentName = '';
-		} else {
-			isCustomComponentName = false;
-			newComponentName = value;
-		}
 	}
 
 	function getSourceTypeLabel(type: string): string {
@@ -301,32 +255,14 @@
 			<div class="grid gap-3 md:grid-cols-4">
 				<div class="space-y-2">
 					<Label for="source-name" class="text-xs">Source Name</Label>
-					{#if isCustomSourceName}
-						<Input
-							id="source-name"
-							bind:value={newSourceName}
-							placeholder="Enter custom source name"
-							class="h-9"
-						/>
-					{:else}
-						<Select.Root
-							type="single"
-							name="source-name"
-							value={selectedSourceNameOption}
-							onValueChange={handleSourceNameChange}
-						>
-							<Select.Trigger class="h-9 w-full">
-								{sourceNameLabel}
-							</Select.Trigger>
-							<Select.Content>
-								{#each sourceNameOptions as option (option.value)}
-									<Select.Item value={option.value} label={option.label}>
-										{option.label}
-									</Select.Item>
-								{/each}
-							</Select.Content>
-						</Select.Root>
-					{/if}
+					<Combobox
+						bind:value={newSourceName}
+						options={sourceNameOptions}
+						placeholder="Select source..."
+						searchPlaceholder="Search sources..."
+						allowCustom={true}
+						class="h-9"
+					/>
 				</div>
 				<div class="space-y-2">
 					<Label for="source-type" class="text-xs">Type</Label>
@@ -353,7 +289,7 @@
 						class="h-9"
 					/>
 				</div>
-				<div class="flex items-end">
+				<div class="mb-2 flex items-end">
 					<Button
 						type="button"
 						onclick={addFundingSource}
@@ -454,32 +390,14 @@
 			<div class="grid gap-3 md:grid-cols-3">
 				<div class="space-y-2">
 					<Label for="component-name" class="text-xs">Component Name</Label>
-					{#if isCustomComponentName}
-						<Input
-							id="component-name"
-							bind:value={newComponentName}
-							placeholder="Enter custom component name"
-							class="h-9"
-						/>
-					{:else}
-						<Select.Root
-							type="single"
-							name="component-name"
-							value={selectedComponentNameOption}
-							onValueChange={handleComponentNameChange}
-						>
-							<Select.Trigger class="h-9 w-full">
-								{componentNameLabel}
-							</Select.Trigger>
-							<Select.Content>
-								{#each componentNameOptions as option (option.value)}
-									<Select.Item value={option.value} label={option.label}>
-										{option.label}
-									</Select.Item>
-								{/each}
-							</Select.Content>
-						</Select.Root>
-					{/if}
+					<Combobox
+						bind:value={newComponentName}
+						options={componentNameOptions}
+						placeholder="Select component..."
+						searchPlaceholder="Search components..."
+						allowCustom={true}
+						class="h-9"
+					/>
 				</div>
 				<div class="space-y-2">
 					<Label for="component-amount" class="text-xs">Amount (PHP)</Label>
@@ -491,7 +409,7 @@
 						class="h-9"
 					/>
 				</div>
-				<div class="flex items-end">
+				<div class="mb-2 flex items-end">
 					<Button
 						type="button"
 						onclick={addBudgetComponent}
