@@ -55,7 +55,7 @@
 </script>
 
 <Popover.Root bind:open>
-	<Popover.Trigger {disabled}>
+	<Popover.Trigger {disabled} class="w-full">
 		<Button
 			type="button"
 			variant="outline"

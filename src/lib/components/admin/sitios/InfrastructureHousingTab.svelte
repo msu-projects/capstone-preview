@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
 	import { Checkbox } from '$lib/components/ui/checkbox';
-	import { Combobox } from '$lib/components/ui/combobox';
+	import { Combobox, ComboboxWithCount } from '$lib/components/ui/combobox';
 	import FormSection from '$lib/components/ui/form-section/form-section.svelte';
 	import HelpTooltip from '$lib/components/ui/help-tooltip/help-tooltip.svelte';
-	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { NumberInput } from '$lib/components/ui/number-input';
 	import * as Select from '$lib/components/ui/select';
@@ -40,46 +39,12 @@
 		ownership_types: Array<{ type: string; count: number }>;
 	} = $props();
 
-	// Initialize quality_types with default values if empty
-	$effect(() => {
-		if (quality_types.length === 0) {
-			quality_types = housingQualityOptions.map((type) => ({ type, count: 0 }));
-		}
-	});
-
-	// Initialize ownership_types with default values if empty
-	$effect(() => {
-		if (ownership_types.length === 0) {
-			ownership_types = housingOwnershipOptions.map((type) => ({ type, count: 0 }));
-		}
-	});
-
 	function addWaterSource() {
 		water_sources = [...water_sources, { source: '', status: '' }];
 	}
 
 	function removeWaterSource(index: number) {
 		water_sources = water_sources.filter((_, i) => i !== index);
-	}
-
-	function addQualityType() {
-		quality_types.push({ type: '', count: 0 });
-		quality_types = quality_types;
-	}
-
-	function removeQualityType(index: number) {
-		quality_types.splice(index, 1);
-		quality_types = quality_types;
-	}
-
-	function addOwnershipType() {
-		ownership_types.push({ type: '', count: 0 });
-		ownership_types = ownership_types;
-	}
-
-	function removeOwnershipType(index: number) {
-		ownership_types.splice(index, 1);
-		ownership_types = ownership_types;
 	}
 
 	function toggleItem(arr: string[], item: string) {
@@ -161,7 +126,7 @@
 						<tbody>
 							{#each water_sources as source, i (i)}
 								<tr class="border-b last:border-0">
-									<td class="px-3 py-2">
+									<td class="w-full px-3 py-2">
 										<Combobox
 											bind:value={source.source}
 											options={waterSourceOptions}
@@ -327,168 +292,40 @@
 	>
 		<!-- Housing Quality Types -->
 		<div class="space-y-3">
-			<div class="flex items-center justify-between">
-				<Label class="flex items-center gap-1.5">
-					Housing Quality
-					<HelpTooltip
-						content="Categorize housing by construction material and quality (Concrete, Wood, Half-Concrete, Makeshift)"
-					/>
-				</Label>
-				<Button
-					type="button"
-					variant="outline"
-					size="sm"
-					onclick={addQualityType}
-					class="h-8 gap-1.5"
-				>
-					<Plus class="size-3.5" />
-					Add
-				</Button>
-			</div>
-
-			{#if quality_types.length === 0}
-				<div
-					class="flex flex-col items-center gap-2 rounded-lg border border-dashed py-6 text-center"
-				>
-					<Home class="size-6 text-muted-foreground/50" />
-					<p class="text-sm text-muted-foreground">No quality types added</p>
-				</div>
-			{:else}
-				<div class="grid grid-cols-2 gap-2 md:grid-cols-4">
-					{#each quality_types as quality, i}
-						<div class="space-y-1.5 rounded-lg border bg-muted/20 p-3">
-							<div class="flex items-center justify-between">
-								<Label class="text-xs font-normal text-muted-foreground">
-									{quality.type || 'Type'}
-								</Label>
-								<Button
-									type="button"
-									variant="ghost"
-									size="icon"
-									class="size-5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-									onclick={() => removeQualityType(i)}
-								>
-									<Trash2 class="size-3" />
-								</Button>
-							</div>
-							<Select.Root
-								type="single"
-								value={quality.type}
-								onValueChange={(val) => {
-									if (val) quality.type = val;
-								}}
-							>
-								<Select.Trigger id="quality_type_{i}" class="mb-1.5 h-8 w-full text-xs">
-									{quality.type || 'Select'}
-								</Select.Trigger>
-								<Select.Content>
-									{#each housingQualityOptions as type}
-										<Select.Item value={type}>{type}</Select.Item>
-									{/each}
-									<Select.Separator />
-									<div class="p-2">
-										<Input
-											id="custom_quality_{i}"
-											bind:value={quality.type}
-											placeholder="Custom type"
-											class="h-8 text-xs"
-										/>
-									</div>
-								</Select.Content>
-							</Select.Root>
-							<NumberInput
-								id="quality_count_{i}"
-								bind:value={quality.count}
-								placeholder="0"
-								min={0}
-							/>
-						</div>
-					{/each}
-				</div>
-			{/if}
+			<Label class="flex items-center gap-1.5">
+				Housing Quality
+				<HelpTooltip
+					content="Categorize housing by construction material and quality (Concrete, Wood, Half-Concrete, Makeshift)"
+				/>
+			</Label>
+			<ComboboxWithCount
+				bind:items={quality_types}
+				options={housingQualityOptions}
+				placeholder="Select quality type..."
+				addLabel="Add Quality Type"
+				emptyMessage="No quality types added"
+				emptyIcon={Home}
+				allowCustom
+			/>
 		</div>
 
 		<!-- Housing Ownership Types -->
 		<div class="space-y-3">
-			<div class="flex items-center justify-between">
-				<Label class="flex items-center gap-1.5">
-					Ownership Types
-					<HelpTooltip
-						content="Categorize housing by ownership status (Owned, Rented, Protected Land, Informal Settler, Owner Consent)"
-					/>
-				</Label>
-				<Button
-					type="button"
-					variant="outline"
-					size="sm"
-					onclick={addOwnershipType}
-					class="h-8 gap-1.5"
-				>
-					<Plus class="size-3.5" />
-					Add
-				</Button>
-			</div>
-
-			{#if ownership_types.length === 0}
-				<div
-					class="flex flex-col items-center gap-2 rounded-lg border border-dashed py-6 text-center"
-				>
-					<Home class="size-6 text-muted-foreground/50" />
-					<p class="text-sm text-muted-foreground">No ownership types added</p>
-				</div>
-			{:else}
-				<div class="grid grid-cols-2 gap-2 md:grid-cols-5">
-					{#each ownership_types as ownership, i}
-						<div class="space-y-1.5 rounded-lg border bg-muted/20 p-3">
-							<div class="flex items-center justify-between">
-								<Label class="text-xs font-normal text-muted-foreground">
-									{ownership.type || 'Type'}
-								</Label>
-								<Button
-									type="button"
-									variant="ghost"
-									size="icon"
-									class="size-5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-									onclick={() => removeOwnershipType(i)}
-								>
-									<Trash2 class="size-3" />
-								</Button>
-							</div>
-							<Select.Root
-								type="single"
-								value={ownership.type}
-								onValueChange={(val) => {
-									if (val) ownership.type = val;
-								}}
-							>
-								<Select.Trigger id="ownership_type_{i}" class="mb-1.5 h-8 w-full text-xs">
-									{ownership.type || 'Select'}
-								</Select.Trigger>
-								<Select.Content>
-									{#each housingOwnershipOptions as type}
-										<Select.Item value={type}>{type}</Select.Item>
-									{/each}
-									<Select.Separator />
-									<div class="p-2">
-										<Input
-											id="custom_ownership_{i}"
-											bind:value={ownership.type}
-											placeholder="Custom type"
-											class="h-8 text-xs"
-										/>
-									</div>
-								</Select.Content>
-							</Select.Root>
-							<NumberInput
-								id="ownership_count_{i}"
-								bind:value={ownership.count}
-								placeholder="0"
-								min={0}
-							/>
-						</div>
-					{/each}
-				</div>
-			{/if}
+			<Label class="flex items-center gap-1.5">
+				Ownership Types
+				<HelpTooltip
+					content="Categorize housing by ownership status (Owned, Rented, Protected Land, Informal Settler, Owner Consent)"
+				/>
+			</Label>
+			<ComboboxWithCount
+				bind:items={ownership_types}
+				options={housingOwnershipOptions}
+				placeholder="Select ownership type..."
+				addLabel="Add Ownership Type"
+				emptyMessage="No ownership types added"
+				emptyIcon={Home}
+				allowCustom
+			/>
 		</div>
 	</FormSection>
 </div>
