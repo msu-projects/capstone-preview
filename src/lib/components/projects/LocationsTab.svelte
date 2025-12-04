@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';
 	import type { Project } from '$lib/types';
@@ -47,7 +48,10 @@
 			<tbody>
 				{#if project.project_sitios && project.project_sitios.length > 0}
 					{#each project.project_sitios as sitio}
-						<tr class="border-b border-slate-50 hover:bg-slate-50/50">
+						<tr
+							class="cursor-pointer border-b border-slate-50 hover:bg-slate-50/50"
+							onclick={() => goto(`/sitios/${sitio.sitio_id}`)}
+						>
 							<td class="px-6 py-4 font-medium text-slate-900">{sitio.sitio_name}</td>
 							<td class="px-6 py-4 text-slate-600">
 								<div class="flex flex-col">
