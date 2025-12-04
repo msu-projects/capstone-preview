@@ -3,12 +3,13 @@
 	import BasicInfoTab from '$lib/components/admin/sitios/BasicInfoTab.svelte';
 	import CommunityServicesTab from '$lib/components/admin/sitios/CommunityServicesTab.svelte';
 	import DemographicsSocialTab from '$lib/components/admin/sitios/DemographicsSocialTab.svelte';
+	import FormStepper, { type Step } from '$lib/components/admin/sitios/FormStepper.svelte';
 	import InfrastructureHousingTab from '$lib/components/admin/sitios/InfrastructureHousingTab.svelte';
 	import LivelihoodsEconomyTab from '$lib/components/admin/sitios/LivelihoodsEconomyTab.svelte';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
-	import * as Tabs from '$lib/components/ui/tabs';
+	import { IsMobile } from '$lib/hooks/is-mobile.svelte';
 	import type { Sitio } from '$lib/types';
 	import { logAuditAction } from '$lib/utils/audit';
 	import { validateDemographics } from '$lib/utils/demographic-validation';
@@ -17,7 +18,6 @@
 		ArrowLeft,
 		ArrowRight,
 		Building,
-		CircleAlert,
 		HandHelping,
 		MapPin,
 		Save,
@@ -27,8 +27,10 @@
 	} from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
 
+	const isMobile = new IsMobile();
+
 	let isSaving = $state(false);
-	let activeTab = $state('basic');
+	let activeStep = $state('basic');
 	let cancelDialogOpen = $state(false);
 
 	// Tab 1: Basic Info
@@ -137,33 +139,96 @@
 	let proposed_ppas = $state<string[]>([]);
 
 	// Validation
-	const isTab1Valid = $derived(
+	const isBasicInfoValid = $derived(
 		municipality.trim() !== '' && barangay.trim() !== '' && name.trim() !== ''
 	);
 
-	const canSave = $derived(isTab1Valid);
+	const isDemographicsValid = $derived(
+		population === 0 || demographics.total === 0 || population === demographics.total
+	);
 
-	// Tab navigation
-	const tabOrder = ['basic', 'demographics-social', 'livelihoods', 'infrastructure', 'community'];
-	const currentTabIndex = $derived(tabOrder.indexOf(activeTab));
-	const canGoNext = $derived(currentTabIndex < tabOrder.length - 1);
-	const canGoPrevious = $derived(currentTabIndex > 0);
+	const canSave = $derived(isBasicInfoValid);
 
-	function nextTab() {
+	// Step configuration
+	const steps: Step[] = $derived([
+		{
+			id: 'basic',
+			label: 'Basic Information',
+			shortLabel: 'Basic Info',
+			icon: MapPin,
+			isValid: isBasicInfoValid,
+			hasError: !isBasicInfoValid && activeStep !== 'basic'
+		},
+		{
+			id: 'demographics-social',
+			label: 'Demographics & Social',
+			shortLabel: 'Demographics',
+			icon: Users,
+			isValid: demographics.total > 0,
+			hasError: !isDemographicsValid
+		},
+		{
+			id: 'livelihoods',
+			label: 'Livelihoods & Economy',
+			shortLabel: 'Livelihoods',
+			icon: Sprout,
+			isValid:
+				economic_condition.employments.length > 0 ||
+				agriculture.farmers_count > 0 ||
+				Object.values(livestock_poultry).some((v) => v > 0)
+		},
+		{
+			id: 'infrastructure',
+			label: 'Infrastructure & Housing',
+			shortLabel: 'Infrastructure',
+			icon: Building,
+			isValid:
+				water_sanitation.water_systems_count > 0 ||
+				utilities.households_with_electricity > 0 ||
+				housing.quality_types.length > 0
+		},
+		{
+			id: 'community',
+			label: 'Community Services',
+			shortLabel: 'Community',
+			icon: HandHelping,
+			isValid:
+				community_empowerment.sectoral_organizations > 0 ||
+				local_officials.length > 0 ||
+				issues_concerns.length > 0
+		}
+	]);
+
+	// Step navigation
+	const stepOrder = ['basic', 'demographics-social', 'livelihoods', 'infrastructure', 'community'];
+	const currentStepIndex = $derived(stepOrder.indexOf(activeStep));
+	const canGoNext = $derived(currentStepIndex < stepOrder.length - 1);
+	const canGoPrevious = $derived(currentStepIndex > 0);
+	const nextStepLabel = $derived(
+		canGoNext ? steps[currentStepIndex + 1]?.shortLabel || steps[currentStepIndex + 1]?.label : null
+	);
+	const prevStepLabel = $derived(
+		canGoPrevious
+			? steps[currentStepIndex - 1]?.shortLabel || steps[currentStepIndex - 1]?.label
+			: null
+	);
+
+	function nextStep() {
 		if (canGoNext) {
-			activeTab = tabOrder[currentTabIndex + 1];
+			activeStep = stepOrder[currentStepIndex + 1];
 		}
 	}
 
-	function previousTab() {
+	function previousStep() {
 		if (canGoPrevious) {
-			activeTab = tabOrder[currentTabIndex - 1];
+			activeStep = stepOrder[currentStepIndex - 1];
 		}
 	}
 
 	async function handleSave() {
 		if (!canSave) {
 			toast.error('Please complete required fields in Basic Information');
+			activeStep = 'basic';
 			return;
 		}
 
@@ -176,7 +241,7 @@
 		if (!demographicValidation.isValid) {
 			const errorMessages = demographicValidation.errors.map((e) => e.message).join('\n');
 			toast.error('Demographic data validation failed:\n' + errorMessages);
-			activeTab = 'demographics'; // Switch to demographics tab to show errors
+			activeStep = 'demographics-social';
 			return;
 		}
 
@@ -265,42 +330,14 @@
 	</AdminHeader>
 
 	<!-- Content -->
-	<div class="flex-1 p-6">
-		<div class="w-full">
-			<Tabs.Root bind:value={activeTab} class="w-full">
-				<!-- Tabs List -->
-				<Card.Card class="mb-6 py-0">
-					<Card.CardContent class="p-3">
-						<Tabs.List class="grid w-full grid-cols-2 gap-1 lg:grid-cols-5">
-							<Tabs.Trigger value="basic" class="flex items-center gap-2 text-xs">
-								<MapPin class="size-4" />
-								<span class="hidden lg:inline">Basic Info</span>
-								{#if !isTab1Valid && activeTab !== 'basic'}
-									<CircleAlert class="size-3 text-destructive" />
-								{/if}
-							</Tabs.Trigger>
-							<Tabs.Trigger value="demographics-social" class="flex items-center gap-2 text-xs">
-								<Users class="size-4" />
-								<span class="hidden lg:inline">Demographics & Social</span>
-							</Tabs.Trigger>
-							<Tabs.Trigger value="livelihoods" class="flex items-center gap-2 text-xs">
-								<Sprout class="size-4" />
-								<span class="hidden lg:inline">Livelihoods & Economy</span>
-							</Tabs.Trigger>
-							<Tabs.Trigger value="infrastructure" class="flex items-center gap-2 text-xs">
-								<Building class="size-4" />
-								<span class="hidden lg:inline">Infrastructure & Housing</span>
-							</Tabs.Trigger>
-							<Tabs.Trigger value="community" class="flex items-center gap-2 text-xs">
-								<HandHelping class="size-4" />
-								<span class="hidden lg:inline">Community Services</span>
-							</Tabs.Trigger>
-						</Tabs.List>
-					</Card.CardContent>
-				</Card.Card>
+	<div class="flex-1 p-4 md:p-6">
+		<div class="flex flex-col gap-6 lg:flex-row">
+			<!-- Stepper Sidebar -->
+			<FormStepper {steps} bind:activeStep />
 
-				<!-- Tab Content -->
-				<Tabs.Content value="basic">
+			<!-- Form Content -->
+			<div class="min-w-0 flex-1">
+				{#if activeStep === 'basic'}
 					<BasicInfoTab
 						bind:municipality
 						bind:barangay
@@ -312,9 +349,7 @@
 						bind:coding
 						demographicsTotal={demographics.total}
 					/>
-				</Tabs.Content>
-
-				<Tabs.Content value="demographics-social">
+				{:else if activeStep === 'demographics-social'}
 					<DemographicsSocialTab
 						bind:male={demographics.male}
 						bind:female={demographics.female}
@@ -329,9 +364,7 @@
 						bind:religions
 						{population}
 					/>
-				</Tabs.Content>
-
-				<Tabs.Content value="livelihoods">
+				{:else if activeStep === 'livelihoods'}
 					<LivelihoodsEconomyTab
 						bind:employments={economic_condition.employments}
 						bind:income_brackets={economic_condition.income_brackets}
@@ -349,9 +382,7 @@
 						bind:households_with_backyard_garden={food_security.households_with_backyard_garden}
 						bind:common_garden_commodities={food_security.common_garden_commodities}
 					/>
-				</Tabs.Content>
-
-				<Tabs.Content value="infrastructure">
+				{:else if activeStep === 'infrastructure'}
 					<InfrastructureHousingTab
 						bind:water_systems_count={water_sanitation.water_systems_count}
 						bind:water_sources={water_sanitation.water_sources}
@@ -363,9 +394,7 @@
 						bind:quality_types={housing.quality_types}
 						bind:ownership_types={housing.ownership_types}
 					/>
-				</Tabs.Content>
-
-				<Tabs.Content value="community">
+				{:else if activeStep === 'community'}
 					<CommunityServicesTab
 						bind:sectoral_organizations={community_empowerment.sectoral_organizations}
 						bind:info_dissemination_methods={community_empowerment.info_dissemination_methods}
@@ -379,25 +408,49 @@
 						bind:issues_concerns
 						bind:proposed_ppas
 					/>
-				</Tabs.Content>
-			</Tabs.Root>
+				{/if}
 
-			<!-- Navigation Buttons -->
-			<Card.Card class="mt-6 p-0">
-				<Card.CardContent class="flex justify-between p-4">
-					<Button variant="outline" onclick={previousTab} disabled={!canGoPrevious} class="gap-2">
-						<ArrowLeft class="size-4" />
-						Previous
-					</Button>
-					<div class="flex items-center gap-2 text-sm text-muted-foreground">
-						Step {currentTabIndex + 1} of {tabOrder.length}
-					</div>
-					<Button variant="outline" onclick={nextTab} disabled={!canGoNext} class="gap-2">
-						Next
-						<ArrowRight class="size-4" />
-					</Button>
-				</Card.CardContent>
-			</Card.Card>
+				<!-- Navigation Buttons -->
+				<Card.Root class="mt-6 py-0">
+					<Card.Content class="flex items-center justify-between p-4">
+						<Button
+							variant="outline"
+							onclick={previousStep}
+							disabled={!canGoPrevious}
+							class="gap-2"
+						>
+							<ArrowLeft class="size-4" />
+							<span class="hidden sm:inline">{prevStepLabel || 'Previous'}</span>
+							<span class="sm:hidden">Back</span>
+						</Button>
+
+						<div class="flex items-center gap-2">
+							<!-- Step dots for mobile -->
+							<div class="flex items-center gap-1.5 lg:hidden">
+								{#each steps as step, index}
+									<div
+										class="size-2 rounded-full transition-all {index === currentStepIndex
+											? 'w-4 bg-primary'
+											: step.isValid
+												? 'bg-primary/50'
+												: 'bg-muted-foreground/30'}"
+									></div>
+								{/each}
+							</div>
+							<!-- Step text for desktop -->
+							<span class="hidden text-sm text-muted-foreground lg:block">
+								Step {currentStepIndex + 1} of {stepOrder.length}
+							</span>
+						</div>
+
+						<Button variant="outline" onclick={nextStep} disabled={!canGoNext} class="gap-2">
+							<span class="hidden sm:inline">{nextStepLabel || 'Next'}</span>
+							<span class="sm:hidden">Next</span>
+							<ArrowRight class="size-4" />
+						</Button>
+					</Card.Content>
+				</Card.Root>
+			</div>
 		</div>
 	</div>
 </div>

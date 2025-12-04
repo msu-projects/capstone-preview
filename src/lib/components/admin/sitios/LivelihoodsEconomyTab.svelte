@@ -62,7 +62,7 @@
 	// Initialize income_brackets if empty
 	$effect(() => {
 		if (income_brackets.length === 0) {
-			income_brackets = incomeBrackets.map((b) => ({ bracket: b.label, households: 0 }));
+			income_brackets = incomeBrackets.map((b) => ({ bracket: b.value, households: 0 }));
 		}
 	});
 
@@ -192,7 +192,7 @@
 
 			<!-- Income Brackets -->
 			<div class="space-y-3">
-				<Label>Income Brackets (Daily Income in PHP)</Label>
+				<Label>Income Brackets (Household Daily Income)</Label>
 				<div class="space-y-3">
 					{#each income_brackets as bracket, i}
 						<div class="flex items-center gap-3">
