@@ -4,13 +4,14 @@
 	import AdminHeader from '$lib/components/admin/AdminHeader.svelte';
 	import SitiosTable from '$lib/components/admin/sitios/SitiosTable.svelte';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
+	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
 	import * as Select from '$lib/components/ui/select';
 	import type { Sitio } from '$lib/types';
 	import { deleteSitio, loadSitios } from '$lib/utils/storage';
-	import { Plus, Search, Upload } from '@lucide/svelte';
+	import { Plus, Search, Upload, X } from '@lucide/svelte';
 	import { onMount, tick } from 'svelte';
 
 	let sitios = $state<Sitio[]>([]);
@@ -26,6 +27,18 @@
 	let deleteDialogOpen = $state(false);
 	let sitioToDelete = $state<Sitio | null>(null);
 	let initialized = $state(false);
+
+	// Derived value for checking if any filters are active
+	const hasActiveFilters = $derived(
+		searchTerm !== '' || selectedMunicipality !== 'all' || selectedBarangay !== 'all'
+	);
+
+	// Count active filters
+	const activeFilterCount = $derived(
+		(searchTerm !== '' ? 1 : 0) +
+			(selectedMunicipality !== 'all' ? 1 : 0) +
+			(selectedBarangay !== 'all' ? 1 : 0)
+	);
 
 	// Derived values for filter options
 	let uniqueMunicipalities = $derived(
@@ -48,6 +61,7 @@
 		selectedMunicipality = params.get('municipality') || 'all';
 		selectedBarangay = params.get('barangay') || 'all';
 		currentPage = parseInt(params.get('page') || '1', 10);
+		const urlViewMode = params.get('view');
 		const urlSortBy = params.get('sortBy');
 		if (
 			urlSortBy &&
@@ -220,6 +234,26 @@
 	function handleRefresh() {
 		loadData();
 	}
+
+	function clearAllFilters() {
+		searchTerm = '';
+		selectedMunicipality = 'all';
+		selectedBarangay = 'all';
+		currentPage = 1;
+	}
+
+	function removeSearchFilter() {
+		searchTerm = '';
+	}
+
+	function removeMunicipalityFilter() {
+		selectedMunicipality = 'all';
+		selectedBarangay = 'all';
+	}
+
+	function removeBarangayFilter() {
+		selectedBarangay = 'all';
+	}
 </script>
 
 <svelte:head>
@@ -244,7 +278,7 @@
 	<!-- Content -->
 	<div class="flex-1 space-y-6 p-6">
 		<!-- Search and Filters -->
-		<Card.Root>
+		<Card.Root class="shadow-sm transition-shadow hover:shadow-md">
 			<Card.Content class="">
 				<div class="flex flex-col gap-4 md:flex-row md:items-center">
 					<div class="relative flex-1">
@@ -255,7 +289,7 @@
 							class="pl-10"
 						/>
 					</div>
-					<div class="flex flex-col gap-2 sm:flex-row">
+					<div class="flex flex-col gap-2 sm:flex-row sm:items-center">
 						<Select.Root type="single" bind:value={selectedMunicipality}>
 							<Select.Trigger class="w-full sm:w-[200px]">
 								{selectedMunicipality === 'all' ? 'All Municipalities' : selectedMunicipality}
@@ -281,6 +315,61 @@
 						</Select.Root>
 					</div>
 				</div>
+
+				<!-- Active Filter Badges -->
+				{#if hasActiveFilters}
+					<div class="mt-4 flex flex-wrap items-center gap-2 border-t pt-4">
+						<span class="text-sm text-muted-foreground">Active filters:</span>
+
+						{#if searchTerm}
+							<Badge variant="secondary" class="gap-1 pr-1">
+								<span class="max-w-32 truncate">Search: "{searchTerm}"</span>
+								<button
+									type="button"
+									class="ml-1 rounded-full p-0.5 hover:bg-muted-foreground/20"
+									onclick={removeSearchFilter}
+								>
+									<X class="size-3" />
+									<span class="sr-only">Remove search filter</span>
+								</button>
+							</Badge>
+						{/if}
+
+						{#if selectedMunicipality !== 'all'}
+							<Badge variant="secondary" class="gap-1 pr-1">
+								<span>Municipality: {selectedMunicipality}</span>
+								<button
+									type="button"
+									class="ml-1 rounded-full p-0.5 hover:bg-muted-foreground/20"
+									onclick={removeMunicipalityFilter}
+								>
+									<X class="size-3" />
+									<span class="sr-only">Remove municipality filter</span>
+								</button>
+							</Badge>
+						{/if}
+
+						{#if selectedBarangay !== 'all'}
+							<Badge variant="secondary" class="gap-1 pr-1">
+								<span>Barangay: {selectedBarangay}</span>
+								<button
+									type="button"
+									class="ml-1 rounded-full p-0.5 hover:bg-muted-foreground/20"
+									onclick={removeBarangayFilter}
+								>
+									<X class="size-3" />
+									<span class="sr-only">Remove barangay filter</span>
+								</button>
+							</Badge>
+						{/if}
+
+						{#if activeFilterCount > 1}
+							<Button variant="ghost" size="sm" class="h-7 text-xs" onclick={clearAllFilters}>
+								Clear all
+							</Button>
+						{/if}
+					</div>
+				{/if}
 			</Card.Content>
 		</Card.Root>
 
@@ -298,7 +387,9 @@
 			onDelete={confirmDelete}
 			onDownloadPDF={handleDownloadPDF}
 			onEdit={handleEdit}
-			onPageChange={(page) => (currentPage = page)}
+			onPageChange={(p) => (currentPage = p)}
+			onClearFilters={clearAllFilters}
+			{hasActiveFilters}
 		/>
 	</div>
 </div>

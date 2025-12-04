@@ -3,6 +3,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
+	import * as Empty from '$lib/components/ui/empty';
 	import * as Select from '$lib/components/ui/select';
 	import * as Table from '$lib/components/ui/table';
 	import { IsMobile } from '$lib/hooks/is-mobile.svelte';
@@ -13,11 +14,14 @@
 		Download,
 		EllipsisVertical,
 		Eye,
+		FilterX,
 		Home,
 		MapPin,
+		Plus,
 		RefreshCw,
 		SquarePen,
 		Trash2,
+		Upload,
 		Users
 	} from '@lucide/svelte';
 
@@ -39,6 +43,8 @@
 		onDownloadPDF: (id: number) => void;
 		onPageChange: (page: number) => void;
 		onEdit: (id: number) => void;
+		onClearFilters?: () => void;
+		hasActiveFilters?: boolean;
 	}
 
 	let {
@@ -53,7 +59,9 @@
 		onRefresh,
 		onDelete,
 		onDownloadPDF,
-		onEdit
+		onEdit,
+		onClearFilters,
+		hasActiveFilters = false
 	}: Props = $props();
 
 	// Mobile sort options
@@ -72,7 +80,7 @@
 	}
 </script>
 
-<Card.Card class="gap-4 shadow-sm">
+<Card.Card class="gap-4 shadow-sm transition-shadow hover:shadow-md">
 	<Card.CardHeader>
 		<div class="flex items-center justify-between">
 			<Card.CardTitle class="text-xl font-semibold">All Sitios ({totalSitios})</Card.CardTitle>
@@ -102,15 +110,46 @@
 		{#if isMobile.current}
 			<div class="space-y-3">
 				{#if sitios.length === 0}
-					<div class="flex flex-col items-center justify-center gap-2 py-12">
-						<MapPin class="size-8 text-muted-foreground/50" />
-						<p class="text-muted-foreground">No sitios found</p>
-					</div>
+					<Empty.Root class="border-none py-8">
+						<Empty.Media>
+							<MapPin class="size-12 text-muted-foreground/50" />
+						</Empty.Media>
+						<Empty.Header>
+							<Empty.Title>
+								{hasActiveFilters ? 'No matching sitios' : 'No sitios yet'}
+							</Empty.Title>
+							<Empty.Description>
+								{#if hasActiveFilters}
+									Try adjusting your search or filters to find what you're looking for.
+								{:else}
+									Get started by adding your first sitio or importing data from a CSV file.
+								{/if}
+							</Empty.Description>
+						</Empty.Header>
+						<Empty.Content>
+							<div class="flex flex-col gap-2 sm:flex-row">
+								{#if hasActiveFilters && onClearFilters}
+									<Button variant="outline" size="sm" onclick={onClearFilters}>
+										<FilterX class="mr-2 size-4" />
+										Clear Filters
+									</Button>
+								{/if}
+								<Button variant="outline" size="sm" onclick={() => goto('/admin/import')}>
+									<Upload class="mr-2 size-4" />
+									Import Data
+								</Button>
+								<Button size="sm" onclick={() => goto('/admin/sitios/new')}>
+									<Plus class="mr-2 size-4" />
+									Add Sitio
+								</Button>
+							</div>
+						</Empty.Content>
+					</Empty.Root>
 				{:else}
 					{#each sitios as sitio (sitio.id)}
 						<button
 							type="button"
-							class="block w-full rounded-lg border bg-card p-4 text-left transition-colors focus:ring-2 focus:ring-primary/20 focus:outline-none"
+							class="block w-full rounded-lg border bg-card p-4 text-left transition-all hover:shadow-md focus:ring-2 focus:ring-primary/20 focus:outline-none"
 							onclick={() => goto(`/admin/sitios/${sitio.id}`)}
 						>
 							<!-- Header: Name & Location -->
@@ -284,16 +323,48 @@
 					<Table.TableBody>
 						{#if sitios.length === 0}
 							<Table.TableRow>
-								<Table.TableCell colspan={6} class="h-32 text-center">
-									<div class="flex flex-col items-center justify-center gap-2">
-										<p class="text-muted-foreground">No sitios found</p>
-									</div>
+								<Table.TableCell colspan={6} class="h-64">
+									<Empty.Root class="border-none">
+										<Empty.Media>
+											<MapPin class="size-12 text-muted-foreground/50" />
+										</Empty.Media>
+										<Empty.Header>
+											<Empty.Title>
+												{hasActiveFilters ? 'No matching sitios' : 'No sitios yet'}
+											</Empty.Title>
+											<Empty.Description>
+												{#if hasActiveFilters}
+													Try adjusting your search or filters to find what you're looking for.
+												{:else}
+													Get started by adding your first sitio or importing data from a CSV file.
+												{/if}
+											</Empty.Description>
+										</Empty.Header>
+										<Empty.Content>
+											<div class="flex flex-wrap justify-center gap-2">
+												{#if hasActiveFilters && onClearFilters}
+													<Button variant="outline" size="sm" onclick={onClearFilters}>
+														<FilterX class="mr-2 size-4" />
+														Clear Filters
+													</Button>
+												{/if}
+												<Button variant="outline" size="sm" onclick={() => goto('/admin/import')}>
+													<Upload class="mr-2 size-4" />
+													Import Data
+												</Button>
+												<Button size="sm" onclick={() => goto('/admin/sitios/new')}>
+													<Plus class="mr-2 size-4" />
+													Add Sitio
+												</Button>
+											</div>
+										</Empty.Content>
+									</Empty.Root>
 								</Table.TableCell>
 							</Table.TableRow>
 						{:else}
 							{#each sitios as sitio (sitio.id)}
 								<Table.TableRow
-									class="cursor-pointer hover:bg-accent/10"
+									class="cursor-pointer transition-colors hover:bg-accent/10"
 									onclick={() => goto(`/admin/sitios/${sitio.id}`)}
 								>
 									<!-- Sitio Name -->
