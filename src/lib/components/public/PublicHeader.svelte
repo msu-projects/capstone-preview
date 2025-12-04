@@ -2,7 +2,8 @@
 	import { page } from '$app/state';
 	import logo from '$lib/assets/logo.png';
 	import { Button } from '$lib/components/ui/button';
-	import { FolderKanban, Home, LogIn, Menu, Users, X } from '@lucide/svelte';
+	import { authStore } from '$lib/stores/auth.svelte';
+	import { FolderKanban, Home, LayoutDashboard, LogIn, Menu, Users, X } from '@lucide/svelte';
 
 	let mobileMenuOpen = $state(false);
 
@@ -59,10 +60,17 @@
 
 		<!-- Desktop Actions -->
 		<div class="hidden items-center gap-2 md:flex">
-			<Button href="/login" variant="outline" size="sm">
-				<LogIn class="mr-2 size-4" />
-				Admin Login
-			</Button>
+			{#if authStore.isAuthenticated}
+				<Button href="/admin" variant="default" size="sm">
+					<LayoutDashboard class="mr-2 size-4" />
+					Dashboard
+				</Button>
+			{:else}
+				<Button href="/login" variant="outline" size="sm">
+					<LogIn class="mr-2 size-4" />
+					Admin Login
+				</Button>
+			{/if}
 		</div>
 
 		<!-- Mobile Menu Button -->
@@ -99,16 +107,29 @@
 					</a>
 				{/each}
 				<div class="my-2 border-t"></div>
-				<Button
-					href="/login"
-					variant="outline"
-					size="sm"
-					class="justify-start"
-					onclick={closeMobileMenu}
-				>
-					<LogIn class="mr-2 size-4" />
-					Admin Login
-				</Button>
+				{#if authStore.isAuthenticated}
+					<Button
+						href="/admin"
+						variant="default"
+						size="sm"
+						class="justify-start"
+						onclick={closeMobileMenu}
+					>
+						<LayoutDashboard class="mr-2 size-4" />
+						Dashboard
+					</Button>
+				{:else}
+					<Button
+						href="/login"
+						variant="outline"
+						size="sm"
+						class="justify-start"
+						onclick={closeMobileMenu}
+					>
+						<LogIn class="mr-2 size-4" />
+						Admin Login
+					</Button>
+				{/if}
 			</nav>
 		</div>
 	{/if}
