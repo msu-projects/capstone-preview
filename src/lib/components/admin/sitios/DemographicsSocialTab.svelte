@@ -20,7 +20,8 @@
 		fourps_beneficiaries = $bindable(0),
 		ethnicities = $bindable<string[]>([]),
 		religions = $bindable<string[]>([]),
-		population = 0
+		population = 0,
+		households = 0
 	}: {
 		male: number;
 		female: number;
@@ -34,6 +35,7 @@
 		ethnicities: string[];
 		religions: string[];
 		population?: number;
+		households?: number;
 	} = $props();
 
 	// Auto-calculate total from gender
@@ -46,16 +48,26 @@
 	const hasGenderData = $derived(male > 0 || female > 0);
 	const hasAgeData = $derived(age_0_14 > 0 || age_15_64 > 0 || age_65_above > 0);
 	const hasPopulation = $derived(population > 0);
+	const hasHouseholds = $derived(households > 0);
 
 	// Validate against population (the source of truth)
 	const isGenderValid = $derived(genderTotal === population);
 	const isAgeValid = $derived(ageTotal === population);
 
+	// Social services validation
+	const eligibleVoters = $derived(age_15_64 + age_65_above);
+	const isVotersValid = $derived(!hasAgeData || registered_voters <= eligibleVoters);
+	const isPhilhealthValid = $derived(!hasHouseholds || philhealth_beneficiaries <= households);
+	const isFourPsValid = $derived(!hasHouseholds || fourps_beneficiaries <= households);
+
 	// Section completion checks
 	const isGenderComplete = $derived(hasGenderData && (!hasPopulation || isGenderValid));
 	const isAgeComplete = $derived(hasAgeData && (!hasPopulation || isAgeValid));
 	const isSocialComplete = $derived(
-		registered_voters > 0 || philhealth_beneficiaries > 0 || fourps_beneficiaries > 0
+		(registered_voters > 0 || philhealth_beneficiaries > 0 || fourps_beneficiaries > 0) &&
+			isVotersValid &&
+			isPhilhealthValid &&
+			isFourPsValid
 	);
 	const isCultureComplete = $derived(ethnicities.length > 0 || religions.length > 0);
 </script>
@@ -260,25 +272,48 @@
 		accent="green"
 		isComplete={isSocialComplete}
 	>
+		{#snippet actions()}
+			{#if !isVotersValid || !isPhilhealthValid || !isFourPsValid}
+				<div
+					class="flex items-center gap-1.5 rounded-full bg-destructive/10 px-2.5 py-1 text-xs font-medium text-destructive"
+				>
+					<AlertCircle class="size-3.5" />
+					<span class="hidden sm:inline">Validation errors</span>
+					<span class="sm:hidden">Error</span>
+				</div>
+			{/if}
+		{/snippet}
+
 		<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
 			<div class="space-y-2">
 				<Label for="registered_voters" class="flex items-center gap-1.5">
 					Registered Voters
-					<HelpTooltip content="Number of individuals registered to vote in elections" />
+					<HelpTooltip
+						content="Number of individuals registered to vote in elections. Cannot exceed the voting-age population (15+ years)."
+					/>
 				</Label>
 				<NumberInput
 					id="registered_voters"
 					bind:value={registered_voters}
 					placeholder="0"
 					min={0}
-					class={cn('transition-all', registered_voters > 0 && 'border-primary/30 bg-primary/5')}
+					class={cn(
+						'transition-all',
+						registered_voters > 0 && isVotersValid && 'border-primary/30 bg-primary/5',
+						!isVotersValid && 'border-destructive/50 bg-destructive/5'
+					)}
 				/>
+				{#if !isVotersValid}
+					<p class="text-xs text-destructive">
+						Cannot exceed eligible voters ({eligibleVoters.toLocaleString()})
+					</p>
+				{/if}
 			</div>
 			<div class="space-y-2">
 				<Label for="philhealth" class="flex items-center gap-1.5">
 					PhilHealth Beneficiaries
 					<HelpTooltip
-						content="Members of the Philippine Health Insurance Corporation (PhilHealth) who have health coverage"
+						content="Members of the Philippine Health Insurance Corporation (PhilHealth) who have health coverage. Cannot exceed total households."
 					/>
 				</Label>
 				<NumberInput
@@ -288,15 +323,21 @@
 					min={0}
 					class={cn(
 						'transition-all',
-						philhealth_beneficiaries > 0 && 'border-primary/30 bg-primary/5'
+						philhealth_beneficiaries > 0 && isPhilhealthValid && 'border-primary/30 bg-primary/5',
+						!isPhilhealthValid && 'border-destructive/50 bg-destructive/5'
 					)}
 				/>
+				{#if !isPhilhealthValid}
+					<p class="text-xs text-destructive">
+						Cannot exceed total households ({households.toLocaleString()})
+					</p>
+				{/if}
 			</div>
 			<div class="space-y-2">
 				<Label for="fourps" class="flex items-center gap-1.5">
 					4Ps Beneficiaries
 					<HelpTooltip
-						content="Pantawid Pamilyang Pilipino Program (4Ps) is a conditional cash transfer program for poor households with children"
+						content="Pantawid Pamilyang Pilipino Program (4Ps) is a conditional cash transfer program for poor households with children. Cannot exceed total households."
 					/>
 				</Label>
 				<NumberInput
@@ -304,8 +345,17 @@
 					bind:value={fourps_beneficiaries}
 					placeholder="0"
 					min={0}
-					class={cn('transition-all', fourps_beneficiaries > 0 && 'border-primary/30 bg-primary/5')}
+					class={cn(
+						'transition-all',
+						fourps_beneficiaries > 0 && isFourPsValid && 'border-primary/30 bg-primary/5',
+						!isFourPsValid && 'border-destructive/50 bg-destructive/5'
+					)}
 				/>
+				{#if !isFourPsValid}
+					<p class="text-xs text-destructive">
+						Cannot exceed total households ({households.toLocaleString()})
+					</p>
+				{/if}
 			</div>
 		</div>
 	</FormSection>

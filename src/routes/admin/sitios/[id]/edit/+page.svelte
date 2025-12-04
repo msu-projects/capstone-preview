@@ -535,6 +535,7 @@
 							bind:ethnicities
 							bind:religions
 							{population}
+							{households}
 						/>
 					{:else if activeStep === 'livelihoods'}
 						<LivelihoodsEconomyTab
@@ -554,6 +555,7 @@
 							bind:households_with_backyard_garden={food_security.households_with_backyard_garden}
 							bind:common_garden_commodities={food_security.common_garden_commodities}
 							{households}
+							{population}
 						/>
 					{:else if activeStep === 'infrastructure'}
 						<InfrastructureHousingTab

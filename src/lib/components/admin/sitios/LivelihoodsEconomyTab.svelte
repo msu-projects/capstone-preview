@@ -38,7 +38,8 @@
 		ducks = $bindable(0),
 		households_with_backyard_garden = $bindable(0),
 		common_garden_commodities = $bindable([]),
-		households = 0
+		households = 0,
+		population = 0
 	}: {
 		employments: Array<{ type: string; count: number }>;
 		income_brackets: Array<{ bracket: string; households: number }>;
@@ -56,7 +57,14 @@
 		households_with_backyard_garden: number;
 		common_garden_commodities: string[];
 		households?: number;
+		population?: number;
 	} = $props();
+
+	// Validation for employment vs population
+	const totalEmploymentCount = $derived(employments.reduce((sum, e) => sum + (e.count || 0), 0));
+	const hasPopulation = $derived(population > 0);
+	const hasEmploymentData = $derived(totalEmploymentCount > 0);
+	const isEmploymentValid = $derived(!hasPopulation || totalEmploymentCount <= population);
 
 	// Validation for income distribution vs households
 	const totalIncomeHouseholds = $derived(
@@ -86,6 +94,27 @@
 		icon={Briefcase}
 		variant="default"
 	>
+		{#snippet actions()}
+			{#if hasEmploymentData && hasPopulation}
+				{#if isEmploymentValid}
+					<div
+						class="flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs text-emerald-600"
+					>
+						<CheckCircle2 class="size-3" />
+						<span class="hidden sm:inline">Valid</span>
+					</div>
+				{:else}
+					<div
+						class="flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-xs text-destructive"
+					>
+						<AlertCircle class="size-3" />
+						<span class="hidden sm:inline">Exceeds population</span>
+						<span class="sm:hidden">Error</span>
+					</div>
+				{/if}
+			{/if}
+		{/snippet}
+
 		<!-- Employment Types -->
 		<ComboboxWithCount
 			bind:items={employments}
@@ -98,10 +127,30 @@
 			{#snippet label()}
 				<Label class="flex items-center gap-1.5">
 					Employment Types
-					<HelpTooltip content="Track the main types of employment in this sitio with counts" />
+					<HelpTooltip
+						content="Track the main types of employment in this sitio with counts. Total cannot exceed population."
+					/>
 				</Label>
 			{/snippet}
 		</ComboboxWithCount>
+
+		{#if hasEmploymentData}
+			<div class="mt-3 flex items-center justify-between text-sm">
+				<span class="text-muted-foreground">Total employed:</span>
+				<span class={cn('font-medium', !isEmploymentValid && 'text-destructive')}>
+					{totalEmploymentCount.toLocaleString()}
+					{#if hasPopulation}
+						<span class="text-muted-foreground">/ {population.toLocaleString()}</span>
+					{/if}
+				</span>
+			</div>
+			{#if !isEmploymentValid}
+				<p class="mt-1 flex items-center gap-1 text-xs text-destructive">
+					<AlertCircle class="size-3" />
+					Total employment count cannot exceed population ({population.toLocaleString()})
+				</p>
+			{/if}
+		{/if}
 	</FormSection>
 
 	<!-- Income Brackets Section -->
