@@ -198,6 +198,8 @@
 						bind:householdsReached={quickUpdateData.householdsReached}
 						bind:plannedPercentage={quickUpdateData.plannedPercentage}
 						bind:photoDocumentation={quickUpdateData.photoDocumentation}
+						bind:achievedOutputs={quickUpdateData.achievedOutputs}
+						performanceTargets={quickUpdateData.performanceTargets}
 						onSwitchToFull={switchToFullEdit}
 					/>
 				</Card.CardContent>

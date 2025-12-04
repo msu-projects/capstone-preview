@@ -98,7 +98,14 @@
 	let showSitioSelection = $state(false);
 
 	// Tab 3: Performance Targets
-	let performanceTargets = $state<Omit<PerformanceTarget, 'id' | 'project_id'>[]>([]);
+	let performanceTargets = $state<Omit<PerformanceTarget, 'id' | 'project_id'>[]>(
+		existingProject?.performance_targets?.map((pt) => ({
+			indicator_type: pt.indicator_type,
+			indicator_name: pt.indicator_name,
+			target_value: pt.target_value,
+			unit_of_measure: pt.unit_of_measure
+		})) ?? []
+	);
 	let targetStartDate = $state<DateValue | undefined>(
 		existingProject?.start_date ? parseDate(existingProject.start_date) : today(getLocalTimeZone())
 	);
@@ -275,6 +282,12 @@
 				})),
 				// Tab 5: Monthly targets
 				monthly_targets: monthlyTargets,
+				// Tab 3: Performance targets
+				performance_targets: performanceTargets.map((pt) => ({
+					...pt,
+					id: 0,
+					project_id: existingProject!.id
+				})),
 				employment_generated: {
 					male: Number(employmentMale) || 0,
 					female: Number(employmentFemale) || 0

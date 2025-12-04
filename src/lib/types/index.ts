@@ -308,6 +308,7 @@ export interface Project {
 	project_sitios?: ProjectSitio[];
 	monthly_progress?: MonthlyProgress[]; // Actual progress data
 	monthly_targets?: MonthlyTarget[]; // Planned physical progress and budget per month
+	performance_targets?: PerformanceTarget[]; // Performance indicator targets
 	funding_sources?: FundingSource[];
 	budget_components?: BudgetComponent[];
 	employment_generated?: {

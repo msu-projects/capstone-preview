@@ -7,7 +7,7 @@
 	import { Label } from '$lib/components/ui/label';
 	import * as Select from '$lib/components/ui/select';
 	import { Textarea } from '$lib/components/ui/textarea';
-	import type { PhotoDocumentation, ProjectStatus } from '$lib/types';
+	import type { PerformanceTarget, PhotoDocumentation, ProjectStatus } from '$lib/types';
 	import { formatMonth } from '$lib/utils/monthly-planning';
 	import {
 		calculateBeneficiaryProgress,
@@ -24,6 +24,7 @@
 		CheckCircle,
 		ImageIcon,
 		Info,
+		Target,
 		TrendingDown,
 		TrendingUp,
 		Users,
@@ -55,6 +56,9 @@
 		plannedPercentage: string;
 		// Photo Documentation
 		photoDocumentation: PhotoDocumentation[];
+		// Performance Indicators
+		achievedOutputs: Record<string, string>;
+		performanceTargets: PerformanceTarget[];
 		// Callback
 		onSwitchToFull: () => void;
 	}
@@ -78,6 +82,8 @@
 		householdsReached = $bindable(),
 		plannedPercentage = $bindable(),
 		photoDocumentation = $bindable(),
+		achievedOutputs = $bindable(),
+		performanceTargets,
 		onSwitchToFull
 	}: Props = $props();
 
@@ -700,6 +706,118 @@
 			</div>
 		</Card.Content>
 	</Card.Root>
+
+	<!-- Performance Indicators Section -->
+	{#if performanceTargets && performanceTargets.length > 0}
+		<Card.Root>
+			<Card.Header class="flex flex-row items-center justify-between">
+				<div class="space-y-1.5">
+					<div class="flex items-center gap-2">
+						<Target class="size-4 text-primary" />
+						<Card.Title>Performance Indicators</Card.Title>
+					</div>
+					<Card.Description>Track achieved outputs for {currentMonthFormatted}</Card.Description>
+				</div>
+			</Card.Header>
+			<Card.Content class="space-y-4">
+				<div class="grid gap-4 md:grid-cols-2">
+					{#each performanceTargets as target (target.indicator_type)}
+						{@const achieved = Number(achievedOutputs[target.indicator_type] || 0)}
+						{@const progressPct =
+							target.target_value > 0 ? (achieved / target.target_value) * 100 : 0}
+						{@const progressStatus =
+							progressPct >= 100
+								? 'on-track'
+								: progressPct >= 75
+									? 'warning'
+									: progressPct >= 50
+										? 'needs-attention'
+										: 'behind'}
+						<div class="space-y-2 rounded-lg border bg-card p-4">
+							<div class="flex items-center justify-between">
+								<Label for="indicator-{target.indicator_type}" class="text-sm font-medium">
+									{target.indicator_name}
+								</Label>
+								<Badge variant={getBadgeVariant(progressStatus)} class="text-xs">
+									{progressPct.toFixed(1)}%
+								</Badge>
+							</div>
+							<div class="grid grid-cols-2 gap-3">
+								<!-- Target (Read-only) -->
+								<div class="space-y-1">
+									<span class="text-xs text-muted-foreground">Target</span>
+									<div class="relative">
+										<Input
+											type="text"
+											value={target.target_value}
+											disabled
+											class="pr-12 text-sm opacity-75"
+										/>
+										<span
+											class="pointer-events-none absolute top-2.5 right-3 text-xs text-muted-foreground"
+										>
+											{target.unit_of_measure}
+										</span>
+									</div>
+								</div>
+								<!-- Achieved (Editable) -->
+								<div class="space-y-1">
+									<span class="text-xs text-muted-foreground">Achieved</span>
+									<div class="relative">
+										<Input
+											id="indicator-{target.indicator_type}"
+											type="number"
+											min="0"
+											value={achievedOutputs[target.indicator_type] || '0'}
+											oninput={(e) => {
+												achievedOutputs = {
+													...achievedOutputs,
+													[target.indicator_type]: e.currentTarget.value
+												};
+											}}
+											class="pr-12 text-sm"
+											placeholder="0"
+										/>
+										<span
+											class="pointer-events-none absolute top-2.5 right-3 text-xs text-muted-foreground"
+										>
+											{target.unit_of_measure}
+										</span>
+									</div>
+								</div>
+							</div>
+							<!-- Progress bar -->
+							<div class="mt-2">
+								<div class="h-2 w-full overflow-hidden rounded-full bg-muted">
+									<div
+										class="h-full transition-all duration-300 {progressPct >= 100
+											? 'bg-primary'
+											: progressPct >= 75
+												? 'bg-yellow-500'
+												: progressPct >= 50
+													? 'bg-orange-500'
+													: 'bg-destructive'}"
+										style="width: {Math.min(progressPct, 100)}%"
+									></div>
+								</div>
+								<p class="mt-1 text-xs text-muted-foreground">
+									{achieved} of {target.target_value}
+									{target.unit_of_measure}
+									{#if target.target_value > achieved}
+										<span class="text-muted-foreground"
+											>({target.target_value - achieved} remaining)</span
+										>
+									{:else if achieved > target.target_value}
+										<span class="text-primary">({achieved - target.target_value} over target)</span>
+									{/if}
+								</p>
+							</div>
+						</div>
+					{/each}
+				</div>
+			</Card.Content>
+		</Card.Root>
+	{/if}
 
 	<Card.Root>
 		<Card.Header>

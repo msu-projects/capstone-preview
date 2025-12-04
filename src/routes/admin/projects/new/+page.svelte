@@ -203,6 +203,11 @@
 					project_id: nextId
 				})),
 				monthly_targets: monthlyTargets,
+				performance_targets: performanceTargets.map((pt) => ({
+					...pt,
+					id: 0,
+					project_id: nextId
+				})),
 				employment_generated: {
 					male: Number(employmentMale) || 0,
 					female: Number(employmentFemale) || 0

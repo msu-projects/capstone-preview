@@ -7,6 +7,7 @@ import type {
 	MonthlyProgress,
 	MonthlyReport,
 	MonthlyTarget,
+	PerformanceTarget,
 	PhotoDocumentation,
 	Project
 } from '$lib/types';
@@ -40,6 +41,9 @@ export interface QuickUpdateFormData {
 	householdsReached: string;
 	// Photo Documentation
 	photoDocumentation: PhotoDocumentation[];
+	// Performance Indicators
+	achievedOutputs: Record<string, string>; // { 'indicator_id': '50' } - strings for form binding
+	performanceTargets: PerformanceTarget[]; // Read-only reference for display
 }
 
 /**
@@ -105,7 +109,12 @@ export function projectToQuickUpdate(project: Project): QuickUpdateFormData {
 			'0',
 		householdsReached: '0', // This could be enhanced to pull from sitio data
 		// Photo Documentation
-		photoDocumentation: latestMonthlyProgress?.photo_documentation || []
+		photoDocumentation: latestMonthlyProgress?.photo_documentation || [],
+		// Performance Indicators
+		achievedOutputs: Object.fromEntries(
+			Object.entries(latestMonthlyProgress?.achieved_outputs || {}).map(([k, v]) => [k, String(v)])
+		),
+		performanceTargets: project.performance_targets || []
 	};
 }
 
@@ -142,6 +151,9 @@ export function applyQuickUpdateToProject(
 						beneficiaries_reached: Number(formData.currentBeneficiaries || 0),
 						issues_encountered: formData.issues,
 						photo_documentation: formData.photoDocumentation,
+						achieved_outputs: Object.fromEntries(
+							Object.entries(formData.achievedOutputs || {}).map(([k, v]) => [k, Number(v) || 0])
+						),
 						status: slippage > 10 ? 'delayed' : slippage < -5 ? 'ahead' : ('on-track' as const),
 						updated_at: new Date().toISOString()
 					}
@@ -155,7 +167,9 @@ export function applyQuickUpdateToProject(
 			month_year: currentMonth,
 			physical_progress_percentage: actualPct,
 			budget_utilized: monthlyAmount,
-			achieved_outputs: {},
+			achieved_outputs: Object.fromEntries(
+				Object.entries(formData.achievedOutputs || {}).map(([k, v]) => [k, Number(v) || 0])
+			),
 			beneficiaries_reached: Number(formData.currentBeneficiaries || 0),
 			issues_encountered: formData.issues,
 			photo_documentation: formData.photoDocumentation,
