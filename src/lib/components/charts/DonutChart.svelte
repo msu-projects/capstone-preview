@@ -149,8 +149,13 @@
 			colors: ['#ffffff']
 		}
 	});
+
+	// Create a key based on the data to force re-render when data changes
+	const chartKey = $derived(JSON.stringify(data.map((d) => ({ l: d.label, v: d.value }))));
 </script>
 
 <div class="w-full">
-	<Chart {options} />
+	{#key chartKey}
+		<Chart {options} />
+	{/key}
 </div>

@@ -151,21 +151,8 @@
 			</Card.Header>
 			<Card.Content>
 				{#if statusChartData.length > 0}
-					<div class="flex items-center gap-6">
-						<div class="w-1/2">
-							<DonutChart data={statusChartData} height={180} />
-						</div>
-						<div class="w-1/2 space-y-3">
-							{#each statusSummary as status}
-								<div class="flex items-center justify-between">
-									<div class="flex items-center gap-2">
-										<div class="size-3 rounded-full bg-{status.color}-500"></div>
-										<span class="text-sm text-slate-600">{status.label}</span>
-									</div>
-									<span class="font-semibold text-slate-900">{status.value}</span>
-								</div>
-							{/each}
-						</div>
+					<div class="flex items-center justify-center gap-6">
+						<DonutChart data={statusChartData} />
 					</div>
 				{:else}
 					<div class="flex h-[180px] items-center justify-center text-sm text-slate-500">

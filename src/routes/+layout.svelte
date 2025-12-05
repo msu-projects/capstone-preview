@@ -1,6 +1,7 @@
 <script lang="ts">
 	import favicon from '$lib/assets/favicon.svg';
 	import { Toaster } from '$lib/components/ui/sonner';
+	import * as Tooltip from '$lib/components/ui/tooltip';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { onMount } from 'svelte';
 	import './layout.css';
@@ -16,5 +17,7 @@
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
-{@render children()}
+<Tooltip.Provider delayDuration={300}>
+	{@render children()}
+</Tooltip.Provider>
 <Toaster />
