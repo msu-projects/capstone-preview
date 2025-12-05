@@ -6,24 +6,15 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { NumberInput } from '$lib/components/ui/number-input';
-	import { Textarea } from '$lib/components/ui/textarea';
 	import {
 		infoDisseminationMethodOptions,
 		localOfficialPositionOptions,
 		rstOfficialPositionOptions,
 		transportationMethodOptions
 	} from '$lib/config/sitio-options';
-	import {
-		AlertTriangle,
-		Bus,
-		Cat,
-		Dog,
-		Megaphone,
-		Plus,
-		Target,
-		Trash2,
-		Users
-	} from '@lucide/svelte';
+	import type { SitioIssue, SitioPPA } from '$lib/types';
+	import { Bus, Cat, Dog, Megaphone, Plus, Trash2, Users } from '@lucide/svelte';
+	import IssuesPPAsSection from './IssuesPPAsSection.svelte';
 
 	let {
 		sectoral_organizations = $bindable(0),
@@ -35,8 +26,8 @@
 		cats_vaccinated = $bindable(0),
 		local_officials = $bindable<Array<{ name: string; position: string }>>([]),
 		rst_officials = $bindable<Array<{ name: string; position: string }>>([]),
-		issues_concerns = $bindable<string[]>([]),
-		proposed_ppas = $bindable<string[]>([])
+		issues_concerns = $bindable<SitioIssue[]>([]),
+		proposed_ppas = $bindable<SitioPPA[]>([])
 	}: {
 		sectoral_organizations: number;
 		info_dissemination_methods: string[];
@@ -47,8 +38,8 @@
 		cats_vaccinated: number;
 		local_officials: Array<{ name: string; position: string }>;
 		rst_officials: Array<{ name: string; position: string }>;
-		issues_concerns: string[];
-		proposed_ppas: string[];
+		issues_concerns: SitioIssue[];
+		proposed_ppas: SitioPPA[];
 	} = $props();
 
 	// Computed values
@@ -79,33 +70,6 @@
 
 	function removeRstOfficial(index: number) {
 		rst_officials = rst_officials.filter((_, i) => i !== index);
-	}
-
-	// Issues management
-	let newIssue = $state('');
-	function addIssue() {
-		if (newIssue.trim()) {
-			issues_concerns = [...issues_concerns, newIssue.trim()];
-			newIssue = '';
-		}
-	}
-
-	function removeIssue(index: number) {
-		issues_concerns = issues_concerns.filter((_, i) => i !== index);
-	}
-
-	// PPAs management
-	let newPpa = $state('');
-
-	function addPpa() {
-		if (newPpa.trim()) {
-			proposed_ppas = [...proposed_ppas, newPpa.trim()];
-			newPpa = '';
-		}
-	}
-
-	function removePpa(index: number) {
-		proposed_ppas = proposed_ppas.filter((_, i) => i !== index);
 	}
 </script>
 
@@ -416,84 +380,6 @@
 		</div>
 	</FormSection>
 
-	<!-- Issues & Concerns -->
-	<FormSection
-		title="Issues & Concerns"
-		description="Primary community issues (e.g., Flooding, No Water System)"
-		icon={AlertTriangle}
-		variant="warning"
-	>
-		{#if issues_concerns.length > 0}
-			<div class="flex flex-wrap gap-2">
-				{#each issues_concerns as issue, i (i)}
-					<div class="flex items-center gap-1.5 rounded-lg border bg-warning/5 py-1.5 pr-1.5 pl-3">
-						<span class="text-sm">{issue}</span>
-						<Button
-							type="button"
-							variant="ghost"
-							size="icon"
-							class="size-6 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-							onclick={() => removeIssue(i)}
-						>
-							<Trash2 class="size-3.5" />
-						</Button>
-					</div>
-				{/each}
-			</div>
-		{/if}
-
-		<div class="flex items-center gap-2">
-			<Input
-				bind:value={newIssue}
-				placeholder="Add an issue or concern..."
-				class="flex-1"
-				onkeydown={(e) => e.key === 'Enter' && (e.preventDefault(), addIssue())}
-			/>
-			<Button type="button" variant="outline" size="sm" onclick={addIssue} class="h-9 gap-1.5">
-				<Plus class="size-3.5" />
-				Add
-			</Button>
-		</div>
-	</FormSection>
-
-	<!-- Proposed PPAs -->
-	<FormSection
-		title="Proposed PPAs"
-		description="Programs, Projects, and Activities to address community needs"
-		icon={Target}
-		variant="success"
-	>
-		{#if proposed_ppas.length > 0}
-			<div class="space-y-2">
-				{#each proposed_ppas as ppa, i (i)}
-					<div class="flex items-start gap-2">
-						<div class="flex-1 rounded-lg border bg-success/5 px-3 py-2 text-sm">
-							{ppa}
-						</div>
-						<Button
-							type="button"
-							variant="ghost"
-							size="icon"
-							class="size-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-							onclick={() => removePpa(i)}
-						>
-							<Trash2 class="size-4" />
-						</Button>
-					</div>
-				{/each}
-			</div>
-		{/if}
-
-		<div class="flex items-start gap-2">
-			<Textarea
-				bind:value={newPpa}
-				placeholder="Add a proposed PPA..."
-				class="min-h-[60px] flex-1"
-			/>
-			<Button type="button" variant="outline" size="sm" onclick={addPpa} class="mt-1 gap-1.5">
-				<Plus class="size-3.5" />
-				Add
-			</Button>
-		</div>
-	</FormSection>
+	<!-- Issues & Concerns and Proposed PPAs -->
+	<IssuesPPAsSection bind:issues_concerns bind:proposed_ppas />
 </div>

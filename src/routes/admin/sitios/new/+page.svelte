@@ -9,7 +9,7 @@
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
-	import type { Sitio } from '$lib/types';
+	import type { Sitio, SitioIssue, SitioPPA } from '$lib/types';
 	import { logAuditAction } from '$lib/utils/audit';
 	import { validateDemographics } from '$lib/utils/demographic-validation';
 	import { loadSitios, saveSitios } from '$lib/utils/storage';
@@ -121,11 +121,11 @@
 	let local_officials = $state<Array<{ name: string; position: string }>>([]);
 	let rst_officials = $state<Array<{ name: string; position: string }>>([]);
 
-	// Primary Priorities - Issues & Concerns
-	let issues_concerns = $state<string[]>([]);
+	// Primary Priorities - Issues & Concerns (structured)
+	let issues_concerns = $state<SitioIssue[]>([]);
 
-	// Proposed PPAs (Programs, Projects, and Activities)
-	let proposed_ppas = $state<string[]>([]);
+	// Proposed PPAs (Programs, Projects, and Activities) (structured)
+	let proposed_ppas = $state<SitioPPA[]>([]);
 
 	// Validation
 	const isBasicInfoValid = $derived(

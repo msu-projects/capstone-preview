@@ -11,7 +11,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import { IsMobile } from '$lib/hooks/is-mobile.svelte';
-	import type { Sitio } from '$lib/types';
+	import type { Sitio, SitioIssue, SitioPPA } from '$lib/types';
 	import { validateDemographics } from '$lib/utils/demographic-validation';
 	import { getSitioById, updateSitio } from '$lib/utils/storage';
 	import {
@@ -147,11 +147,11 @@
 	let local_officials = $state<Array<{ name: string; position: string }>>([]);
 	let rst_officials = $state<Array<{ name: string; position: string }>>([]);
 
-	// Primary Priorities - Issues & Concerns
-	let issues_concerns = $state<string[]>([]);
+	// Primary Priorities - Issues & Concerns (structured)
+	let issues_concerns = $state<SitioIssue[]>([]);
 
-	// Proposed PPAs (Programs, Projects, and Activities)
-	let proposed_ppas = $state<string[]>([]);
+	// Proposed PPAs (Programs, Projects, and Activities) (structured)
+	let proposed_ppas = $state<SitioPPA[]>([]);
 
 	// Load sitio data on mount
 	onMount(() => {

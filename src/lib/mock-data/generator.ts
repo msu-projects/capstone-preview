@@ -1,3 +1,9 @@
+import {
+	createIssueFromPredefined,
+	createPPAFromPredefined,
+	predefinedIssues,
+	predefinedPPAs
+} from '$lib/config/issue-ppa-mappings';
 import { MUNICIPALITIES_DATA } from '$lib/config/location-data';
 import { categories, projectTypes } from '$lib/config/project-categories';
 import type {
@@ -11,7 +17,9 @@ import type {
 	Project,
 	ProjectSitio,
 	ProjectStatus,
-	Sitio
+	Sitio,
+	SitioIssue,
+	SitioPPA
 } from '$lib/types';
 
 // ===== SEEDED RANDOM NUMBER GENERATOR =====
@@ -435,11 +443,19 @@ export function generateSitios(count: number = 50, seed: number = 42): Sitio[] {
 					position
 				})),
 
-			// Issues & Concerns (2-4 items)
-			issues_concerns: rng.shuffle(ISSUES_CONCERNS).slice(0, rng.nextInt(2, 4)),
+			// Issues & Concerns (2-4 items) - structured
+			issues_concerns: rng
+				.shuffle(predefinedIssues)
+				.slice(0, rng.nextInt(2, 4))
+				.map((issue) => createIssueFromPredefined(issue.id))
+				.filter((i): i is SitioIssue => i !== null),
 
-			// Proposed PPAs (2-4 items)
-			proposed_ppas: rng.shuffle(PROPOSED_PPAS).slice(0, rng.nextInt(2, 4)),
+			// Proposed PPAs (2-4 items) - structured
+			proposed_ppas: rng
+				.shuffle(predefinedPPAs)
+				.slice(0, rng.nextInt(2, 4))
+				.map((ppa) => createPPAFromPredefined(ppa.id))
+				.filter((p): p is SitioPPA => p !== null),
 
 			created_at: new Date(2024, rng.nextInt(0, 11), rng.nextInt(1, 28)).toISOString(),
 			updated_at: new Date().toISOString()

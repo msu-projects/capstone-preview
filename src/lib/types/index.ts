@@ -8,6 +8,25 @@ export type CategoryKey =
 	| 'livelihood'
 	| 'environment';
 
+// ===== ISSUE & PPA STRUCTURED TYPES =====
+
+export interface SitioIssue {
+	id: string;
+	name: string;
+	category: CategoryKey;
+	isCustom?: boolean;
+	linkedPPAIds?: string[];
+}
+
+export interface SitioPPA {
+	id: string;
+	name: string;
+	category: CategoryKey;
+	isCustom?: boolean;
+	linkedIssueIds?: string[];
+	projectTypeId?: number;
+}
+
 export interface Sitio {
 	// Core identification
 	id: number;
@@ -117,11 +136,11 @@ export interface Sitio {
 		position: string;
 	}>;
 
-	// Primary Priorities - Issues & Concerns
-	issues_concerns?: string[];
+	// Primary Priorities - Issues & Concerns (structured)
+	issues_concerns?: SitioIssue[];
 
-	// Proposed PPAs (Programs, Projects, and Activities)
-	proposed_ppas?: string[];
+	// Proposed PPAs (Programs, Projects, and Activities) (structured)
+	proposed_ppas?: SitioPPA[];
 
 	// Metadata
 	created_at: string;
