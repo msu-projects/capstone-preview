@@ -254,7 +254,7 @@ export function aggregateProgress(projects: Project[]): ProgressAggregation {
 			notStarted++;
 		} else if (project.monthly_progress && project.monthly_progress.length > 0) {
 			// Check latest status from monthly progress
-			const latestProgress = project.monthly_progress.sort((a, b) =>
+			const latestProgress = [...project.monthly_progress].sort((a, b) =>
 				b.month_year.localeCompare(a.month_year)
 			)[0];
 
