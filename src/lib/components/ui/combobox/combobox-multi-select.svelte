@@ -109,7 +109,7 @@
 		</Popover.Trigger>
 		<Popover.Content class="max-w-[min(280px,calc(100vw-2rem))] p-0" align="start">
 			<Command.Root shouldFilter={false}>
-				<Command.Input {placeholder} bind:value={search} />
+				<Command.Input placeholder={'Add/' + placeholder} bind:value={search} />
 				<Command.List>
 					{#if filteredOptions.length === 0 && !isCustomEntry}
 						<Command.Empty>No options found.</Command.Empty>
