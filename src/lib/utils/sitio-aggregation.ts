@@ -431,33 +431,6 @@ export function toAgeChartData(demographics: AggregatedDemographics) {
 }
 
 /**
- * Convert demographics to population pyramid data
- */
-export function toPopulationPyramidData(demographics: AggregatedDemographics) {
-	const maleRatio =
-		demographics.totalPopulation > 0 ? demographics.totalMale / demographics.totalPopulation : 0.5;
-	const femaleRatio = 1 - maleRatio;
-
-	return [
-		{
-			ageGroup: '65+',
-			male: Math.round(demographics.age65above * maleRatio),
-			female: Math.round(demographics.age65above * femaleRatio)
-		},
-		{
-			ageGroup: '15-64',
-			male: Math.round(demographics.age15to64 * maleRatio),
-			female: Math.round(demographics.age15to64 * femaleRatio)
-		},
-		{
-			ageGroup: '0-14',
-			male: Math.round(demographics.age0to14 * maleRatio),
-			female: Math.round(demographics.age0to14 * femaleRatio)
-		}
-	];
-}
-
-/**
  * Convert infrastructure to utilities radar chart data
  */
 export function toUtilitiesRadarData(infrastructure: AggregatedInfrastructure) {

@@ -1,6 +1,5 @@
 <script lang="ts">
 	import DonutChart from '$lib/components/charts/DonutChart.svelte';
-	import PopulationPyramid from '$lib/components/charts/PopulationPyramid.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';
 	import { Progress } from '$lib/components/ui/progress';
@@ -9,8 +8,7 @@
 	import {
 		aggregateDemographics,
 		toAgeChartData,
-		toGenderChartData,
-		toPopulationPyramidData
+		toGenderChartData
 	} from '$lib/utils/sitio-aggregation';
 	import { Activity, Baby, Briefcase, Home, PersonStanding, Users } from '@lucide/svelte';
 
@@ -26,7 +24,6 @@
 	// Chart data
 	const genderChartData = $derived(toGenderChartData(demographics));
 	const ageChartData = $derived(toAgeChartData(demographics));
-	const pyramidData = $derived(toPopulationPyramidData(demographics));
 
 	// Dependency ratio interpretation
 	const dependencyInterpretation = $derived.by(() => {
@@ -157,21 +154,7 @@
 	</div>
 
 	<!-- Charts Row -->
-	<div class="grid gap-6 lg:grid-cols-3">
-		<!-- Population Pyramid -->
-		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50 lg:col-span-2">
-			<Card.Header>
-				<Card.Title class="flex items-center gap-2 text-base">
-					<Users class="size-5 text-slate-500" />
-					Population Pyramid
-				</Card.Title>
-				<Card.Description>Age and gender distribution across all sitios</Card.Description>
-			</Card.Header>
-			<Card.Content>
-				<PopulationPyramid data={pyramidData} height={280} />
-			</Card.Content>
-		</Card.Root>
-
+	<div class="grid gap-6 lg:grid-cols-2">
 		<!-- Gender Distribution -->
 		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50">
 			<Card.Header>
@@ -189,10 +172,7 @@
 				/>
 			</Card.Content>
 		</Card.Root>
-	</div>
 
-	<!-- Age Distribution & Dependency -->
-	<div class="grid gap-6 lg:grid-cols-2">
 		<!-- Age Distribution -->
 		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50">
 			<Card.Header>

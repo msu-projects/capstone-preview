@@ -110,7 +110,7 @@
 	<BarChart data={sitiosByMunicipality} orientation="horizontal" height={280} title="Sitios" />
 </div>
 
-<div class="mt-6 grid gap-6 lg:grid-cols-[60%_40%]">
+<div class="mt-6 grid gap-6 lg:grid-cols-[70%_30%]">
 	<!-- Population by Municipality -->
 	<div class="rounded-lg border bg-card p-4">
 		<h3 class="mb-4 text-lg font-semibold">Population by Municipality</h3>
