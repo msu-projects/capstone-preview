@@ -239,7 +239,7 @@
 						<Button
 							variant="outline"
 							size="sm"
-							href={activeTab === 'sitios' ? '/sitios' : '/projects'}
+							href={activeTab === 'sitios' ? '/admin/sitios' : '/projects'}
 						>
 							<ExternalLink class="mr-2 size-4" />
 							View More Info

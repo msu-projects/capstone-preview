@@ -74,6 +74,10 @@
 	}
 
 	function isActive(url: string): boolean {
+		// For sitios and projects, use startsWith to match sub-routes
+		if (url === '/admin/sitios' || url === '/admin/projects') {
+			return page.url.pathname.startsWith(url);
+		}
 		return page.url.pathname === url;
 	}
 

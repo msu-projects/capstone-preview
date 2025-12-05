@@ -1,44 +1,70 @@
 <script lang="ts">
-	import { goto, replaceState } from '$app/navigation';
-	import { page } from '$app/state';
+	import { goto } from '$app/navigation';
 	import AdminHeader from '$lib/components/admin/AdminHeader.svelte';
-	import SitiosTable from '$lib/components/admin/sitios/SitiosTable.svelte';
-	import * as AlertDialog from '$lib/components/ui/alert-dialog';
+	import {
+		AggregatedDemographicsSection,
+		AggregatedEconomySection,
+		AggregatedInfrastructureSection,
+		AggregatedOverviewSection,
+		AggregatedSocialSection,
+		DashboardSkeleton,
+		SitiosMapSection
+	} from '$lib/components/sitios/dashboard';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
-	import { Input } from '$lib/components/ui/input';
 	import * as Select from '$lib/components/ui/select';
-	import type { Sitio } from '$lib/types';
-	import { deleteSitio, loadSitios } from '$lib/utils/storage';
-	import { Plus, Search, Upload, X } from '@lucide/svelte';
-	import { onMount, tick } from 'svelte';
+	import * as Tabs from '$lib/components/ui/tabs';
+	import type { Project, Sitio } from '$lib/types';
+	import toTitleCase from '$lib/utils/common';
+	import { loadProjects, loadSitios } from '$lib/utils/storage';
+	import {
+		Briefcase,
+		Building2,
+		FileText,
+		Heart,
+		List,
+		Map,
+		MapPin,
+		Plus,
+		Upload,
+		Users,
+		X
+	} from '@lucide/svelte';
+	import { onMount } from 'svelte';
+
+	// Props from +page.ts
+	interface Props {
+		data: {
+			municipality: string;
+			barangay: string;
+			tab: string;
+		};
+	}
+
+	const { data }: Props = $props();
 
 	let sitios = $state<Sitio[]>([]);
-	let searchTerm = $state('');
-	let selectedMunicipality = $state<string>('all');
-	let selectedBarangay = $state<string>('all');
-	let currentPage = $state(1);
-	let sortBy = $state<
-		'name' | 'municipality' | 'barangay' | 'population' | 'households' | 'need_score'
-	>('households');
-	let sortOrder = $state<'asc' | 'desc'>('asc');
-	const itemsPerPage = 10;
-	let deleteDialogOpen = $state(false);
-	let sitioToDelete = $state<Sitio | null>(null);
-	let initialized = $state(false);
+	let projects = $state<Project[]>([]);
+	let isLoading = $state(true);
 
-	// Derived value for checking if any filters are active
-	const hasActiveFilters = $derived(
-		searchTerm !== '' || selectedMunicipality !== 'all' || selectedBarangay !== 'all'
-	);
+	// Filter state synced with URL
+	let selectedMunicipality = $state(data.municipality);
+	let selectedBarangay = $state(data.barangay);
+	let activeTab = $state(data.tab);
 
-	// Count active filters
-	const activeFilterCount = $derived(
-		(searchTerm !== '' ? 1 : 0) +
-			(selectedMunicipality !== 'all' ? 1 : 0) +
-			(selectedBarangay !== 'all' ? 1 : 0)
-	);
+	// Sync state when data changes (e.g., browser back/forward)
+	$effect(() => {
+		selectedMunicipality = data.municipality;
+		selectedBarangay = data.barangay;
+		activeTab = data.tab;
+	});
+
+	onMount(() => {
+		sitios = loadSitios();
+		projects = loadProjects();
+		isLoading = false;
+	});
 
 	// Derived values for filter options
 	let uniqueMunicipalities = $derived(
@@ -54,221 +80,112 @@
 		).sort()
 	);
 
-	// Initialize filters from URL query params
-	function initFromUrl() {
-		const params = page.url.searchParams;
-		searchTerm = params.get('search') || '';
-		selectedMunicipality = params.get('municipality') || 'all';
-		selectedBarangay = params.get('barangay') || 'all';
-		currentPage = parseInt(params.get('page') || '1', 10);
-		const urlViewMode = params.get('view');
-		const urlSortBy = params.get('sortBy');
-		if (
-			urlSortBy &&
-			['name', 'municipality', 'barangay', 'population', 'households', 'need_score'].includes(
-				urlSortBy
-			)
-		) {
-			sortBy = urlSortBy as typeof sortBy;
-		}
-		const urlSortOrder = params.get('sortOrder');
-		if (urlSortOrder && ['asc', 'desc'].includes(urlSortOrder)) {
-			sortOrder = urlSortOrder as 'asc' | 'desc';
-		}
-		initialized = true;
-	}
-
-	// Sync filters to URL
-	function syncToUrl() {
-		const params = new URLSearchParams();
-		if (searchTerm) params.set('search', searchTerm);
-		if (selectedMunicipality !== 'all') params.set('municipality', selectedMunicipality);
-		if (selectedBarangay !== 'all') params.set('barangay', selectedBarangay);
-		if (currentPage > 1) params.set('page', currentPage.toString());
-		if (sortBy !== 'households') params.set('sortBy', sortBy);
-		if (sortOrder !== 'asc') params.set('sortOrder', sortOrder);
-
-		const queryString = params.toString();
-		const newUrl = queryString ? `?${queryString}` : page.url.pathname;
-
-		tick().then(() => {
-			replaceState(newUrl, {});
-		});
-	}
-
-	// Sync URL when filters change
-	$effect(() => {
-		// Track all filter values
-		searchTerm;
-		selectedMunicipality;
-		selectedBarangay;
-		currentPage;
-		sortBy;
-		sortOrder;
-		// Only sync after initial mount
-
-		syncToUrl();
-	});
-
-	onMount(() => {
-		loadData();
-		initFromUrl();
-	});
-
-	function loadData() {
-		sitios = loadSitios();
-	}
-
-	// Filter and sort sitios
+	// Filter sitios based on selections
 	const filteredSitios = $derived.by(() => {
-		const filtered = sitios.filter((s) => {
-			// Municipality filter
+		return sitios.filter((s) => {
 			if (selectedMunicipality !== 'all' && s.municipality !== selectedMunicipality) {
 				return false;
 			}
-
-			// Barangay filter
 			if (selectedBarangay !== 'all' && s.barangay !== selectedBarangay) {
 				return false;
 			}
-
-			// Search term filter
-			if (searchTerm) {
-				const term = searchTerm.toLowerCase();
-				return (
-					s.name.toLowerCase().includes(term) ||
-					s.municipality.toLowerCase().includes(term) ||
-					s.barangay.toLowerCase().includes(term)
-				);
-			}
-
 			return true;
 		});
+	});
 
-		// Sort sitios
-		return filtered.sort((a, b) => {
-			let comparison = 0;
-			switch (sortBy) {
-				case 'name':
-					comparison = a.name.localeCompare(b.name);
-					break;
-				case 'municipality':
-					comparison = a.municipality.localeCompare(b.municipality);
-					break;
-				case 'barangay':
-					comparison = a.barangay.localeCompare(b.barangay);
-					break;
-				case 'population':
-					comparison = (a.population || 0) - (b.population || 0);
-					break;
-				case 'households':
-					comparison = (a.households || 0) - (b.households || 0);
-					break;
-				case 'need_score':
-					comparison = (a.need_score ?? 5) - (b.need_score ?? 5);
-					break;
-			}
-			return sortOrder === 'asc' ? comparison : -comparison;
+	// Filter projects based on their associated sitios matching the selected filters
+	const filteredProjects = $derived.by(() => {
+		if (selectedMunicipality === 'all' && selectedBarangay === 'all') {
+			return projects;
+		}
+		return projects.filter((p) => {
+			if (!p.project_sitios || p.project_sitios.length === 0) return false;
+			return p.project_sitios.some((ps) => {
+				if (selectedMunicipality !== 'all' && ps.municipality !== selectedMunicipality) {
+					return false;
+				}
+				if (selectedBarangay !== 'all' && ps.barangay !== selectedBarangay) {
+					return false;
+				}
+				return true;
+			});
 		});
 	});
 
-	// Paginate
-	const paginatedSitios = $derived.by(() => {
-		const start = (currentPage - 1) * itemsPerPage;
-		return filteredSitios.slice(start, start + itemsPerPage);
+	// Create filter label for display
+	const filterLabel = $derived.by(() => {
+		if (selectedMunicipality === 'all') return 'All Sitios';
+		if (selectedBarangay === 'all') return selectedMunicipality;
+		return `${selectedBarangay}, ${selectedMunicipality}`;
 	});
 
-	const totalPages = $derived(Math.ceil(filteredSitios.length / itemsPerPage));
+	// Check if filters are active
+	const hasActiveFilters = $derived(selectedMunicipality !== 'all' || selectedBarangay !== 'all');
 
-	// Reset barangay filter when municipality changes
-	$effect(() => {
-		selectedMunicipality;
-		if (selectedBarangay !== 'all') {
-			const barangayExists = sitios.some(
-				(s) =>
-					s.barangay === selectedBarangay &&
-					(selectedMunicipality === 'all' || s.municipality === selectedMunicipality)
-			);
-			if (!barangayExists) {
-				selectedBarangay = 'all';
-			}
-		}
-	});
+	// Update URL when filters or tab change
+	function updateUrl() {
+		const params = new URLSearchParams();
+		if (selectedMunicipality !== 'all') params.set('municipality', selectedMunicipality);
+		if (selectedBarangay !== 'all') params.set('barangay', selectedBarangay);
+		if (activeTab !== 'overview') params.set('tab', activeTab);
 
-	function toggleSort(column: typeof sortBy) {
-		if (sortBy === column) {
-			sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
-		} else {
-			sortBy = column;
-			sortOrder = 'asc';
-		}
+		const queryString = params.toString();
+		goto(`/admin/sitios${queryString ? `?${queryString}` : ''}`, {
+			replaceState: true,
+			noScroll: true
+		});
 	}
 
-	function handleEdit(sitioId: number) {
-		goto(`/admin/sitios/${sitioId}/edit`);
+	// Handle filter changes
+	function handleMunicipalityChange(value: string | undefined) {
+		selectedMunicipality = value || 'all';
+		selectedBarangay = 'all'; // Reset barangay when municipality changes
+		updateUrl();
 	}
 
-	function confirmDelete(sitioId: number) {
-		const sitio = sitios.find((s) => s.id === sitioId);
-		sitioToDelete = sitio || null;
-		deleteDialogOpen = true;
+	function handleBarangayChange(value: string | undefined) {
+		selectedBarangay = value || 'all';
+		updateUrl();
 	}
 
-	function handleDelete() {
-		if (sitioToDelete) {
-			const success = deleteSitio(sitioToDelete.id);
-			if (success) {
-				loadData();
-			} else {
-				alert('Failed to delete sitio');
-			}
-		}
-		deleteDialogOpen = false;
-		sitioToDelete = null;
+	function handleTabChange(value: string) {
+		activeTab = value;
+		updateUrl();
 	}
 
-	function handleDownloadPDF(sitioId: number) {
-		const sitio = sitios.find((s) => s.id === sitioId);
-		if (sitio) {
-			console.log('Download PDF for sitio:', sitio.name);
-			// TODO: Implement PDF download functionality
-			alert(`PDF download for ${sitio.name} will be implemented soon.`);
-		}
-	}
-
-	function handleRefresh() {
-		loadData();
-	}
-
-	function clearAllFilters() {
-		searchTerm = '';
+	function clearFilters() {
 		selectedMunicipality = 'all';
 		selectedBarangay = 'all';
-		currentPage = 1;
+		updateUrl();
 	}
 
-	function removeSearchFilter() {
-		searchTerm = '';
-	}
-
-	function removeMunicipalityFilter() {
-		selectedMunicipality = 'all';
-		selectedBarangay = 'all';
-	}
-
-	function removeBarangayFilter() {
-		selectedBarangay = 'all';
-	}
+	// Tab configuration
+	const tabs = [
+		{ id: 'overview', label: 'Overview', icon: FileText },
+		{ id: 'demographics', label: 'Demographics', icon: Users },
+		{ id: 'infrastructure', label: 'Infrastructure', icon: Building2 },
+		{ id: 'social', label: 'Social', icon: Heart },
+		{ id: 'economy', label: 'Economy', icon: Briefcase },
+		{ id: 'map', label: 'Map', icon: Map }
+	];
 </script>
 
 <svelte:head>
-	<title>Sitio Management</title>
+	<title>Sitio Dashboard - Admin</title>
+	<meta
+		name="description"
+		content="Admin dashboard for sitio data and community indicators across South Cotabato"
+	/>
 </svelte:head>
 
 <div class="flex min-h-screen flex-col bg-muted/30">
 	<!-- Header -->
-	<AdminHeader title="Sitios" description="Manage sitio data and demographics">
+	<AdminHeader title="Sitio Dashboard" description="Aggregated sitio analytics and insights">
 		{#snippet actions()}
+			<Button variant="outline" onclick={() => goto('/admin/sitios/list')} size="sm">
+				<List class="size-4 sm:mr-2" />
+				<span class="hidden sm:inline">Manage Sitios</span>
+			</Button>
 			<Button variant="outline" onclick={() => goto('/admin/import')} size="sm">
 				<Upload class="size-4 sm:mr-2" />
 				<span class="hidden sm:inline">Import Data</span>
@@ -281,138 +198,143 @@
 	</AdminHeader>
 
 	<!-- Content -->
-	<div class="flex-1 space-y-6 p-6">
-		<!-- Search and Filters -->
-		<Card.Root class="shadow-sm transition-shadow hover:shadow-md">
-			<Card.Content class="">
-				<div class="flex flex-col gap-4 md:flex-row md:items-center">
-					<div class="relative flex-1">
-						<Search class="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-						<Input
-							bind:value={searchTerm}
-							placeholder="Search by sitio, municipality, or barangay..."
-							class="pl-10"
-						/>
-					</div>
-					<div class="flex flex-col gap-2 sm:flex-row sm:items-center">
-						<Select.Root type="single" bind:value={selectedMunicipality}>
-							<Select.Trigger class="w-full sm:w-[200px]">
-								{selectedMunicipality === 'all' ? 'All Municipalities' : selectedMunicipality}
-							</Select.Trigger>
-							<Select.Content>
-								<Select.Item value="all">All Municipalities</Select.Item>
-								{#each uniqueMunicipalities as municipality}
-									<Select.Item value={municipality}>{municipality}</Select.Item>
-								{/each}
-							</Select.Content>
-						</Select.Root>
+	<div class="flex-1 space-y-4 p-6">
+		<!-- Filter Bar -->
+		<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+			<div class="flex flex-wrap items-center gap-3">
+				<!-- Municipality Filter -->
+				<Select.Root
+					type="single"
+					value={selectedMunicipality}
+					onValueChange={handleMunicipalityChange}
+				>
+					<Select.Trigger class="w-full sm:w-[180px]">
+						{selectedMunicipality === 'all' ? 'All Municipalities' : selectedMunicipality}
+					</Select.Trigger>
+					<Select.Content>
+						<Select.Item value="all">All Municipalities</Select.Item>
+						{#each uniqueMunicipalities as municipality}
+							<Select.Item value={municipality}>{municipality}</Select.Item>
+						{/each}
+					</Select.Content>
+				</Select.Root>
 
-						<Select.Root type="single" bind:value={selectedBarangay}>
-							<Select.Trigger class="w-full sm:w-[200px]">
-								{selectedBarangay === 'all' ? 'All Barangays' : selectedBarangay}
-							</Select.Trigger>
-							<Select.Content>
-								<Select.Item value="all">All Barangays</Select.Item>
-								{#each uniqueBarangays as barangay}
-									<Select.Item value={barangay}>{barangay}</Select.Item>
-								{/each}
-							</Select.Content>
-						</Select.Root>
+				<!-- Barangay Filter -->
+				<Select.Root type="single" value={selectedBarangay} onValueChange={handleBarangayChange}>
+					<Select.Trigger class="w-full sm:w-[180px]">
+						{selectedBarangay === 'all' ? 'All Barangays' : selectedBarangay}
+					</Select.Trigger>
+					<Select.Content>
+						<Select.Item value="all">All Barangays</Select.Item>
+						{#each uniqueBarangays as barangay}
+							<Select.Item value={barangay}>{barangay}</Select.Item>
+						{/each}
+					</Select.Content>
+				</Select.Root>
+
+				<!-- Clear Filters -->
+				{#if hasActiveFilters}
+					<Button variant="ghost" size="sm" onclick={clearFilters} class="gap-1.5">
+						<X class="size-4" />
+						Clear Filters
+					</Button>
+				{/if}
+			</div>
+
+			<div class="flex items-center gap-3">
+				<!-- Current filter label -->
+				{#if hasActiveFilters}
+					<Badge variant="secondary" class="gap-1.5">
+						<MapPin class="size-3" />
+						{toTitleCase(filterLabel)}
+					</Badge>
+				{/if}
+			</div>
+		</div>
+
+		<!-- Loading State -->
+		{#if isLoading}
+			<DashboardSkeleton />
+		{:else if filteredSitios.length === 0}
+			<!-- Empty State -->
+			<Card.Root class="py-16 text-center">
+				<Card.Content>
+					<div
+						class="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800"
+					>
+						<MapPin class="size-8 text-slate-400" />
 					</div>
+					<h3 class="text-lg font-semibold text-slate-900 dark:text-slate-100">No Sitios Found</h3>
+					<p class="mt-2 text-slate-500 dark:text-slate-400">
+						No sitios match your current filter criteria. Try adjusting your filters.
+					</p>
+					<Button onclick={clearFilters} class="mt-4">Clear Filters</Button>
+				</Card.Content>
+			</Card.Root>
+		{:else}
+			<!-- Tabs -->
+			<Tabs.Root value={activeTab} onValueChange={handleTabChange}>
+				<div class="sticky top-0 z-50 -mx-6 bg-muted/30 px-6 pt-2 pb-2 backdrop-blur-sm">
+					<Tabs.List
+						class="inline-flex h-auto w-full justify-start gap-1 overflow-x-auto rounded-xl bg-background p-1.5 shadow-sm ring-1 ring-border"
+					>
+						{#each tabs as tab}
+							<Tabs.Trigger
+								value={tab.id}
+								class="inline-flex shrink-0 items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-muted-foreground transition-all hover:bg-muted hover:text-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
+							>
+								<tab.icon class="size-4" />
+								<span class="hidden sm:inline">{tab.label}</span>
+							</Tabs.Trigger>
+						{/each}
+					</Tabs.List>
 				</div>
 
-				<!-- Active Filter Badges -->
-				{#if hasActiveFilters}
-					<div class="mt-4 flex flex-wrap items-center gap-2 border-t pt-4">
-						<span class="text-sm text-muted-foreground">Active filters:</span>
+				<div class="mt-3">
+					<Tabs.Content
+						value="overview"
+						class="animate-in duration-300 fade-in slide-in-from-bottom-2"
+					>
+						<AggregatedOverviewSection
+							sitios={filteredSitios}
+							projects={filteredProjects}
+							filterLabel={toTitleCase(filterLabel)}
+						/>
+					</Tabs.Content>
 
-						{#if searchTerm}
-							<Badge variant="secondary" class="gap-1 pr-1">
-								<span class="max-w-32 truncate">Search: "{searchTerm}"</span>
-								<button
-									type="button"
-									class="ml-1 rounded-full p-0.5 hover:bg-muted-foreground/20"
-									onclick={removeSearchFilter}
-								>
-									<X class="size-3" />
-									<span class="sr-only">Remove search filter</span>
-								</button>
-							</Badge>
-						{/if}
+					<Tabs.Content
+						value="demographics"
+						class="animate-in duration-300 fade-in slide-in-from-bottom-2"
+					>
+						<AggregatedDemographicsSection sitios={filteredSitios} />
+					</Tabs.Content>
 
-						{#if selectedMunicipality !== 'all'}
-							<Badge variant="secondary" class="gap-1 pr-1">
-								<span>Municipality: {selectedMunicipality}</span>
-								<button
-									type="button"
-									class="ml-1 rounded-full p-0.5 hover:bg-muted-foreground/20"
-									onclick={removeMunicipalityFilter}
-								>
-									<X class="size-3" />
-									<span class="sr-only">Remove municipality filter</span>
-								</button>
-							</Badge>
-						{/if}
+					<Tabs.Content
+						value="infrastructure"
+						class="animate-in duration-300 fade-in slide-in-from-bottom-2"
+					>
+						<AggregatedInfrastructureSection sitios={filteredSitios} />
+					</Tabs.Content>
 
-						{#if selectedBarangay !== 'all'}
-							<Badge variant="secondary" class="gap-1 pr-1">
-								<span>Barangay: {selectedBarangay}</span>
-								<button
-									type="button"
-									class="ml-1 rounded-full p-0.5 hover:bg-muted-foreground/20"
-									onclick={removeBarangayFilter}
-								>
-									<X class="size-3" />
-									<span class="sr-only">Remove barangay filter</span>
-								</button>
-							</Badge>
-						{/if}
+					<Tabs.Content
+						value="social"
+						class="animate-in duration-300 fade-in slide-in-from-bottom-2"
+					>
+						<AggregatedSocialSection sitios={filteredSitios} />
+					</Tabs.Content>
 
-						{#if activeFilterCount > 1}
-							<Button variant="ghost" size="sm" class="h-7 text-xs" onclick={clearAllFilters}>
-								Clear all
-							</Button>
-						{/if}
-					</div>
-				{/if}
-			</Card.Content>
-		</Card.Root>
+					<Tabs.Content
+						value="economy"
+						class="animate-in duration-300 fade-in slide-in-from-bottom-2"
+					>
+						<AggregatedEconomySection sitios={filteredSitios} />
+					</Tabs.Content>
 
-		<!-- Sitios Table -->
-		<SitiosTable
-			sitios={paginatedSitios}
-			totalSitios={filteredSitios.length}
-			bind:currentPage
-			{itemsPerPage}
-			{totalPages}
-			{sortBy}
-			{sortOrder}
-			onToggleSort={toggleSort}
-			onRefresh={handleRefresh}
-			onDelete={confirmDelete}
-			onDownloadPDF={handleDownloadPDF}
-			onEdit={handleEdit}
-			onPageChange={(p) => (currentPage = p)}
-			onClearFilters={clearAllFilters}
-			{hasActiveFilters}
-		/>
+					<Tabs.Content value="map" class="animate-in duration-300 fade-in slide-in-from-bottom-2">
+						<SitiosMapSection sitios={filteredSitios} currentTab={activeTab} />
+					</Tabs.Content>
+				</div>
+			</Tabs.Root>
+		{/if}
 	</div>
 </div>
-
-<!-- Delete Confirmation Dialog -->
-<AlertDialog.Root bind:open={deleteDialogOpen}>
-	<AlertDialog.Content>
-		<AlertDialog.Header>
-			<AlertDialog.Title>Delete Sitio</AlertDialog.Title>
-			<AlertDialog.Description>
-				Are you sure you want to delete "{sitioToDelete?.name}"? This action cannot be undone.
-			</AlertDialog.Description>
-		</AlertDialog.Header>
-		<AlertDialog.Footer>
-			<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
-			<AlertDialog.Action onclick={handleDelete} class="text-destructive-foreground bg-destructive">
-				Delete
-			</AlertDialog.Action>
-		</AlertDialog.Footer>
-	</AlertDialog.Content>
-</AlertDialog.Root>
