@@ -443,18 +443,54 @@ export function generateSitios(count: number = 50, seed: number = 42): Sitio[] {
 				})),
 
 			// Issues & Concerns (2-4 items) - structured
-			issues_concerns: rng
-				.shuffle(predefinedIssues)
-				.slice(0, rng.nextInt(2, 4))
-				.map((issue) => createIssueFromPredefined(issue.id))
-				.filter((i): i is SitioIssue => i !== null),
+			// First, pick random issues
+			...(() => {
+				const selectedIssues = rng
+					.shuffle(predefinedIssues)
+					.slice(0, rng.nextInt(2, 4))
+					.map((issue) => createIssueFromPredefined(issue.id))
+					.filter((i): i is SitioIssue => i !== null);
 
-			// Proposed PPAs (2-4 items) - structured
-			proposed_ppas: rng
-				.shuffle(predefinedPPAs)
-				.slice(0, rng.nextInt(2, 4))
-				.map((ppa) => createPPAFromPredefined(ppa.id))
-				.filter((p): p is SitioPPA => p !== null),
+				// Collect all suggested PPA IDs from the selected issues
+				const suggestedPPAIds = new Set<string>();
+				for (const issue of selectedIssues) {
+					const predefined = predefinedIssues.find((pi) => pi.id === issue.id);
+					if (predefined) {
+						for (const ppaId of predefined.suggestedPPAIds) {
+							suggestedPPAIds.add(ppaId);
+						}
+					}
+				}
+
+				// Convert to array and pick related PPAs
+				const relatedPPAIds = Array.from(suggestedPPAIds);
+				let selectedPPAs: SitioPPA[] = [];
+
+				if (relatedPPAIds.length > 0) {
+					// Pick PPAs that are related to the issues (prioritize related ones)
+					const numPPAs = Math.min(rng.nextInt(2, 4), relatedPPAIds.length);
+					selectedPPAs = rng
+						.shuffle(relatedPPAIds)
+						.slice(0, numPPAs)
+						.map((ppaId) => createPPAFromPredefined(ppaId))
+						.filter((p): p is SitioPPA => p !== null);
+				}
+
+				// If we don't have enough PPAs, add some random ones
+				if (selectedPPAs.length < 2) {
+					const additionalPPAs = rng
+						.shuffle(predefinedPPAs.filter((ppa) => !relatedPPAIds.includes(ppa.id)))
+						.slice(0, 2 - selectedPPAs.length)
+						.map((ppa) => createPPAFromPredefined(ppa.id))
+						.filter((p): p is SitioPPA => p !== null);
+					selectedPPAs = [...selectedPPAs, ...additionalPPAs];
+				}
+
+				return {
+					issues_concerns: selectedIssues,
+					proposed_ppas: selectedPPAs
+				};
+			})(),
 
 			created_at: new Date(2024, rng.nextInt(0, 11), rng.nextInt(1, 28)).toISOString(),
 			updated_at: new Date().toISOString()

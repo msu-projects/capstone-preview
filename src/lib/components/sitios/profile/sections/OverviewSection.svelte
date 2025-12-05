@@ -2,26 +2,39 @@
 	import SitioMap from '$lib/components/sitios/SitioMap.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';
-	import type { Project, Sitio } from '$lib/types';
+	import * as Tooltip from '$lib/components/ui/tooltip';
+	import {
+		categoryColors,
+		categoryLabels,
+		getPredefinedIssue,
+		getPredefinedPPA
+	} from '$lib/config/issue-ppa-mappings';
+	import type { CategoryKey, Project, Sitio, SitioIssue, SitioPPA } from '$lib/types';
 	import type { SitioYearlySnapshot } from '$lib/types/sitio-yearly';
 	import { formatCurrency, formatNumber } from '$lib/utils/formatters';
 	import {
 		AlertTriangle,
 		ArrowUpRight,
+		Briefcase,
 		Building2,
 		Crown,
 		FolderKanban,
+		GraduationCap,
 		Heart,
+		HeartPulse,
 		Home,
 		Leaf,
 		Lightbulb,
+		Link,
 		MapPin,
 		Shield,
 		Sparkles,
+		Sprout,
 		TrendingUp,
 		Users,
 		Vote,
-		Zap
+		Zap,
+		type Icon as IconType
 	} from '@lucide/svelte';
 
 	interface Props {
@@ -31,6 +44,89 @@
 	}
 
 	const { sitio, relatedProjects, previousSnapshot = null }: Props = $props();
+
+	// Category icon mapping
+	const categoryIcons: Record<CategoryKey, typeof IconType> = {
+		infrastructure: Building2,
+		agriculture: Sprout,
+		education: GraduationCap,
+		health: HeartPulse,
+		livelihood: Briefcase,
+		environment: Leaf
+	};
+
+	// Normalize issue: handle both string and object formats
+	function normalizeIssue(item: SitioIssue | string): SitioIssue {
+		if (typeof item === 'string') {
+			return {
+				id: `legacy_${Date.now()}_${Math.random()}`,
+				name: item,
+				category: 'infrastructure', // default category for legacy strings
+				isCustom: true
+			};
+		}
+		return item;
+	}
+
+	// Normalize PPA: handle both string and object formats
+	function normalizePPA(item: SitioPPA | string): SitioPPA {
+		if (typeof item === 'string') {
+			return {
+				id: `legacy_${Date.now()}_${Math.random()}`,
+				name: item,
+				category: 'infrastructure', // default category for legacy strings
+				isCustom: true
+			};
+		}
+		return item;
+	}
+
+	// Group items by category and return as typed array of entries
+	function groupByCategory<T extends { category: CategoryKey }>(
+		items: T[]
+	): Array<{ category: CategoryKey; items: T[] }> {
+		const grouped = new Map<CategoryKey, T[]>();
+		for (const item of items) {
+			const existing = grouped.get(item.category) || [];
+			existing.push(item);
+			grouped.set(item.category, existing);
+		}
+		return Array.from(grouped.entries()).map(([category, items]) => ({ category, items }));
+	}
+
+	// Derived: normalized and grouped issues
+	const groupedIssues = $derived.by(() => {
+		if (!sitio.issues_concerns || sitio.issues_concerns.length === 0) return [];
+		const normalized = sitio.issues_concerns.map(normalizeIssue);
+		return groupByCategory(normalized);
+	});
+
+	// Derived: normalized and grouped PPAs
+	const groupedPPAs = $derived.by(() => {
+		if (!sitio.proposed_ppas || sitio.proposed_ppas.length === 0) return [];
+		const normalized = sitio.proposed_ppas.map(normalizePPA);
+		return groupByCategory(normalized);
+	});
+
+	// Helper: Get linked PPA names from IDs
+	function getLinkedPPANames(ppaIds: string[]): string[] {
+		return ppaIds
+			.map((id) => {
+				const ppa = getPredefinedPPA(id);
+				return ppa?.name ?? id;
+			})
+			.filter(Boolean);
+	}
+
+	// Helper: Get linked Issue names from IDs
+	function getLinkedIssueNames(issueIds: string[]): string[] {
+		return issueIds
+			.map((id) => {
+				const issue = getPredefinedIssue(id);
+				return issue?.name ?? id;
+			})
+			.filter(Boolean);
+	}
 
 	// Calculate key metrics
 	const philhealthCoverage = $derived(
@@ -389,72 +485,228 @@
 		<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
 			<!-- Issues & Concerns -->
 			{#if sitio.issues_concerns && sitio.issues_concerns.length > 0}
-				<Card.Root class="gap-0 py-0 shadow-sm">
-					<Card.Header class="border-b bg-rose-50/50 py-6">
+				<Card.Root
+					class="gap-0 py-0 shadow-sm dark:bg-slate-900/50 dark:ring-1 dark:ring-slate-800"
+				>
+					<Card.Header
+						class="border-b bg-rose-50/50 py-6 dark:border-rose-900/50 dark:bg-rose-950/30"
+					>
 						<div class="flex items-center justify-between">
 							<div class="flex items-center gap-2">
-								<div class="rounded-lg bg-rose-100 p-1.5">
-									<AlertTriangle class="size-4 text-rose-600" />
+								<div class="rounded-lg bg-rose-100 p-1.5 dark:bg-rose-900/50">
+									<AlertTriangle class="size-4 text-rose-600 dark:text-rose-400" />
 								</div>
-								<Card.Title class="text-lg">Issues & Concerns</Card.Title>
+								<Card.Title class="text-lg dark:text-slate-100">Issues & Concerns</Card.Title>
 							</div>
-							<Badge variant="outline" class="bg-rose-50 text-rose-700">
+							<Badge
+								variant="outline"
+								class="bg-rose-50 text-rose-700 dark:border-rose-800 dark:bg-rose-950/50 dark:text-rose-300"
+							>
 								{sitio.issues_concerns.length} Items
 							</Badge>
 						</div>
-						<Card.Description>Priority areas identified by the community</Card.Description>
+						<Card.Description class="dark:text-slate-400"
+							>Priority areas identified by the community</Card.Description
+						>
 					</Card.Header>
 					<Card.Content class="py-4">
-						<ul class="space-y-2">
-							{#each sitio.issues_concerns as issue, i}
-								<li
-									class="flex items-start gap-3 rounded-lg bg-rose-50/50 px-3 py-2.5 ring-1 ring-rose-100"
-								>
-									<span
-										class="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-rose-200 text-xs font-semibold text-rose-700"
-									>
-										{i + 1}
-									</span>
-									<span class="text-sm text-slate-700">{issue}</span>
-								</li>
+						<div class="space-y-4">
+							{#each groupedIssues as group}
+								{@const colors = categoryColors[group.category]}
+								{@const CategoryIcon = categoryIcons[group.category]}
+								<div class="space-y-2">
+									<!-- Category Header -->
+									<div class="flex items-center gap-2">
+										<div class="flex items-center gap-1.5 rounded-md px-2 py-1 {colors.bg}">
+											<CategoryIcon class="size-3.5 {colors.text}" />
+											<span class="text-xs font-semibold {colors.text}">
+												{categoryLabels[group.category]}
+											</span>
+										</div>
+										<span class="text-xs text-slate-400 dark:text-slate-500">
+											{group.items.length}
+											{group.items.length === 1 ? 'issue' : 'issues'}
+										</span>
+									</div>
+									<!-- Issues in this category -->
+									<ul class="space-y-1.5 pl-1">
+										{#each group.items as issue}
+											<li
+												class="group flex items-start gap-3 rounded-lg border border-slate-100 bg-white/50 px-3
+													py-2.5 transition-colors hover:bg-slate-50/80
+													dark:border-slate-700/50 dark:bg-slate-800/30 dark:hover:bg-slate-800/50"
+											>
+												<div class="flex-1">
+													<div class="flex items-center gap-2">
+														<span class="text-sm font-medium text-slate-700 dark:text-slate-200">
+															{issue.name}
+														</span>
+														{#if issue.isCustom}
+															<Sparkles class="size-3.5 text-amber-500 dark:text-amber-400" />
+														{/if}
+													</div>
+													{#if issue.linkedPPAIds && issue.linkedPPAIds.length > 0}
+														{@const linkedNames = getLinkedPPANames(issue.linkedPPAIds)}
+														<Tooltip.Root>
+															<Tooltip.Trigger class="cursor-help">
+																<div
+																	class="mt-1 flex items-center gap-1 text-xs text-slate-500 transition-colors hover:text-emerald-600 dark:text-slate-400 dark:hover:text-emerald-400"
+																>
+																	<Link class="size-3" />
+																	<span class="underline decoration-dashed underline-offset-2"
+																		>{issue.linkedPPAIds.length} linked PPA{issue.linkedPPAIds
+																			.length > 1
+																			? 's'
+																			: ''}</span
+																	>
+																</div>
+															</Tooltip.Trigger>
+															<Tooltip.Content
+																side="bottom"
+																align="start"
+																class="max-w-xs bg-blue-100 text-black shadow-md"
+															>
+																<div class="space-y-1.5">
+																	<p
+																		class="text-xs font-semibold text-emerald-600 dark:text-emerald-400"
+																	>
+																		Linked Programs & Activities:
+																	</p>
+																	<ul class="space-y-1">
+																		{#each linkedNames as name}
+																			<li class="flex items-start gap-1.5 text-xs">
+																				<Lightbulb
+																					class="mt-0.5 size-3 shrink-0 text-emerald-500"
+																				/>
+																				<span>{name}</span>
+																			</li>
+																		{/each}
+																	</ul>
+																</div>
+															</Tooltip.Content>
+														</Tooltip.Root>
+													{/if}
+												</div>
+											</li>
+										{/each}
+									</ul>
+								</div>
 							{/each}
-						</ul>
+						</div>
 					</Card.Content>
 				</Card.Root>
 			{/if}
 
 			<!-- Proposed PPAs -->
 			{#if sitio.proposed_ppas && sitio.proposed_ppas.length > 0}
-				<Card.Root class="gap-0 py-0 shadow-sm">
-					<Card.Header class="border-b bg-emerald-50/50 py-6">
+				<Card.Root
+					class="gap-0 py-0 shadow-sm dark:bg-slate-900/50 dark:ring-1 dark:ring-slate-800"
+				>
+					<Card.Header
+						class="border-b bg-emerald-50/50 py-6 dark:border-emerald-900/50 dark:bg-emerald-950/30"
+					>
 						<div class="flex items-center justify-between">
 							<div class="flex items-center gap-2">
-								<div class="rounded-lg bg-emerald-100 p-1.5">
-									<Lightbulb class="size-4 text-emerald-600" />
+								<div class="rounded-lg bg-emerald-100 p-1.5 dark:bg-emerald-900/50">
+									<Lightbulb class="size-4 text-emerald-600 dark:text-emerald-400" />
 								</div>
-								<Card.Title class="text-lg">Proposed Programs & Activities</Card.Title>
+								<Card.Title class="text-lg dark:text-slate-100"
+									>Proposed Programs & Activities</Card.Title
+								>
 							</div>
-							<Badge variant="outline" class="bg-emerald-50 text-emerald-700">
+							<Badge
+								variant="outline"
+								class="bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300"
+							>
 								{sitio.proposed_ppas.length} PPAs
 							</Badge>
 						</div>
-						<Card.Description>Community-proposed interventions</Card.Description>
+						<Card.Description class="dark:text-slate-400"
+							>Community-proposed interventions</Card.Description
+						>
 					</Card.Header>
 					<Card.Content class="py-4">
-						<ul class="space-y-2">
-							{#each sitio.proposed_ppas as ppa, i}
-								<li
-									class="flex items-start gap-3 rounded-lg bg-emerald-50/50 px-3 py-2.5 ring-1 ring-emerald-100"
-								>
-									<span
-										class="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-emerald-200 text-xs font-semibold text-emerald-700"
-									>
-										{i + 1}
-									</span>
-									<span class="text-sm text-slate-700">{ppa}</span>
-								</li>
+						<div class="space-y-4">
+							{#each groupedPPAs as group}
+								{@const colors = categoryColors[group.category]}
+								{@const CategoryIcon = categoryIcons[group.category]}
+								<div class="space-y-2">
+									<!-- Category Header -->
+									<div class="flex items-center gap-2">
+										<div class="flex items-center gap-1.5 rounded-md px-2 py-1 {colors.bg}">
+											<CategoryIcon class="size-3.5 {colors.text}" />
+											<span class="text-xs font-semibold {colors.text}">
+												{categoryLabels[group.category]}
+											</span>
+										</div>
+										<span class="text-xs text-slate-400 dark:text-slate-500">
+											{group.items.length}
+											{group.items.length === 1 ? 'program' : 'programs'}
+										</span>
+									</div>
+									<!-- PPAs in this category -->
+									<ul class="space-y-1.5 pl-1">
+										{#each group.items as ppa}
+											<li
+												class="group flex items-start gap-3 rounded-lg border border-slate-100 bg-white/50 px-3
+													py-2.5 transition-colors hover:bg-slate-50/80
+													dark:border-slate-700/50 dark:bg-slate-800/30 dark:hover:bg-slate-800/50"
+											>
+												<div class="flex-1">
+													<div class="flex items-center gap-2">
+														<span class="text-sm font-medium text-slate-700 dark:text-slate-200">
+															{ppa.name}
+														</span>
+														{#if ppa.isCustom}
+															<Sparkles class="size-3.5 text-amber-500 dark:text-amber-400" />
+														{/if}
+													</div>
+													{#if ppa.linkedIssueIds && ppa.linkedIssueIds.length > 0}
+														{@const linkedNames = getLinkedIssueNames(ppa.linkedIssueIds)}
+														<Tooltip.Root>
+															<Tooltip.Trigger class="cursor-help">
+																<div
+																	class="mt-1 flex items-center gap-1 text-xs text-slate-500 transition-colors hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-400"
+																>
+																	<Link class="size-3" />
+																	<span class="underline decoration-dashed underline-offset-2"
+																		>Addresses {ppa.linkedIssueIds.length} issue{ppa.linkedIssueIds
+																			.length > 1
+																			? 's'
+																			: ''}</span
+																	>
+																</div>
+															</Tooltip.Trigger>
+															<Tooltip.Content
+																side="bottom"
+																align="start"
+																class="max-w-xs bg-blue-50 text-black shadow-md"
+															>
+																<div class="space-y-1.5">
+																	<p class="text-xs font-semibold text-rose-600 dark:text-rose-400">
+																		Addresses These Issues:
+																	</p>
+																	<ul class="space-y-1">
+																		{#each linkedNames as name}
+																			<li class="flex items-start gap-1.5 text-xs">
+																				<AlertTriangle
+																					class="mt-0.5 size-3 shrink-0 text-rose-500"
+																				/>
+																				<span>{name}</span>
+																			</li>
+																		{/each}
+																	</ul>
+																</div>
+															</Tooltip.Content>
+														</Tooltip.Root>
+													{/if}
+												</div>
+											</li>
+										{/each}
+									</ul>
+								</div>
 							{/each}
-						</ul>
+						</div>
 					</Card.Content>
 				</Card.Root>
 			{/if}
