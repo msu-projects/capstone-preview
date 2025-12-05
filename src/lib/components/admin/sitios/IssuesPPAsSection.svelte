@@ -454,10 +454,10 @@
 						type="button"
 						variant="outline"
 						size="sm"
-						class="h-auto gap-1.5 py-1.5 {colors.border} hover:{colors.bg}"
+						class="h-auto gap-1.5 py-1.5 {colors.border} hover:{colors.bg} hover:text-black hover:dark:text-white"
 						onclick={() => addPPA(ppa.id)}
 					>
-						<Sparkles class="size-3.5 text-success" />
+						<Sparkles class="size-3.5 text-success " />
 						<span class="rounded px-1 py-0.5 text-xs {colors.bg} {colors.text}">
 							{categoryLabels[ppa.category]}
 						</span>
