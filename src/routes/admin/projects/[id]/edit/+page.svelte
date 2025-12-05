@@ -90,7 +90,6 @@
 			municipality: ps.municipality,
 			barangay: ps.barangay,
 			beneficiaries_target: ps.beneficiaries_target,
-			priority_level: ps.priority_level,
 			focal_person: ps.focal_person,
 			focal_contact: ps.focal_contact
 		})) ?? []

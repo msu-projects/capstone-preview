@@ -1,5 +1,4 @@
 export type ProjectStatus = 'planning' | 'in-progress' | 'completed' | 'suspended';
-export type PriorityLevel = 'high' | 'medium' | 'low';
 export type CategoryKey =
 	| 'infrastructure'
 	| 'agriculture'
@@ -220,7 +219,6 @@ export interface ProjectSitio {
 	municipality: string;
 	barangay: string;
 	beneficiaries_target: number;
-	priority_level: PriorityLevel;
 	focal_person?: string;
 	focal_contact?: string;
 }

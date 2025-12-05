@@ -13,7 +13,6 @@ import type {
 	MonthlyProgress,
 	MonthlyTarget,
 	PerformanceTarget,
-	PriorityLevel,
 	Project,
 	ProjectSitio,
 	ProjectStatus,
@@ -533,7 +532,6 @@ const PROJECT_TITLES: Record<CategoryKey, string[]> = {
 };
 
 const STATUSES: ProjectStatus[] = ['planning', 'in-progress', 'completed', 'suspended'];
-const PRIORITIES: PriorityLevel[] = ['high', 'medium', 'low'];
 const AGENCIES = [
 	"Provincial Governor's Office",
 	'Provincial Engineering Office',
@@ -1056,7 +1054,6 @@ export function generateProjects(
 			municipality: sitio.municipality,
 			barangay: sitio.barangay,
 			beneficiaries_target: rng.nextInt(50, 300),
-			priority_level: rng.pick(PRIORITIES),
 			focal_person: `Kgwd. ${rng.pick(['Juan', 'Maria', 'Pedro', 'Ana'])} ${rng.pick(['Santos', 'Reyes', 'Cruz', 'Garcia'])}`,
 			focal_contact: `09${rng.nextInt(10, 99)}-${rng.nextInt(100, 999)}-${rng.nextInt(1000, 9999)}`
 		}));

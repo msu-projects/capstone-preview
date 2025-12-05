@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
@@ -8,7 +7,7 @@
 	import * as Select from '$lib/components/ui/select';
 	import * as Table from '$lib/components/ui/table';
 	import { sitios } from '$lib/mock-data';
-	import type { PriorityLevel, ProjectSitio, Sitio } from '$lib/types';
+	import type { ProjectSitio, Sitio } from '$lib/types';
 	import { cn } from '$lib/utils';
 	import { Check, Home, MapPin, Plus, Search, Trash2, TrendingUp, Users } from '@lucide/svelte';
 	import { cubicOut } from 'svelte/easing';
@@ -21,7 +20,6 @@
 
 	let selectedSitioId = $state<number | undefined>(undefined);
 	let beneficiariesTarget = $state('');
-	let priorityLevel = $state<PriorityLevel>('medium');
 	let focalPerson = $state('');
 	let focalContact = $state('');
 
@@ -138,7 +136,6 @@
 			municipality: sitio.municipality,
 			barangay: sitio.barangay,
 			beneficiaries_target: Number(beneficiariesTarget),
-			priority_level: priorityLevel,
 			focal_person: focalPerson || undefined,
 			focal_contact: focalContact || undefined
 		};
@@ -148,7 +145,6 @@
 		// Reset form
 		selectedSitioId = undefined;
 		beneficiariesTarget = '';
-		priorityLevel = 'medium';
 		focalPerson = '';
 		focalContact = '';
 		showSitioSelection = false;
@@ -158,19 +154,6 @@
 		projectSitios = projectSitios.filter(
 			(ps: Omit<ProjectSitio, 'project_id'>) => ps.sitio_id !== sitioId
 		);
-	}
-
-	function getPriorityColor(priority: PriorityLevel): 'destructive' | 'outline' | 'secondary' {
-		switch (priority) {
-			case 'high':
-				return 'destructive';
-			case 'medium':
-				return 'outline';
-			case 'low':
-				return 'secondary';
-			default:
-				return 'secondary';
-		}
 	}
 </script>
 
@@ -242,7 +225,6 @@
 							<Table.Head>Municipality</Table.Head>
 							<Table.Head>Barangay</Table.Head>
 							<Table.Head>Beneficiaries</Table.Head>
-							<Table.Head>Priority</Table.Head>
 							<Table.Head>Focal Person</Table.Head>
 							<Table.Head class="text-right">Actions</Table.Head>
 						</Table.Row>
@@ -254,11 +236,6 @@
 								<Table.Cell>{ps.municipality}</Table.Cell>
 								<Table.Cell>{ps.barangay}</Table.Cell>
 								<Table.Cell>{ps.beneficiaries_target}</Table.Cell>
-								<Table.Cell>
-									<Badge variant={getPriorityColor(ps.priority_level)}>
-										{ps.priority_level}
-									</Badge>
-								</Table.Cell>
 								<Table.Cell>
 									<div class="text-sm">
 										{ps.focal_person || '—'}
@@ -447,26 +424,8 @@
 							</div>
 						{/if}
 					</div>
-					<!-- Priority Level -->
-					<div class="space-y-2">
-						<Label for="priority" class="required">Implementation Priority</Label>
-						<Select.Root type="single" bind:value={priorityLevel}>
-							<Select.Trigger class="w-full">
-								{priorityLevel.charAt(0).toUpperCase() + priorityLevel.slice(1)}
-							</Select.Trigger>
-							<Select.Content>
-								<Select.Item value="high" label="High">
-									<Badge variant="destructive">High</Badge>
-								</Select.Item>
-								<Select.Item value="medium" label="Medium">
-									<Badge variant="outline">Medium</Badge>
-								</Select.Item>
-								<Select.Item value="low" label="Low">
-									<Badge variant="secondary">Low</Badge>
-								</Select.Item>
-							</Select.Content>
-						</Select.Root>
-					</div>
+
+					<div class="hidden md:block"></div>
 
 					<!-- Focal Person -->
 					<div class="space-y-2">

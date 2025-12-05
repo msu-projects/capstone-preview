@@ -22,12 +22,6 @@ enum project_status {
   suspended [note: 'Project is temporarily suspended']
 }
 
-enum priority_level {
-  high
-  medium
-  low
-}
-
 enum category_key {
   infrastructure
   agriculture
@@ -291,7 +285,6 @@ Table project_sitios {
   project_id integer [not null, ref: > projects.id]
   sitio_id integer [not null, ref: > sitios.id]
   beneficiaries_target integer [default: 0]
-  priority_level priority_level [default: 'medium']
   focal_person varchar(255)
   focal_contact varchar(100)
   
