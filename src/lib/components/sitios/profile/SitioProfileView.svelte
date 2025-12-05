@@ -131,6 +131,14 @@
 					Sitios
 				</a>
 				<ChevronRight class="size-4 text-slate-400" />
+
+				<a
+					href={isAdminView ? '/admin/sitios/list' : '/sitios/list'}
+					class="text-slate-500 transition-colors hover:text-slate-700"
+				>
+					List
+				</a>
+				<ChevronRight class="size-4 text-slate-400" />
 				<span class="font-medium text-slate-900">{sitio.name}</span>
 			</nav>
 		</div>
