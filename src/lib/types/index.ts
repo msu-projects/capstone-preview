@@ -66,15 +66,7 @@ export interface Sitio {
 	};
 
 	// Livestock and poultry
-	livestock_poultry?: {
-		pigs?: number;
-		cows?: number;
-		carabaos?: number;
-		horses?: number;
-		goats?: number;
-		chickens?: number;
-		ducks?: number;
-	};
+	livestock_poultry?: string[];
 
 	// Food security
 	food_security?: {

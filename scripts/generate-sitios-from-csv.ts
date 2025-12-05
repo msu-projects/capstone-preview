@@ -444,27 +444,18 @@ function generateSitiosCode(rows: CSVRow[]): string {
 			code += `\t\t},\n`;
 		}
 
-		// Livestock and poultry
-		const livestock = {
-			pigs: parseNumber(row.pig),
-			cows: parseNumber(row.cow),
-			carabaos: parseNumber(row.kalabaw),
-			horses: parseNumber(row.horse),
-			goats: parseNumber(row.goat),
-			chickens: parseNumber(row.chicken),
-			ducks: parseNumber(row.ducks)
-		};
-		const hasLivestock = Object.values(livestock).some((v) => v > 0);
-		if (hasLivestock) {
-			code += `\t\tlivestock_poultry: {\n`;
-			if (livestock.pigs > 0) code += `\t\t\tpigs: ${livestock.pigs},\n`;
-			if (livestock.cows > 0) code += `\t\t\tcows: ${livestock.cows},\n`;
-			if (livestock.carabaos > 0) code += `\t\t\tcarabaos: ${livestock.carabaos},\n`;
-			if (livestock.horses > 0) code += `\t\t\thorses: ${livestock.horses},\n`;
-			if (livestock.goats > 0) code += `\t\t\tgoats: ${livestock.goats},\n`;
-			if (livestock.chickens > 0) code += `\t\t\tchickens: ${livestock.chickens},\n`;
-			if (livestock.ducks > 0) code += `\t\t\tducks: ${livestock.ducks}\n`;
-			code += `\t\t},\n`;
+		// Livestock and poultry (now as string array)
+		const livestockTypes: string[] = [];
+		if (parseNumber(row.pig) > 0) livestockTypes.push('Pigs');
+		if (parseNumber(row.cow) > 0) livestockTypes.push('Cows');
+		if (parseNumber(row.kalabaw) > 0) livestockTypes.push('Carabaos');
+		if (parseNumber(row.horse) > 0) livestockTypes.push('Horses');
+		if (parseNumber(row.goat) > 0) livestockTypes.push('Goats');
+		if (parseNumber(row.chicken) > 0) livestockTypes.push('Chickens');
+		if (parseNumber(row.ducks) > 0) livestockTypes.push('Ducks');
+
+		if (livestockTypes.length > 0) {
+			code += `\t\tlivestock_poultry: ${JSON.stringify(livestockTypes)},\n`;
 		}
 
 		// Food security

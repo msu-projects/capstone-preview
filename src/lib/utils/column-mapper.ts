@@ -190,14 +190,67 @@ export const SITIO_FIELD_DEFINITIONS = [
 		required: false
 	},
 
-	// Livestock and poultry
-	{ field: 'livestock_poultry.pigs', label: 'Pigs', csvHeader: 'Pigs', required: false },
-	{ field: 'livestock_poultry.cows', label: 'Cows', csvHeader: 'Cows', required: false },
-	{ field: 'livestock_poultry.carabaos', label: 'Carabaos', csvHeader: 'Carabao', required: false },
-	{ field: 'livestock_poultry.horses', label: 'Horses', csvHeader: 'Horse', required: false },
-	{ field: 'livestock_poultry.goats', label: 'Goats', csvHeader: 'Goat', required: false },
-	{ field: 'livestock_poultry.chickens', label: 'Chickens', csvHeader: 'Chicken', required: false },
-	{ field: 'livestock_poultry.ducks', label: 'Ducks', csvHeader: 'Duck', required: false },
+	// Livestock and poultry (now string array like top_crops)
+	{
+		field: 'livestock_poultry',
+		label: 'Livestock 1',
+		csvHeader: 'Livestock - 1st',
+		required: false
+	},
+	{
+		field: 'livestock_poultry',
+		label: 'Livestock 2',
+		csvHeader: 'Livestock - 2nd',
+		required: false
+	},
+	{
+		field: 'livestock_poultry',
+		label: 'Livestock 3',
+		csvHeader: 'Livestock - 3rd',
+		required: false
+	},
+	{
+		field: 'livestock_poultry',
+		label: 'Livestock 4',
+		csvHeader: 'Pigs',
+		required: false
+	},
+	{
+		field: 'livestock_poultry',
+		label: 'Livestock 5',
+		csvHeader: 'Cows',
+		required: false
+	},
+	{
+		field: 'livestock_poultry',
+		label: 'Livestock 6',
+		csvHeader: 'Carabao',
+		required: false
+	},
+	{
+		field: 'livestock_poultry',
+		label: 'Livestock 7',
+		csvHeader: 'Horse',
+		required: false
+	},
+	{
+		field: 'livestock_poultry',
+		label: 'Livestock 8',
+		csvHeader: 'Goat',
+		required: false
+	},
+	{
+		field: 'livestock_poultry',
+		label: 'Livestock 9',
+		csvHeader: 'Chicken',
+		required: false
+	},
+	{
+		field: 'livestock_poultry',
+		label: 'Livestock 10',
+		csvHeader: 'Duck',
+		required: false
+	},
 
 	// Food security
 	{
@@ -360,7 +413,7 @@ export function createDefaultSitio(): Sitio {
 			toilet_facility_types: [],
 			waste_segregation_practice: null
 		},
-		livestock_poultry: {},
+		livestock_poultry: [],
 		food_security: {
 			households_with_backyard_garden: 0,
 			common_garden_commodities: []
@@ -410,7 +463,8 @@ export function transformRowToSitio(row: ImportedRow, mappings: ColumnMapping[])
 			'common_garden_commodities',
 			'info_dissemination_methods',
 			'transportation_methods',
-			'alternative_electricity_sources'
+			'alternative_electricity_sources',
+			'livestock_poultry'
 		];
 		const objectArrayFields = [
 			'employments',

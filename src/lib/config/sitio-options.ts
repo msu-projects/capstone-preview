@@ -54,16 +54,16 @@ export const incomeBracketOptions = [
 	{ label: 'Above ₱500', value: '>=500' }
 ] as const;
 
-/** Livestock types with display info */
-export const livestockTypes = [
-	{ id: 'pigs', label: 'Pigs', icon: '🐷' },
-	{ id: 'cows', label: 'Cows', icon: '🐄' },
-	{ id: 'carabaos', label: 'Carabaos', icon: '🦬' },
-	{ id: 'horses', label: 'Horses', icon: '🐴' },
-	{ id: 'goats', label: 'Goats', icon: '🐐' },
-	{ id: 'chickens', label: 'Chickens', icon: '🐔' },
-	{ id: 'ducks', label: 'Ducks', icon: '🦆' }
-] as const;
+/** Livestock and poultry options */
+export const livestockPoultryOptions = [
+	'Pigs',
+	'Cows',
+	'Carabaos',
+	'Horses',
+	'Goats',
+	'Chickens',
+	'Ducks'
+];
 
 /** Major agricultural crops */
 export const cropOptions = [

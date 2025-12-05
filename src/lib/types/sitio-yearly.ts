@@ -54,15 +54,7 @@ export interface SitioYearlySnapshot {
 	};
 
 	// Livestock and poultry
-	livestock_poultry?: {
-		pigs?: number;
-		cows?: number;
-		carabaos?: number;
-		horses?: number;
-		goats?: number;
-		chickens?: number;
-		ducks?: number;
-	};
+	livestock_poultry?: string[];
 
 	// Food security
 	food_security?: {
@@ -144,7 +136,7 @@ export function createSnapshotFromSitio(sitio: Sitio, year: number): SitioYearly
 					water_sources: sitio.water_sanitation.water_sources?.map((w) => ({ ...w })) || []
 				}
 			: undefined,
-		livestock_poultry: sitio.livestock_poultry ? { ...sitio.livestock_poultry } : undefined,
+		livestock_poultry: sitio.livestock_poultry ? [...sitio.livestock_poultry] : undefined,
 		food_security: sitio.food_security ? { ...sitio.food_security } : undefined,
 		housing: sitio.housing
 			? {
@@ -183,7 +175,7 @@ export function applySitioSnapshot(sitio: Sitio, snapshot: SitioYearlySnapshot):
 					water_sources: snapshot.water_sanitation.water_sources?.map((w) => ({ ...w })) || []
 				}
 			: undefined,
-		livestock_poultry: snapshot.livestock_poultry ? { ...snapshot.livestock_poultry } : undefined,
+		livestock_poultry: snapshot.livestock_poultry ? [...snapshot.livestock_poultry] : undefined,
 		food_security: snapshot.food_security ? { ...snapshot.food_security } : undefined,
 		housing: snapshot.housing
 			? {

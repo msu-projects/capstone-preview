@@ -9,7 +9,7 @@
 		employmentTypeOptions,
 		gardenCommodityOptions,
 		incomeBracketOptions,
-		livestockTypes
+		livestockPoultryOptions
 	} from '$lib/config/sitio-options';
 	import { cn } from '$lib/utils';
 	import {
@@ -29,13 +29,7 @@
 		farmer_associations = $bindable(0),
 		farm_area_hectares = $bindable(0),
 		top_crops = $bindable([]),
-		pigs = $bindable(0),
-		cows = $bindable(0),
-		carabaos = $bindable(0),
-		horses = $bindable(0),
-		goats = $bindable(0),
-		chickens = $bindable(0),
-		ducks = $bindable(0),
+		livestock_poultry = $bindable<string[]>([]),
 		households_with_backyard_garden = $bindable(0),
 		common_garden_commodities = $bindable([]),
 		households = 0,
@@ -47,13 +41,7 @@
 		farmer_associations: number;
 		farm_area_hectares: number;
 		top_crops: string[];
-		pigs: number;
-		cows: number;
-		carabaos: number;
-		horses: number;
-		goats: number;
-		chickens: number;
-		ducks: number;
+		livestock_poultry: string[];
 		households_with_backyard_garden: number;
 		common_garden_commodities: string[];
 		households?: number;
@@ -278,74 +266,19 @@
 	<!-- Livestock & Poultry Section -->
 	<FormSection
 		title="Livestock & Poultry"
-		description="Animal husbandry statistics"
+		description="Animal husbandry in the community"
 		icon={PawPrint}
 		variant="warning"
 	>
-		<div class="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-7">
-			{#each livestockTypes as animal}
-				<div class="space-y-1.5 rounded-lg border bg-muted/20 p-3 text-center">
-					<div class="text-2xl">{animal.icon}</div>
-					<Label for={animal.id} class="text-xs">{animal.label}</Label>
-					{#if animal.id === 'pigs'}
-						<NumberInput
-							id={animal.id}
-							bind:value={pigs}
-							placeholder="0"
-							min={0}
-							class="text-center"
-						/>
-					{:else if animal.id === 'cows'}
-						<NumberInput
-							id={animal.id}
-							bind:value={cows}
-							placeholder="0"
-							min={0}
-							class="text-center"
-						/>
-					{:else if animal.id === 'carabaos'}
-						<NumberInput
-							id={animal.id}
-							bind:value={carabaos}
-							placeholder="0"
-							min={0}
-							class="text-center"
-						/>
-					{:else if animal.id === 'horses'}
-						<NumberInput
-							id={animal.id}
-							bind:value={horses}
-							placeholder="0"
-							min={0}
-							class="text-center"
-						/>
-					{:else if animal.id === 'goats'}
-						<NumberInput
-							id={animal.id}
-							bind:value={goats}
-							placeholder="0"
-							min={0}
-							class="text-center"
-						/>
-					{:else if animal.id === 'chickens'}
-						<NumberInput
-							id={animal.id}
-							bind:value={chickens}
-							placeholder="0"
-							min={0}
-							class="text-center"
-						/>
-					{:else if animal.id === 'ducks'}
-						<NumberInput
-							id={animal.id}
-							bind:value={ducks}
-							placeholder="0"
-							min={0}
-							class="text-center"
-						/>
-					{/if}
-				</div>
-			{/each}
+		<div class="space-y-3">
+			<Label>Livestock & Poultry Types</Label>
+			<ComboboxMultiSelect
+				bind:values={livestock_poultry}
+				options={livestockPoultryOptions}
+				placeholder="Search livestock..."
+				addLabel="Add Livestock"
+				emptyMessage="No livestock added"
+			/>
 		</div>
 	</FormSection>
 

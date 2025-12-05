@@ -63,16 +63,8 @@ export interface AggregatedSocialServices {
 export interface AggregatedEconomy {
 	employmentByType: Map<string, number>;
 	incomeBracketDistribution: Map<string, number>;
-	totalLivestock: {
-		pigs: number;
-		cows: number;
-		carabaos: number;
-		horses: number;
-		goats: number;
-		chickens: number;
-		ducks: number;
-	};
-	totalLivestockCount: number;
+	livestockFrequency: Map<string, number>; // How many sitios have each livestock type
+	livestockList: Array<{ type: string; count: number }>;
 }
 
 export interface AggregatedAgriculture {
@@ -294,16 +286,7 @@ export function aggregateSocialServices(sitios: Sitio[]): AggregatedSocialServic
 export function aggregateEconomy(sitios: Sitio[]): AggregatedEconomy {
 	const employmentByType = new Map<string, number>();
 	const incomeBrackets = new Map<string, number>();
-
-	const livestock = {
-		pigs: 0,
-		cows: 0,
-		carabaos: 0,
-		horses: 0,
-		goats: 0,
-		chickens: 0,
-		ducks: 0
-	};
+	const livestockFrequency = new Map<string, number>();
 
 	for (const sitio of sitios) {
 		// Employment types
@@ -323,25 +306,24 @@ export function aggregateEconomy(sitios: Sitio[]): AggregatedEconomy {
 			}
 		}
 
-		// Livestock
-		if (sitio.livestock_poultry) {
-			livestock.pigs += sitio.livestock_poultry.pigs || 0;
-			livestock.cows += sitio.livestock_poultry.cows || 0;
-			livestock.carabaos += sitio.livestock_poultry.carabaos || 0;
-			livestock.horses += sitio.livestock_poultry.horses || 0;
-			livestock.goats += sitio.livestock_poultry.goats || 0;
-			livestock.chickens += sitio.livestock_poultry.chickens || 0;
-			livestock.ducks += sitio.livestock_poultry.ducks || 0;
+		// Livestock - count frequency across sitios
+		if (sitio.livestock_poultry && sitio.livestock_poultry.length > 0) {
+			for (const animal of sitio.livestock_poultry) {
+				livestockFrequency.set(animal, (livestockFrequency.get(animal) || 0) + 1);
+			}
 		}
 	}
 
-	const totalLivestockCount = Object.values(livestock).reduce((sum, count) => sum + count, 0);
+	// Convert livestock frequency map to sorted list
+	const livestockList = Array.from(livestockFrequency.entries())
+		.map(([type, count]) => ({ type, count }))
+		.sort((a, b) => b.count - a.count);
 
 	return {
 		employmentByType,
 		incomeBracketDistribution: incomeBrackets,
-		totalLivestock: livestock,
-		totalLivestockCount
+		livestockFrequency,
+		livestockList
 	};
 }
 

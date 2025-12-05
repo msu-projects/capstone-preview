@@ -65,25 +65,9 @@
 		return max.type ?? 'N/A';
 	});
 
-	// Livestock data
-	const livestockData = $derived.by(() => {
-		const lp = sitio.livestock_poultry;
-		if (!lp) return [];
-
-		return [
-			{ label: 'Chickens', value: lp.chickens || 0, icon: '🐔' },
-			{ label: 'Pigs', value: lp.pigs || 0, icon: '🐷' },
-			{ label: 'Goats', value: lp.goats || 0, icon: '🐐' },
-			{ label: 'Cows', value: lp.cows || 0, icon: '🐄' },
-			{ label: 'Ducks', value: lp.ducks || 0, icon: '🦆' },
-			{ label: 'Carabaos', value: lp.carabaos || 0, icon: '🦬' },
-			{ label: 'Horses', value: lp.horses || 0, icon: '🐴' }
-		]
-			.filter((item) => item.value > 0)
-			.sort((a, b) => b.value - a.value);
-	});
-
-	const totalLivestock = $derived(livestockData.reduce((sum, l) => sum + l.value, 0));
+	// Livestock data - now just a string array
+	const hasLivestock = $derived(sitio.livestock_poultry && sitio.livestock_poultry.length > 0);
+	const livestockCount = $derived(sitio.livestock_poultry?.length || 0);
 
 	$inspect(sitio);
 
@@ -232,11 +216,11 @@
 						<Beef class="size-5 text-amber-700 sm:size-6" />
 					</div>
 					<div class="min-w-0 flex-1">
-						<p class="truncate text-xs font-medium text-slate-500 sm:text-sm">Livestock</p>
+						<p class="truncate text-xs font-medium text-slate-500 sm:text-sm">Livestock Types</p>
 						<p
 							class="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl"
 						>
-							{formatNumber(totalLivestock)}
+							{livestockCount}
 						</p>
 					</div>
 				</div>
@@ -418,26 +402,26 @@
 					<div class="rounded-lg bg-amber-100 p-1.5">
 						<Beef class="size-4 text-amber-600" />
 					</div>
-					<Card.Title class="text-lg">Livestock & Poultry Census</Card.Title>
+					<Card.Title class="text-lg">Livestock & Poultry</Card.Title>
 				</div>
-				{#if totalLivestock > 0}
+				{#if hasLivestock}
 					<Badge variant="outline" class="bg-amber-50 text-amber-700">
-						{formatNumber(totalLivestock)} Total
+						{livestockCount} Types
 					</Badge>
 				{/if}
 			</div>
 		</Card.Header>
 		<Card.Content class="py-6">
-			{#if livestockData.length > 0}
-				<div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-					{#each livestockData as animal}
-						<div
-							class="rounded-xl bg-slate-50 p-4 text-center ring-1 ring-slate-200 transition-all hover:bg-slate-100 hover:ring-slate-300"
+			{#if hasLivestock}
+				<div class="flex flex-wrap gap-2">
+					{#each sitio.livestock_poultry as animal}
+						<Badge
+							variant="secondary"
+							class="gap-1.5 bg-amber-50 px-3 py-2 text-sm text-amber-700 ring-1 ring-amber-200"
 						>
-							<div class="text-3xl">{animal.icon}</div>
-							<div class="mt-2 text-xl font-bold text-slate-900">{formatNumber(animal.value)}</div>
-							<div class="text-xs font-medium text-slate-500">{animal.label}</div>
-						</div>
+							<Beef class="size-4" />
+							{animal}
+						</Badge>
 					{/each}
 				</div>
 			{:else}

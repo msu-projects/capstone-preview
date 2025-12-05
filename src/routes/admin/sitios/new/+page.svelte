@@ -81,15 +81,7 @@
 	});
 
 	// Tab 7: Livestock
-	let livestock_poultry = $state({
-		pigs: 0,
-		cows: 0,
-		carabaos: 0,
-		horses: 0,
-		goats: 0,
-		chickens: 0,
-		ducks: 0
-	});
+	let livestock_poultry = $state<string[]>([]);
 
 	// Tab 8: Additional Info
 	let utilities = $state({
@@ -172,7 +164,7 @@
 			isValid:
 				economic_condition.employments.length > 0 ||
 				agriculture.farmers_count > 0 ||
-				Object.values(livestock_poultry).some((v) => v > 0)
+				livestock_poultry.length > 0
 		},
 		{
 			id: 'infrastructure',
@@ -375,13 +367,7 @@
 						bind:farmer_associations={agriculture.farmer_associations}
 						bind:farm_area_hectares={agriculture.farm_area_hectares}
 						bind:top_crops={agriculture.top_crops}
-						bind:pigs={livestock_poultry.pigs}
-						bind:cows={livestock_poultry.cows}
-						bind:carabaos={livestock_poultry.carabaos}
-						bind:horses={livestock_poultry.horses}
-						bind:goats={livestock_poultry.goats}
-						bind:chickens={livestock_poultry.chickens}
-						bind:ducks={livestock_poultry.ducks}
+						bind:livestock_poultry
 						bind:households_with_backyard_garden={food_security.households_with_backyard_garden}
 						bind:common_garden_commodities={food_security.common_garden_commodities}
 						{households}

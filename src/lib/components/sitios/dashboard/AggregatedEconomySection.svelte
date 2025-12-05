@@ -33,18 +33,25 @@
 		}))
 	);
 
-	// Livestock bar chart data
+	// Livestock data - now based on frequency (how many sitios have each livestock type)
 	const livestockData = $derived(
-		[
-			{ label: 'Chickens', value: economy.totalLivestock.chickens, color: 'hsl(45, 93%, 47%)' },
-			{ label: 'Ducks', value: economy.totalLivestock.ducks, color: 'hsl(200, 70%, 50%)' },
-			{ label: 'Pigs', value: economy.totalLivestock.pigs, color: 'hsl(330, 81%, 60%)' },
-			{ label: 'Goats', value: economy.totalLivestock.goats, color: 'hsl(24, 95%, 53%)' },
-			{ label: 'Cows', value: economy.totalLivestock.cows, color: 'hsl(142, 71%, 45%)' },
-			{ label: 'Carabaos', value: economy.totalLivestock.carabaos, color: 'hsl(262, 83%, 58%)' },
-			{ label: 'Horses', value: economy.totalLivestock.horses, color: 'hsl(217, 91%, 60%)' }
-		].filter((item) => item.value > 0)
+		economy.livestockList.map((item, i) => ({
+			label: item.type,
+			value: item.count,
+			color: [
+				'hsl(45, 93%, 47%)',
+				'hsl(200, 70%, 50%)',
+				'hsl(330, 81%, 60%)',
+				'hsl(24, 95%, 53%)',
+				'hsl(142, 71%, 45%)',
+				'hsl(262, 83%, 58%)',
+				'hsl(217, 91%, 60%)'
+			][i % 7]
+		}))
 	);
+
+	// Total unique livestock types across all sitios
+	const totalLivestockTypes = $derived(economy.livestockList.length);
 
 	// Top crops list (limited to top 8)
 	const topCrops = $derived(agriculture.topCropsList.slice(0, 8));
@@ -140,11 +147,11 @@
 						<Warehouse class="size-5 text-purple-700 sm:size-6" />
 					</div>
 					<div class="min-w-0 flex-1">
-						<p class="truncate text-xs font-medium text-slate-500 sm:text-sm">Total Livestock</p>
+						<p class="truncate text-xs font-medium text-slate-500 sm:text-sm">Livestock Types</p>
 						<p
 							class="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl"
 						>
-							{formatNumber(economy.totalLivestockCount)}
+							{totalLivestockTypes}
 						</p>
 					</div>
 				</div>
@@ -204,7 +211,7 @@
 					<Warehouse class="size-5 text-slate-500" />
 					Livestock & Poultry
 				</Card.Title>
-				<Card.Description>Animal count distribution across all sitios</Card.Description>
+				<Card.Description>Number of sitios with each livestock type</Card.Description>
 			</Card.Header>
 			<Card.Content>
 				{#if livestockData.length > 0}

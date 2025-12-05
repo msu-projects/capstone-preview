@@ -120,6 +120,7 @@ const CROPS = [
 	'Cacao',
 	'Abaca'
 ];
+const LIVESTOCK_POULTRY = ['Pigs', 'Cows', 'Carabaos', 'Horses', 'Goats', 'Chickens', 'Ducks'];
 const GARDEN_COMMODITIES = [
 	'Tomato',
 	'Eggplant',
@@ -379,15 +380,7 @@ export function generateSitios(count: number = 50, seed: number = 42): Sitio[] {
 				toilet_facility_types: rng.shuffle(TOILET_TYPES).slice(0, rng.nextInt(2, 4)),
 				waste_segregation_practice: rng.next() > 0.3
 			},
-			livestock_poultry: {
-				pigs: rng.nextInt(20, 150),
-				cows: rng.nextInt(0, 30),
-				carabaos: rng.nextInt(5, 40),
-				horses: rng.nextInt(0, 10),
-				goats: rng.nextInt(10, 60),
-				chickens: rng.nextInt(100, 500),
-				ducks: rng.nextInt(20, 100)
-			},
+			livestock_poultry: rng.shuffle(LIVESTOCK_POULTRY).slice(0, rng.nextInt(2, 5)),
 			food_security: {
 				households_with_backyard_garden: Math.round(households * (0.4 + rng.next() * 0.4)),
 				common_garden_commodities: rng.shuffle(GARDEN_COMMODITIES).slice(0, rng.nextInt(3, 6))
