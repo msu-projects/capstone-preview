@@ -494,3 +494,83 @@ export function toMunicipalityBarData(
 		][i % 8]
 	}));
 }
+
+// ============================================================================
+// Need Score Aggregation Functions
+// ============================================================================
+
+import { getNeedLevelFromScore, type NeedLevel } from '$lib/types';
+
+export interface AggregatedNeedScore {
+	averageScore: number;
+	minScore: number;
+	maxScore: number;
+	byLevel: {
+		critical: number;
+		high: number;
+		medium: number;
+		low: number;
+	};
+	totalSitios: number;
+}
+
+/**
+ * Aggregate need score data from sitios
+ */
+export function aggregateNeedScores(sitios: Sitio[]): AggregatedNeedScore {
+	if (sitios.length === 0) {
+		return {
+			averageScore: 0,
+			minScore: 0,
+			maxScore: 0,
+			byLevel: { critical: 0, high: 0, medium: 0, low: 0 },
+			totalSitios: 0
+		};
+	}
+
+	const scores = sitios.map((s) => s.need_score ?? 5);
+	const sum = scores.reduce((a, b) => a + b, 0);
+	const byLevel = { critical: 0, high: 0, medium: 0, low: 0 };
+
+	sitios.forEach((sitio) => {
+		const level = sitio.need_level ?? getNeedLevelFromScore(sitio.need_score ?? 5);
+		byLevel[level]++;
+	});
+
+	return {
+		averageScore: sum / scores.length,
+		minScore: Math.min(...scores),
+		maxScore: Math.max(...scores),
+		byLevel,
+		totalSitios: sitios.length
+	};
+}
+
+/**
+ * Get the average need score from a list of sitios
+ */
+export function getAverageNeedScore(sitios: Sitio[]): number {
+	if (sitios.length === 0) return 0;
+	const sum = sitios.reduce((acc, sitio) => acc + (sitio.need_score ?? 5), 0);
+	return sum / sitios.length;
+}
+
+/**
+ * Convert need level distribution to donut chart data
+ */
+export function toNeedLevelDonutData(agg: AggregatedNeedScore) {
+	const levelConfig: Record<NeedLevel, { label: string; color: string }> = {
+		critical: { label: 'Critical (8-10)', color: 'hsl(0, 84%, 60%)' },
+		high: { label: 'High (6-7)', color: 'hsl(24, 95%, 53%)' },
+		medium: { label: 'Medium (4-5)', color: 'hsl(45, 93%, 47%)' },
+		low: { label: 'Low (1-3)', color: 'hsl(142, 71%, 45%)' }
+	};
+
+	return Object.entries(agg.byLevel)
+		.filter(([, count]) => count > 0)
+		.map(([level, count]) => ({
+			label: levelConfig[level as NeedLevel].label,
+			value: count,
+			color: levelConfig[level as NeedLevel].color
+		}));
+}

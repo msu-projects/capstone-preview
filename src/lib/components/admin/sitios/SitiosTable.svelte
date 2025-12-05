@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
@@ -7,7 +8,8 @@
 	import * as Select from '$lib/components/ui/select';
 	import * as Table from '$lib/components/ui/table';
 	import { IsMobile } from '$lib/hooks/is-mobile.svelte';
-	import type { Sitio } from '$lib/types';
+	import type { NeedLevel, Sitio } from '$lib/types';
+	import { getNeedLevelFromScore } from '$lib/types';
 	import { formatNumber } from '$lib/utils/formatters';
 	import {
 		ArrowDownUp,
@@ -15,6 +17,7 @@
 		EllipsisVertical,
 		Eye,
 		FilterX,
+		Gauge,
 		Home,
 		MapPin,
 		Plus,
@@ -27,16 +30,53 @@
 
 	const isMobile = new IsMobile();
 
+	// Need level badge styling
+	const needLevelConfig: Record<
+		NeedLevel,
+		{
+			label: string;
+			variant: 'destructive' | 'default' | 'secondary' | 'outline';
+			className: string;
+		}
+	> = {
+		critical: {
+			label: 'Critical',
+			variant: 'destructive',
+			className: ''
+		},
+		high: {
+			label: 'High',
+			variant: 'default',
+			className: 'bg-orange-500 hover:bg-orange-600'
+		},
+		medium: {
+			label: 'Medium',
+			variant: 'secondary',
+			className: 'bg-yellow-500/20 text-yellow-700 dark:text-yellow-400'
+		},
+		low: {
+			label: 'Low',
+			variant: 'secondary',
+			className: 'bg-green-500/20 text-green-700 dark:text-green-400'
+		}
+	};
+
+	function getNeedBadgeProps(sitio: Sitio) {
+		const score = sitio.need_score ?? 5;
+		const level = sitio.need_level ?? getNeedLevelFromScore(score);
+		return { score, level, ...needLevelConfig[level] };
+	}
+
 	interface Props {
 		sitios: Sitio[];
 		totalSitios: number;
 		currentPage: number;
 		itemsPerPage: number;
 		totalPages: number;
-		sortBy?: 'name' | 'municipality' | 'barangay' | 'population' | 'households';
+		sortBy?: 'name' | 'municipality' | 'barangay' | 'population' | 'households' | 'need_score';
 		sortOrder?: 'asc' | 'desc';
 		onToggleSort?: (
-			column: 'name' | 'municipality' | 'barangay' | 'population' | 'households'
+			column: 'name' | 'municipality' | 'barangay' | 'population' | 'households' | 'need_score'
 		) => void;
 		onRefresh: () => void;
 		onDelete: (id: number) => void;
@@ -70,7 +110,8 @@
 		{ value: 'barangay', label: 'Barangay' },
 		{ value: 'municipality', label: 'Municipality' },
 		{ value: 'population', label: 'Population' },
-		{ value: 'households', label: 'Households' }
+		{ value: 'households', label: 'Households' },
+		{ value: 'need_score', label: 'Need Score' }
 	] as const;
 
 	function handleMobileSortChange(value: string | undefined) {
@@ -147,6 +188,7 @@
 					</Empty.Root>
 				{:else}
 					{#each sitios as sitio (sitio.id)}
+						{@const badge = getNeedBadgeProps(sitio)}
 						<button
 							type="button"
 							class="block w-full rounded-lg border bg-card p-4 text-left transition-all hover:shadow-md focus:ring-2 focus:ring-primary/20 focus:outline-none"
@@ -216,7 +258,7 @@
 							</div>
 
 							<!-- Stats Grid -->
-							<div class="grid grid-cols-2 gap-3">
+							<div class="grid grid-cols-3 gap-3">
 								<div class="flex items-center gap-2 rounded-md bg-muted/50 px-3 py-2">
 									<Users class="size-4 text-muted-foreground" />
 									<div>
@@ -229,6 +271,15 @@
 									<div>
 										<p class="text-xs text-muted-foreground">Households</p>
 										<p class="text-sm font-medium">{formatNumber(sitio.households)}</p>
+									</div>
+								</div>
+								<div class="flex items-center gap-2 rounded-md bg-muted/50 px-3 py-2">
+									<Gauge class="size-4 text-muted-foreground" />
+									<div>
+										<p class="text-xs text-muted-foreground">Need</p>
+										<Badge variant={badge.variant} class="{badge.className} text-xs">
+											{badge.score}
+										</Badge>
 									</div>
 								</div>
 							</div>
@@ -317,13 +368,28 @@
 									Households
 								{/if}
 							</Table.TableHead>
+							<Table.TableHead class="w-[120px] text-center">
+								{#if onToggleSort}
+									<button
+										class="flex items-center gap-1 hover:text-foreground"
+										onclick={() => onToggleSort?.('need_score')}
+									>
+										Need Score
+										<ArrowDownUp
+											class="size-3 {sortBy === 'need_score' ? 'opacity-100' : 'opacity-30'}"
+										/>
+									</button>
+								{:else}
+									Need Score
+								{/if}
+							</Table.TableHead>
 							<Table.TableHead class="w-[100px] text-right">Actions</Table.TableHead>
 						</Table.TableRow>
 					</Table.TableHeader>
 					<Table.TableBody>
 						{#if sitios.length === 0}
 							<Table.TableRow>
-								<Table.TableCell colspan={6} class="h-64">
+								<Table.TableCell colspan={7} class="h-64">
 									<Empty.Root class="border-none">
 										<Empty.Media>
 											<MapPin class="size-12 text-muted-foreground/50" />
@@ -390,6 +456,14 @@
 									<!-- Households -->
 									<Table.TableCell class="">
 										<div class="text-sm font-medium">{formatNumber(sitio.households)}</div>
+									</Table.TableCell>
+
+									<!-- Need Score -->
+									<Table.TableCell class="text-center">
+										{@const badge = getNeedBadgeProps(sitio)}
+										<Badge variant={badge.variant} class={badge.className}>
+											{badge.score} - {badge.label}
+										</Badge>
 									</Table.TableCell>
 
 									<!-- Actions -->

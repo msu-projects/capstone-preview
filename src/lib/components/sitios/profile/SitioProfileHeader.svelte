@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
-	import type { Project, Sitio } from '$lib/types';
-	import { Calendar, Download, MapPin, Pencil } from '@lucide/svelte';
+	import type { NeedLevel, Project, Sitio } from '$lib/types';
+	import { getNeedLevelFromScore } from '$lib/types';
+	import { Calendar, Download, Gauge, MapPin, Pencil } from '@lucide/svelte';
 	import YearSelector from './YearSelector.svelte';
 
 	interface Props {
@@ -26,6 +27,35 @@
 		onSaveCurrentYear,
 		isCurrentYearSaved
 	}: Props = $props();
+
+	// Need level badge styling
+	const needLevelConfig: Record<NeedLevel, { label: string; bgClass: string; textClass: string }> =
+		{
+			critical: {
+				label: 'Critical Need',
+				bgClass: 'bg-red-100 dark:bg-red-900/30',
+				textClass: 'text-red-700 dark:text-red-400'
+			},
+			high: {
+				label: 'High Need',
+				bgClass: 'bg-orange-100 dark:bg-orange-900/30',
+				textClass: 'text-orange-700 dark:text-orange-400'
+			},
+			medium: {
+				label: 'Medium Need',
+				bgClass: 'bg-yellow-100 dark:bg-yellow-900/30',
+				textClass: 'text-yellow-700 dark:text-yellow-400'
+			},
+			low: {
+				label: 'Low Need',
+				bgClass: 'bg-green-100 dark:bg-green-900/30',
+				textClass: 'text-green-700 dark:text-green-400'
+			}
+		};
+
+	const needScore = $derived(sitio.need_score ?? 5);
+	const needLevel = $derived(sitio.need_level ?? getNeedLevelFromScore(needScore));
+	const needConfig = $derived(needLevelConfig[needLevel]);
 </script>
 
 <!-- Hero Header -->
@@ -59,6 +89,11 @@
 							Code: {sitio.coding}
 						</Badge>
 					{/if}
+					<!-- Need Score Badge -->
+					<Badge variant="secondary" class="gap-1.5 {needConfig.bgClass} {needConfig.textClass}">
+						<Gauge class="size-3" />
+						{needScore}/10 - {needConfig.label}
+					</Badge>
 				</div>
 
 				<!-- Title -->

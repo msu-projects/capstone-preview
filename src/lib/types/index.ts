@@ -7,6 +7,24 @@ export type CategoryKey =
 	| 'livelihood'
 	| 'environment';
 
+// ===== NEED LEVEL TYPE =====
+
+export type NeedLevel = 'critical' | 'high' | 'medium' | 'low';
+
+/**
+ * Derives the need level from a 1-10 need score.
+ * - Critical: 8-10 (urgent need, prioritize for projects)
+ * - High: 6-7 (significant need)
+ * - Medium: 4-5 (moderate need)
+ * - Low: 1-3 (relatively well-served)
+ */
+export function getNeedLevelFromScore(score: number): NeedLevel {
+	if (score >= 8) return 'critical';
+	if (score >= 6) return 'high';
+	if (score >= 4) return 'medium';
+	return 'low';
+}
+
 // ===== ISSUE & PPA STRUCTURED TYPES =====
 
 export interface SitioIssue {
@@ -39,6 +57,10 @@ export interface Sitio {
 		lat: number;
 		lng: number;
 	};
+
+	// Need Score (1-10, admin-assigned)
+	need_score: number;
+	need_level: NeedLevel;
 
 	// Coding information
 	coding?: string;

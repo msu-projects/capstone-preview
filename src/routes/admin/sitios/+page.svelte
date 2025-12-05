@@ -19,9 +19,9 @@
 	let selectedMunicipality = $state<string>('all');
 	let selectedBarangay = $state<string>('all');
 	let currentPage = $state(1);
-	let sortBy = $state<'name' | 'municipality' | 'barangay' | 'population' | 'households'>(
-		'households'
-	);
+	let sortBy = $state<
+		'name' | 'municipality' | 'barangay' | 'population' | 'households' | 'need_score'
+	>('households');
 	let sortOrder = $state<'asc' | 'desc'>('asc');
 	const itemsPerPage = 10;
 	let deleteDialogOpen = $state(false);
@@ -65,7 +65,9 @@
 		const urlSortBy = params.get('sortBy');
 		if (
 			urlSortBy &&
-			['name', 'municipality', 'barangay', 'population', 'households'].includes(urlSortBy)
+			['name', 'municipality', 'barangay', 'population', 'households', 'need_score'].includes(
+				urlSortBy
+			)
 		) {
 			sortBy = urlSortBy as typeof sortBy;
 		}
@@ -161,6 +163,9 @@
 					break;
 				case 'households':
 					comparison = (a.households || 0) - (b.households || 0);
+					break;
+				case 'need_score':
+					comparison = (a.need_score ?? 5) - (b.need_score ?? 5);
 					break;
 			}
 			return sortOrder === 'asc' ? comparison : -comparison;

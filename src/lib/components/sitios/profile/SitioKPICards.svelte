@@ -1,7 +1,8 @@
 <script lang="ts">
 	import * as Card from '$lib/components/ui/card';
-	import type { Sitio } from '$lib/types';
-	import { AlertTriangle, Briefcase, Home, TrendingDown, TrendingUp, Users } from '@lucide/svelte';
+	import type { NeedLevel, Sitio } from '$lib/types';
+	import { getNeedLevelFromScore } from '$lib/types';
+	import { Briefcase, Gauge, Home, TrendingDown, TrendingUp, Users } from '@lucide/svelte';
 
 	interface Props {
 		sitio: Sitio;
@@ -10,22 +11,42 @@
 
 	let { sitio, class: className = '' }: Props = $props();
 
-	// Calculate vulnerability score
-	// % of families who are 4Ps Beneficiaries + % without Electricity
-	const fourpsPercentage = $derived(
-		sitio.social_services && sitio.households > 0
-			? (sitio.social_services.fourps_beneficiaries / sitio.households) * 100
-			: 0
-	);
+	// Get need score and level
+	const needScore = $derived(sitio.need_score ?? 5);
+	const needLevel = $derived(sitio.need_level ?? getNeedLevelFromScore(needScore));
 
-	const withoutElectricityPercentage = $derived.by(() => {
-		if (!sitio.utilities || sitio.households <= 0) return 0;
-		const withElectricity = sitio.utilities.households_with_electricity;
-		const withoutElectricity = sitio.households - withElectricity;
-		return (withoutElectricity / sitio.households) * 100;
-	});
+	// Need level styling configuration
+	const needLevelConfig: Record<
+		NeedLevel,
+		{ label: string; color: string; bg: string; gradient: string }
+	> = {
+		critical: {
+			label: 'Critical',
+			color: 'text-red-600',
+			bg: 'bg-red-50',
+			gradient: 'from-red-500 to-red-600'
+		},
+		high: {
+			label: 'High',
+			color: 'text-orange-600',
+			bg: 'bg-orange-50',
+			gradient: 'from-orange-500 to-orange-600'
+		},
+		medium: {
+			label: 'Medium',
+			color: 'text-yellow-600',
+			bg: 'bg-yellow-50',
+			gradient: 'from-yellow-500 to-yellow-600'
+		},
+		low: {
+			label: 'Low',
+			color: 'text-emerald-600',
+			bg: 'bg-emerald-50',
+			gradient: 'from-emerald-500 to-emerald-600'
+		}
+	};
 
-	const vulnerabilityScore = $derived((fourpsPercentage + withoutElectricityPercentage) / 2);
+	const currentNeedConfig = $derived(needLevelConfig[needLevel]);
 
 	// Calculate workforce participation
 	// % of population aged 18-60 currently employed
@@ -34,15 +55,6 @@
 		if (!sitio.economic_condition || sitio.demographics.age_15_64 <= 0) return 0;
 		const totalEmployed = sitio.economic_condition.employments.reduce((sum, e) => sum + e.count, 0);
 		return (totalEmployed / sitio.demographics.age_15_64) * 100;
-	});
-
-	// Vulnerability interpretation
-	const vulnerabilityLevel = $derived.by(() => {
-		if (vulnerabilityScore < 25)
-			return { label: 'Low', color: 'text-emerald-600', bg: 'bg-emerald-50' };
-		if (vulnerabilityScore < 50)
-			return { label: 'Moderate', color: 'text-amber-600', bg: 'bg-amber-50' };
-		return { label: 'High', color: 'text-red-600', bg: 'bg-red-50' };
 	});
 
 	// Workforce interpretation
@@ -76,21 +88,15 @@
 			iconColor: 'text-indigo-600'
 		},
 		{
-			label: 'Vulnerability Score',
-			value: `${vulnerabilityScore.toFixed(1)}%`,
-			sublabel: vulnerabilityLevel.label + ' Risk',
-			icon: AlertTriangle,
-			color:
-				vulnerabilityScore >= 50
-					? 'from-red-500 to-red-600'
-					: vulnerabilityScore >= 25
-						? 'from-amber-500 to-amber-600'
-						: 'from-emerald-500 to-emerald-600',
-			bgColor: vulnerabilityLevel.bg,
-			iconBg: vulnerabilityLevel.bg,
-			iconColor: vulnerabilityLevel.color,
-			trend:
-				vulnerabilityScore >= 50 ? 'negative' : vulnerabilityScore >= 25 ? 'neutral' : 'positive'
+			label: 'Need Score',
+			value: `${needScore}/10`,
+			sublabel: currentNeedConfig.label + ' Priority',
+			icon: Gauge,
+			color: currentNeedConfig.gradient,
+			bgColor: currentNeedConfig.bg,
+			iconBg: currentNeedConfig.bg,
+			iconColor: currentNeedConfig.color,
+			trend: needScore >= 8 ? 'negative' : needScore >= 6 ? 'neutral' : 'positive'
 		},
 		{
 			label: 'Workforce Participation',

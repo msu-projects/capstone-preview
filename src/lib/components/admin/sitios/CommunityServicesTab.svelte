@@ -12,9 +12,7 @@
 		rstOfficialPositionOptions,
 		transportationMethodOptions
 	} from '$lib/config/sitio-options';
-	import type { SitioIssue, SitioPPA } from '$lib/types';
 	import { Bus, Cat, Dog, Megaphone, Plus, Trash2, Users } from '@lucide/svelte';
-	import IssuesPPAsSection from './IssuesPPAsSection.svelte';
 
 	let {
 		sectoral_organizations = $bindable(0),
@@ -25,9 +23,7 @@
 		dogs_vaccinated = $bindable(0),
 		cats_vaccinated = $bindable(0),
 		local_officials = $bindable<Array<{ name: string; position: string }>>([]),
-		rst_officials = $bindable<Array<{ name: string; position: string }>>([]),
-		issues_concerns = $bindable<SitioIssue[]>([]),
-		proposed_ppas = $bindable<SitioPPA[]>([])
+		rst_officials = $bindable<Array<{ name: string; position: string }>>([])
 	}: {
 		sectoral_organizations: number;
 		info_dissemination_methods: string[];
@@ -38,8 +34,6 @@
 		cats_vaccinated: number;
 		local_officials: Array<{ name: string; position: string }>;
 		rst_officials: Array<{ name: string; position: string }>;
-		issues_concerns: SitioIssue[];
-		proposed_ppas: SitioPPA[];
 	} = $props();
 
 	// Computed values
@@ -379,7 +373,4 @@
 			{/if}
 		</div>
 	</FormSection>
-
-	<!-- Issues & Concerns and Proposed PPAs -->
-	<IssuesPPAsSection bind:issues_concerns bind:proposed_ppas />
 </div>

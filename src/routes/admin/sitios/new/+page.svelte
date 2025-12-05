@@ -6,10 +6,12 @@
 	import FormStepper, { type Step } from '$lib/components/admin/sitios/FormStepper.svelte';
 	import InfrastructureHousingTab from '$lib/components/admin/sitios/InfrastructureHousingTab.svelte';
 	import LivelihoodsEconomyTab from '$lib/components/admin/sitios/LivelihoodsEconomyTab.svelte';
+	import NeedsAssessmentTab from '$lib/components/admin/sitios/NeedsAssessmentTab.svelte';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import type { Sitio, SitioIssue, SitioPPA } from '$lib/types';
+	import { getNeedLevelFromScore } from '$lib/types';
 	import { logAuditAction } from '$lib/utils/audit';
 	import { validateDemographics } from '$lib/utils/demographic-validation';
 	import { loadSitios, saveSitios } from '$lib/utils/storage';
@@ -21,6 +23,7 @@
 		MapPin,
 		Save,
 		Sprout,
+		Target,
 		Users,
 		X
 	} from '@lucide/svelte';
@@ -39,6 +42,7 @@
 	let households = $state(0);
 	let coordinates = $state({ lat: 0, lng: 0 });
 	let coding = $state('');
+	let needScore = $state(5);
 
 	// Tab 2: Demographics
 	let demographics = $state({
@@ -136,7 +140,9 @@
 		population === 0 || demographics.total === 0 || population === demographics.total
 	);
 
-	const canSave = $derived(isBasicInfoValid);
+	const isNeedsAssessmentValid = $derived(needScore >= 1 && needScore <= 10);
+
+	const canSave = $derived(isBasicInfoValid && isNeedsAssessmentValid);
 
 	// Step configuration
 	const steps: Step[] = $derived([
@@ -181,15 +187,27 @@
 			label: 'Community Services',
 			shortLabel: 'Community',
 			icon: HandHelping,
-			isValid:
-				community_empowerment.sectoral_organizations > 0 ||
-				local_officials.length > 0 ||
-				issues_concerns.length > 0
+			isValid: community_empowerment.sectoral_organizations > 0 || local_officials.length > 0
+		},
+		{
+			id: 'needs-assessment',
+			label: 'Needs Assessment',
+			shortLabel: 'Needs',
+			icon: Target,
+			isValid: isNeedsAssessmentValid,
+			hasError: !isNeedsAssessmentValid && activeStep !== 'needs-assessment'
 		}
 	]);
 
 	// Step navigation
-	const stepOrder = ['basic', 'demographics-social', 'livelihoods', 'infrastructure', 'community'];
+	const stepOrder = [
+		'basic',
+		'demographics-social',
+		'livelihoods',
+		'infrastructure',
+		'community',
+		'needs-assessment'
+	];
 	const currentStepIndex = $derived(stepOrder.indexOf(activeStep));
 	const canGoNext = $derived(currentStepIndex < stepOrder.length - 1);
 	const canGoPrevious = $derived(currentStepIndex > 0);
@@ -220,9 +238,15 @@
 	}
 
 	async function handleSave() {
-		if (!canSave) {
+		if (!isBasicInfoValid) {
 			toast.error('Please complete required fields in Basic Information');
 			activeStep = 'basic';
+			return;
+		}
+
+		if (!isNeedsAssessmentValid) {
+			toast.error('Please complete the Needs Assessment section');
+			activeStep = 'needs-assessment';
 			return;
 		}
 
@@ -253,6 +277,8 @@
 			population,
 			households,
 			coordinates,
+			need_score: needScore,
+			need_level: getNeedLevelFromScore(needScore),
 			created_at: new Date().toISOString(),
 			updated_at: new Date().toISOString(),
 			coding,
@@ -396,9 +422,9 @@
 						bind:cats_vaccinated={domestic_animals.cats_vaccinated}
 						bind:local_officials
 						bind:rst_officials
-						bind:issues_concerns
-						bind:proposed_ppas
 					/>
+				{:else if activeStep === 'needs-assessment'}
+					<NeedsAssessmentTab bind:needScore bind:issues_concerns bind:proposed_ppas />
 				{/if}
 
 				<!-- Navigation Buttons -->

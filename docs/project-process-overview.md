@@ -505,43 +505,43 @@ Check for Dependencies
 
 ### 4.6 Sitio Need Score
 
-The Need Score is a calculated metric (0-100) that indicates a sitio's priority for development projects based on infrastructure gaps, economic indicators, and community-expressed needs.
+The Need Score is a manually-assigned metric (1-10) that indicates a sitio's priority for development projects. A higher score indicates a greater need for assistance. Administrators assign this score when creating or editing a sitio based on their assessment of the community's overall needs.
 
-#### 4.6.1 Score Components
+#### 4.6.1 Score Scale
 
-| Category           | Weight | Description                                            |
-| ------------------ | ------ | ------------------------------------------------------ |
-| Infrastructure Gap | 30%    | Sanitation, water access, electricity, housing quality |
-| Economic Need      | 25%    | Low income ratio, 4Ps dependency, employment gap       |
-| Social Service Gap | 20%    | PhilHealth coverage, vaccination rates                 |
-| Community Priority | 15%    | Issues count, proposed PPAs count                      |
-| Population Impact  | 10%    | Population size percentile, dependent ratio            |
+| Score | Description                                      |
+| ----- | ------------------------------------------------ |
+| 1-3   | Low need - community is relatively well-served   |
+| 4-5   | Medium need - some gaps exist but manageable     |
+| 6-7   | High need - significant gaps requiring attention |
+| 8-10  | Critical need - urgent intervention required     |
 
 #### 4.6.2 Need Levels
 
-| Level    | Score Range | Description                          |
-| -------- | ----------- | ------------------------------------ |
-| Critical | 75–100      | Urgent need, prioritize for projects |
-| High     | 50–74       | Significant need                     |
-| Medium   | 25–49       | Moderate need                        |
-| Low      | 0–24        | Relatively well-served               |
+| Level    | Score Range | Color Badge | Description                          |
+| -------- | ----------- | ----------- | ------------------------------------ |
+| Critical | 8–10        | Red/Rose    | Urgent need, prioritize for projects |
+| High     | 6–7         | Orange      | Significant need                     |
+| Medium   | 4–5         | Yellow      | Moderate need                        |
+| Low      | 1–3         | Green       | Relatively well-served               |
 
-#### 4.6.3 Score Behavior
+#### 4.6.3 Score Assignment
 
-- **Cached**: Score is stored on the sitio record for fast display
-- **Recalculated**: Automatically recalculated when sitio data is updated
-- **History Tracked**: Each score change is logged with timestamp and trigger
-- **Missing Data**: Categories with insufficient data are excluded; weights are redistributed proportionally. If overall data completeness is below 40%, the sitio shows "Insufficient Data" instead of a score.
+- **Manual Entry**: Administrators assign the score when creating or editing a sitio
+- **Default Value**: New sitios default to a score of 5 (Medium need)
+- **Required Field**: The need score is mandatory for all sitios
+- **Visual Feedback**: The form displays the current need level badge alongside the slider input
 
 #### 4.6.4 Admin Features
 
-| Feature          | Description                                                |
-| ---------------- | ---------------------------------------------------------- |
-| Need Score Badge | Color-coded badge (Critical/High/Medium/Low) in sitio list |
-| Trend Indicator  | Shows ↑↓→ compared to previous score                       |
-| Filter by Level  | Filter sitio list by need level                            |
-| Sort by Score    | Sort sitio list by need score (high to low)                |
-| Breakdown View   | Hover card showing category scores and data completeness   |
+| Feature            | Description                                                |
+| ------------------ | ---------------------------------------------------------- |
+| Need Score Input   | Slider input (1-10) with visual level indicator            |
+| Need Score Badge   | Color-coded badge (Critical/High/Medium/Low) in sitio list |
+| Filter by Level    | Filter sitio list by need level                            |
+| Sort by Score      | Sort sitio list by need score (high to low or low to high) |
+| Dashboard Chart    | Donut chart showing distribution of sitios by need level   |
+| Average Need Score | Dashboard metric showing average need score across sitios  |
 
 ### 4.7 Post-Project Sitio Updates (Optional)
 
@@ -1120,10 +1120,10 @@ When a record is updated, the system captures the specific field changes:
 
 ```json
 {
-  "changes": [
-    { "field": "status", "oldValue": "in-progress", "newValue": "suspended" },
-    { "field": "issues", "oldValue": null, "newValue": "Funding delay" }
-  ]
+	"changes": [
+		{ "field": "status", "oldValue": "in-progress", "newValue": "suspended" },
+		{ "field": "issues", "oldValue": null, "newValue": "Funding delay" }
+	]
 }
 ```
 

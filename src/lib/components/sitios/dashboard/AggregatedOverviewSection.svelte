@@ -1,5 +1,6 @@
 <script lang="ts">
 	import BarChart from '$lib/components/charts/BarChart.svelte';
+	import DonutChart from '$lib/components/charts/DonutChart.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';
 	import { Progress } from '$lib/components/ui/progress';
@@ -8,13 +9,16 @@
 	import {
 		aggregateDemographics,
 		aggregateInfrastructure,
+		aggregateNeedScores,
 		aggregateSocialServices,
 		getGeographicDistribution,
-		toMunicipalityBarData
+		toMunicipalityBarData,
+		toNeedLevelDonutData
 	} from '$lib/utils/sitio-aggregation';
 	import {
 		Building2,
 		FolderKanban,
+		Gauge,
 		Heart,
 		Home,
 		Landmark,
@@ -45,6 +49,7 @@
 	const infrastructure = $derived(aggregateInfrastructure(sitios));
 	const social = $derived(aggregateSocialServices(sitios));
 	const geographic = $derived(getGeographicDistribution(sitios));
+	const needScores = $derived(aggregateNeedScores(sitios));
 
 	// KPI metrics
 	const keyMetrics = $derived([
@@ -73,9 +78,9 @@
 			textColor: 'text-emerald-700'
 		},
 		{
-			label: 'Municipalities',
-			value: geographic.totalMunicipalities.toString(),
-			icon: Landmark,
+			label: 'Avg Need Score',
+			value: needScores.averageScore.toFixed(1) + '/10',
+			icon: Gauge,
 			color: 'bg-amber-500',
 			bgColor: 'bg-amber-50',
 			textColor: 'text-amber-700'
@@ -106,6 +111,9 @@
 
 	// Municipality distribution chart data
 	const municipalityChartData = $derived(toMunicipalityBarData(geographic, 'population'));
+
+	// Need level distribution chart data
+	const needLevelChartData = $derived(toNeedLevelDonutData(needScores));
 </script>
 
 <div class="space-y-6">
@@ -140,7 +148,7 @@
 		{/each}
 	</div>
 
-	<div class="grid gap-6 lg:grid-cols-2">
+	<div class="grid gap-6 lg:grid-cols-3">
 		<!-- Community Snapshot -->
 		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50">
 			<Card.Header>
@@ -163,6 +171,26 @@
 						<Progress value={stat.value} class="h-2" />
 					</div>
 				{/each}
+			</Card.Content>
+		</Card.Root>
+
+		<!-- Need Level Distribution -->
+		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50">
+			<Card.Header>
+				<Card.Title class="flex items-center gap-2 text-base">
+					<Gauge class="size-5 text-slate-500" />
+					Need Level Distribution
+				</Card.Title>
+				<Card.Description>Sitios by priority level</Card.Description>
+			</Card.Header>
+			<Card.Content>
+				{#if needLevelChartData.length > 0}
+					<DonutChart data={needLevelChartData} height={250} />
+				{:else}
+					<div class="flex h-[220px] items-center justify-center text-sm text-slate-500">
+						No need score data available
+					</div>
+				{/if}
 			</Card.Content>
 		</Card.Root>
 

@@ -1,4 +1,9 @@
-import type { ColumnMapping, ImportedRow, Sitio } from '$lib/types';
+import {
+	getNeedLevelFromScore,
+	type ColumnMapping,
+	type ImportedRow,
+	type Sitio
+} from '$lib/types';
 
 /**
  * Field definitions for the 86-column Sitio dataset
@@ -436,7 +441,11 @@ export function createDefaultSitio(): Sitio {
 		utilities: {
 			households_with_electricity: 0,
 			alternative_electricity_sources: []
-		}
+		},
+
+		// Need Score (default 5 = medium)
+		need_score: 5,
+		need_level: getNeedLevelFromScore(5)
 	};
 }
 

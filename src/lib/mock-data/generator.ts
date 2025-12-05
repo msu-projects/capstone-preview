@@ -6,19 +6,20 @@ import {
 } from '$lib/config/issue-ppa-mappings';
 import { MUNICIPALITIES_DATA } from '$lib/config/location-data';
 import { categories, projectTypes } from '$lib/config/project-categories';
-import type {
-	BudgetComponent,
-	CategoryKey,
-	FundingSource,
-	MonthlyProgress,
-	MonthlyTarget,
-	PerformanceTarget,
-	Project,
-	ProjectSitio,
-	ProjectStatus,
-	Sitio,
-	SitioIssue,
-	SitioPPA
+import {
+	getNeedLevelFromScore,
+	type BudgetComponent,
+	type CategoryKey,
+	type FundingSource,
+	type MonthlyProgress,
+	type MonthlyTarget,
+	type PerformanceTarget,
+	type Project,
+	type ProjectSitio,
+	type ProjectStatus,
+	type Sitio,
+	type SitioIssue,
+	type SitioPPA
 } from '$lib/types';
 
 // ===== SEEDED RANDOM NUMBER GENERATOR =====
@@ -493,7 +494,16 @@ export function generateSitios(count: number = 50, seed: number = 42): Sitio[] {
 			})(),
 
 			created_at: new Date(2024, rng.nextInt(0, 11), rng.nextInt(1, 28)).toISOString(),
-			updated_at: new Date().toISOString()
+			updated_at: new Date().toISOString(),
+
+			// Need Score (1-10, randomly generated)
+			...(() => {
+				const needScore = rng.nextInt(1, 10);
+				return {
+					need_score: needScore,
+					need_level: getNeedLevelFromScore(needScore)
+				};
+			})()
 		};
 
 		sitios.push(sitio);
