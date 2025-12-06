@@ -99,7 +99,11 @@
 						{/if}
 						<Command.Group>
 							{#each filteredOptions as option (option)}
-								<Command.Item value={option} onSelect={() => addItem(option)}>
+								<Command.Item
+									value={option}
+									onSelect={() => addItem(option)}
+									class="cursor-pointer"
+								>
 									{option}
 								</Command.Item>
 							{/each}

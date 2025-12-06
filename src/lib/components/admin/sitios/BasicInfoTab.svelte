@@ -8,6 +8,7 @@
 	import * as Popover from '$lib/components/ui/popover';
 	import { MUNICIPALITIES, getBarangaysForMunicipality } from '$lib/config/location-data';
 	import { cn } from '$lib/utils';
+	import toTitleCase from '$lib/utils/common';
 	import {
 		AlertCircle,
 		Check,
@@ -106,7 +107,7 @@
 						)}
 					>
 						<span class={cn('truncate', !municipality && 'text-muted-foreground')}>
-							{municipality || 'Select municipality...'}
+							{toTitleCase(municipality) || 'Select municipality...'}
 						</span>
 						<ChevronsUpDown class="ml-2 size-4 shrink-0 opacity-50" />
 					</Popover.Trigger>
@@ -140,7 +141,7 @@
 													municipality === mun ? 'opacity-100' : 'opacity-0'
 												)}
 											/>
-											{mun}
+											<span>{toTitleCase(mun)}</span>
 										</button>
 									{/each}
 								</div>
@@ -164,7 +165,7 @@
 						)}
 					>
 						<span class={cn('truncate', !barangay && 'text-muted-foreground')}>
-							{barangay || 'Select barangay...'}
+							{toTitleCase(barangay) || 'Select barangay...'}
 						</span>
 						<ChevronsUpDown class="ml-2 size-4 shrink-0 opacity-50" />
 					</Popover.Trigger>
@@ -199,7 +200,7 @@
 											<Check
 												class={cn('mr-2 size-4', barangay === bar ? 'opacity-100' : 'opacity-0')}
 											/>
-											{bar}
+											<span>{toTitleCase(bar)}</span>
 										</button>
 									{/each}
 								</div>
