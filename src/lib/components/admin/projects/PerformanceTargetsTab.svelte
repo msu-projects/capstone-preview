@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Badge } from '$lib/components/ui/badge';
+	import { Button } from '$lib/components/ui/button';
 	import { Calendar as CalendarComponent } from '$lib/components/ui/calendar';
 	import * as Card from '$lib/components/ui/card';
 	import { CurrencyInput } from '$lib/components/ui/currency-input';
@@ -12,7 +13,18 @@
 	import { cn } from '$lib/utils';
 	import toTitleCase from '$lib/utils/common';
 	import { type DateValue, getLocalTimeZone } from '@internationalized/date';
-	import { Banknote, Briefcase, Calendar, Info, Target } from '@lucide/svelte';
+	import {
+		Banknote,
+		Briefcase,
+		Calendar,
+		Check,
+		Info,
+		Pencil,
+		Plus,
+		Target,
+		Trash2,
+		X
+	} from '@lucide/svelte';
 
 	let {
 		selectedProjectTypeId = undefined,
@@ -37,6 +49,131 @@
 	);
 
 	const defaultIndicators = $derived(projectType?.default_indicators ?? []);
+
+	// Custom deliverables state
+	let customName = $state('');
+	let customUnit = $state('');
+	let customDescription = $state('');
+	let customTargetValue = $state('');
+	let validationError = $state('');
+
+	// Edit mode state
+	let editingIndicatorType = $state<string | null>(null);
+	let editForm = $state({
+		name: '',
+		unit: '',
+		description: '',
+		targetValue: ''
+	});
+
+	// Derived: filter custom targets from performanceTargets
+	const customTargets = $derived(
+		performanceTargets.filter((t: Omit<PerformanceTarget, 'id' | 'project_id'>) =>
+			t.indicator_type.startsWith('custom_')
+		)
+	);
+
+	// Helper: check if indicator is custom
+	function isCustomIndicator(indicatorType: string): boolean {
+		return indicatorType.startsWith('custom_');
+	}
+
+	// Helper: check for duplicate name
+	function isDuplicateName(name: string, excludeType?: string): boolean {
+		const normalizedName = name.trim().toLowerCase();
+		return performanceTargets.some(
+			(t: Omit<PerformanceTarget, 'id' | 'project_id'>) =>
+				t.indicator_name.toLowerCase() === normalizedName &&
+				(excludeType ? t.indicator_type !== excludeType : true)
+		);
+	}
+
+	// Add custom deliverable
+	function addCustomDeliverable() {
+		const trimmedName = customName.trim();
+		if (!trimmedName || !customUnit.trim() || !customTargetValue) {
+			validationError = 'Please fill in name, unit, and target value.';
+			return;
+		}
+
+		if (isDuplicateName(trimmedName)) {
+			validationError = `A deliverable named "${trimmedName}" already exists.`;
+			return;
+		}
+
+		const newTarget: Omit<PerformanceTarget, 'id' | 'project_id'> = {
+			indicator_type: `custom_${Date.now()}`,
+			indicator_name: trimmedName,
+			target_value: Number(customTargetValue),
+			unit_of_measure: customUnit.trim()
+		};
+
+		performanceTargets = [...performanceTargets, newTarget];
+
+		// Reset form
+		customName = '';
+		customUnit = '';
+		customDescription = '';
+		customTargetValue = '';
+		validationError = '';
+	}
+
+	// Remove deliverable (works for custom only)
+	function removeDeliverable(indicatorType: string) {
+		performanceTargets = performanceTargets.filter(
+			(t: Omit<PerformanceTarget, 'id' | 'project_id'>) => t.indicator_type !== indicatorType
+		);
+	}
+
+	// Start editing a custom deliverable
+	function startEdit(target: Omit<PerformanceTarget, 'id' | 'project_id'>) {
+		editingIndicatorType = target.indicator_type;
+		editForm = {
+			name: target.indicator_name,
+			unit: target.unit_of_measure,
+			description: '', // Description not stored in PerformanceTarget type
+			targetValue: String(target.target_value)
+		};
+		validationError = '';
+	}
+
+	// Cancel editing
+	function cancelEdit() {
+		editingIndicatorType = null;
+		editForm = { name: '', unit: '', description: '', targetValue: '' };
+		validationError = '';
+	}
+
+	// Save edited deliverable
+	function saveEdit() {
+		if (!editingIndicatorType) return;
+
+		const trimmedName = editForm.name.trim();
+		if (!trimmedName || !editForm.unit.trim() || !editForm.targetValue) {
+			validationError = 'Please fill in name, unit, and target value.';
+			return;
+		}
+
+		if (isDuplicateName(trimmedName, editingIndicatorType)) {
+			validationError = `A deliverable named "${trimmedName}" already exists.`;
+			return;
+		}
+
+		const index = performanceTargets.findIndex(
+			(t: Omit<PerformanceTarget, 'id' | 'project_id'>) => t.indicator_type === editingIndicatorType
+		);
+
+		if (index >= 0) {
+			performanceTargets[index] = {
+				...performanceTargets[index],
+				indicator_name: trimmedName,
+				unit_of_measure: editForm.unit.trim(),
+				target_value: Number(editForm.targetValue)
+			};
+		}
+
+		cancelEdit();
+	}
 
 	// Initialize performance targets when project type changes
 	$effect(() => {
@@ -164,6 +301,125 @@
 					</Card.CardContent>
 				</Card.Card>
 			{/if}
+
+			<!-- Custom Deliverables -->
+			<Card.Card>
+				<Card.CardHeader>
+					<Card.CardTitle class="flex items-center gap-2">
+						<Plus class="size-5" />
+						Custom Deliverables
+					</Card.CardTitle>
+					<Card.CardDescription>
+						Add project-specific deliverables not covered by the default indicators
+					</Card.CardDescription>
+				</Card.CardHeader>
+				<Card.CardContent class="space-y-4">
+					<!-- Add Custom Deliverable Form -->
+					<div class="rounded-lg border bg-muted/30 p-4">
+						<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+							<div class="space-y-2">
+								<Label for="custom-name" class="text-sm">Name</Label>
+								<Input id="custom-name" bind:value={customName} placeholder="e.g., Trees Planted" />
+							</div>
+							<div class="space-y-2">
+								<Label for="custom-unit" class="text-sm">Unit</Label>
+								<Input id="custom-unit" bind:value={customUnit} placeholder="e.g., trees" />
+							</div>
+							<div class="space-y-2">
+								<Label for="custom-target" class="text-sm">Target Value</Label>
+								<Input
+									id="custom-target"
+									type="number"
+									bind:value={customTargetValue}
+									placeholder="e.g., 500"
+									min="0"
+								/>
+							</div>
+							<div class="flex items-end">
+								<Button onclick={addCustomDeliverable} class="w-full sm:w-auto">
+									<Plus class="mr-2 size-4" />
+									Add
+								</Button>
+							</div>
+						</div>
+						{#if validationError && !editingIndicatorType}
+							<p class="mt-2 text-sm text-destructive">{validationError}</p>
+						{/if}
+					</div>
+
+					<!-- Custom Deliverables List -->
+					{#if customTargets.length > 0}
+						<div class="space-y-3">
+							{#each customTargets as target (target.indicator_type)}
+								<div
+									class="flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between"
+								>
+									{#if editingIndicatorType === target.indicator_type}
+										<!-- Edit Mode -->
+										<div class="flex-1 space-y-3">
+											<div class="grid gap-3 sm:grid-cols-3">
+												<Input bind:value={editForm.name} placeholder="Name" />
+												<Input bind:value={editForm.unit} placeholder="Unit" />
+												<Input
+													type="number"
+													bind:value={editForm.targetValue}
+													placeholder="Target"
+													min="0"
+												/>
+											</div>
+											{#if validationError && editingIndicatorType}
+												<p class="text-sm text-destructive">{validationError}</p>
+											{/if}
+										</div>
+										<div class="flex gap-2">
+											<Button size="sm" onclick={saveEdit}>
+												<Check class="mr-1 size-4" />
+												Save
+											</Button>
+											<Button size="sm" variant="outline" onclick={cancelEdit}>
+												<X class="mr-1 size-4" />
+												Cancel
+											</Button>
+										</div>
+									{:else}
+										<!-- View Mode -->
+										<div class="flex flex-1 flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+											<div class="flex items-center gap-2">
+												<Target class="size-4 text-muted-foreground" />
+												<span class="font-medium">{target.indicator_name}</span>
+												<Badge variant="outline" class="text-xs">Custom</Badge>
+											</div>
+											<div class="flex items-center gap-2 text-sm text-muted-foreground">
+												<span class="font-semibold text-foreground">{target.target_value}</span>
+												<Badge variant="secondary">{toTitleCase(target.unit_of_measure)}</Badge>
+											</div>
+										</div>
+										<div class="flex gap-2">
+											<Button size="sm" variant="ghost" onclick={() => startEdit(target)}>
+												<Pencil class="size-4" />
+												<span class="sr-only">Edit</span>
+											</Button>
+											<Button
+												size="sm"
+												variant="ghost"
+												class="text-destructive hover:bg-destructive/10 hover:text-destructive"
+												onclick={() => removeDeliverable(target.indicator_type)}
+											>
+												<Trash2 class="size-4" />
+												<span class="sr-only">Delete</span>
+											</Button>
+										</div>
+									{/if}
+								</div>
+							{/each}
+						</div>
+					{:else}
+						<p class="text-center text-sm text-muted-foreground">
+							No custom deliverables added yet. Use the form above to add one.
+						</p>
+					{/if}
+				</Card.CardContent>
+			</Card.Card>
 
 			<!-- Universal Performance Indicators -->
 			<Card.Card>
