@@ -1,10 +1,27 @@
-import type { Category, CategoryKey, ProjectType } from '$lib/types';
-
 /**
  * Project Categories Configuration
  * Based on the Improved Project Tracking System v2
+ *
+ * NOTE: These are default values. Admins can customize via the Configuration page.
+ * Use the getter functions (e.g., getCategories(), getProjectTypes()) to get values with overrides.
  */
-export const categories: Category[] = [
+
+import type { Category, CategoryKey, ProjectType } from '$lib/types';
+import {
+	CONFIG_STORAGE_KEYS,
+	getConfigWithOverrides,
+	hasConfigOverride,
+	resetConfigToDefault,
+	saveConfigOverride,
+	type ProjectCategoriesConfig,
+	type ProjectTypesConfig
+} from '$lib/utils/config-storage';
+
+// ============================================
+// DEFAULT CATEGORIES
+// ============================================
+
+const DEFAULT_CATEGORIES: Category[] = [
 	{
 		id: 1,
 		key: 'infrastructure',
@@ -49,11 +66,11 @@ export const categories: Category[] = [
 	}
 ];
 
-/**
- * Project Types by Category
- * Each category has specific project types with default performance indicators
- */
-export const projectTypes: ProjectType[] = [
+// ============================================
+// DEFAULT PROJECT TYPES
+// ============================================
+
+const DEFAULT_PROJECT_TYPES: ProjectType[] = [
 	// INFRASTRUCTURE
 	{
 		id: 1,
@@ -891,30 +908,144 @@ export const projectTypes: ProjectType[] = [
 	}
 ];
 
+// ============================================
+// GETTER FUNCTIONS (with localStorage override support)
+// ============================================
+
+function getCategoriesConfig(): ProjectCategoriesConfig {
+	const defaultConfig: ProjectCategoriesConfig = { categories: DEFAULT_CATEGORIES };
+	return getConfigWithOverrides(CONFIG_STORAGE_KEYS.PROJECT_CATEGORIES, defaultConfig);
+}
+
+function getProjectTypesConfig(): ProjectTypesConfig {
+	const defaultConfig: ProjectTypesConfig = { projectTypes: DEFAULT_PROJECT_TYPES };
+	return getConfigWithOverrides(CONFIG_STORAGE_KEYS.PROJECT_TYPES, defaultConfig);
+}
+
 /**
- * Helper function to get category by key
+ * Get all project categories
+ */
+export function getCategories(): Category[] {
+	return getCategoriesConfig().categories as Category[];
+}
+
+/**
+ * Get all project types
+ */
+export function getProjectTypes(): ProjectType[] {
+	return getProjectTypesConfig().projectTypes as ProjectType[];
+}
+
+/**
+ * Get category by key
  */
 export function getCategoryByKey(key: CategoryKey): Category | undefined {
-	return categories.find((c) => c.key === key);
+	return getCategories().find((c) => c.key === key);
 }
 
 /**
- * Helper function to get project types by category
+ * Get project types by category
  */
 export function getProjectTypesByCategory(categoryKey: CategoryKey): ProjectType[] {
-	return projectTypes.filter((pt) => pt.category_key === categoryKey);
+	return getProjectTypes().filter((pt) => pt.category_key === categoryKey);
 }
 
 /**
- * Helper function to get project type by id
+ * Get project type by id
  */
 export function getProjectTypeById(id: number): ProjectType | undefined {
-	return projectTypes.find((pt) => pt.id === id);
+	return getProjectTypes().find((pt) => pt.id === id);
 }
 
 /**
- * Helper function to get all category keys
+ * Get all category keys
  */
 export function getCategoryKeys(): CategoryKey[] {
-	return categories.map((c) => c.key);
+	return getCategories().map((c) => c.key);
 }
+
+/**
+ * Get the next available project type ID
+ */
+export function getNextProjectTypeId(): number {
+	const types = getProjectTypes();
+	return types.length > 0 ? Math.max(...types.map((t) => t.id)) + 1 : 1;
+}
+
+/**
+ * Get the next available category ID
+ */
+export function getNextCategoryId(): number {
+	const cats = getCategories();
+	return cats.length > 0 ? Math.max(...cats.map((c) => c.id)) + 1 : 1;
+}
+
+// ============================================
+// FULL CONFIG ACCESS (for admin config page)
+// ============================================
+
+export function getProjectCategoriesFullConfig(): ProjectCategoriesConfig {
+	return getCategoriesConfig();
+}
+
+export function getProjectTypesFullConfig(): ProjectTypesConfig {
+	return getProjectTypesConfig();
+}
+
+export function getDefaultCategoriesConfig(): ProjectCategoriesConfig {
+	return { categories: [...DEFAULT_CATEGORIES] };
+}
+
+export function getDefaultProjectTypesConfig(): ProjectTypesConfig {
+	return { projectTypes: [...DEFAULT_PROJECT_TYPES] };
+}
+
+export function saveCategoriesConfig(
+	config: ProjectCategoriesConfig,
+	changeDescription?: string
+): boolean {
+	return saveConfigOverride(
+		CONFIG_STORAGE_KEYS.PROJECT_CATEGORIES,
+		config,
+		'project-categories',
+		changeDescription
+	);
+}
+
+export function saveProjectTypesConfig(
+	config: ProjectTypesConfig,
+	changeDescription?: string
+): boolean {
+	return saveConfigOverride(
+		CONFIG_STORAGE_KEYS.PROJECT_TYPES,
+		config,
+		'project-types',
+		changeDescription
+	);
+}
+
+export function resetCategoriesConfig(): boolean {
+	return resetConfigToDefault(CONFIG_STORAGE_KEYS.PROJECT_CATEGORIES, 'project-categories');
+}
+
+export function resetProjectTypesConfig(): boolean {
+	return resetConfigToDefault(CONFIG_STORAGE_KEYS.PROJECT_TYPES, 'project-types');
+}
+
+export function hasCategoriesOverride(): boolean {
+	return hasConfigOverride(CONFIG_STORAGE_KEYS.PROJECT_CATEGORIES);
+}
+
+export function hasProjectTypesOverride(): boolean {
+	return hasConfigOverride(CONFIG_STORAGE_KEYS.PROJECT_TYPES);
+}
+
+// ============================================
+// LEGACY EXPORTS (for backward compatibility)
+// ============================================
+
+/** @deprecated Use getCategories() instead */
+export const categories = DEFAULT_CATEGORIES;
+
+/** @deprecated Use getProjectTypes() instead */
+export const projectTypes = DEFAULT_PROJECT_TYPES;

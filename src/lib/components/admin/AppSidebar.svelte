@@ -15,6 +15,7 @@
 		LayoutDashboard,
 		LogOut,
 		MapPin,
+		Settings2,
 		Shield,
 		ShieldCheck,
 		User as UserIcon,
@@ -53,6 +54,7 @@
 		{
 			title: 'System',
 			items: [
+				{ title: 'Configuration', url: '/admin/config', icon: Settings2, requiresSuperadmin: true },
 				{ title: 'Users', url: '/admin/users', icon: Users, requiresSuperadmin: true },
 				{ title: 'Audit Logs', url: '/admin/audit', icon: FileText, requiresAdmin: true },
 				{ title: 'View Public Portal', url: '/', icon: ExternalLink }
@@ -75,8 +77,8 @@
 	}
 
 	function isActive(url: string): boolean {
-		// For sitios and projects, use startsWith to match sub-routes
-		if (url === '/admin/sitios' || url === '/admin/projects') {
+		// For sitios, projects, and config, use startsWith to match sub-routes
+		if (url === '/admin/sitios' || url === '/admin/projects' || url === '/admin/config') {
 			return page.url.pathname.startsWith(url);
 		}
 		return page.url.pathname === url;

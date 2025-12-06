@@ -1,11 +1,5 @@
 export type ProjectStatus = 'planning' | 'in-progress' | 'completed' | 'suspended';
-export type CategoryKey =
-	| 'infrastructure'
-	| 'agriculture'
-	| 'education'
-	| 'health'
-	| 'livelihood'
-	| 'environment';
+export type CategoryKey = string;
 
 // ===== NEED LEVEL TYPE =====
 

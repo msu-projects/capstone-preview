@@ -1,5 +1,3 @@
-import type { CategoryKey, SitioIssue, SitioPPA } from '$lib/types';
-
 /**
  * Issue & PPA Mappings Configuration
  *
@@ -8,10 +6,21 @@ import type { CategoryKey, SitioIssue, SitioPPA } from '$lib/types';
  * - Proposed PPAs (Programs, Projects, and Activities)
  * - Project Types (from project-categories.ts)
  *
- * Each issue can suggest related PPAs, and each PPA can link to a specific project type.
+ * NOTE: These are default values. Admins can customize via the Configuration page.
+ * Use the getter functions to get values with overrides.
  */
 
-// ===== PREDEFINED ISSUES =====
+import type { CategoryKey, SitioIssue, SitioPPA } from '$lib/types';
+import {
+	CONFIG_STORAGE_KEYS,
+	getConfigWithOverrides,
+	hasConfigOverride,
+	resetConfigToDefault,
+	saveConfigOverride,
+	type IssuesPPAsConfig
+} from '$lib/utils/config-storage';
+
+// ===== TYPES =====
 
 export interface PredefinedIssue {
 	id: string;
@@ -21,7 +30,18 @@ export interface PredefinedIssue {
 	keywords: string[];
 }
 
-export const predefinedIssues: PredefinedIssue[] = [
+export interface PredefinedPPA {
+	id: string;
+	name: string;
+	category: CategoryKey;
+	projectTypeId: number; // Links to projectTypes from project-categories.ts
+	addressesIssueIds: string[];
+	keywords: string[];
+}
+
+// ===== DEFAULT PREDEFINED ISSUES =====
+
+const DEFAULT_PREDEFINED_ISSUES: PredefinedIssue[] = [
 	// INFRASTRUCTURE
 	{
 		id: 'issue_water_supply',
@@ -175,18 +195,9 @@ export const predefinedIssues: PredefinedIssue[] = [
 	}
 ];
 
-// ===== PREDEFINED PPAs =====
+// ===== DEFAULT PREDEFINED PPAs =====
 
-export interface PredefinedPPA {
-	id: string;
-	name: string;
-	category: CategoryKey;
-	projectTypeId: number; // Links to projectTypes from project-categories.ts
-	addressesIssueIds: string[];
-	keywords: string[];
-}
-
-export const predefinedPPAs: PredefinedPPA[] = [
+const DEFAULT_PREDEFINED_PPAS: PredefinedPPA[] = [
 	// INFRASTRUCTURE (Project Type IDs: 1-8)
 	{
 		id: 'ppa_water_system',
@@ -424,12 +435,37 @@ export const predefinedPPAs: PredefinedPPA[] = [
 	}
 ];
 
-// ===== HELPER FUNCTIONS =====
+// ============================================
+// GETTER FUNCTIONS (with localStorage override support)
+// ============================================
+
+function getConfig(): IssuesPPAsConfig {
+	const defaultConfig: IssuesPPAsConfig = {
+		predefinedIssues: DEFAULT_PREDEFINED_ISSUES,
+		predefinedPPAs: DEFAULT_PREDEFINED_PPAS
+	};
+	return getConfigWithOverrides(CONFIG_STORAGE_KEYS.ISSUES_PPAS, defaultConfig);
+}
+
+/**
+ * Get all predefined issues
+ */
+export function getPredefinedIssues(): PredefinedIssue[] {
+	return getConfig().predefinedIssues as PredefinedIssue[];
+}
+
+/**
+ * Get all predefined PPAs
+ */
+export function getPredefinedPPAs(): PredefinedPPA[] {
+	return getConfig().predefinedPPAs as PredefinedPPA[];
+}
 
 /**
  * Get all predefined issues organized by category
  */
 export function getIssuesByCategory(): Record<CategoryKey, PredefinedIssue[]> {
+	const issues = getPredefinedIssues();
 	const result = {} as Record<CategoryKey, PredefinedIssue[]>;
 	const categories: CategoryKey[] = [
 		'infrastructure',
@@ -441,7 +477,7 @@ export function getIssuesByCategory(): Record<CategoryKey, PredefinedIssue[]> {
 	];
 
 	for (const cat of categories) {
-		result[cat] = predefinedIssues.filter((issue) => issue.category === cat);
+		result[cat] = issues.filter((issue) => issue.category === cat);
 	}
 
 	return result;
@@ -451,6 +487,7 @@ export function getIssuesByCategory(): Record<CategoryKey, PredefinedIssue[]> {
  * Get all predefined PPAs organized by category
  */
 export function getPPAsByCategory(): Record<CategoryKey, PredefinedPPA[]> {
+	const ppas = getPredefinedPPAs();
 	const result = {} as Record<CategoryKey, PredefinedPPA[]>;
 	const categories: CategoryKey[] = [
 		'infrastructure',
@@ -462,7 +499,7 @@ export function getPPAsByCategory(): Record<CategoryKey, PredefinedPPA[]> {
 	];
 
 	for (const cat of categories) {
-		result[cat] = predefinedPPAs.filter((ppa) => ppa.category === cat);
+		result[cat] = ppas.filter((ppa) => ppa.category === cat);
 	}
 
 	return result;
@@ -472,34 +509,38 @@ export function getPPAsByCategory(): Record<CategoryKey, PredefinedPPA[]> {
  * Get suggested PPAs for a given issue
  */
 export function getSuggestedPPAsForIssue(issueId: string): PredefinedPPA[] {
-	const issue = predefinedIssues.find((i) => i.id === issueId);
+	const issues = getPredefinedIssues();
+	const ppas = getPredefinedPPAs();
+	const issue = issues.find((i) => i.id === issueId);
 	if (!issue) return [];
 
-	return predefinedPPAs.filter((ppa) => issue.suggestedPPAIds.includes(ppa.id));
+	return ppas.filter((ppa) => issue.suggestedPPAIds.includes(ppa.id));
 }
 
 /**
  * Get issues that a PPA addresses
  */
 export function getIssuesForPPA(ppaId: string): PredefinedIssue[] {
-	const ppa = predefinedPPAs.find((p) => p.id === ppaId);
+	const issues = getPredefinedIssues();
+	const ppas = getPredefinedPPAs();
+	const ppa = ppas.find((p) => p.id === ppaId);
 	if (!ppa) return [];
 
-	return predefinedIssues.filter((issue) => ppa.addressesIssueIds.includes(issue.id));
+	return issues.filter((issue) => ppa.addressesIssueIds.includes(issue.id));
 }
 
 /**
  * Get predefined issue by ID
  */
 export function getPredefinedIssue(id: string): PredefinedIssue | undefined {
-	return predefinedIssues.find((issue) => issue.id === id);
+	return getPredefinedIssues().find((issue) => issue.id === id);
 }
 
 /**
  * Get predefined PPA by ID
  */
 export function getPredefinedPPA(id: string): PredefinedPPA | undefined {
-	return predefinedPPAs.find((ppa) => ppa.id === id);
+	return getPredefinedPPAs().find((ppa) => ppa.id === id);
 }
 
 /**
@@ -606,7 +647,7 @@ export function createCustomPPA(
  * Get issues as options for combobox (grouped by category)
  */
 export function getIssueOptions(): Array<{ value: string; label: string; category: CategoryKey }> {
-	return predefinedIssues.map((issue) => ({
+	return getPredefinedIssues().map((issue) => ({
 		value: issue.id,
 		label: issue.name,
 		category: issue.category
@@ -622,12 +663,47 @@ export function getPPAOptions(): Array<{
 	category: CategoryKey;
 	projectTypeId: number;
 }> {
-	return predefinedPPAs.map((ppa) => ({
+	return getPredefinedPPAs().map((ppa) => ({
 		value: ppa.id,
 		label: ppa.name,
 		category: ppa.category,
 		projectTypeId: ppa.projectTypeId
 	}));
+}
+
+// ============================================
+// FULL CONFIG ACCESS (for admin config page)
+// ============================================
+
+export function getIssuesPPAsFullConfig(): IssuesPPAsConfig {
+	return getConfig();
+}
+
+export function getDefaultIssuesPPAsConfig(): IssuesPPAsConfig {
+	return {
+		predefinedIssues: [...DEFAULT_PREDEFINED_ISSUES],
+		predefinedPPAs: [...DEFAULT_PREDEFINED_PPAS]
+	};
+}
+
+export function saveIssuesPPAsConfig(
+	config: IssuesPPAsConfig,
+	changeDescription?: string
+): boolean {
+	return saveConfigOverride(
+		CONFIG_STORAGE_KEYS.ISSUES_PPAS,
+		config,
+		'issues-ppas',
+		changeDescription
+	);
+}
+
+export function resetIssuesPPAsConfig(): boolean {
+	return resetConfigToDefault(CONFIG_STORAGE_KEYS.ISSUES_PPAS, 'issues-ppas');
+}
+
+export function hasIssuesPPAsOverride(): boolean {
+	return hasConfigOverride(CONFIG_STORAGE_KEYS.ISSUES_PPAS);
 }
 
 // ===== CATEGORY STYLING =====
@@ -673,3 +749,13 @@ export const categoryLabels: Record<CategoryKey, string> = {
 	livelihood: 'Livelihood',
 	environment: 'Environment'
 };
+
+// ============================================
+// LEGACY EXPORTS (for backward compatibility)
+// ============================================
+
+/** @deprecated Use getPredefinedIssues() instead */
+export const predefinedIssues = DEFAULT_PREDEFINED_ISSUES;
+
+/** @deprecated Use getPredefinedPPAs() instead */
+export const predefinedPPAs = DEFAULT_PREDEFINED_PPAS;

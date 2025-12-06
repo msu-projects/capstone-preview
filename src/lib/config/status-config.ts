@@ -1,9 +1,22 @@
 /**
  * Status configuration for projects and sitio need levels
  * Centralizes all status-related display logic (labels, colors, badges)
+ *
+ * NOTE: These are default values. Admins can customize via the Configuration page.
+ * Use the getter functions to get values with overrides.
  */
 import type { NeedLevel, ProjectStatus } from '$lib/types';
 import { getNeedLevelFromScore } from '$lib/types';
+import {
+	CONFIG_STORAGE_KEYS,
+	getConfigWithOverrides,
+	hasConfigOverride,
+	resetConfigToDefault,
+	saveConfigOverride,
+	type StatusConfigData
+} from '$lib/utils/config-storage';
+
+// ===== TYPES =====
 
 export interface StatusConfig {
 	label: string;
@@ -15,7 +28,19 @@ export interface StatusConfig {
 	darkTextColor: string;
 }
 
-export const PROJECT_STATUS_CONFIG: Record<ProjectStatus, StatusConfig> = {
+export interface NeedLevelConfig {
+	label: string;
+	shortLabel: string;
+	bgClass: string;
+	textClass: string;
+	darkBgClass: string;
+	darkTextClass: string;
+	badgeVariant: 'default' | 'secondary' | 'outline' | 'destructive';
+}
+
+// ===== DEFAULT PROJECT STATUS CONFIGURATION =====
+
+const DEFAULT_PROJECT_STATUS_CONFIG: Record<ProjectStatus, StatusConfig> = {
 	planning: {
 		label: 'Planning',
 		badgeVariant: 'secondary',
@@ -54,11 +79,79 @@ export const PROJECT_STATUS_CONFIG: Record<ProjectStatus, StatusConfig> = {
 	}
 };
 
+// ===== DEFAULT NEED LEVEL CONFIGURATION =====
+
+const DEFAULT_NEED_LEVEL_CONFIG: Record<NeedLevel, NeedLevelConfig> = {
+	critical: {
+		label: 'Critical Need',
+		shortLabel: 'Critical',
+		bgClass: 'bg-red-100',
+		textClass: 'text-red-700',
+		darkBgClass: 'dark:bg-red-900/30',
+		darkTextClass: 'dark:text-red-400',
+		badgeVariant: 'destructive'
+	},
+	high: {
+		label: 'High Need',
+		shortLabel: 'High',
+		bgClass: 'bg-orange-100',
+		textClass: 'text-orange-700',
+		darkBgClass: 'dark:bg-orange-900/30',
+		darkTextClass: 'dark:text-orange-400',
+		badgeVariant: 'default'
+	},
+	medium: {
+		label: 'Medium Need',
+		shortLabel: 'Medium',
+		bgClass: 'bg-yellow-100',
+		textClass: 'text-yellow-700',
+		darkBgClass: 'dark:bg-yellow-900/30',
+		darkTextClass: 'dark:text-yellow-400',
+		badgeVariant: 'secondary'
+	},
+	low: {
+		label: 'Low Need',
+		shortLabel: 'Low',
+		bgClass: 'bg-green-100',
+		textClass: 'text-green-700',
+		darkBgClass: 'dark:bg-green-900/30',
+		darkTextClass: 'dark:text-green-400',
+		badgeVariant: 'secondary'
+	}
+};
+
+// ============================================
+// GETTER FUNCTIONS (with localStorage override support)
+// ============================================
+
+function getConfig(): StatusConfigData {
+	const defaultConfig: StatusConfigData = {
+		projectStatuses: DEFAULT_PROJECT_STATUS_CONFIG,
+		needLevels: DEFAULT_NEED_LEVEL_CONFIG
+	};
+	return getConfigWithOverrides(CONFIG_STORAGE_KEYS.STATUS_CONFIG, defaultConfig);
+}
+
+/**
+ * Get the full project status configuration object
+ */
+export function getProjectStatusConfigAll(): Record<ProjectStatus, StatusConfig> {
+	return getConfig().projectStatuses as Record<ProjectStatus, StatusConfig>;
+}
+
+/**
+ * Get the full need level configuration object
+ */
+export function getNeedLevelConfigAll(): Record<NeedLevel, NeedLevelConfig> {
+	return getConfig().needLevels as Record<NeedLevel, NeedLevelConfig>;
+}
+
 /**
  * Gets the full status configuration for a project status
  */
 export function getStatusConfig(status: ProjectStatus): StatusConfig {
-	return PROJECT_STATUS_CONFIG[status] ?? PROJECT_STATUS_CONFIG.planning;
+	const config = getProjectStatusConfigAll();
+	return config[status] ?? DEFAULT_PROJECT_STATUS_CONFIG.planning;
 }
 
 /**
@@ -110,62 +203,14 @@ export const ALL_PROJECT_STATUSES: ProjectStatus[] = [
 	'suspended'
 ];
 
-// ===== NEED LEVEL CONFIGURATION =====
-
-export interface NeedLevelConfig {
-	label: string;
-	shortLabel: string;
-	bgClass: string;
-	textClass: string;
-	darkBgClass: string;
-	darkTextClass: string;
-	badgeVariant: 'default' | 'secondary' | 'outline' | 'destructive';
-}
-
-export const NEED_LEVEL_CONFIG: Record<NeedLevel, NeedLevelConfig> = {
-	critical: {
-		label: 'Critical Need',
-		shortLabel: 'Critical',
-		bgClass: 'bg-red-100',
-		textClass: 'text-red-700',
-		darkBgClass: 'dark:bg-red-900/30',
-		darkTextClass: 'dark:text-red-400',
-		badgeVariant: 'destructive'
-	},
-	high: {
-		label: 'High Need',
-		shortLabel: 'High',
-		bgClass: 'bg-orange-100',
-		textClass: 'text-orange-700',
-		darkBgClass: 'dark:bg-orange-900/30',
-		darkTextClass: 'dark:text-orange-400',
-		badgeVariant: 'default'
-	},
-	medium: {
-		label: 'Medium Need',
-		shortLabel: 'Medium',
-		bgClass: 'bg-yellow-100',
-		textClass: 'text-yellow-700',
-		darkBgClass: 'dark:bg-yellow-900/30',
-		darkTextClass: 'dark:text-yellow-400',
-		badgeVariant: 'secondary'
-	},
-	low: {
-		label: 'Low Need',
-		shortLabel: 'Low',
-		bgClass: 'bg-green-100',
-		textClass: 'text-green-700',
-		darkBgClass: 'dark:bg-green-900/30',
-		darkTextClass: 'dark:text-green-400',
-		badgeVariant: 'secondary'
-	}
-};
+// ===== NEED LEVEL FUNCTIONS =====
 
 /**
  * Gets the full need level configuration for a need level
  */
 export function getNeedLevelConfig(level: NeedLevel): NeedLevelConfig {
-	return NEED_LEVEL_CONFIG[level] ?? NEED_LEVEL_CONFIG.medium;
+	const config = getNeedLevelConfigAll();
+	return config[level] ?? DEFAULT_NEED_LEVEL_CONFIG.medium;
 }
 
 /**
@@ -188,3 +233,40 @@ export function getNeedLevelBadgeClasses(level: NeedLevel): string {
  * Array of all need levels for iteration (ordered by priority)
  */
 export const ALL_NEED_LEVELS: NeedLevel[] = ['critical', 'high', 'medium', 'low'];
+
+// ============================================
+// FULL CONFIG ACCESS (for admin config page)
+// ============================================
+
+export function getStatusFullConfig(): StatusConfigData {
+	return getConfig();
+}
+
+export function getDefaultStatusConfig(): StatusConfigData {
+	return {
+		projectStatuses: { ...DEFAULT_PROJECT_STATUS_CONFIG },
+		needLevels: { ...DEFAULT_NEED_LEVEL_CONFIG }
+	};
+}
+
+export function saveStatusConfig(config: StatusConfigData, changeDescription?: string): boolean {
+	return saveConfigOverride(CONFIG_STORAGE_KEYS.STATUS_CONFIG, config, 'status', changeDescription);
+}
+
+export function resetStatusConfig(): boolean {
+	return resetConfigToDefault(CONFIG_STORAGE_KEYS.STATUS_CONFIG, 'status');
+}
+
+export function hasStatusOverride(): boolean {
+	return hasConfigOverride(CONFIG_STORAGE_KEYS.STATUS_CONFIG);
+}
+
+// ============================================
+// LEGACY EXPORTS (for backward compatibility)
+// ============================================
+
+/** @deprecated Use getProjectStatusConfigAll() instead */
+export const PROJECT_STATUS_CONFIG = DEFAULT_PROJECT_STATUS_CONFIG;
+
+/** @deprecated Use getNeedLevelConfigAll() instead */
+export const NEED_LEVEL_CONFIG = DEFAULT_NEED_LEVEL_CONFIG;

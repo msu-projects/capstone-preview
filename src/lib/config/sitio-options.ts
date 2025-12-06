@@ -3,14 +3,26 @@
  *
  * Centralized constants for all dropdown/combobox options used in sitio forms.
  * Edit these arrays to add, remove, or modify available options.
+ *
+ * NOTE: These are default values. Admins can customize via the Configuration page.
+ * Use the getter functions (e.g., getEthnicityOptions()) to get values with overrides.
  */
 
+import {
+	CONFIG_STORAGE_KEYS,
+	getConfigWithPartialOverrides,
+	hasConfigOverride,
+	resetConfigToDefault,
+	saveConfigOverride,
+	type SitioOptionsConfig
+} from '$lib/utils/config-storage';
+
 // ============================================
-// Demographics & Social Tab Options
+// DEFAULT VALUES
 // ============================================
 
 /** Ethnic groups commonly found in the region */
-export const ethnicityOptions = [
+const DEFAULT_ETHNICITY_OPTIONS = [
 	'Ilonggo',
 	'Cebuano',
 	'Tagalog',
@@ -22,7 +34,7 @@ export const ethnicityOptions = [
 ];
 
 /** Religious affiliations */
-export const religionOptions = [
+const DEFAULT_RELIGION_OPTIONS = [
 	'Roman Catholic',
 	'Alliance',
 	'Baptist',
@@ -32,12 +44,8 @@ export const religionOptions = [
 	"Jehovah's Witness"
 ];
 
-// ============================================
-// Livelihoods & Economy Tab Options
-// ============================================
-
 /** Common employment types in rural areas */
-export const employmentTypeOptions = [
+const DEFAULT_EMPLOYMENT_TYPE_OPTIONS = [
 	'Vendor',
 	'Laborer',
 	'Farmer',
@@ -47,15 +55,15 @@ export const employmentTypeOptions = [
 ];
 
 /** Daily income brackets in Philippine Peso */
-export const incomeBracketOptions = [
+const DEFAULT_INCOME_BRACKET_OPTIONS = [
 	{ label: 'Below ₱100', value: '<=100' },
 	{ label: '₱101 - ₱300', value: '100-300' },
 	{ label: '₱301 - ₱500', value: '300-500' },
 	{ label: 'Above ₱500', value: '>=500' }
-] as const;
+];
 
 /** Livestock and poultry options */
-export const livestockPoultryOptions = [
+const DEFAULT_LIVESTOCK_POULTRY_OPTIONS = [
 	'Pigs',
 	'Cows',
 	'Carabaos',
@@ -66,7 +74,7 @@ export const livestockPoultryOptions = [
 ];
 
 /** Major agricultural crops */
-export const cropOptions = [
+const DEFAULT_CROP_OPTIONS = [
 	'Rice',
 	'Corn',
 	'Coconut',
@@ -84,7 +92,7 @@ export const cropOptions = [
 ];
 
 /** Common backyard garden commodities */
-export const gardenCommodityOptions = [
+const DEFAULT_GARDEN_COMMODITY_OPTIONS = [
 	'Tomatoes',
 	'Eggplant',
 	'Kangkong',
@@ -99,12 +107,8 @@ export const gardenCommodityOptions = [
 	'Ginger'
 ];
 
-// ============================================
-// Infrastructure & Housing Tab Options
-// ============================================
-
 /** Water source types */
-export const waterSourceOptions = [
+const DEFAULT_WATER_SOURCE_OPTIONS = [
 	'Deep Well',
 	'Shallow Well',
 	'Spring',
@@ -116,7 +120,7 @@ export const waterSourceOptions = [
 ];
 
 /** Water source condition/status options */
-export const waterStatusOptions = [
+const DEFAULT_WATER_STATUS_OPTIONS = [
 	'Good',
 	'Needs Repair',
 	'Rehabilitation',
@@ -125,16 +129,21 @@ export const waterStatusOptions = [
 ];
 
 /** Toilet facility types */
-export const toiletFacilityTypeOptions = ['Water Sealed', 'Open Pit', 'Pour Flush', 'Composting'];
+const DEFAULT_TOILET_FACILITY_TYPE_OPTIONS = [
+	'Water Sealed',
+	'Open Pit',
+	'Pour Flush',
+	'Composting'
+];
 
 /** Alternative electricity sources */
-export const alternativeElectricitySourceOptions = ['Solar', 'Generator', 'Battery'];
+const DEFAULT_ALTERNATIVE_ELECTRICITY_SOURCE_OPTIONS = ['Solar', 'Generator', 'Battery'];
 
 /** Housing quality/material types */
-export const housingQualityOptions = ['Concrete', 'Wood', 'Half-Concrete', 'Makeshift'];
+const DEFAULT_HOUSING_QUALITY_OPTIONS = ['Concrete', 'Wood', 'Half-Concrete', 'Makeshift'];
 
 /** Housing ownership types */
-export const housingOwnershipOptions = [
+const DEFAULT_HOUSING_OWNERSHIP_OPTIONS = [
 	'Owned',
 	'Rented',
 	'Protected Land',
@@ -142,12 +151,8 @@ export const housingOwnershipOptions = [
 	'Owner Consent'
 ];
 
-// ============================================
-// Community Services Tab Options
-// ============================================
-
 /** Information dissemination methods */
-export const infoDisseminationMethodOptions = [
+const DEFAULT_INFO_DISSEMINATION_METHOD_OPTIONS = [
 	'Radio',
 	'Signages',
 	'Person in Authority',
@@ -158,10 +163,10 @@ export const infoDisseminationMethodOptions = [
 ];
 
 /** Transportation methods available in the area */
-export const transportationMethodOptions = ['Motorcycle', 'Tricycle', '4-Wheels', 'Boat'];
+const DEFAULT_TRANSPORTATION_METHOD_OPTIONS = ['Motorcycle', 'Tricycle', '4-Wheels', 'Boat'];
 
 /** Local sitio official positions */
-export const localOfficialPositionOptions = [
+const DEFAULT_LOCAL_OFFICIAL_POSITION_OPTIONS = [
 	'Sitio Leader',
 	'Vice-President',
 	'Secretary',
@@ -173,9 +178,203 @@ export const localOfficialPositionOptions = [
 ];
 
 /** RST (Resident Support Team) official positions */
-export const rstOfficialPositionOptions = [
+const DEFAULT_RST_OFFICIAL_POSITION_OPTIONS = [
 	'Team Leader',
 	'Assistant Team Leader',
 	'Secretary',
 	'Member'
 ];
+
+// ============================================
+// DEFAULT CONFIG OBJECT
+// ============================================
+
+const DEFAULT_SITIO_OPTIONS_CONFIG: SitioOptionsConfig = {
+	ethnicityOptions: DEFAULT_ETHNICITY_OPTIONS,
+	religionOptions: DEFAULT_RELIGION_OPTIONS,
+	employmentTypeOptions: DEFAULT_EMPLOYMENT_TYPE_OPTIONS,
+	incomeBracketOptions: DEFAULT_INCOME_BRACKET_OPTIONS,
+	livestockPoultryOptions: DEFAULT_LIVESTOCK_POULTRY_OPTIONS,
+	cropOptions: DEFAULT_CROP_OPTIONS,
+	gardenCommodityOptions: DEFAULT_GARDEN_COMMODITY_OPTIONS,
+	waterSourceOptions: DEFAULT_WATER_SOURCE_OPTIONS,
+	waterStatusOptions: DEFAULT_WATER_STATUS_OPTIONS,
+	toiletFacilityTypeOptions: DEFAULT_TOILET_FACILITY_TYPE_OPTIONS,
+	alternativeElectricitySourceOptions: DEFAULT_ALTERNATIVE_ELECTRICITY_SOURCE_OPTIONS,
+	housingQualityOptions: DEFAULT_HOUSING_QUALITY_OPTIONS,
+	housingOwnershipOptions: DEFAULT_HOUSING_OWNERSHIP_OPTIONS,
+	infoDisseminationMethodOptions: DEFAULT_INFO_DISSEMINATION_METHOD_OPTIONS,
+	transportationMethodOptions: DEFAULT_TRANSPORTATION_METHOD_OPTIONS,
+	localOfficialPositionOptions: DEFAULT_LOCAL_OFFICIAL_POSITION_OPTIONS,
+	rstOfficialPositionOptions: DEFAULT_RST_OFFICIAL_POSITION_OPTIONS
+};
+
+// ============================================
+// GETTER FUNCTIONS (with localStorage override support)
+// ============================================
+
+function getConfig(): SitioOptionsConfig {
+	return getConfigWithPartialOverrides(
+		CONFIG_STORAGE_KEYS.SITIO_OPTIONS,
+		DEFAULT_SITIO_OPTIONS_CONFIG
+	);
+}
+
+export function getEthnicityOptions(): string[] {
+	return getConfig().ethnicityOptions;
+}
+
+export function getReligionOptions(): string[] {
+	return getConfig().religionOptions;
+}
+
+export function getEmploymentTypeOptions(): string[] {
+	return getConfig().employmentTypeOptions;
+}
+
+export function getIncomeBracketOptions(): Array<{ label: string; value: string }> {
+	return getConfig().incomeBracketOptions;
+}
+
+export function getLivestockPoultryOptions(): string[] {
+	return getConfig().livestockPoultryOptions;
+}
+
+export function getCropOptions(): string[] {
+	return getConfig().cropOptions;
+}
+
+export function getGardenCommodityOptions(): string[] {
+	return getConfig().gardenCommodityOptions;
+}
+
+export function getWaterSourceOptions(): string[] {
+	return getConfig().waterSourceOptions;
+}
+
+export function getWaterStatusOptions(): string[] {
+	return getConfig().waterStatusOptions;
+}
+
+export function getToiletFacilityTypeOptions(): string[] {
+	return getConfig().toiletFacilityTypeOptions;
+}
+
+export function getAlternativeElectricitySourceOptions(): string[] {
+	return getConfig().alternativeElectricitySourceOptions;
+}
+
+export function getHousingQualityOptions(): string[] {
+	return getConfig().housingQualityOptions;
+}
+
+export function getHousingOwnershipOptions(): string[] {
+	return getConfig().housingOwnershipOptions;
+}
+
+export function getInfoDisseminationMethodOptions(): string[] {
+	return getConfig().infoDisseminationMethodOptions;
+}
+
+export function getTransportationMethodOptions(): string[] {
+	return getConfig().transportationMethodOptions;
+}
+
+export function getLocalOfficialPositionOptions(): string[] {
+	return getConfig().localOfficialPositionOptions;
+}
+
+export function getRstOfficialPositionOptions(): string[] {
+	return getConfig().rstOfficialPositionOptions;
+}
+
+// ============================================
+// FULL CONFIG ACCESS (for admin config page)
+// ============================================
+
+export function getSitioOptionsConfig(): SitioOptionsConfig {
+	return getConfig();
+}
+
+export function getDefaultSitioOptionsConfig(): SitioOptionsConfig {
+	return { ...DEFAULT_SITIO_OPTIONS_CONFIG };
+}
+
+export function saveSitioOptionsConfig(
+	config: SitioOptionsConfig,
+	changeDescription?: string
+): boolean {
+	return saveConfigOverride(
+		CONFIG_STORAGE_KEYS.SITIO_OPTIONS,
+		config,
+		'sitio-options',
+		changeDescription
+	);
+}
+
+export function resetSitioOptionsConfig(): boolean {
+	return resetConfigToDefault(CONFIG_STORAGE_KEYS.SITIO_OPTIONS, 'sitio-options');
+}
+
+export function hasSitioOptionsOverride(): boolean {
+	return hasConfigOverride(CONFIG_STORAGE_KEYS.SITIO_OPTIONS);
+}
+
+// ============================================
+// LEGACY EXPORTS (for backward compatibility)
+// Keep these for existing code that imports directly
+// ============================================
+
+/** @deprecated Use getEthnicityOptions() instead */
+export const ethnicityOptions = DEFAULT_ETHNICITY_OPTIONS;
+
+/** @deprecated Use getReligionOptions() instead */
+export const religionOptions = DEFAULT_RELIGION_OPTIONS;
+
+/** @deprecated Use getEmploymentTypeOptions() instead */
+export const employmentTypeOptions = DEFAULT_EMPLOYMENT_TYPE_OPTIONS;
+
+/** @deprecated Use getIncomeBracketOptions() instead */
+export const incomeBracketOptions = DEFAULT_INCOME_BRACKET_OPTIONS as readonly {
+	label: string;
+	value: string;
+}[];
+
+/** @deprecated Use getLivestockPoultryOptions() instead */
+export const livestockPoultryOptions = DEFAULT_LIVESTOCK_POULTRY_OPTIONS;
+
+/** @deprecated Use getCropOptions() instead */
+export const cropOptions = DEFAULT_CROP_OPTIONS;
+
+/** @deprecated Use getGardenCommodityOptions() instead */
+export const gardenCommodityOptions = DEFAULT_GARDEN_COMMODITY_OPTIONS;
+
+/** @deprecated Use getWaterSourceOptions() instead */
+export const waterSourceOptions = DEFAULT_WATER_SOURCE_OPTIONS;
+
+/** @deprecated Use getWaterStatusOptions() instead */
+export const waterStatusOptions = DEFAULT_WATER_STATUS_OPTIONS;
+
+/** @deprecated Use getToiletFacilityTypeOptions() instead */
+export const toiletFacilityTypeOptions = DEFAULT_TOILET_FACILITY_TYPE_OPTIONS;
+
+/** @deprecated Use getAlternativeElectricitySourceOptions() instead */
+export const alternativeElectricitySourceOptions = DEFAULT_ALTERNATIVE_ELECTRICITY_SOURCE_OPTIONS;
+
+/** @deprecated Use getHousingQualityOptions() instead */
+export const housingQualityOptions = DEFAULT_HOUSING_QUALITY_OPTIONS;
+
+/** @deprecated Use getHousingOwnershipOptions() instead */
+export const housingOwnershipOptions = DEFAULT_HOUSING_OWNERSHIP_OPTIONS;
+
+/** @deprecated Use getInfoDisseminationMethodOptions() instead */
+export const infoDisseminationMethodOptions = DEFAULT_INFO_DISSEMINATION_METHOD_OPTIONS;
+
+/** @deprecated Use getTransportationMethodOptions() instead */
+export const transportationMethodOptions = DEFAULT_TRANSPORTATION_METHOD_OPTIONS;
+
+/** @deprecated Use getLocalOfficialPositionOptions() instead */
+export const localOfficialPositionOptions = DEFAULT_LOCAL_OFFICIAL_POSITION_OPTIONS;
+
+/** @deprecated Use getRstOfficialPositionOptions() instead */
+export const rstOfficialPositionOptions = DEFAULT_RST_OFFICIAL_POSITION_OPTIONS;

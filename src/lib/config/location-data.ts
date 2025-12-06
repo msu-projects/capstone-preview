@@ -1,14 +1,36 @@
 /**
- * Location data extracted from SC CATCH-UP 2025 DATABANK
+ * Location Data Configuration
+ *
  * Municipalities and Barangays in South Cotabato
+ * Extracted from SC CATCH-UP 2025 DATABANK
+ *
+ * NOTE: These are default values. Admins can customize via the Configuration page.
+ * Use the getter functions (e.g., getMunicipalities()) to get values with overrides.
  */
+
+import {
+	CONFIG_STORAGE_KEYS,
+	getConfigWithOverrides,
+	hasConfigOverride,
+	resetConfigToDefault,
+	saveConfigOverride,
+	type LocationsConfig
+} from '$lib/utils/config-storage';
+
+// ============================================
+// TYPES
+// ============================================
 
 export interface MunicipalityData {
 	name: string;
 	barangays: string[];
 }
 
-export const MUNICIPALITIES_DATA: MunicipalityData[] = [
+// ============================================
+// DEFAULT VALUES
+// ============================================
+
+const DEFAULT_MUNICIPALITIES_DATA: MunicipalityData[] = [
 	{
 		name: 'BANGA',
 		barangays: [
@@ -174,14 +196,98 @@ export const MUNICIPALITIES_DATA: MunicipalityData[] = [
 	}
 ];
 
-// Get all unique municipalities
-export const MUNICIPALITIES = MUNICIPALITIES_DATA.map((m) => m.name).sort();
+// ============================================
+// GETTER FUNCTIONS (with localStorage override support)
+// ============================================
 
-// Get barangays for a specific municipality
+function getConfig(): LocationsConfig {
+	const defaultConfig: LocationsConfig = { municipalities: DEFAULT_MUNICIPALITIES_DATA };
+	return getConfigWithOverrides(CONFIG_STORAGE_KEYS.LOCATIONS, defaultConfig);
+}
+
+/**
+ * Get all municipalities data with barangays
+ */
+export function getMunicipalitiesData(): MunicipalityData[] {
+	return getConfig().municipalities;
+}
+
+/**
+ * Get sorted list of municipality names
+ */
+export function getMunicipalities(): string[] {
+	return getMunicipalitiesData()
+		.map((m) => m.name)
+		.sort();
+}
+
+/**
+ * Get barangays for a specific municipality
+ */
 export function getBarangaysForMunicipality(municipality: string): string[] {
-	const municipalityData = MUNICIPALITIES_DATA.find((m) => m.name === municipality);
+	const municipalityData = getMunicipalitiesData().find(
+		(m) => m.name.toLowerCase() === municipality.toLowerCase()
+	);
 	return municipalityData?.barangays || [];
 }
 
-// Get all barangays (flattened)
-export const ALL_BARANGAYS = MUNICIPALITIES_DATA.flatMap((m) => m.barangays).sort();
+/**
+ * Get all barangays (flattened and sorted)
+ */
+export function getAllBarangays(): string[] {
+	return getMunicipalitiesData()
+		.flatMap((m) => m.barangays)
+		.sort();
+}
+
+/**
+ * Check if a municipality exists
+ */
+export function isMunicipalityValid(municipality: string): boolean {
+	return getMunicipalitiesData().some((m) => m.name.toLowerCase() === municipality.toLowerCase());
+}
+
+/**
+ * Check if a barangay exists in a municipality
+ */
+export function isBarangayValid(municipality: string, barangay: string): boolean {
+	const barangays = getBarangaysForMunicipality(municipality);
+	return barangays.some((b) => b.toLowerCase() === barangay.toLowerCase());
+}
+
+// ============================================
+// FULL CONFIG ACCESS (for admin config page)
+// ============================================
+
+export function getLocationsConfig(): LocationsConfig {
+	return getConfig();
+}
+
+export function getDefaultLocationsConfig(): LocationsConfig {
+	return { municipalities: [...DEFAULT_MUNICIPALITIES_DATA] };
+}
+
+export function saveLocationsConfig(config: LocationsConfig, changeDescription?: string): boolean {
+	return saveConfigOverride(CONFIG_STORAGE_KEYS.LOCATIONS, config, 'locations', changeDescription);
+}
+
+export function resetLocationsConfig(): boolean {
+	return resetConfigToDefault(CONFIG_STORAGE_KEYS.LOCATIONS, 'locations');
+}
+
+export function hasLocationsOverride(): boolean {
+	return hasConfigOverride(CONFIG_STORAGE_KEYS.LOCATIONS);
+}
+
+// ============================================
+// LEGACY EXPORTS (for backward compatibility)
+// ============================================
+
+/** @deprecated Use getMunicipalitiesData() instead */
+export const MUNICIPALITIES_DATA = DEFAULT_MUNICIPALITIES_DATA;
+
+/** @deprecated Use getMunicipalities() instead */
+export const MUNICIPALITIES = DEFAULT_MUNICIPALITIES_DATA.map((m) => m.name).sort();
+
+/** @deprecated Use getAllBarangays() instead */
+export const ALL_BARANGAYS = DEFAULT_MUNICIPALITIES_DATA.flatMap((m) => m.barangays).sort();
