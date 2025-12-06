@@ -352,7 +352,6 @@
 											>
 												<div class="min-w-0 flex-1">
 													<p class="font-medium">{issue.name}</p>
-													<p class="text-xs text-muted-foreground">{issue.id}</p>
 												</div>
 												<div class="flex gap-1">
 													<Button
@@ -420,7 +419,7 @@
 												<div class="min-w-0 flex-1">
 													<p class="font-medium">{ppa.name}</p>
 													<p class="text-xs text-muted-foreground">
-														{ppa.id} • {getProjectTypeName(ppa.projectTypeId)}
+														{getProjectTypeName(ppa.projectTypeId)}
 													</p>
 												</div>
 												<div class="flex gap-1">
