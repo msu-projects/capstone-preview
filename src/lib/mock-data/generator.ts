@@ -829,47 +829,292 @@ function generatePerformanceTargets(
 	});
 }
 
+// Category-specific achieved outputs templates
+const ACHIEVED_OUTPUTS_BY_CATEGORY: Record<
+	CategoryKey,
+	Array<{ key: string; label: string; baseValue: number; isAccumulative: boolean }>
+> = {
+	infrastructure: [
+		{ key: 'meters_constructed', label: 'Meters Constructed', baseValue: 50, isAccumulative: true },
+		{
+			key: 'materials_delivered',
+			label: 'Materials Delivered (%)',
+			baseValue: 15,
+			isAccumulative: true
+		},
+		{ key: 'workers_deployed', label: 'Workers Deployed', baseValue: 8, isAccumulative: false },
+		{
+			key: 'equipment_mobilized',
+			label: 'Equipment Mobilized',
+			baseValue: 3,
+			isAccumulative: false
+		}
+	],
+	agriculture: [
+		{
+			key: 'seedlings_distributed',
+			label: 'Seedlings Distributed',
+			baseValue: 200,
+			isAccumulative: true
+		},
+		{ key: 'farmers_trained', label: 'Farmers Trained', baseValue: 10, isAccumulative: true },
+		{ key: 'hectares_covered', label: 'Hectares Covered', baseValue: 5, isAccumulative: true },
+		{
+			key: 'farm_visits_conducted',
+			label: 'Farm Visits Conducted',
+			baseValue: 8,
+			isAccumulative: true
+		}
+	],
+	education: [
+		{ key: 'students_served', label: 'Students Served', baseValue: 30, isAccumulative: true },
+		{
+			key: 'learning_materials_distributed',
+			label: 'Learning Materials Distributed',
+			baseValue: 50,
+			isAccumulative: true
+		},
+		{ key: 'training_sessions', label: 'Training Sessions', baseValue: 2, isAccumulative: true },
+		{ key: 'classrooms_improved', label: 'Classrooms Improved', baseValue: 1, isAccumulative: true }
+	],
+	health: [
+		{ key: 'patients_served', label: 'Patients Served', baseValue: 40, isAccumulative: true },
+		{
+			key: 'medical_supplies_distributed',
+			label: 'Medical Supplies Distributed',
+			baseValue: 100,
+			isAccumulative: true
+		},
+		{
+			key: 'health_sessions_conducted',
+			label: 'Health Sessions Conducted',
+			baseValue: 3,
+			isAccumulative: true
+		},
+		{
+			key: 'vaccinations_administered',
+			label: 'Vaccinations Administered',
+			baseValue: 25,
+			isAccumulative: true
+		}
+	],
+	livelihood: [
+		{
+			key: 'beneficiaries_trained',
+			label: 'Beneficiaries Trained',
+			baseValue: 15,
+			isAccumulative: true
+		},
+		{
+			key: 'starter_kits_distributed',
+			label: 'Starter Kits Distributed',
+			baseValue: 8,
+			isAccumulative: true
+		},
+		{
+			key: 'skills_sessions',
+			label: 'Skills Training Sessions',
+			baseValue: 2,
+			isAccumulative: true
+		},
+		{
+			key: 'enterprises_assisted',
+			label: 'Enterprises Assisted',
+			baseValue: 3,
+			isAccumulative: true
+		}
+	],
+	environment: [
+		{ key: 'seedlings_planted', label: 'Seedlings Planted', baseValue: 500, isAccumulative: true },
+		{ key: 'hectares_covered', label: 'Hectares Covered', baseValue: 2, isAccumulative: true },
+		{
+			key: 'volunteers_mobilized',
+			label: 'Volunteers Mobilized',
+			baseValue: 20,
+			isAccumulative: false
+		},
+		{ key: 'cleanup_activities', label: 'Cleanup Activities', baseValue: 2, isAccumulative: true }
+	]
+};
+
+// Common issues encountered by category
+const ISSUES_BY_CATEGORY: Record<CategoryKey, string[]> = {
+	infrastructure: [
+		'Weather delays due to heavy rainfall',
+		'Material supply chain disruption',
+		'Equipment breakdown requiring repairs',
+		'Pending right-of-way clearance',
+		'Labor shortage in the area',
+		'Soil condition issues requiring additional work',
+		'Delayed delivery of construction materials'
+	],
+	agriculture: [
+		'Pest infestation affecting seedlings',
+		'Drought conditions limiting planting',
+		'Delayed delivery of farm inputs',
+		'Low farmer turnout for training',
+		'Transportation issues for equipment delivery',
+		'Soil testing delays'
+	],
+	education: [
+		'School schedule conflicts',
+		'Delayed procurement of materials',
+		'Limited classroom availability',
+		'Teacher availability constraints',
+		'Transportation issues for remote areas'
+	],
+	health: [
+		'Medical supply shortage',
+		'Limited health personnel availability',
+		'Weather affecting outreach activities',
+		'Vaccine storage issues',
+		'Low community turnout',
+		'Equipment calibration delays'
+	],
+	livelihood: [
+		'Low participant turnout',
+		'Delayed delivery of starter kits',
+		'Venue availability issues',
+		'Resource person scheduling conflicts',
+		'Market linkage challenges'
+	],
+	environment: [
+		'Unfavorable weather for planting',
+		'Seedling mortality due to drought',
+		'Low volunteer participation',
+		'Site accessibility issues',
+		'Delayed delivery of planting materials'
+	]
+};
+
+// S-curve progress calculation for more realistic project progression
+function calculateSCurveProgress(
+	monthIndex: number,
+	totalMonths: number,
+	rng: SeededRandom
+): number {
+	// S-curve formula: slower start, faster middle, slower end
+	const t = (monthIndex + 1) / totalMonths;
+
+	// Sigmoid-like S-curve
+	const sCurveValue = 1 / (1 + Math.exp(-10 * (t - 0.5)));
+
+	// Normalize to 0-100 range with some variance
+	const baseProgress = sCurveValue * 100;
+	const variance = rng.nextInt(-5, 5);
+
+	return Math.max(0, Math.min(100, Math.round(baseProgress + variance)));
+}
+
 function generateMonthlyProgress(
 	projectId: number,
 	totalBudget: number,
 	startDate: Date,
 	months: number,
-	rng: SeededRandom
+	rng: SeededRandom,
+	categoryKey: CategoryKey = 'infrastructure'
 ): MonthlyProgress[] {
 	const progress: MonthlyProgress[] = [];
 	let cumulativeBeneficiaries = 0;
-	const monthlyBudget = Math.floor(totalBudget / months);
+	let cumulativeBudget = 0;
+
+	// Get category-specific outputs and issues
+	const outputTemplates = ACHIEVED_OUTPUTS_BY_CATEGORY[categoryKey];
+	const categoryIssues = ISSUES_BY_CATEGORY[categoryKey];
+
+	// Track cumulative values for accumulative outputs
+	const cumulativeOutputs: Record<string, number> = {};
+	outputTemplates.forEach((template) => {
+		if (template.isAccumulative) {
+			cumulativeOutputs[template.key] = 0;
+		}
+	});
+
+	// Project health factor (some projects perform better than others)
+	const projectHealthFactor = 0.7 + rng.next() * 0.5; // 0.7 to 1.2
 
 	for (let i = 0; i < months; i++) {
 		const date = new Date(startDate);
 		date.setMonth(date.getMonth() + i);
 		const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 
-		const beneficiariesThisMonth = rng.nextInt(10, 50);
-		cumulativeBeneficiaries += beneficiariesThisMonth;
+		// Calculate progress using S-curve for realistic progression
+		const rawProgress = calculateSCurveProgress(i, months, rng);
+		const adjustedProgress = Math.round(rawProgress * projectHealthFactor);
+		const progressPercent = Math.max(0, Math.min(100, adjustedProgress));
 
-		// Calculate actual progress and budget utilized
-		const progressPercent = Math.min(
-			100,
-			Math.floor(((i + 1) / months) * 100) + rng.nextInt(-5, 5)
+		// Budget utilization correlates with physical progress
+		// Typically budget runs slightly ahead of physical progress
+		const budgetProgressRatio = progressPercent / 100;
+		const budgetVariance = 0.95 + rng.next() * 0.15; // 0.95 to 1.10
+		const targetBudgetUtilization = Math.min(
+			totalBudget,
+			totalBudget * budgetProgressRatio * budgetVariance
 		);
-		const budgetUtilized = Math.floor(monthlyBudget * (0.7 + rng.next() * 0.25));
+		cumulativeBudget = Math.round(Math.max(cumulativeBudget, targetBudgetUtilization));
+
+		// Beneficiaries increase progressively with some variance
+		const monthlyBeneficiaryBase = Math.round((progressPercent / 100) * rng.nextInt(20, 60));
+		cumulativeBeneficiaries += monthlyBeneficiaryBase;
+
+		// Generate category-specific achieved outputs
+		const achievedOutputs: Record<string, number> = {};
+		outputTemplates.forEach((template) => {
+			if (template.isAccumulative) {
+				// Accumulative outputs grow with progress
+				const targetValue = Math.round(
+					template.baseValue * (progressPercent / 100) * (0.8 + rng.next() * 0.4)
+				);
+				cumulativeOutputs[template.key] = Math.max(cumulativeOutputs[template.key], targetValue);
+				achievedOutputs[template.key] = cumulativeOutputs[template.key];
+			} else {
+				// Non-accumulative outputs vary each month
+				achievedOutputs[template.key] = Math.round(template.baseValue * (0.6 + rng.next() * 0.8));
+			}
+		});
+
+		// Calculate expected progress based on linear timeline
+		const expectedProgress = ((i + 1) / months) * 100;
+		const progressVariance = progressPercent - expectedProgress;
+
+		// Determine status based on variance
+		let status: 'on-track' | 'delayed' | 'ahead';
+		if (progressVariance >= 8) {
+			status = 'ahead';
+		} else if (progressVariance <= -12) {
+			status = 'delayed';
+		} else {
+			status = 'on-track';
+		}
+
+		// Issues are more likely when delayed or at certain project phases
+		const issueChance = status === 'delayed' ? 0.7 : i === 0 || i === months - 1 ? 0.4 : 0.25;
+		const hasIssue = rng.next() < issueChance;
+
+		// Generate detailed issue description based on status
+		let issuesEncountered: string | undefined;
+		if (hasIssue) {
+			const baseIssue = rng.pick(categoryIssues);
+			if (status === 'delayed') {
+				issuesEncountered = `${baseIssue}. Implementing catch-up measures to address delays.`;
+			} else {
+				issuesEncountered = baseIssue;
+			}
+		} else if (status === 'ahead' && rng.next() > 0.7) {
+			issuesEncountered = 'No significant issues. Project progressing ahead of schedule.';
+		}
 
 		progress.push({
 			id: projectId * 100 + i,
 			project_id: projectId,
 			month_year: monthYear,
 			physical_progress_percentage: progressPercent,
-			budget_utilized: budgetUtilized,
-			achieved_outputs: {
-				units_completed: rng.nextInt(1, 10),
-				materials_delivered: rng.nextInt(50, 200),
-				training_sessions: rng.nextInt(0, 3)
-			},
+			budget_utilized: cumulativeBudget,
+			achieved_outputs: achievedOutputs,
 			beneficiaries_reached: cumulativeBeneficiaries,
-			issues_encountered: rng.next() > 0.7 ? 'Minor delays due to weather' : undefined,
+			issues_encountered: issuesEncountered,
 			photo_documentation: [], // Empty array - photos are uploaded via Quick Update form
-			status: rng.pick(['on-track', 'delayed', 'ahead'] as const),
+			status,
 			created_at: date.toISOString(),
 			updated_at: date.toISOString()
 		});
@@ -884,7 +1129,7 @@ function generateMonthlyTargets(
 	months: number
 ): MonthlyTarget[] {
 	const targets: MonthlyTarget[] = [];
-	const monthlyBudget = Math.floor(totalBudget / months);
+	const monthlyBudgetIncrement = Math.floor(totalBudget / months);
 
 	for (let i = 0; i < months; i++) {
 		const date = new Date(startDate);
@@ -894,10 +1139,13 @@ function generateMonthlyTargets(
 		// Generate cumulative planned progress (should reach 100% by final month)
 		const plannedProgress = Math.min(100, Math.floor(((i + 1) / months) * 100));
 
+		// Cumulative planned budget (increases each month towards total)
+		const cumulativePlannedBudget = monthlyBudgetIncrement * (i + 1);
+
 		targets.push({
 			month_year: monthYear,
 			planned_physical_progress: plannedProgress,
-			planned_budget: monthlyBudget
+			planned_budget: cumulativePlannedBudget
 		});
 	}
 
@@ -1148,7 +1396,9 @@ export function generateProjects(
 			catch_up_plan,
 			project_sitios: projectSitios,
 			monthly_progress:
-				monthsElapsed > 0 ? generateMonthlyProgress(i, budget, startDate, monthsElapsed, rng) : [],
+				monthsElapsed > 0
+					? generateMonthlyProgress(i, budget, startDate, monthsElapsed, rng, categoryKey)
+					: [],
 			monthly_targets: generateMonthlyTargets(budget, startDate, durationMonths),
 			performance_targets: generatePerformanceTargets(
 				i,
