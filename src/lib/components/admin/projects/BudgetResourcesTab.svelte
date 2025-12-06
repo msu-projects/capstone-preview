@@ -4,6 +4,7 @@
 	import * as Card from '$lib/components/ui/card';
 	import { Combobox } from '$lib/components/ui/combobox';
 	import { CurrencyInput } from '$lib/components/ui/currency-input';
+	import { FormSection } from '$lib/components/ui/form-section';
 	import { Label } from '$lib/components/ui/label';
 	import * as Select from '$lib/components/ui/select';
 	import * as Table from '$lib/components/ui/table';
@@ -139,9 +140,20 @@
 		};
 		return variants[type] || 'secondary';
 	}
+
+	// Check if section is complete
+	const isSectionComplete = $derived(fundingSources.length > 0 && budgetComponents.length > 0);
 </script>
 
-<div class="space-y-6">
+<FormSection
+	title="Budget & Resources"
+	description="Define funding sources and budget allocation for this project"
+	icon={Banknote}
+	variant="green"
+	isComplete={isSectionComplete}
+	collapsible={false}
+>
+	<div class="space-y-6">
 	<!-- Total Project Budget (Read-only from Tab 3) -->
 	<Card.Card class="border-primary/20 bg-primary/5">
 		<Card.CardHeader>
@@ -440,7 +452,8 @@
 			</div>
 		</Card.CardContent>
 	</Card.Card>
-</div>
+	</div>
+</FormSection>
 
 <style>
 	:global(.required::after) {

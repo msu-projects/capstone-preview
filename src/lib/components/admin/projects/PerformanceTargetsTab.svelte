@@ -3,6 +3,7 @@
 	import { Calendar as CalendarComponent } from '$lib/components/ui/calendar';
 	import * as Card from '$lib/components/ui/card';
 	import { CurrencyInput } from '$lib/components/ui/currency-input';
+	import { FormSection } from '$lib/components/ui/form-section';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import * as Popover from '$lib/components/ui/popover';
@@ -92,9 +93,25 @@
 		}
 		return undefined;
 	});
+
+	// Check if section is complete
+	const isSectionComplete = $derived(
+		targetStartDate !== undefined &&
+			durationInCalendarDays !== '' &&
+			Number(durationInCalendarDays) > 0 &&
+			totalBudget !== ''
+	);
 </script>
 
-<div class="space-y-6">
+<FormSection
+	title="Performance Targets"
+	description="Define performance deliverables, timeline, and budget allocation for this project"
+	icon={Target}
+	variant="amber"
+	isComplete={isSectionComplete}
+	collapsible={false}
+>
+	<div class="space-y-6">
 	{#if !selectedProjectTypeId}
 		<Card.Card>
 			<Card.CardContent class="">
@@ -260,7 +277,8 @@
 			</Card.CardContent>
 		</Card.Card>
 	{/if}
-</div>
+	</div>
+</FormSection>
 
 <style>
 	:global(.required::after) {

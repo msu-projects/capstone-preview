@@ -2,6 +2,7 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
+	import { FormSection } from '$lib/components/ui/form-section';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import * as Popover from '$lib/components/ui/popover';
@@ -216,9 +217,20 @@
 	const selectedSitioIds = $derived(
 		projectSitios.map((ps: Omit<ProjectSitio, 'project_id'>) => ps.sitio_id)
 	);
+
+	// Check if section is complete
+	const isSectionComplete = $derived(projectSitios.length > 0);
 </script>
 
-<div class="space-y-6">
+<FormSection
+	title="Location & Beneficiaries"
+	description="Select target sitios and define beneficiary households for this project"
+	icon={MapPin}
+	variant="purple"
+	isComplete={isSectionComplete}
+	collapsible={false}
+>
+	<div class="space-y-6">
 	<!-- Summary Cards -->
 	{#if projectSitios.length > 0}
 		<div class="grid gap-4 md:grid-cols-4">
@@ -579,7 +591,8 @@
 			{/if}
 		</Card.CardContent>
 	</Card.Card>
-</div>
+	</div>
+</FormSection>
 
 <style>
 	:global(.required::after) {

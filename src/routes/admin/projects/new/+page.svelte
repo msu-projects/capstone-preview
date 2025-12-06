@@ -8,7 +8,8 @@
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
-	import * as Tabs from '$lib/components/ui/tabs';
+	import { FormSection } from '$lib/components/ui/form-section';
+	import { FormStepper, type Step } from '$lib/components/ui/form-stepper';
 	import { getProjectTypeById } from '$lib/config/project-categories';
 	import type {
 		BudgetComponent,
@@ -28,7 +29,6 @@
 		ArrowRight,
 		Banknote,
 		Calendar,
-		CircleAlert,
 		FolderOpen,
 		MapPin,
 		Save,
@@ -39,7 +39,7 @@
 
 	// Form state
 	let isSaving = $state(false);
-	let activeTab = $state('category');
+	let activeStep = $state('category');
 	let cancelDialogOpen = $state(false);
 
 	// Tab 1: Category & Project Selection
@@ -95,16 +95,60 @@
 
 	const canSave = $derived(isTab1Valid && isTab2Valid && isTab3Valid && isTab4Valid && isTab5Valid);
 
-	// Tab navigation
-	const tabOrder = ['category', 'location', 'performance', 'budget', 'monthly'];
-	const currentTabIndex = $derived(tabOrder.indexOf(activeTab));
-	const canGoNext = $derived(currentTabIndex < tabOrder.length - 1);
-	const canGoPrevious = $derived(currentTabIndex > 0);
-	const isLastTab = $derived(currentTabIndex === tabOrder.length - 1);
+	// Step configuration for stepper
+	const steps: Step[] = $derived([
+		{
+			id: 'category',
+			label: 'Category & Type',
+			shortLabel: 'Category',
+			icon: FolderOpen,
+			isValid: isTab1Valid,
+			hasError: !isTab1Valid && activeStep !== 'category'
+		},
+		{
+			id: 'location',
+			label: 'Location & Beneficiaries',
+			shortLabel: 'Location',
+			icon: MapPin,
+			isValid: isTab2Valid,
+			hasError: !isTab2Valid && activeStep !== 'location'
+		},
+		{
+			id: 'performance',
+			label: 'Performance Targets',
+			shortLabel: 'Targets',
+			icon: Target,
+			isValid: isTab3Valid,
+			hasError: !isTab3Valid && activeStep !== 'performance'
+		},
+		{
+			id: 'budget',
+			label: 'Budget & Resources',
+			shortLabel: 'Budget',
+			icon: Banknote,
+			isValid: isTab4Valid,
+			hasError: !isTab4Valid && activeStep !== 'budget'
+		},
+		{
+			id: 'monthly',
+			label: 'Monthly Planning',
+			shortLabel: 'Planning',
+			icon: Calendar,
+			isValid: isTab5Valid,
+			hasError: !isTab5Valid && activeStep !== 'monthly'
+		}
+	]);
 
-	// Get validation state for current tab
-	const getCurrentTabValid = $derived(() => {
-		switch (activeTab) {
+	// Step navigation
+	const stepOrder = ['category', 'location', 'performance', 'budget', 'monthly'];
+	const currentStepIndex = $derived(stepOrder.indexOf(activeStep));
+	const canGoNext = $derived(currentStepIndex < stepOrder.length - 1);
+	const canGoPrevious = $derived(currentStepIndex > 0);
+	const isLastStep = $derived(currentStepIndex === stepOrder.length - 1);
+
+	// Get validation state for current step (for strict validation)
+	const getCurrentStepValid = $derived(() => {
+		switch (activeStep) {
 			case 'category':
 				return isTab1Valid;
 			case 'location':
@@ -120,26 +164,21 @@
 		}
 	});
 
-	// Check if a tab can be accessed (all tabs are freely accessible)
-	const canAccessTab = $derived((_tabName: string) => {
-		return true;
-	});
-
-	function nextTab() {
+	function nextStep() {
+		// Strict validation - must complete current step before proceeding
+		if (!getCurrentStepValid()) {
+			toast.error('Please complete all required fields before proceeding');
+			return;
+		}
 		if (canGoNext) {
-			activeTab = tabOrder[currentTabIndex + 1];
+			activeStep = stepOrder[currentStepIndex + 1];
 		}
 	}
 
-	function previousTab() {
+	function previousStep() {
 		if (canGoPrevious) {
-			activeTab = tabOrder[currentTabIndex - 1];
+			activeStep = stepOrder[currentStepIndex - 1];
 		}
-	}
-
-	function handleTabChange(newTab: string | undefined) {
-		if (!newTab) return;
-		activeTab = newTab;
 	}
 
 	async function handleSave() {
@@ -274,54 +313,14 @@
 	</AdminHeader>
 
 	<!-- Content -->
-	<div class="flex-1 p-6">
-		<div class="w-full">
-			<Tabs.Root value={activeTab} onValueChange={handleTabChange} class="w-full">
-				<!-- Tabs List -->
-				<Card.Card class="mb-6 py-0">
-					<Card.CardContent class="p-3">
-						<Tabs.List class="grid w-full grid-cols-5 gap-1">
-							<Tabs.Trigger value="category" class="flex items-center gap-2 text-xs">
-								<FolderOpen class="size-4" />
-								<span class="hidden lg:inline">Category &</span> Type
-								{#if !isTab1Valid && activeTab !== 'category'}
-									<CircleAlert class="size-3 text-destructive" />
-								{/if}
-							</Tabs.Trigger>
-							<Tabs.Trigger value="location" class="flex items-center gap-2 text-xs">
-								<MapPin class="size-4" />
-								<span class="hidden lg:inline">Location &</span> Beneficiaries
-								{#if !isTab2Valid && activeTab !== 'location'}
-									<CircleAlert class="size-3 text-destructive" />
-								{/if}
-							</Tabs.Trigger>
-							<Tabs.Trigger value="performance" class="flex items-center gap-2 text-xs">
-								<Target class="size-4" />
-								<span class="hidden lg:inline">Performance</span> Targets
-								{#if !isTab3Valid && activeTab !== 'performance'}
-									<CircleAlert class="size-3 text-destructive" />
-								{/if}
-							</Tabs.Trigger>
-							<Tabs.Trigger value="budget" class="flex items-center gap-2 text-xs">
-								<Banknote class="size-4" />
-								<span class="hidden lg:inline">Budget &</span> Resources
-								{#if !isTab4Valid && activeTab !== 'budget'}
-									<CircleAlert class="size-3 text-destructive" />
-								{/if}
-							</Tabs.Trigger>
-							<Tabs.Trigger value="monthly" class="flex items-center gap-2 text-xs">
-								<Calendar class="size-4" />
-								<span class="hidden lg:inline">Monthly</span> Planning
-								{#if !isTab5Valid && activeTab !== 'monthly'}
-									<CircleAlert class="size-3 text-destructive" />
-								{/if}
-							</Tabs.Trigger>
-						</Tabs.List>
-					</Card.CardContent>
-				</Card.Card>
+	<div class="flex-1 p-4 md:p-6">
+		<div class="flex flex-col gap-6 lg:flex-row">
+			<!-- Stepper Sidebar -->
+			<FormStepper {steps} bind:activeStep />
 
-				<!-- Tab Content -->
-				<Tabs.Content value="category">
+			<!-- Form Content -->
+			<div class="min-w-0 flex-1">
+				{#if activeStep === 'category'}
 					<CategoryProjectSelectionTab
 						bind:title
 						bind:description
@@ -329,17 +328,13 @@
 						bind:selectedProjectType
 						bind:implementingAgency
 					/>
-				</Tabs.Content>
-
-				<Tabs.Content value="location">
+				{:else if activeStep === 'location'}
 					<LocationBeneficiariesTab
 						bind:projectSitios
 						bind:showSitioSelection
 						projectType={selectedProjectType ? getProjectTypeById(selectedProjectType) : undefined}
 					/>
-				</Tabs.Content>
-
-				<Tabs.Content value="performance">
+				{:else if activeStep === 'performance'}
 					<PerformanceTargetsTab
 						selectedProjectTypeId={selectedProjectType}
 						bind:performanceTargets
@@ -349,55 +344,85 @@
 						bind:employmentMale
 						bind:employmentFemale
 					/>
-				</Tabs.Content>
-
-				<Tabs.Content value="budget">
+				{:else if activeStep === 'budget'}
 					<BudgetResourcesTab {totalBudget} bind:fundingSources bind:budgetComponents />
-				</Tabs.Content>
+				{:else if activeStep === 'monthly'}
+					<FormSection
+						title="Monthly Planning"
+						description="Plan monthly physical progress and budget allocation across the project timeline"
+						icon={Calendar}
+						variant="rose"
+						isComplete={isTab5Valid}
+						collapsible={false}
+					>
+						{@const endDate =
+							targetStartDate && durationInCalendarDays
+								? targetStartDate.add({ days: Number(durationInCalendarDays) }).toString()
+								: ''}
+						<MonthlyTargetsForm
+							startDate={targetStartDate?.toString() || ''}
+							{endDate}
+							totalBudget={Number(totalBudget)}
+							onUpdate={(data) => {
+								monthlyTargets = data.monthlyTargets;
+							}}
+						/>
+					</FormSection>
+				{/if}
 
-				<Tabs.Content value="monthly">
-					<Card.Card class="py-0">
-						<Card.CardContent class="p-6">
-							{@const endDate =
-								targetStartDate && durationInCalendarDays
-									? targetStartDate.add({ days: Number(durationInCalendarDays) }).toString()
-									: ''}
-							<MonthlyTargetsForm
-								startDate={targetStartDate?.toString() || ''}
-								{endDate}
-								totalBudget={Number(totalBudget)}
-								onUpdate={(data) => {
-									monthlyTargets = data.monthlyTargets;
-								}}
-							/>
-						</Card.CardContent>
-					</Card.Card>
-				</Tabs.Content>
-			</Tabs.Root>
+				<!-- Navigation Footer -->
+				<Card.Root class="mt-6 py-0">
+					<Card.Content class="flex items-center justify-between p-4">
+						<Button
+							variant="outline"
+							onclick={previousStep}
+							disabled={!canGoPrevious}
+							class="gap-2"
+						>
+							<ArrowLeft class="size-4" />
+							<span class="hidden sm:inline">Previous</span>
+						</Button>
 
-			<!-- Navigation Buttons -->
-			<Card.Card class="mt-6 p-0">
-				<Card.CardContent class="flex justify-between p-4">
-					<Button variant="outline" onclick={previousTab} disabled={!canGoPrevious} class="gap-2">
-						<ArrowLeft class="size-4" />
-						Previous
-					</Button>
-					<div class="flex items-center gap-2 text-sm text-muted-foreground">
-						Step {currentTabIndex + 1} of {tabOrder.length}
-					</div>
-					{#if isLastTab && canSave}
-						<Button onclick={handleSave} disabled={isSaving} class="gap-2">
-							<Save class="size-4" />
-							{isSaving ? 'Saving...' : 'Save Project'}
-						</Button>
-					{:else}
-						<Button variant="outline" onclick={nextTab} disabled={!canGoNext} class="gap-2">
-							Next
-							<ArrowRight class="size-4" />
-						</Button>
-					{/if}
-				</Card.CardContent>
-			</Card.Card>
+						<!-- Step dots for mobile -->
+						<div class="flex items-center gap-1.5 sm:hidden">
+							{#each steps as step, index (step.id)}
+								<button
+									type="button"
+									onclick={() => (activeStep = step.id)}
+									class="h-2 w-2 rounded-full transition-all {step.id === activeStep
+										? 'w-4 bg-primary'
+										: step.isValid
+											? 'bg-emerald-500'
+											: 'bg-muted-foreground/30'}"
+									aria-label="Go to step {index + 1}"
+								></button>
+							{/each}
+						</div>
+
+						<!-- Step text for desktop -->
+						<div class="hidden items-center gap-2 text-sm text-muted-foreground sm:flex">
+							Step {currentStepIndex + 1} of {stepOrder.length}
+						</div>
+
+						{#if isLastStep && canSave}
+							<Button onclick={handleSave} disabled={isSaving} class="gap-2">
+								<Save class="size-4" />
+								<span class="hidden sm:inline">{isSaving ? 'Saving...' : 'Save Project'}</span>
+							</Button>
+						{:else}
+							<Button
+								variant="outline"
+								onclick={nextStep}
+								disabled={!canGoNext || !getCurrentStepValid()}
+								class="gap-2"
+							>
+								<span class="hidden sm:inline">Next</span>
+								<ArrowRight class="size-4" />
+							</Button>
+						{/if}
+					</Card.Content>
+				</Card.Root>
+			</div>
 		</div>
 	</div>
 </div>

@@ -1,14 +1,16 @@
 <script lang="ts">
-	import * as Card from '$lib/components/ui/card';
+	import { FormSection } from '$lib/components/ui/form-section';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import * as Select from '$lib/components/ui/select';
 	import { Textarea } from '$lib/components/ui/textarea';
 	import { categories, getProjectTypesByCategory } from '$lib/config/project-categories';
 	import type { CategoryKey, ProjectType } from '$lib/types';
+	import { cn } from '$lib/utils';
 	import {
 		Briefcase,
 		Building2,
+		FolderOpen,
 		GraduationCap,
 		HeartPulse,
 		Info,
@@ -189,17 +191,26 @@
 			userModifiedTitle = true;
 		}
 	}
+
+	// Check if section is complete
+	const isSectionComplete = $derived(
+		title.trim() !== '' &&
+			description.trim() !== '' &&
+			selectedCategory !== '' &&
+			selectedProjectType !== undefined &&
+			implementingAgency.trim() !== ''
+	);
 </script>
 
-<Card.Card>
-	<Card.CardHeader>
-		<Card.CardTitle>Category & Project Selection</Card.CardTitle>
-		<Card.CardDescription>
-			Select the project category and specific project type. This determines the performance
-			indicators and target templates.
-		</Card.CardDescription>
-	</Card.CardHeader>
-	<Card.CardContent class="space-y-6">
+<FormSection
+	title="Category & Project Selection"
+	description="Select the project category and specific project type. This determines the performance indicators and target templates."
+	icon={FolderOpen}
+	variant="blue"
+	isComplete={isSectionComplete}
+	collapsible={false}
+>
+	<div class="space-y-6">
 		<!-- Category Selection -->
 		<div class="space-y-2">
 			<Label for="category" class="required">Project Category</Label>
@@ -256,7 +267,7 @@
 				bind:value={title}
 				oninput={handleTitleInput}
 				placeholder="Enter descriptive project title"
-				class="w-full"
+				class={cn('w-full', title.trim() && 'border-primary/30 bg-primary/5')}
 			/>
 			<p class="text-xs text-muted-foreground">
 				{#if selectedProjectTypeData}
@@ -275,7 +286,7 @@
 				bind:value={description}
 				placeholder="Provide a detailed description of the project objectives, scope, and expected outcomes"
 				rows={4}
-				class="w-full"
+				class={cn('w-full', description.trim() && 'border-primary/30 bg-primary/5')}
 			/>
 			<p class="text-xs text-muted-foreground">
 				Include key objectives, target outcomes, and how this project addresses sitio needs.
@@ -292,14 +303,14 @@
 				id="implementing-agency"
 				bind:value={implementingAgency}
 				placeholder="e.g., Provincial Engineer's Office, DA - Region XII"
-				class="w-full"
+				class={cn('w-full', implementingAgency.trim() && 'border-primary/30 bg-primary/5')}
 			/>
 			<p class="text-xs text-muted-foreground">
 				The government office or agency primarily responsible for implementing this project.
 			</p>
 		</div>
-	</Card.CardContent>
-</Card.Card>
+	</div>
+</FormSection>
 
 <style>
 	:global(.required::after) {

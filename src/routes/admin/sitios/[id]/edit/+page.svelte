@@ -4,7 +4,7 @@
 	import BasicInfoTab from '$lib/components/admin/sitios/BasicInfoTab.svelte';
 	import CommunityServicesTab from '$lib/components/admin/sitios/CommunityServicesTab.svelte';
 	import DemographicsSocialTab from '$lib/components/admin/sitios/DemographicsSocialTab.svelte';
-	import FormStepper, { type Step } from '$lib/components/admin/sitios/FormStepper.svelte';
+	import { FormStepper, type Step } from '$lib/components/ui/form-stepper';
 	import InfrastructureHousingTab from '$lib/components/admin/sitios/InfrastructureHousingTab.svelte';
 	import LivelihoodsEconomyTab from '$lib/components/admin/sitios/LivelihoodsEconomyTab.svelte';
 	import NeedsAssessmentTab from '$lib/components/admin/sitios/NeedsAssessmentTab.svelte';
