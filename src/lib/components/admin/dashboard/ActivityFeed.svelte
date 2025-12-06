@@ -7,6 +7,7 @@
 	import toTitleCase from '$lib/utils/common';
 	import {
 		Activity,
+		ArrowRight,
 		Download,
 		FileText,
 		LogIn,
@@ -101,7 +102,18 @@
 
 <Card.Card class="shadow-sm">
 	<Card.CardHeader>
-		<Card.CardTitle class="text-xl font-semibold">Recent Activity</Card.CardTitle>
+		<Card.CardTitle class="">
+			<div class="flex items-center justify-between">
+				<span class="text-xl font-semibold">Recent Activity</span>
+				<a
+					href="/admin/audit"
+					class="flex items-center gap-1 text-sm font-normal text-muted-foreground hover:text-foreground"
+				>
+					View All
+					<ArrowRight class="size-4" />
+				</a>
+			</div>
+		</Card.CardTitle>
 	</Card.CardHeader>
 	<Card.CardContent>
 		{#if isLoading}

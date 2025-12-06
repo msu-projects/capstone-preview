@@ -1,47 +1,32 @@
 <script lang="ts">
 	import AdminHeader from '$lib/components/admin/AdminHeader.svelte';
-	import BudgetTab from '$lib/components/admin/dashboard/BudgetTab.svelte';
+	import ActivityFeed from '$lib/components/admin/dashboard/ActivityFeed.svelte';
 	import DashboardStats from '$lib/components/admin/dashboard/DashboardStats.svelte';
-	import EmploymentTab from '$lib/components/admin/dashboard/EmploymentTab.svelte';
-	import GeographicTab from '$lib/components/admin/dashboard/GeographicTab.svelte';
-	import OverviewTab from '$lib/components/admin/dashboard/OverviewTab.svelte';
-	import SitiosTab from '$lib/components/admin/dashboard/SitiosTab.svelte';
+	import RecentProjectsTable from '$lib/components/admin/dashboard/RecentProjectsTable.svelte';
+	import DonutChart from '$lib/components/charts/DonutChart.svelte';
+	import LineChart from '$lib/components/charts/LineChart.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import { Skeleton } from '$lib/components/ui/skeleton';
-	import * as Tabs from '$lib/components/ui/tabs';
-	import { categories } from '$lib/config/project-categories';
-	import { chartData, projects, sitios, stats } from '$lib/mock-data';
-	import type { AuditLog } from '$lib/types';
+	import { chartData, projects, stats } from '$lib/mock-data';
 	import { loadAuditLogs } from '$lib/utils/audit';
-	import toTitleCase from '$lib/utils/common';
 	import { downloadProjectMonitoringPDF } from '$lib/utils/pdf-generator';
-	import { ChartColumn, Download, ExternalLink, Plus } from '@lucide/svelte';
-	import { onMount } from 'svelte';
+	import { ArrowRight, ChartColumn, Download, ExternalLink, Plus } from '@lucide/svelte';
 
 	// Loading state for async data simulation
 	let isLoading = $state(false);
-	let activities = $state<AuditLog[]>([]);
-	let activeTab = $state('overview');
 
-	onMount(() => {
-		// Load recent audit logs (most recent first, limited to 10)
-		activities = loadAuditLogs().reverse().slice(0, 10);
-	});
+	// Sitios recording progress - target of 500 sitios
+	const targetSitios = 500;
+	const sitiosProgress = Math.round((stats.total_sitios / targetSitios) * 100);
 
-	const recentProjects = projects.slice(0, 5);
+	// Recent projects - sorted by updated_at descending
+	const recentProjects = [...projects]
+		.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+		.slice(0, 5);
 
-	// Chart color palette
-	const chartColors = [
-		'hsl(217, 91%, 60%)', // blue
-		'hsl(142, 71%, 45%)', // green
-		'hsl(48, 96%, 53%)', // yellow
-		'hsl(280, 70%, 60%)', // purple
-		'hsl(340, 82%, 52%)', // pink
-		'hsl(195, 85%, 45%)', // cyan
-		'hsl(25, 95%, 53%)', // orange
-		'hsl(160, 65%, 50%)' // teal
-	];
+	// Recent activities from audit logs
+	const recentActivities = loadAuditLogs().reverse().slice(0, 10);
 
 	// Chart data preparations
 	// Status donut chart data
@@ -58,25 +43,6 @@
 						: 'hsl(0, 84%, 60%)'
 	}));
 
-	// Category bar chart data
-	const categoryChartData = chartData.projectsByCategory
-		.sort((a, b) => b.count - a.count)
-		.slice(0, 8)
-		.map((item, i) => ({
-			label: toTitleCase(item.category as string),
-			value: item.count,
-			color: chartColors[i % chartColors.length]
-		}));
-
-	// Municipality bar chart data
-	const municipalityChartData = chartData.projectsByMunicipality
-		.sort((a, b) => b.count - a.count)
-		.map((item, i) => ({
-			label: item.municipality as string,
-			value: item.count,
-			color: chartColors[i % chartColors.length]
-		}));
-
 	// Monthly progress line chart data
 	const monthlyProgressSeries = [
 		{
@@ -85,116 +51,6 @@
 		}
 	];
 	const monthlyProgressCategories = chartData.monthlyProgress.map((item) => item.month as string);
-
-	// Budget by category (derived)
-	const budgetByCategory = categories.map((cat, i) => ({
-		label: cat.name,
-		value: projects
-			.filter((p) => p.category_key === cat.key)
-			.reduce((sum, p) => sum + p.total_budget, 0),
-		color: chartColors[i % chartColors.length]
-	}));
-	const topBudgetCategories = budgetByCategory.sort((a, b) => b.value - a.value).slice(0, 5);
-
-	// Employment data
-	const totalMaleEmployment = projects.reduce(
-		(sum, p) => sum + (p.employment_generated?.male || 0),
-		0
-	);
-	const totalFemaleEmployment = projects.reduce(
-		(sum, p) => sum + (p.employment_generated?.female || 0),
-		0
-	);
-	const employmentChartData = [
-		{ label: 'Male', value: totalMaleEmployment, color: 'hsl(217, 91%, 60%)' },
-		{ label: 'Female', value: totalFemaleEmployment, color: 'hsl(340, 82%, 52%)' }
-	];
-
-	// Employment by category for stacked comparison
-	const employmentByCategory = categories
-		.map((cat) => {
-			const catProjects = projects.filter((p) => p.category_key === cat.key);
-			return {
-				category: cat.name,
-				male: catProjects.reduce((sum, p) => sum + (p.employment_generated?.male || 0), 0),
-				female: catProjects.reduce((sum, p) => sum + (p.employment_generated?.female || 0), 0)
-			};
-		})
-		.sort((a, b) => b.male + b.female - (a.male + a.female))
-		.slice(0, 6);
-
-	// ===== SITIO ANALYTICS =====
-	// Total population and households across all sitios
-	const totalPopulation = sitios.reduce((sum, s) => sum + (s.population || 0), 0);
-	const totalHouseholds = sitios.reduce((sum, s) => sum + (s.households || 0), 0);
-
-	// Sitios by municipality
-	const sitiosByMunicipality = [...new Set(sitios.map((s) => s.municipality))]
-		.map((mun, i) => ({
-			label: mun,
-			value: sitios.filter((s) => s.municipality === mun).length,
-			color: chartColors[i % chartColors.length]
-		}))
-		.sort((a, b) => b.value - a.value);
-
-	// Population by municipality
-	const populationByMunicipality = [...new Set(sitios.map((s) => s.municipality))]
-		.map((mun, i) => ({
-			label: mun,
-			value: sitios
-				.filter((s) => s.municipality === mun)
-				.reduce((sum, s) => sum + (s.population || 0), 0),
-			color: chartColors[i % chartColors.length]
-		}))
-		.sort((a, b) => b.value - a.value);
-
-	// Demographics aggregation (male vs female)
-	const totalMalePopulation = sitios.reduce((sum, s) => sum + (s.demographics?.male || 0), 0);
-	const totalFemalePopulation = sitios.reduce((sum, s) => sum + (s.demographics?.female || 0), 0);
-	const demographicsChartData = [
-		{ label: 'Male', value: totalMalePopulation, color: 'hsl(217, 91%, 60%)' },
-		{ label: 'Female', value: totalFemalePopulation, color: 'hsl(340, 82%, 52%)' }
-	];
-
-	// Age distribution aggregation
-	const ageDistribution = [
-		{
-			label: '0-14 years',
-			value: sitios.reduce((sum, s) => sum + (s.demographics?.age_0_14 || 0), 0),
-			color: 'hsl(142, 71%, 45%)'
-		},
-		{
-			label: '15-64 years',
-			value: sitios.reduce((sum, s) => sum + (s.demographics?.age_15_64 || 0), 0),
-			color: 'hsl(217, 91%, 60%)'
-		},
-		{
-			label: '65+ years',
-			value: sitios.reduce((sum, s) => sum + (s.demographics?.age_65_above || 0), 0),
-			color: 'hsl(280, 70%, 60%)'
-		}
-	];
-
-	// Social services aggregation
-	const totalVoters = sitios.reduce(
-		(sum, s) => sum + (s.social_services?.registered_voters || 0),
-		0
-	);
-	const totalPhilhealth = sitios.reduce(
-		(sum, s) => sum + (s.social_services?.philhealth_beneficiaries || 0),
-		0
-	);
-	const total4Ps = sitios.reduce(
-		(sum, s) => sum + (s.social_services?.fourps_beneficiaries || 0),
-		0
-	);
-
-	// Agriculture data
-	const totalFarmers = sitios.reduce((sum, s) => sum + (s.agriculture?.farmers_count || 0), 0);
-	const totalFarmArea = sitios.reduce(
-		(sum, s) => sum + (s.agriculture?.farm_area_hectares || 0),
-		0
-	);
 
 	function handleExportReport() {
 		// Download PDF for all projects
@@ -224,25 +80,22 @@
 	<!-- Content -->
 	<div class="flex-1 space-y-6 p-6">
 		<!-- Stats Grid -->
-		<DashboardStats {stats} {isLoading} onTabChange={(tab) => (activeTab = tab)} />
+		<DashboardStats {stats} {isLoading} />
 
-		<!-- Charts Section with Tabs -->
+		<!-- Analytics Overview -->
 		<Card.Card class="shadow-sm">
 			<Card.CardHeader>
 				<div class="flex items-center justify-between">
 					<div>
 						<Card.CardTitle class="text-xl font-semibold">Analytics Overview</Card.CardTitle>
-						<Card.CardDescription>Comprehensive project and resource analytics</Card.CardDescription
+						<Card.CardDescription
+							>Project status, progress, and sitio recording</Card.CardDescription
 						>
 					</div>
 					<div class="flex items-center gap-2">
-						<Button
-							variant="outline"
-							size="sm"
-							href={activeTab === 'sitios' ? '/admin/sitios' : '/projects'}
-						>
+						<Button variant="outline" size="sm" href="/admin/projects">
 							<ExternalLink class="mr-2 size-4" />
-							View More Info
+							View All Projects
 						</Button>
 						<div class="rounded-full bg-primary/10 p-2">
 							<ChartColumn class="size-5 text-primary" />
@@ -252,67 +105,107 @@
 			</Card.CardHeader>
 			<Card.CardContent>
 				{#if isLoading}
-					<div class="grid gap-6 lg:grid-cols-2">
-						<Skeleton class="h-[300px] w-full rounded-lg" />
-						<Skeleton class="h-[300px] w-full rounded-lg" />
+					<div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+						<Skeleton class="h-80 w-full rounded-lg" />
+						<Skeleton class="h-80 w-full rounded-lg" />
+						<Skeleton class="h-80 w-full rounded-lg" />
 					</div>
 				{:else}
-					<Tabs.Root bind:value={activeTab} class="w-full">
-						<Tabs.List class="grid w-full grid-cols-5">
-							<Tabs.Trigger value="overview">Overview</Tabs.Trigger>
-							<Tabs.Trigger value="sitios">Sitios</Tabs.Trigger>
-							<Tabs.Trigger value="geographic">Geographic</Tabs.Trigger>
-							<Tabs.Trigger value="budget">Budget</Tabs.Trigger>
-							<Tabs.Trigger value="employment">Employment</Tabs.Trigger>
-						</Tabs.List>
+					<div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+						<!-- Projects by Status -->
+						<div class="flex h-80 flex-col rounded-lg border bg-card p-4">
+							<h3 class="mb-4 text-lg font-semibold">Projects by Status</h3>
+							<div class="flex flex-1 items-center justify-center">
+								<DonutChart
+									data={statusChartData}
+									height={220}
+									showLegend={true}
+									centerValue={String(stats.total_projects)}
+									centerLabel="Total"
+								/>
+							</div>
+						</div>
 
-						<Tabs.Content value="overview" class="mt-6">
-							<OverviewTab
-								{statusChartData}
-								{categoryChartData}
-								{monthlyProgressSeries}
-								{monthlyProgressCategories}
-								totalProjects={stats.total_projects ?? 0}
-								{recentProjects}
-								{activities}
-								{isLoading}
-							/>
-						</Tabs.Content>
+						<!-- Monthly Project Completions -->
+						<div class="flex h-80 flex-col rounded-lg border bg-card p-4">
+							<h3 class="mb-4 text-lg font-semibold">Monthly Completions</h3>
+							<div class="flex-1">
+								<LineChart
+									series={[{ ...monthlyProgressSeries[0], color: 'hsl(142, 71%, 45%)' }]}
+									categories={monthlyProgressCategories}
+									height={240}
+								/>
+							</div>
+						</div>
 
-						<Tabs.Content value="sitios" class="mt-6">
-							<SitiosTab
-								{totalPopulation}
-								{totalHouseholds}
-								{totalVoters}
-								{totalFarmers}
-								{totalFarmArea}
-								{totalPhilhealth}
-								{total4Ps}
-								{demographicsChartData}
-								{ageDistribution}
-								{sitiosByMunicipality}
-								{populationByMunicipality}
-							/>
-						</Tabs.Content>
+						<!-- Sitios Recording Progress -->
+						<div class="flex h-80 flex-col rounded-lg border bg-card p-4">
+							<div class="mb-4 flex items-center justify-between">
+								<h3 class="text-lg font-semibold">Sitios Recorded</h3>
+								<a
+									href="/admin/sitios"
+									class="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+								>
+									View All
+									<ArrowRight class="size-4" />
+								</a>
+							</div>
+							<div class="flex flex-1 flex-col items-center justify-center gap-4">
+								<!-- Circular Progress Indicator -->
+								<div class="relative flex size-40 items-center justify-center">
+									<svg class="size-full -rotate-90" viewBox="0 0 100 100">
+										<!-- Background circle -->
+										<circle
+											cx="50"
+											cy="50"
+											r="42"
+											fill="none"
+											stroke="currentColor"
+											class="text-muted/30"
+											stroke-width="8"
+										/>
+										<!-- Progress circle -->
+										<circle
+											cx="50"
+											cy="50"
+											r="42"
+											fill="none"
+											stroke="hsl(217, 91%, 60%)"
+											stroke-width="8"
+											stroke-linecap="round"
+											stroke-dasharray="{(sitiosProgress / 100) * 264} 264"
+											class="transition-all duration-500"
+										/>
+									</svg>
+									<div class="absolute flex flex-col items-center justify-center">
+										<span class="text-3xl font-bold">{sitiosProgress}%</span>
+										<span class="text-xs text-muted-foreground">Complete</span>
+									</div>
+								</div>
 
-						<Tabs.Content value="geographic" class="mt-6">
-							<GeographicTab {municipalityChartData} />
-						</Tabs.Content>
-
-						<Tabs.Content value="budget" class="mt-6">
-							<BudgetTab {topBudgetCategories} totalBudget={stats.total_budget} />
-						</Tabs.Content>
-
-						<Tabs.Content value="employment" class="mt-6">
-							<EmploymentTab
-								{employmentChartData}
-								{employmentByCategory}
-								totalEmployment={totalMaleEmployment + totalFemaleEmployment}
-							/>
-						</Tabs.Content>
-					</Tabs.Root>
+								<!-- Stats below circle -->
+								<div class="flex w-full items-center justify-center gap-6 text-center">
+									<div>
+										<p class="text-2xl font-bold text-primary">{stats.total_sitios}</p>
+										<p class="text-xs text-muted-foreground">Recorded</p>
+									</div>
+									<div class="h-8 w-px bg-border"></div>
+									<div>
+										<p class="text-2xl font-bold">{targetSitios}</p>
+										<p class="text-xs text-muted-foreground">Target</p>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
 				{/if}
 			</Card.CardContent>
 		</Card.Card>
+
+		<!-- Recent Projects & Activity -->
+		<div class="grid gap-6 lg:grid-cols-3">
+			<RecentProjectsTable projects={recentProjects} {isLoading} />
+			<ActivityFeed activities={recentActivities} {isLoading} />
+		</div>
 	</div>
 </div>
