@@ -791,6 +791,42 @@ const ISSUES_BY_CATEGORY: Record<CategoryKey, string[]> = {
 	]
 };
 
+/**
+ * Generate a realistic updated_at date for projects
+ * Non-completed projects have a chance to be "stale" (not updated recently)
+ * This creates data for the StaleProjectsCard dashboard component
+ */
+function generateUpdatedAt(status: ProjectStatus, rng: SeededRandom): Date {
+	const now = new Date();
+
+	// Completed projects are always recently updated (within last 7 days)
+	if (status === 'completed') {
+		const daysAgo = rng.nextInt(0, 7);
+		return new Date(now.getTime() - daysAgo * 24 * 60 * 60 * 1000);
+	}
+
+	// For non-completed projects, create a distribution of stale and fresh projects
+	const staleChance = rng.next();
+
+	if (staleChance < 0.3) {
+		// 30% chance: Recently updated (0-29 days) - not stale
+		const daysAgo = rng.nextInt(0, 29);
+		return new Date(now.getTime() - daysAgo * 24 * 60 * 60 * 1000);
+	} else if (staleChance < 0.5) {
+		// 20% chance: Moderate staleness (30-60 days)
+		const daysAgo = rng.nextInt(30, 60);
+		return new Date(now.getTime() - daysAgo * 24 * 60 * 60 * 1000);
+	} else if (staleChance < 0.7) {
+		// 20% chance: Warning level staleness (61-90 days)
+		const daysAgo = rng.nextInt(61, 90);
+		return new Date(now.getTime() - daysAgo * 24 * 60 * 60 * 1000);
+	} else {
+		// 30% chance: Critical staleness (91-180 days)
+		const daysAgo = rng.nextInt(91, 180);
+		return new Date(now.getTime() - daysAgo * 24 * 60 * 60 * 1000);
+	}
+}
+
 // S-curve progress calculation for more realistic project progression
 function calculateSCurveProgress(
 	monthIndex: number,
@@ -1218,7 +1254,7 @@ export function generateProjects(
 			},
 			implementing_agency: rng.pick(AGENCIES),
 			created_at: startDate.toISOString(),
-			updated_at: new Date().toISOString()
+			updated_at: generateUpdatedAt(status, rng).toISOString()
 		};
 
 		projects.push(project);
@@ -1297,8 +1333,8 @@ export function initializeMockDataIfNeeded(): { sitios: Sitio[]; projects: Proje
 	}
 
 	// Generate and save mock data
-	const sitios = generateSitios(50);
-	const projects = generateProjects(sitios, 20);
+	const sitios = generateSitios(150);
+	const projects = generateProjects(sitios, 50);
 
 	localStorage.setItem(MOCK_SITIOS_KEY, JSON.stringify(sitios));
 	localStorage.setItem(MOCK_PROJECTS_KEY, JSON.stringify(projects));
@@ -1322,8 +1358,8 @@ export function resetMockData(): { sitios: Sitio[]; projects: Project[] } {
 
 	// Regenerate with new seed based on current time
 	const seed = Date.now() % 1000000;
-	const sitios = generateSitios(50, seed);
-	const projects = generateProjects(sitios, 20, seed);
+	const sitios = generateSitios(150, seed);
+	const projects = generateProjects(sitios, 50, seed);
 
 	localStorage.setItem(MOCK_SITIOS_KEY, JSON.stringify(sitios));
 	localStorage.setItem(MOCK_PROJECTS_KEY, JSON.stringify(projects));
