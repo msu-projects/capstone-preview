@@ -460,7 +460,6 @@
 								<Table.Header>
 									<Table.Row>
 										<Table.Head class="w-12">Icon</Table.Head>
-										<Table.Head class="w-32">Key</Table.Head>
 										<Table.Head>Name</Table.Head>
 										<Table.Head class="hidden md:table-cell">Description</Table.Head>
 										<Table.Head class="w-20 text-center">Types</Table.Head>
@@ -478,9 +477,6 @@
 												{:else}
 													<Folder class="size-5 text-muted-foreground" />
 												{/if}
-											</Table.Cell>
-											<Table.Cell>
-												<Badge variant="outline">{category.key}</Badge>
 											</Table.Cell>
 											<Table.Cell class="font-medium">{category.name}</Table.Cell>
 											<Table.Cell class="hidden text-muted-foreground md:table-cell">

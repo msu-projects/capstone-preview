@@ -107,7 +107,7 @@
 			<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 				{#each configSections as section}
 					<Card.Root
-						class="cursor-pointer transition-colors hover:border-primary/50"
+						class="h-full cursor-pointer transition-colors hover:border-primary/50"
 						onclick={() => goto(section.href)}
 					>
 						<Card.Header class="pb-2">
@@ -126,7 +126,7 @@
 							<Card.Title class="text-lg">{section.title}</Card.Title>
 							<Card.Description>{section.description}</Card.Description>
 						</Card.Header>
-						<Card.Content>
+						<Card.Content class="flex-1">
 							<div class="flex flex-wrap gap-1">
 								{#each section.items as item}
 									<Badge variant="secondary" class="text-xs">{item}</Badge>
