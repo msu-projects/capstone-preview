@@ -187,7 +187,7 @@
 						<DropdownMenu.Separator />
 						<div class="flex items-center justify-between px-2 py-1.5">
 							<span class="text-sm">Theme</span>
-							<ThemeToggle />
+							<ThemeToggle variant="inline" />
 						</div>
 						<DropdownMenu.Separator />
 						<DropdownMenu.Item onclick={handleLogout}>
