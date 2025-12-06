@@ -61,4 +61,9 @@
 	</main>
 </div>
 
-<MonitoringReportDialog bind:open={dialogOpen} {selectedReport} />
+<MonitoringReportDialog
+	bind:open={dialogOpen}
+	{selectedReport}
+	performanceTargets={project.performance_targets}
+	monthlyProgress={project.monthly_progress}
+/>

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import PerformanceIndicatorsChart from '$lib/components/charts/PerformanceIndicatorsChart.svelte';
 	import ProgressLineChart from '$lib/components/charts/ProgressLineChart.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';
@@ -10,6 +11,7 @@
 	import { aggregateAchievedOutputs } from '$lib/utils/project-adapters';
 	import {
 		Activity,
+		BarChart3,
 		CalendarClock,
 		ChevronDown,
 		Image as ImageIcon,
@@ -33,11 +35,13 @@
 	// Collapsible states - default open on desktop, closed on mobile
 	let chartOpen = $state(true);
 	let targetsOpen = $state(true);
+	let indicatorsChartOpen = $state(true);
 
 	// Initialize based on mobile state
 	$effect(() => {
 		chartOpen = !isMobile.current;
 		targetsOpen = !isMobile.current;
+		indicatorsChartOpen = !isMobile.current;
 	});
 
 	// Aggregate achieved outputs from all monthly progress entries
@@ -148,9 +152,9 @@
 	<!-- Performance Targets (Collapsible) - only show if targets exist -->
 	{#if performanceTargets && performanceTargets.length > 0}
 		<Collapsible.Root bind:open={targetsOpen}>
-			<Card.Root class="overflow-hidden">
-				<Collapsible.Trigger class="w-full">
-					<Card.Header class="cursor-pointer hover:bg-muted/50">
+			<Card.Root class="overflow-hidden py-0">
+				<Collapsible.Trigger class="w-full py-6 hover:bg-muted/50">
+					<Card.Header class="cursor-pointer">
 						<div class="flex items-center justify-between">
 							<div class="flex items-center gap-2">
 								<div class="rounded-lg bg-amber-50 p-1.5 dark:bg-amber-900/30">
@@ -167,7 +171,7 @@
 					</Card.Header>
 				</Collapsible.Trigger>
 				<Collapsible.Content>
-					<Card.Content class="space-y-4 pt-0">
+					<Card.Content class="space-y-4 pt-0 pb-4">
 						{#each performanceTargets as target}
 							{@const achieved = getAchievedValue(target)}
 							{@const percentage = Math.min((achieved / target.target_value) * 100, 100)}
@@ -199,6 +203,36 @@
 				</Collapsible.Content>
 			</Card.Root>
 		</Collapsible.Root>
+
+		<!-- Performance Indicators Progress Chart (Collapsible) -->
+		{#if monthlyProgress && monthlyProgress.length > 0}
+			<Collapsible.Root bind:open={indicatorsChartOpen}>
+				<Card.Root class="overflow-hidden">
+					<Collapsible.Trigger class="w-full">
+						<Card.Header class="cursor-pointer hover:bg-muted/50">
+							<div class="flex items-center justify-between">
+								<div class="flex items-center gap-2">
+									<div class="rounded-lg bg-violet-50 p-1.5 dark:bg-violet-900/30">
+										<BarChart3 class="size-4 text-violet-600" />
+									</div>
+									<Card.Title class="text-base">Indicators Progress Over Time</Card.Title>
+								</div>
+								<ChevronDown
+									class="size-5 text-muted-foreground transition-transform duration-200 {indicatorsChartOpen
+										? 'rotate-180'
+										: ''}"
+								/>
+							</div>
+						</Card.Header>
+					</Collapsible.Trigger>
+					<Collapsible.Content>
+						<Card.Content class="pt-0">
+							<PerformanceIndicatorsChart {monthlyProgress} {performanceTargets} height={300} />
+						</Card.Content>
+					</Collapsible.Content>
+				</Card.Root>
+			</Collapsible.Root>
+		{/if}
 	{/if}
 
 	<!-- Monthly Timeline Section -->

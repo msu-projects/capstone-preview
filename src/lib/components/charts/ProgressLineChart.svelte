@@ -69,37 +69,45 @@
 			.join(' ');
 	}
 
-	// Paths for each series
+	// Paths for each series (starting from zero)
 	const plannedPhysicalPath = $derived(
 		generatePath(
-			sortedData.map((d, i) => ({ x: xScale(i), y: yScalePercent(d.plan_physical) })),
+			[
+				{ x: xScale(0), y: yScalePercent(0) }, // Start from zero
+				...sortedData.map((d, i) => ({ x: xScale(i), y: yScalePercent(d.plan_physical) }))
+			],
 			false
 		)
 	);
 
 	const actualPhysicalPath = $derived(
-		generatePath(
-			sortedData.map((d, i) => ({
+		generatePath([
+			{ x: xScale(0), y: yScalePercent(0) }, // Start from zero
+			...sortedData.map((d, i) => ({
 				x: xScale(i),
 				y: d.actual_physical !== null ? yScalePercent(d.actual_physical) : null
 			}))
-		)
+		])
 	);
 
 	const plannedFinancialPath = $derived(
 		generatePath(
-			sortedData.map((d, i) => ({ x: xScale(i), y: yScaleFinancial(d.plan_financial) })),
+			[
+				{ x: xScale(0), y: yScaleFinancial(0) }, // Start from zero
+				...sortedData.map((d, i) => ({ x: xScale(i), y: yScaleFinancial(d.plan_financial) }))
+			],
 			false
 		)
 	);
 
 	const actualFinancialPath = $derived(
-		generatePath(
-			sortedData.map((d, i) => ({
+		generatePath([
+			{ x: xScale(0), y: yScaleFinancial(0) }, // Start from zero
+			...sortedData.map((d, i) => ({
 				x: xScale(i),
 				y: d.actual_financial !== null ? yScaleFinancial(d.actual_financial) : null
 			}))
-		)
+		])
 	);
 
 	// Hover state

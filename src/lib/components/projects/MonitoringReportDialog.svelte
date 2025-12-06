@@ -1,16 +1,63 @@
 <script lang="ts">
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { PhotoGallery } from '$lib/components/ui/photo-gallery';
-	import type { MonthlyReport } from '$lib/types';
+	import { Progress } from '$lib/components/ui/progress';
+	import type { MonthlyProgress, MonthlyReport, PerformanceTarget } from '$lib/types';
 	import { formatCurrency } from '$lib/utils/formatters';
-	import { Activity, Banknote, Camera, CheckCircle2 } from '@lucide/svelte';
+	import { Activity, Banknote, Camera, CheckCircle2, Target } from '@lucide/svelte';
 
 	interface Props {
 		open: boolean;
 		selectedReport: MonthlyReport | null;
+		performanceTargets?: PerformanceTarget[];
+		monthlyProgress?: MonthlyProgress[];
 	}
 
-	let { open = $bindable(), selectedReport }: Props = $props();
+	let { open = $bindable(), selectedReport, performanceTargets, monthlyProgress }: Props = $props();
+
+	// Get achieved outputs up to and including the selected month
+	function getCumulativeAchievedOutputs(monthYear: string): Record<string, number> {
+		if (!monthlyProgress) return {};
+
+		// Parse the target month_year (e.g., "2024-03")
+		const targetDate = new Date(monthYear + '-01');
+
+		// Filter progress entries up to and including the target month and aggregate
+		const cumulativeOutputs: Record<string, number> = {};
+
+		monthlyProgress
+			.filter((p) => {
+				const progressDate = new Date(p.month_year + '-01');
+				return progressDate <= targetDate;
+			})
+			.forEach((progress) => {
+				if (progress.achieved_outputs) {
+					Object.entries(progress.achieved_outputs).forEach(([key, value]) => {
+						const normalizedKey = key.toLowerCase().replace(/\s+/g, '_');
+						cumulativeOutputs[normalizedKey] = (cumulativeOutputs[normalizedKey] || 0) + value;
+					});
+				}
+			});
+
+		return cumulativeOutputs;
+	}
+
+	// Get achieved value for a specific performance target
+	function getAchievedValue(
+		target: PerformanceTarget,
+		cumulativeOutputs: Record<string, number>
+	): number {
+		const normalizedType = target.indicator_type?.toLowerCase().replace(/\s+/g, '_');
+		const normalizedName = target.indicator_name?.toLowerCase().replace(/\s+/g, '_');
+
+		return (
+			cumulativeOutputs[normalizedType] ||
+			cumulativeOutputs[normalizedName] ||
+			cumulativeOutputs[target.indicator_type] ||
+			cumulativeOutputs[target.indicator_name] ||
+			0
+		);
+	}
 
 	// Format indicator key for display (e.g., 'seedlings_distributed' -> 'Seedlings Distributed')
 	function formatIndicatorKey(key: string): string {
@@ -129,28 +176,68 @@
 					</div>
 				</div>
 
-				<!-- Achieved Outputs -->
-				{#if selectedReport.achieved_outputs && Object.keys(selectedReport.achieved_outputs).length > 0}
-					<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-						<div
-							class="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800"
+				<!-- Performance Targets Progress -->
+				{#if performanceTargets && performanceTargets.length > 0 && selectedReport.month_year}
+					{@const cumulativeOutputs = getCumulativeAchievedOutputs(selectedReport.month_year)}
+					<div
+						class="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800"
+					>
+						<h4
+							class="mb-4 flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-200"
 						>
-							<h4
-								class="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-200"
-							>
-								<CheckCircle2 class="size-4 text-violet-600" /> Achieved Outputs
-							</h4>
-							<div class="space-y-2">
-								{#each Object.entries(selectedReport.achieved_outputs) as [key, value]}
-									<div class="flex justify-between text-sm">
-										<span class="text-slate-500 dark:text-slate-400">{formatIndicatorKey(key)}</span
-										>
-										<span class="font-medium text-slate-900 dark:text-slate-100"
-											>{value.toLocaleString()}</span
-										>
+							<Target class="size-4 text-amber-600" /> Performance Targets
+						</h4>
+						<div class="space-y-4">
+							{#each performanceTargets as target}
+								{@const achieved = getAchievedValue(target, cumulativeOutputs)}
+								{@const percentage = Math.min((achieved / target.target_value) * 100, 100)}
+								<div class="space-y-1.5">
+									<div class="flex items-center justify-between text-sm">
+										<span class="font-medium text-slate-700 dark:text-slate-300">
+											{target.indicator_name}
+										</span>
+										<span class="text-xs text-slate-500 dark:text-slate-400">
+											{achieved.toLocaleString()} / {target.target_value.toLocaleString()}
+											{target.unit_of_measure}
+										</span>
 									</div>
-								{/each}
-							</div>
+									<div class="flex items-center gap-3">
+										<Progress value={percentage} class="h-2 flex-1" />
+										<span
+											class="min-w-10 text-right text-xs font-medium {percentage >= 100
+												? 'text-emerald-600'
+												: percentage >= 50
+													? 'text-blue-600'
+													: 'text-slate-500'}"
+										>
+											{percentage.toFixed(0)}%
+										</span>
+									</div>
+								</div>
+							{/each}
+						</div>
+					</div>
+				{/if}
+
+				<!-- Achieved Outputs (this month) -->
+				{#if selectedReport.achieved_outputs && Object.keys(selectedReport.achieved_outputs).length > 0}
+					<div
+						class="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800"
+					>
+						<h4
+							class="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-200"
+						>
+							<CheckCircle2 class="size-4 text-violet-600" /> Outputs This Month
+						</h4>
+						<div class="space-y-2">
+							{#each Object.entries(selectedReport.achieved_outputs) as [key, value]}
+								<div class="flex justify-between text-sm">
+									<span class="text-slate-500 dark:text-slate-400">{formatIndicatorKey(key)}</span>
+									<span class="font-medium text-slate-900 dark:text-slate-100"
+										>{value.toLocaleString()}</span
+									>
+								</div>
+							{/each}
 						</div>
 					</div>
 				{/if}
