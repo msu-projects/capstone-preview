@@ -9,6 +9,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import * as Tabs from '$lib/components/ui/tabs';
+	import { getProjectTypeById } from '$lib/config/project-categories';
 	import type {
 		BudgetComponent,
 		CategoryKey,
@@ -331,7 +332,11 @@
 				</Tabs.Content>
 
 				<Tabs.Content value="location">
-					<LocationBeneficiariesTab bind:projectSitios bind:showSitioSelection />
+					<LocationBeneficiariesTab
+						bind:projectSitios
+						bind:showSitioSelection
+						projectType={selectedProjectType ? getProjectTypeById(selectedProjectType) : undefined}
+					/>
 				</Tabs.Content>
 
 				<Tabs.Content value="performance">

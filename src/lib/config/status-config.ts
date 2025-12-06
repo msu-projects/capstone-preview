@@ -1,8 +1,9 @@
 /**
- * Status configuration for projects
+ * Status configuration for projects and sitio need levels
  * Centralizes all status-related display logic (labels, colors, badges)
  */
-import type { ProjectStatus } from '$lib/types';
+import type { NeedLevel, ProjectStatus } from '$lib/types';
+import { getNeedLevelFromScore } from '$lib/types';
 
 export interface StatusConfig {
 	label: string;
@@ -96,3 +97,82 @@ export const ALL_PROJECT_STATUSES: ProjectStatus[] = [
 	'completed',
 	'suspended'
 ];
+
+// ===== NEED LEVEL CONFIGURATION =====
+
+export interface NeedLevelConfig {
+	label: string;
+	shortLabel: string;
+	bgClass: string;
+	textClass: string;
+	darkBgClass: string;
+	darkTextClass: string;
+	badgeVariant: 'default' | 'secondary' | 'outline' | 'destructive';
+}
+
+export const NEED_LEVEL_CONFIG: Record<NeedLevel, NeedLevelConfig> = {
+	critical: {
+		label: 'Critical Need',
+		shortLabel: 'Critical',
+		bgClass: 'bg-red-100',
+		textClass: 'text-red-700',
+		darkBgClass: 'dark:bg-red-900/30',
+		darkTextClass: 'dark:text-red-400',
+		badgeVariant: 'destructive'
+	},
+	high: {
+		label: 'High Need',
+		shortLabel: 'High',
+		bgClass: 'bg-orange-100',
+		textClass: 'text-orange-700',
+		darkBgClass: 'dark:bg-orange-900/30',
+		darkTextClass: 'dark:text-orange-400',
+		badgeVariant: 'default'
+	},
+	medium: {
+		label: 'Medium Need',
+		shortLabel: 'Medium',
+		bgClass: 'bg-yellow-100',
+		textClass: 'text-yellow-700',
+		darkBgClass: 'dark:bg-yellow-900/30',
+		darkTextClass: 'dark:text-yellow-400',
+		badgeVariant: 'secondary'
+	},
+	low: {
+		label: 'Low Need',
+		shortLabel: 'Low',
+		bgClass: 'bg-green-100',
+		textClass: 'text-green-700',
+		darkBgClass: 'dark:bg-green-900/30',
+		darkTextClass: 'dark:text-green-400',
+		badgeVariant: 'secondary'
+	}
+};
+
+/**
+ * Gets the full need level configuration for a need level
+ */
+export function getNeedLevelConfig(level: NeedLevel): NeedLevelConfig {
+	return NEED_LEVEL_CONFIG[level] ?? NEED_LEVEL_CONFIG.medium;
+}
+
+/**
+ * Gets the need level configuration from a score (1-10)
+ */
+export function getNeedLevelConfigFromScore(score: number): NeedLevelConfig {
+	const level = getNeedLevelFromScore(score);
+	return getNeedLevelConfig(level);
+}
+
+/**
+ * Gets the combined Tailwind classes for a need level badge
+ */
+export function getNeedLevelBadgeClasses(level: NeedLevel): string {
+	const config = getNeedLevelConfig(level);
+	return `${config.bgClass} ${config.textClass} ${config.darkBgClass} ${config.darkTextClass}`;
+}
+
+/**
+ * Array of all need levels for iteration (ordered by priority)
+ */
+export const ALL_NEED_LEVELS: NeedLevel[] = ['critical', 'high', 'medium', 'low'];

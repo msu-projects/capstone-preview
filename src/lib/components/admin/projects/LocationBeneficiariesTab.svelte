@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
@@ -6,16 +7,36 @@
 	import * as Popover from '$lib/components/ui/popover';
 	import * as Select from '$lib/components/ui/select';
 	import * as Table from '$lib/components/ui/table';
+	import { getNeedLevelBadgeClasses, getNeedLevelConfig } from '$lib/config/status-config';
 	import { sitios } from '$lib/mock-data';
-	import type { ProjectSitio, Sitio } from '$lib/types';
+	import type { ProjectSitio, ProjectType, Sitio } from '$lib/types';
+	import { getNeedLevelFromScore } from '$lib/types';
 	import { cn } from '$lib/utils';
-	import { Check, Home, MapPin, Plus, Search, Trash2, TrendingUp, Users } from '@lucide/svelte';
+	import {
+		ArrowDownWideNarrow,
+		ArrowUpNarrowWide,
+		Check,
+		Gauge,
+		Home,
+		MapPin,
+		Plus,
+		Search,
+		Trash2,
+		TrendingUp,
+		Users
+	} from '@lucide/svelte';
 	import { cubicOut } from 'svelte/easing';
 	import { Tween } from 'svelte/motion';
+	import SitioRecommendationPanel from './SitioRecommendationPanel.svelte';
 
-	let { projectSitios = $bindable([]), showSitioSelection = $bindable(true) } = $props<{
+	let {
+		projectSitios = $bindable([]),
+		showSitioSelection = $bindable(true),
+		projectType
+	} = $props<{
 		projectSitios: Omit<ProjectSitio, 'project_id'>[];
 		showSitioSelection: boolean;
+		projectType?: ProjectType;
 	}>();
 
 	let selectedSitioId = $state<number | undefined>(undefined);
@@ -28,6 +49,7 @@
 	let searchQuery = $state('');
 	let selectedMunicipality = $state('');
 	let selectedBarangay = $state('');
+	let sortByNeedScore = $state<'none' | 'desc' | 'asc'>('desc'); // Default to highest need first
 
 	// Filter out already selected sitios
 	const availableSitios = $derived(
@@ -50,9 +72,9 @@
 			: [...new Set(availableSitios.map((s) => s.barangay))].sort()
 	);
 
-	// Filtered sitios based on search and filters
-	const filteredSitios = $derived(
-		availableSitios.filter((sitio) => {
+	// Filtered and sorted sitios based on search and filters
+	const filteredSitios = $derived.by(() => {
+		const filtered = availableSitios.filter((sitio) => {
 			const matchesSearch =
 				!searchQuery ||
 				sitio.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -64,8 +86,16 @@
 			const matchesBarangay = !selectedBarangay || sitio.barangay === selectedBarangay;
 
 			return matchesSearch && matchesMunicipality && matchesBarangay;
-		})
-	);
+		});
+
+		// Sort by need score if enabled
+		if (sortByNeedScore === 'desc') {
+			return [...filtered].sort((a, b) => (b.need_score ?? 5) - (a.need_score ?? 5));
+		} else if (sortByNeedScore === 'asc') {
+			return [...filtered].sort((a, b) => (a.need_score ?? 5) - (b.need_score ?? 5));
+		}
+		return filtered;
+	});
 
 	// Get selected sitio data
 	const selectedSitioData = $derived(
@@ -104,6 +134,17 @@
 		searchQuery = '';
 		selectedMunicipality = '';
 		selectedBarangay = '';
+	}
+
+	function toggleNeedScoreSort() {
+		if (sortByNeedScore === 'none') sortByNeedScore = 'desc';
+		else if (sortByNeedScore === 'desc') sortByNeedScore = 'asc';
+		else sortByNeedScore = 'none';
+	}
+
+	// Get sitio data by ID for the table (to access need_score)
+	function getSitioById(sitioId: number): Sitio | undefined {
+		return sitios.find((s) => s.id === sitioId);
 	}
 
 	// Calculated totals
@@ -155,6 +196,26 @@
 			(ps: Omit<ProjectSitio, 'project_id'>) => ps.sitio_id !== sitioId
 		);
 	}
+
+	// Add sitio from recommendation panel (auto-populates beneficiaries with household count)
+	function addSitioFromRecommendation(sitio: Sitio) {
+		const newProjectSitio: Omit<ProjectSitio, 'project_id'> = {
+			sitio_id: sitio.id,
+			sitio_name: sitio.name,
+			municipality: sitio.municipality,
+			barangay: sitio.barangay,
+			beneficiaries_target: sitio.households, // Default to all households
+			focal_person: undefined,
+			focal_contact: undefined
+		};
+
+		projectSitios = [...projectSitios, newProjectSitio];
+	}
+
+	// Get list of already selected sitio IDs for the recommendation panel
+	const selectedSitioIds = $derived(
+		projectSitios.map((ps: Omit<ProjectSitio, 'project_id'>) => ps.sitio_id)
+	);
 </script>
 
 <div class="space-y-6">
@@ -222,6 +283,7 @@
 					<Table.Header>
 						<Table.Row>
 							<Table.Head>Sitio Name</Table.Head>
+							<Table.Head>Need Level</Table.Head>
 							<Table.Head>Municipality</Table.Head>
 							<Table.Head>Barangay</Table.Head>
 							<Table.Head>Beneficiaries</Table.Head>
@@ -231,8 +293,18 @@
 					</Table.Header>
 					<Table.Body>
 						{#each projectSitios as ps}
+							{@const sitioData = getSitioById(ps.sitio_id)}
+							{@const needScore = sitioData?.need_score ?? 5}
+							{@const needLevel = getNeedLevelFromScore(needScore)}
+							{@const needConfig = getNeedLevelConfig(needLevel)}
 							<Table.Row>
 								<Table.Cell class="font-medium">{ps.sitio_name}</Table.Cell>
+								<Table.Cell>
+									<Badge variant="secondary" class="gap-1 {getNeedLevelBadgeClasses(needLevel)}">
+										<Gauge class="size-3" />
+										{needScore}/10
+									</Badge>
+								</Table.Cell>
 								<Table.Cell>{ps.municipality}</Table.Cell>
 								<Table.Cell>{ps.barangay}</Table.Cell>
 								<Table.Cell>{ps.beneficiaries_target}</Table.Cell>
@@ -261,6 +333,15 @@
 				</Table.Root>
 			</Card.CardContent>
 		</Card.Card>
+	{/if}
+
+	<!-- Sitio Recommendation Panel -->
+	{#if projectType}
+		<SitioRecommendationPanel
+			{projectType}
+			{selectedSitioIds}
+			onAddSitio={addSitioFromRecommendation}
+		/>
 	{/if}
 
 	<!-- Add Sitio Form -->
@@ -299,7 +380,7 @@
 								{/if}
 								<Search class="ml-2 size-4 shrink-0 opacity-50" />
 							</Popover.Trigger>
-							<Popover.Content class="w-[500px] p-0" align="start">
+							<Popover.Content class="w-full p-0 md:w-[500px]" align="start">
 								<div class="space-y-3 border-b p-3">
 									<!-- Search Input -->
 									<div class="relative">
@@ -337,8 +418,27 @@
 												{/each}
 											</Select.Content>
 										</Select.Root>
-									</div>
 
+										<!-- Sort by Need Score Button -->
+										<Button
+											variant={sortByNeedScore !== 'none' ? 'secondary' : 'outline'}
+											size="sm"
+											class="h-9 gap-1.5 text-xs"
+											onclick={toggleNeedScoreSort}
+											title="Sort by need score"
+										>
+											{#if sortByNeedScore === 'desc'}
+												<ArrowDownWideNarrow class="size-3.5" />
+												<span>Need ↓</span>
+											{:else if sortByNeedScore === 'asc'}
+												<ArrowUpNarrowWide class="size-3.5" />
+												<span>Need ↑</span>
+											{:else}
+												<Gauge class="size-3.5" />
+												<span>Sort</span>
+											{/if}
+										</Button>
+									</div>
 									<!-- Clear Filters Button -->
 									{#if searchQuery || selectedMunicipality || selectedBarangay}
 										<Button
@@ -363,6 +463,9 @@
 									{:else}
 										<div class="p-1">
 											{#each filteredSitios as sitio (sitio.id)}
+												{@const needScore = sitio.need_score ?? 5}
+												{@const needLevel = getNeedLevelFromScore(needScore)}
+												{@const needConfig = getNeedLevelConfig(needLevel)}
 												<button
 													type="button"
 													class={cn(
@@ -372,7 +475,17 @@
 													onclick={() => selectSitio(sitio)}
 												>
 													<div class="flex flex-1 flex-col items-start gap-1">
-														<span class="font-medium">{sitio.name}</span>
+														<div class="flex w-full items-center justify-between gap-2">
+															<span class="font-medium">{sitio.name}</span>
+															<Badge
+																variant="secondary"
+																class="flex h-5 gap-1 px-1.5 text-[10px] 
+																{getNeedLevelBadgeClasses(needLevel)}"
+															>
+																<Gauge class="size-2.5" />
+																{needConfig.shortLabel} ({needScore})
+															</Badge>
+														</div>
 														<span class="text-xs text-muted-foreground">
 															{sitio.barangay}, {sitio.municipality}
 														</span>
