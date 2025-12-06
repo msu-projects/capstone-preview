@@ -15,7 +15,7 @@
 </script>
 
 {#if sticky}
-	<div class="sticky top-0 z-10 border-b border-border bg-background shadow-sm">
+	<div class="sticky top-0 z-20 border-b border-border bg-background shadow-sm">
 		<div class="flex items-center gap-2 p-3 sm:gap-4 sm:p-4">
 			<Sidebar.Trigger class="-ml-1 shrink-0" />
 			<Separator orientation="vertical" class="hidden h-6 sm:block" />

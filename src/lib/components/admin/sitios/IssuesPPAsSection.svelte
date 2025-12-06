@@ -400,7 +400,7 @@
 					Add Issue
 				</Button>
 			</Popover.Trigger>
-			<Popover.Content class="w-80 p-0" align="start">
+			<Popover.Content class="w-110 p-0" align="start">
 				<Command.Root shouldFilter={false}>
 					<Command.Input placeholder="Search issues..." bind:value={issueSearch} />
 					<Command.List class="max-h-60">
@@ -410,7 +410,11 @@
 						<Command.Group heading="Predefined Issues">
 							{#each availableIssues as issue (issue.id)}
 								{@const colors = categoryColors[issue.category]}
-								<Command.Item value={issue.id} onSelect={() => addIssue(issue.id)}>
+								<Command.Item
+									value={issue.id}
+									onSelect={() => addIssue(issue.id)}
+									class="cursor-pointer transition-colors duration-100 aria-selected:bg-primary/30 aria-selected:text-black"
+								>
 									<div class="flex w-full items-center gap-2">
 										<span
 											class="shrink-0 rounded px-1.5 py-0.5 text-xs font-medium {colors.bg} {colors.text}"
@@ -454,7 +458,7 @@
 						type="button"
 						variant="outline"
 						size="sm"
-						class="h-auto gap-1.5 py-1.5 {colors.border} hover:{colors.bg} hover:text-black hover:dark:text-white"
+						class="h-auto gap-1.5 py-1.5 {colors.border} hover:{colors.bg} transition-colors hover:text-black hover:dark:text-white"
 						onclick={() => addPPA(ppa.id)}
 					>
 						<Sparkles class="size-3.5 text-success " />
@@ -560,7 +564,7 @@
 					Add PPA
 				</Button>
 			</Popover.Trigger>
-			<Popover.Content class="w-96 p-0" align="start">
+			<Popover.Content class="w-120 p-0" align="start">
 				<Command.Root shouldFilter={false}>
 					<Command.Input placeholder="Search PPAs..." bind:value={ppaSearch} />
 					<Command.List class="max-h-60">
@@ -571,7 +575,11 @@
 							{#each availablePPAs as ppa (ppa.id)}
 								{@const colors = categoryColors[ppa.category]}
 								{@const projectTypeName = getProjectTypeName(ppa.projectTypeId)}
-								<Command.Item value={ppa.id} onSelect={() => addPPA(ppa.id)}>
+								<Command.Item
+									value={ppa.id}
+									onSelect={() => addPPA(ppa.id)}
+									class="cursor-pointer transition-colors duration-100 aria-selected:bg-primary/30 aria-selected:text-black"
+								>
 									<div class="flex w-full flex-col gap-0.5">
 										<div class="flex items-center gap-2">
 											<span
@@ -582,7 +590,7 @@
 											<span class="truncate">{ppa.name}</span>
 										</div>
 										{#if projectTypeName}
-											<span class="ml-1 text-xs text-muted-foreground">
+											<span class="ml-1 text-xs opacity-70">
 												→ {projectTypeName}
 											</span>
 										{/if}

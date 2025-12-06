@@ -51,7 +51,7 @@
 
 {#if isMobile.current}
 	<!-- Mobile: Horizontal compact stepper with sheet for full navigation -->
-	<div class={cn('mb-4', className)}>
+	<div class={cn('relative z-0 mb-4', className)}>
 		<!-- Current step indicator bar -->
 		<div
 			class="relative flex items-center gap-3 overflow-hidden rounded-xl border bg-card p-3 shadow-sm"
@@ -69,7 +69,7 @@
 							{...props}
 							variant="ghost"
 							size="icon"
-							class="relative z-10 size-11 shrink-0 rounded-lg bg-muted/50 hover:bg-muted"
+							class="relative z-10 size-11 shrink-0 rounded-lg hover:bg-muted hover:text-black"
 						>
 							<Menu class="size-5" />
 						</Button>

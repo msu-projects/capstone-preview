@@ -12,7 +12,7 @@
 		rstOfficialPositionOptions,
 		transportationMethodOptions
 	} from '$lib/config/sitio-options';
-	import { Bus, Cat, Dog, Megaphone, Plus, Trash2, Users } from '@lucide/svelte';
+	import { Bus, Cat, Dog, Eraser, Megaphone, Plus, Trash2, Users } from '@lucide/svelte';
 
 	let {
 		sectoral_organizations = $bindable(0),
@@ -70,6 +70,10 @@
 		local_officials = local_officials.filter((_, i) => i !== index);
 	}
 
+	function clearAllLocalOfficials() {
+		local_officials = [];
+	}
+
 	// RST Officials management
 	function addRstOfficial() {
 		rst_officials = [...rst_officials, { name: '', position: '' }];
@@ -77,6 +81,10 @@
 
 	function removeRstOfficial(index: number) {
 		rst_officials = rst_officials.filter((_, i) => i !== index);
+	}
+
+	function clearAllRstOfficials() {
+		rst_officials = [];
 	}
 </script>
 
@@ -243,16 +251,30 @@
 		<div class="space-y-3">
 			<div class="flex items-center justify-between">
 				<Label>Officials List</Label>
-				<Button
-					type="button"
-					variant="outline"
-					size="sm"
-					onclick={addLocalOfficial}
-					class="h-8 gap-1.5"
-				>
-					<Plus class="size-3.5" />
-					Add
-				</Button>
+				<div class="flex items-center gap-2">
+					{#if local_officials.length > 0}
+						<Button
+							type="button"
+							variant="outline"
+							size="sm"
+							onclick={clearAllLocalOfficials}
+							class="h-8 gap-1.5 text-destructive hover:bg-destructive/10 hover:text-destructive"
+						>
+							<Eraser class="size-3.5" />
+							Clear All
+						</Button>
+					{/if}
+					<Button
+						type="button"
+						variant="outline"
+						size="sm"
+						onclick={addLocalOfficial}
+						class="h-8 gap-1.5"
+					>
+						<Plus class="size-3.5" />
+						Add
+					</Button>
+				</div>
 			</div>
 
 			{#if local_officials.length === 0}
@@ -323,16 +345,30 @@
 						content="Resident Support Team - community volunteers assisting in local governance"
 					/>
 				</Label>
-				<Button
-					type="button"
-					variant="outline"
-					size="sm"
-					onclick={addRstOfficial}
-					class="h-8 gap-1.5"
-				>
-					<Plus class="size-3.5" />
-					Add
-				</Button>
+				<div class="flex items-center gap-2">
+					{#if rst_officials.length > 0}
+						<Button
+							type="button"
+							variant="outline"
+							size="sm"
+							onclick={clearAllRstOfficials}
+							class="h-8 gap-1.5 text-destructive hover:bg-destructive/10 hover:text-destructive"
+						>
+							<Eraser class="size-3.5" />
+							Clear All
+						</Button>
+					{/if}
+					<Button
+						type="button"
+						variant="outline"
+						size="sm"
+						onclick={addRstOfficial}
+						class="h-8 gap-1.5"
+					>
+						<Plus class="size-3.5" />
+						Add
+					</Button>
+				</div>
 			</div>
 
 			{#if rst_officials.length === 0}

@@ -126,7 +126,9 @@
 	let local_officials = $state<Array<{ name: string; position: string }>>(
 		localOfficialPositionOptions.map((position) => ({ name: '', position }))
 	);
-	let rst_officials = $state<Array<{ name: string; position: string }>>([]);
+	let rst_officials = $state<Array<{ name: string; position: string }>>(
+		localOfficialPositionOptions.map((position) => ({ name: '', position }))
+	);
 
 	// Primary Priorities - Issues & Concerns (structured)
 	let issues_concerns = $state<SitioIssue[]>([]);
