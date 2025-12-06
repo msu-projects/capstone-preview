@@ -4,6 +4,7 @@
 	import * as Card from '$lib/components/ui/card';
 	import { Progress } from '$lib/components/ui/progress';
 	import type { Project } from '$lib/types';
+	import toTitleCase from '$lib/utils/common';
 	import {
 		aggregateByCategory,
 		aggregateProgress,
@@ -245,7 +246,9 @@
 									variant={item.project.status === 'completed' ? 'default' : 'secondary'}
 									class="shrink-0"
 								>
-									{item.project.status === 'in-progress' ? 'In Progress' : item.project.status}
+									{item.project.status === 'in-progress'
+										? 'In Progress'
+										: toTitleCase(item.project.status)}
 								</Badge>
 							</div>
 						{/each}
