@@ -32,7 +32,7 @@
 <header
 	class="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60"
 >
-	<div class="container mx-auto flex h-16 items-center justify-between px-4">
+	<div class="relative container mx-auto flex h-16 items-center justify-between px-4">
 		<!-- Logo & Title -->
 		<a href="/" class="flex items-center gap-2">
 			<img src={logo} alt="CATCH-UP Logo" class="size-9 rounded-lg object-contain" />
@@ -43,7 +43,7 @@
 		</a>
 
 		<!-- Desktop Navigation -->
-		<nav class="hidden items-center gap-1 md:flex">
+		<nav class="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 md:flex">
 			{#each navLinks as link}
 				{@const active = isActive(link.href)}
 				<a

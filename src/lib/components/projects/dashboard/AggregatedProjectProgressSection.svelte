@@ -143,20 +143,7 @@
 			<Card.Content>
 				{#if progressChartData.length > 0}
 					<div class="flex items-center gap-6">
-						<div class="w-1/2">
-							<DonutChart data={progressChartData} height={200} />
-						</div>
-						<div class="w-1/2 space-y-2">
-							{#each progressChartData as item}
-								<div class="flex items-center justify-between text-sm">
-									<div class="flex items-center gap-2">
-										<div class="size-3 rounded-full" style="background-color: {item.color}"></div>
-										<span class="text-slate-600">{item.label}</span>
-									</div>
-									<span class="font-semibold text-slate-900">{item.value}</span>
-								</div>
-							{/each}
-						</div>
+						<DonutChart data={progressChartData} height={300} />
 					</div>
 				{:else}
 					<div class="flex h-[200px] items-center justify-center text-sm text-slate-500">
@@ -206,17 +193,43 @@
 				{#if topPerforming.length > 0}
 					<div class="space-y-3">
 						{#each topPerforming as item}
-							<div class="flex items-center gap-3 rounded-lg bg-slate-50 p-3">
-								<div
-									class="flex size-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 font-bold text-emerald-700"
-								>
-									{item.progress.toFixed(0)}%
+							{@const circumference = 2 * Math.PI * 18}
+							{@const strokeDashoffset = circumference - (item.progress / 100) * circumference}
+							<div class="flex items-center gap-3 rounded-lg bg-slate-50 p-3 dark:bg-slate-800/50">
+								<div class="relative size-11 shrink-0">
+									<svg class="size-11 -rotate-90" viewBox="0 0 44 44">
+										<circle
+											cx="22"
+											cy="22"
+											r="18"
+											stroke="currentColor"
+											stroke-width="4"
+											fill="none"
+											class="text-emerald-100 dark:text-emerald-900/30"
+										/>
+										<circle
+											cx="22"
+											cy="22"
+											r="18"
+											stroke="currentColor"
+											stroke-width="4"
+											fill="none"
+											stroke-linecap="round"
+											class="text-emerald-500 transition-all duration-500"
+											style="stroke-dasharray: {circumference}; stroke-dashoffset: {strokeDashoffset};"
+										/>
+									</svg>
+									<span
+										class="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-emerald-700 dark:text-emerald-400"
+									>
+										{item.progress.toFixed(0)}%
+									</span>
 								</div>
 								<div class="min-w-0 flex-1">
-									<p class="truncate text-sm font-medium text-slate-900">
+									<p class="truncate text-sm font-medium text-slate-900 dark:text-slate-100">
 										{item.project.title}
 									</p>
-									<p class="text-xs text-slate-500">
+									<p class="text-xs text-slate-500 dark:text-slate-400">
 										{item.project.project_sitios?.[0]?.municipality ?? 'N/A'}
 									</p>
 								</div>
@@ -230,7 +243,7 @@
 						{/each}
 					</div>
 				{:else}
-					<div class="py-8 text-center text-sm text-slate-500">
+					<div class="py-8 text-center text-sm text-slate-500 dark:text-slate-400">
 						No projects with significant progress yet
 					</div>
 				{/if}
@@ -250,28 +263,59 @@
 				{#if underperforming.length > 0}
 					<div class="space-y-3">
 						{#each underperforming as item}
-							<div class="flex items-center gap-3 rounded-lg bg-amber-50/50 p-3">
-								<div
-									class="flex size-10 shrink-0 items-center justify-center rounded-full bg-amber-100 font-bold text-amber-700"
-								>
-									{item.progress.toFixed(0)}%
+							{@const circumference = 2 * Math.PI * 18}
+							{@const strokeDashoffset = circumference - (item.progress / 100) * circumference}
+							<div
+								class="flex items-center gap-3 rounded-lg bg-amber-50/50 p-3 dark:bg-amber-900/10"
+							>
+								<div class="relative size-11 shrink-0">
+									<svg class="size-11 -rotate-90" viewBox="0 0 44 44">
+										<circle
+											cx="22"
+											cy="22"
+											r="18"
+											stroke="currentColor"
+											stroke-width="4"
+											fill="none"
+											class="text-amber-100 dark:text-amber-900/30"
+										/>
+										<circle
+											cx="22"
+											cy="22"
+											r="18"
+											stroke="currentColor"
+											stroke-width="4"
+											fill="none"
+											stroke-linecap="round"
+											class="text-amber-500 transition-all duration-500"
+											style="stroke-dasharray: {circumference}; stroke-dashoffset: {strokeDashoffset};"
+										/>
+									</svg>
+									<span
+										class="absolute inset-0 flex items-center justify-center text-xs font-bold text-amber-700 dark:text-amber-400"
+									>
+										{item.progress.toFixed(0)}%
+									</span>
 								</div>
 								<div class="min-w-0 flex-1">
-									<p class="truncate text-sm font-medium text-slate-900">
+									<p class="truncate text-sm font-medium text-slate-900 dark:text-slate-100">
 										{item.project.title}
 									</p>
-									<p class="text-xs text-slate-500">
+									<p class="text-xs text-slate-500 dark:text-slate-400">
 										{item.project.project_sitios?.[0]?.municipality ?? 'N/A'}
 									</p>
 								</div>
-								<Badge variant="outline" class="shrink-0 border-amber-200 text-amber-700">
+								<Badge
+									variant="outline"
+									class="shrink-0 border-amber-200 text-amber-700 dark:border-amber-700 dark:text-amber-400"
+								>
 									Needs Review
 								</Badge>
 							</div>
 						{/each}
 					</div>
 				{:else}
-					<div class="py-8 text-center text-sm text-slate-500">
+					<div class="py-8 text-center text-sm text-slate-500 dark:text-slate-400">
 						All active projects are progressing well
 					</div>
 				{/if}

@@ -2,7 +2,6 @@
 	import BarChart from '$lib/components/charts/BarChart.svelte';
 	import DonutChart from '$lib/components/charts/DonutChart.svelte';
 	import * as Card from '$lib/components/ui/card';
-	import { Progress } from '$lib/components/ui/progress';
 	import type { Project } from '$lib/types';
 	import { formatCurrency, formatCurrencyCompact } from '$lib/utils/formatters';
 	import {
@@ -124,25 +123,11 @@
 			<Card.Content>
 				{#if statusBudgetData.length > 0}
 					<div class="flex items-center gap-6">
-						<div class="w-1/2">
-							<DonutChart
-								data={statusBudgetData}
-								height={0}
-								valueFormatter={formatCurrencyCompact}
-							/>
-						</div>
-						<div class="w-1/2 space-y-3">
-							{#each budgetByStatus as item}
-								<div class="space-y-1">
-									<div class="flex items-center justify-between text-sm">
-										<span class="text-slate-600">{item.label}</span>
-										<span class="font-medium text-slate-900">{item.percentage.toFixed(1)}%</span>
-									</div>
-									<Progress value={item.percentage} class="h-1.5" />
-									<p class="text-xs text-slate-500">{formatCurrency(item.budget)}</p>
-								</div>
-							{/each}
-						</div>
+						<DonutChart
+							data={statusBudgetData}
+							height={270}
+							valueFormatter={formatCurrencyCompact}
+						/>
 					</div>
 				{:else}
 					<div class="flex h-[200px] items-center justify-center text-sm text-slate-500">
