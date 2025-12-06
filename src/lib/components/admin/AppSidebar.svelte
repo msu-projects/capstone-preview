@@ -8,7 +8,6 @@
 	import { authStore } from '$lib/stores/auth.svelte';
 	import {
 		CloudUpload,
-		Database,
 		ExternalLink,
 		FileText,
 		Folder,
@@ -108,13 +107,11 @@
 			<Sidebar.MenuItem>
 				<Sidebar.MenuButton size="lg" class="data-[state=open]:bg-sidebar-accent">
 					<a href="/admin" class="flex items-center gap-2">
-						<div
-							class="flex aspect-square size-8 items-center justify-center rounded-lg bg-blue-600 text-white"
-						>
-							<Database class="size-4" />
+						<div class="flex aspect-square size-8 items-center justify-center">
+							<img src="/favicon.png" alt="SC Data Bank Logo" class="size-8 object-contain" />
 						</div>
 						<div class="grid flex-1 text-left text-sm leading-tight">
-							<span class="truncate font-semibold">SC Data Bank</span>
+							<span class="truncate font-semibold">CATCH-UP Data Bank</span>
 							<span class="truncate text-xs">Admin Portal</span>
 						</div>
 					</a>
