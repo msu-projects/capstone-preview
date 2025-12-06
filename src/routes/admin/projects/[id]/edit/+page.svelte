@@ -448,6 +448,9 @@
 
 			<!-- Form Content -->
 			<div class="min-w-0 flex-1">
+				<p class="mb-4 text-sm text-muted-foreground">
+					Fields marked with <span class="text-destructive">*</span> are required.
+				</p>
 				{#if activeStep === 'category'}
 					<CategoryProjectSelectionTab
 						bind:title

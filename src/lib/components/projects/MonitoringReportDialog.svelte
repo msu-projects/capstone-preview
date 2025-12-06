@@ -3,7 +3,7 @@
 	import { PhotoGallery } from '$lib/components/ui/photo-gallery';
 	import type { MonthlyReport } from '$lib/types';
 	import { formatCurrency } from '$lib/utils/formatters';
-	import { Activity, Banknote, Camera, CheckCircle2, Users } from '@lucide/svelte';
+	import { Activity, Banknote, Camera, CheckCircle2 } from '@lucide/svelte';
 
 	interface Props {
 		open: boolean;
@@ -36,12 +36,12 @@
 
 <!-- Detail Modal -->
 <Dialog.Root bind:open>
-	<Dialog.Content class="max-h-[90vh] max-w-3xl! overflow-y-auto">
+	<Dialog.Content class="max-h-[90vh] w-full max-w-3xl! overflow-y-auto">
 		<Dialog.Header>
 			<Dialog.Title>Progress Report: {selectedReport?.month}</Dialog.Title>
 		</Dialog.Header>
 		{#if selectedReport}
-			<div class="space-y-6">
+			<div class="space-y-6 overflow-x-hidden">
 				<!-- Status Banner -->
 				<div
 					class="rounded-xl border p-4 {getStatusColor(selectedReport.status)
@@ -66,20 +66,20 @@
 				<!-- Detailed Stats -->
 				<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
 					<div
-						class="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800"
+						class="min-w-0 rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800"
 					>
 						<h4
 							class="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-200"
 						>
-							<Activity class="size-4 text-blue-600" /> Physical Progress
+							<Activity class="size-4 shrink-0 text-blue-600" /> Physical Progress
 						</h4>
 						<div class="space-y-3">
-							<div class="flex justify-between text-sm">
-								<span class="text-slate-500 dark:text-slate-400">Planned</span>
+							<div class="flex items-center justify-between gap-2 text-sm">
+								<span class="shrink-0 text-slate-500 dark:text-slate-400">Planned</span>
 								<span class="font-medium">{selectedReport.plan_physical}%</span>
 							</div>
-							<div class="flex justify-between text-sm">
-								<span class="text-slate-500 dark:text-slate-400">Actual</span>
+							<div class="flex items-center justify-between gap-2 text-sm">
+								<span class="shrink-0 text-slate-500 dark:text-slate-400">Actual</span>
 								<span class="font-bold text-slate-900 dark:text-slate-100"
 									>{selectedReport.actual_physical ?? '-'}%</span
 								>
@@ -94,21 +94,23 @@
 					</div>
 
 					<div
-						class="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800"
+						class="min-w-0 rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800"
 					>
 						<h4
 							class="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-200"
 						>
-							<Banknote class="size-4 text-emerald-600" /> Financial Releases
+							<Banknote class="size-4 shrink-0 text-emerald-600" /> Financial Releases
 						</h4>
 						<div class="space-y-3">
-							<div class="flex justify-between text-sm">
-								<span class="text-slate-500 dark:text-slate-400">Planned</span>
-								<span class="font-medium">{formatCurrency(selectedReport.plan_financial)}</span>
+							<div class="flex items-center justify-between gap-2 text-sm">
+								<span class="shrink-0 text-slate-500 dark:text-slate-400">Planned</span>
+								<span class="truncate font-medium"
+									>{formatCurrency(selectedReport.plan_financial)}</span
+								>
 							</div>
-							<div class="flex justify-between text-sm">
-								<span class="text-slate-500 dark:text-slate-400">Actual</span>
-								<span class="font-bold text-slate-900 dark:text-slate-100"
+							<div class="flex items-center justify-between gap-2 text-sm">
+								<span class="shrink-0 text-slate-500 dark:text-slate-400">Actual</span>
+								<span class="truncate font-bold text-slate-900 dark:text-slate-100"
 									>{selectedReport.actual_financial
 										? formatCurrency(selectedReport.actual_financial)
 										: '-'}</span
@@ -118,7 +120,8 @@
 								<div
 									class="h-1.5 rounded-full bg-emerald-500"
 									style="width: {selectedReport.actual_financial && selectedReport.plan_financial
-										? (selectedReport.actual_financial / selectedReport.plan_financial) * 100
+										? Math.min(selectedReport.actual_financial / selectedReport.plan_financial, 1) *
+											100
 										: 0}%"
 								></div>
 							</div>
@@ -126,52 +129,29 @@
 					</div>
 				</div>
 
-				<!-- Achieved Outputs & Beneficiaries -->
-				{#if (selectedReport.achieved_outputs && Object.keys(selectedReport.achieved_outputs).length > 0) || (selectedReport.beneficiaries_reached && selectedReport.beneficiaries_reached > 0)}
+				<!-- Achieved Outputs -->
+				{#if selectedReport.achieved_outputs && Object.keys(selectedReport.achieved_outputs).length > 0}
 					<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-						<!-- Achieved Outputs -->
-						{#if selectedReport.achieved_outputs && Object.keys(selectedReport.achieved_outputs).length > 0}
-							<div
-								class="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800"
+						<div
+							class="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800"
+						>
+							<h4
+								class="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-200"
 							>
-								<h4
-									class="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-200"
-								>
-									<CheckCircle2 class="size-4 text-violet-600" /> Achieved Outputs
-								</h4>
-								<div class="space-y-2">
-									{#each Object.entries(selectedReport.achieved_outputs) as [key, value]}
-										<div class="flex justify-between text-sm">
-											<span class="text-slate-500 dark:text-slate-400"
-												>{formatIndicatorKey(key)}</span
-											>
-											<span class="font-medium text-slate-900 dark:text-slate-100"
-												>{value.toLocaleString()}</span
-											>
-										</div>
-									{/each}
-								</div>
+								<CheckCircle2 class="size-4 text-violet-600" /> Achieved Outputs
+							</h4>
+							<div class="space-y-2">
+								{#each Object.entries(selectedReport.achieved_outputs) as [key, value]}
+									<div class="flex justify-between text-sm">
+										<span class="text-slate-500 dark:text-slate-400">{formatIndicatorKey(key)}</span
+										>
+										<span class="font-medium text-slate-900 dark:text-slate-100"
+											>{value.toLocaleString()}</span
+										>
+									</div>
+								{/each}
 							</div>
-						{/if}
-
-						<!-- Beneficiaries Reached -->
-						{#if selectedReport.beneficiaries_reached && selectedReport.beneficiaries_reached > 0}
-							<div
-								class="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800"
-							>
-								<h4
-									class="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-200"
-								>
-									<Users class="size-4 text-amber-600" /> Beneficiaries Reached
-								</h4>
-								<div class="flex items-baseline gap-2">
-									<span class="text-3xl font-bold text-slate-900 dark:text-slate-100">
-										{selectedReport.beneficiaries_reached.toLocaleString()}
-									</span>
-									<span class="text-sm text-slate-500 dark:text-slate-400">individuals</span>
-								</div>
-							</div>
-						{/if}
+						</div>
 					</div>
 				{/if}
 

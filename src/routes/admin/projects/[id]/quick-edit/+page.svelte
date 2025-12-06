@@ -177,6 +177,9 @@
 	<!-- Content -->
 	<div class="flex-1 p-6">
 		<div class="w-full">
+			<p class="mb-4 text-sm text-muted-foreground">
+				Fields marked with <span class="text-destructive">*</span> are required.
+			</p>
 			<Card.Card class="p-0">
 				<Card.CardContent class="p-6">
 					<QuickUpdateForm

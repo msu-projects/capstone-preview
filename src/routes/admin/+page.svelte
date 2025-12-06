@@ -3,6 +3,7 @@
 	import ActivityFeed from '$lib/components/admin/dashboard/ActivityFeed.svelte';
 	import DashboardStats from '$lib/components/admin/dashboard/DashboardStats.svelte';
 	import RecentProjectsTable from '$lib/components/admin/dashboard/RecentProjectsTable.svelte';
+	import StaleProjectsCard from '$lib/components/admin/dashboard/StaleProjectsCard.svelte';
 	import DonutChart from '$lib/components/charts/DonutChart.svelte';
 	import LineChart from '$lib/components/charts/LineChart.svelte';
 	import { Button } from '$lib/components/ui/button';
@@ -201,6 +202,9 @@
 				{/if}
 			</Card.CardContent>
 		</Card.Card>
+
+		<!-- Projects Needing Update -->
+		<StaleProjectsCard {projects} {isLoading} staleDays={30} />
 
 		<!-- Recent Projects & Activity -->
 		<div class="grid gap-6 lg:grid-cols-3">

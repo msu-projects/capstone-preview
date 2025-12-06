@@ -8,17 +8,8 @@
 	import { hasLocationsOverride } from '$lib/config/location-data';
 	import { hasCategoriesOverride, hasProjectTypesOverride } from '$lib/config/project-categories';
 	import { hasSitioOptionsOverride } from '$lib/config/sitio-options';
-	import { hasStatusOverride } from '$lib/config/status-config';
 	import { authStore } from '$lib/stores/auth.svelte';
-	import {
-		ChevronRight,
-		FileText,
-		FolderCog,
-		ListChecks,
-		MapPin,
-		Palette,
-		Settings2
-	} from '@lucide/svelte';
+	import { ChevronRight, FileText, FolderCog, ListChecks, MapPin, Settings2 } from '@lucide/svelte';
 
 	interface ConfigSection {
 		id: string;
@@ -69,16 +60,16 @@
 			href: '/admin/config/issues-ppas',
 			hasOverride: hasIssuesPPAsOverride,
 			items: ['Predefined Issues', 'Predefined PPAs', 'Issue-PPA Mappings']
-		},
-		{
-			id: 'status',
-			title: 'Status Configuration',
-			description: 'Labels and colors for project statuses and need levels',
-			icon: Palette,
-			href: '/admin/config/status',
-			hasOverride: hasStatusOverride,
-			items: ['Project Statuses', 'Need Levels', 'Colors & Badges']
 		}
+		// {
+		// 	id: 'status',
+		// 	title: 'Status Configuration',
+		// 	description: 'Labels and colors for project statuses and need levels',
+		// 	icon: Palette,
+		// 	href: '/admin/config/status',
+		// 	hasOverride: hasStatusOverride,
+		// 	items: ['Project Statuses', 'Need Levels', 'Colors & Badges']
+		// }
 	];
 
 	const canManageConfig = $derived(authStore.isSuperadmin);
