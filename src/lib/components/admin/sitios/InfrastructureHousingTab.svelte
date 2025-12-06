@@ -216,20 +216,18 @@
 			<Label>Toilet Facility Types</Label>
 			<div class="grid grid-cols-2 gap-2 md:grid-cols-4">
 				{#each toiletFacilityTypeOptions as type}
-					<div
-						class="flex items-center gap-2 rounded-lg border p-3 transition-colors hover:bg-muted/50 {toilet_facility_types.includes(
-							type
-						)
-							? 'border-primary/30 bg-primary/5'
-							: ''}"
+					<Label
+						for={`toilet_${type}`}
+						class="flex cursor-pointer items-center gap-2 rounded-lg border p-3 text-sm font-normal transition-colors hover:bg-muted/50
+						{toilet_facility_types.includes(type) ? 'border-primary/30 bg-primary/5' : ''}"
 					>
 						<Checkbox
 							id={`toilet_${type}`}
 							checked={toilet_facility_types.includes(type)}
 							onCheckedChange={() => toggleToiletType(type)}
 						/>
-						<Label for={`toilet_${type}`} class="cursor-pointer text-sm font-normal">{type}</Label>
-					</div>
+						<span> {type}</span>
+					</Label>
 				{/each}
 			</div>
 		</div>
@@ -258,12 +256,17 @@
 			<Label>Alternative Electricity Sources</Label>
 			<div class="flex flex-wrap gap-2">
 				{#each alternativeElectricitySourceOptions as source}
-					<div
+					<!-- <div
 						class="flex items-center gap-2 rounded-lg border px-3 py-2 transition-colors hover:bg-muted/50 {alternative_electricity_sources.includes(
 							source
 						)
 							? 'border-warning/30 bg-warning/10'
 							: ''}"
+					> -->
+					<Label
+						for={`elec_${source}`}
+						class="flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm font-normal transition-colors hover:bg-muted/50 
+						{alternative_electricity_sources.includes(source) ? 'border-primary/30' : ''}"
 					>
 						<Checkbox
 							id={`elec_${source}`}
@@ -275,9 +278,8 @@
 								);
 							}}
 						/>
-						<Label for={`elec_${source}`} class="cursor-pointer text-sm font-normal">{source}</Label
-						>
-					</div>
+						<span> {source}</span>
+					</Label>
 				{/each}
 			</div>
 		</div>

@@ -19,7 +19,7 @@ export const SITIO_FIELD_DEFINITIONS = [
 		required: true
 	},
 	{ field: 'barangay', label: 'Barangay', csvHeader: 'BARANGAY', required: true },
-	{ field: 'name', label: 'Sitio/Purok', csvHeader: 'SITIO', required: true },
+	{ field: 'name', label: 'Sitio', csvHeader: 'SITIO', required: true },
 	{
 		field: 'households',
 		label: 'Number of Households',

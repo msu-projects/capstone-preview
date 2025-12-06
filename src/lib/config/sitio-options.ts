@@ -160,9 +160,9 @@ export const infoDisseminationMethodOptions = [
 /** Transportation methods available in the area */
 export const transportationMethodOptions = ['Motorcycle', 'Tricycle', '4-Wheels', 'Boat'];
 
-/** Local sitio/purok official positions */
+/** Local sitio official positions */
 export const localOfficialPositionOptions = [
-	'Sitio/Purok Leader',
+	'Sitio Leader',
 	'Vice-President',
 	'Secretary',
 	'Treasurer',

@@ -10,6 +10,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import { FormStepper, type Step } from '$lib/components/ui/form-stepper';
+	import { localOfficialPositionOptions } from '$lib/config/sitio-options';
 	import type { Sitio, SitioIssue, SitioPPA } from '$lib/types';
 	import { getNeedLevelFromScore } from '$lib/types';
 	import { logAuditAction } from '$lib/utils/audit';
@@ -121,8 +122,10 @@
 	let ethnicities = $state<string[]>([]);
 	let religions = $state<string[]>([]);
 
-	// Local Officials
-	let local_officials = $state<Array<{ name: string; position: string }>>([]);
+	// Local Officials - prefilled with standard positions
+	let local_officials = $state<Array<{ name: string; position: string }>>(
+		localOfficialPositionOptions.map((position) => ({ name: '', position }))
+	);
 	let rst_officials = $state<Array<{ name: string; position: string }>>([]);
 
 	// Primary Priorities - Issues & Concerns (structured)
@@ -295,8 +298,8 @@
 			food_security,
 			ethnicities,
 			religions,
-			local_officials,
-			rst_officials,
+			local_officials: local_officials.filter((o) => o.name.trim() !== ''),
+			rst_officials: rst_officials.filter((o) => o.name.trim() !== ''),
 			issues_concerns,
 			proposed_ppas
 		};

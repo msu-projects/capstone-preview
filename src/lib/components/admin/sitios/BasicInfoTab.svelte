@@ -218,10 +218,10 @@
 				<Input
 					id="sitio"
 					bind:value={name}
-					placeholder="Enter sitio/purok name"
+					placeholder="Enter sitio name"
 					class={cn('transition-all', name && 'border-primary/30 bg-primary/5')}
 				/>
-				<p class="text-xs text-muted-foreground">The name of the sitio or purok</p>
+				<p class="text-xs text-muted-foreground">The name of the sitio</p>
 			</div>
 
 			<!-- Coding -->

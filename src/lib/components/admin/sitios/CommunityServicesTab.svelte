@@ -36,6 +36,19 @@
 		rst_officials: Array<{ name: string; position: string }>;
 	} = $props();
 
+	// Enforce vaccinated counts don't exceed total counts
+	$effect(() => {
+		if (dogs_vaccinated > dogs) {
+			dogs_vaccinated = dogs;
+		}
+	});
+
+	$effect(() => {
+		if (cats_vaccinated > cats) {
+			cats_vaccinated = cats;
+		}
+	});
+
 	// Computed values
 	const total_count = $derived(dogs + cats);
 	const dog_vaccination_rate = $derived(
@@ -222,7 +235,7 @@
 
 	<!-- Local Officials -->
 	<FormSection
-		title="Sitio/Purok Officials"
+		title="Sitio Officials"
 		description="Local leaders and officers"
 		icon={Users}
 		variant="success"

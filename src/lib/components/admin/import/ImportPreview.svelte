@@ -120,7 +120,7 @@
 								<Table.Row>
 									<Table.Head>Municipality</Table.Head>
 									<Table.Head>Barangay</Table.Head>
-									<Table.Head>Sitio/Purok</Table.Head>
+									<Table.Head>Sitio</Table.Head>
 									<Table.Head>Population</Table.Head>
 									<Table.Head>Households</Table.Head>
 								</Table.Row>
@@ -188,7 +188,7 @@
 									<Table.Head class="w-20">Row</Table.Head>
 									<Table.Head>Municipality</Table.Head>
 									<Table.Head>Barangay</Table.Head>
-									<Table.Head>Sitio/Purok</Table.Head>
+									<Table.Head>Sitio</Table.Head>
 									<Table.Head>Errors</Table.Head>
 								</Table.Row>
 							</Table.Header>

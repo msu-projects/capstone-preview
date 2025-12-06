@@ -58,17 +58,7 @@ class SeededRandom {
 
 // ===== SITIO NAME GENERATORS =====
 
-const SITIO_PREFIXES = [
-	'Sitio',
-	'Purok',
-	'Barrio',
-	'Zone',
-	'Upper',
-	'Lower',
-	'New',
-	'Old',
-	'Central'
-];
+const SITIO_PREFIXES = ['Sitio', 'Barrio', 'Zone', 'Upper', 'Lower', 'New', 'Old', 'Central'];
 
 const SITIO_NAMES = [
 	'Maligaya',
