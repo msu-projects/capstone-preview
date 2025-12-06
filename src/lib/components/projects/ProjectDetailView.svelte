@@ -50,7 +50,12 @@
 			{:else if activeTab === 'locations'}
 				<LocationsTab {project} />
 			{:else if activeTab === 'monitoring'}
-				<MonitoringTab {monthlyMonitoring} onReportClick={handleReportClick} />
+				<MonitoringTab
+					{monthlyMonitoring}
+					monthlyProgress={project.monthly_progress}
+					performanceTargets={project.performance_targets}
+					onReportClick={handleReportClick}
+				/>
 			{/if}
 		</div>
 	</main>

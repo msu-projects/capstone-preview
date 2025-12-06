@@ -416,7 +416,10 @@ export function transformToMonthlyReports(
 			actual_financial: progress.budget_utilized,
 			status: mapProgressStatus(progress.status),
 			remarks: progress.issues_encountered || '',
-			photos: progress.photo_documentation || []
+			photos: progress.photo_documentation || [],
+			// Enhanced fields
+			achieved_outputs: progress.achieved_outputs,
+			beneficiaries_reached: progress.beneficiaries_reached
 		};
 	});
 
@@ -424,4 +427,45 @@ export function transformToMonthlyReports(
 	reports.sort((a, b) => b.month_year.localeCompare(a.month_year));
 
 	return reports;
+}
+
+/**
+ * Aggregate achieved_outputs across all monthly progress entries
+ * Returns a Record summing up all output values by indicator key
+ */
+export function aggregateAchievedOutputs(
+	monthlyProgress: MonthlyProgress[] | undefined
+): Record<string, number> {
+	if (!monthlyProgress || monthlyProgress.length === 0) {
+		return {};
+	}
+
+	const aggregated: Record<string, number> = {};
+
+	for (const progress of monthlyProgress) {
+		if (progress.achieved_outputs) {
+			for (const [key, value] of Object.entries(progress.achieved_outputs)) {
+				aggregated[key] = (aggregated[key] || 0) + (Number(value) || 0);
+			}
+		}
+	}
+
+	return aggregated;
+}
+
+/**
+ * Get cumulative beneficiaries reached from all monthly progress entries
+ * Returns the maximum value (assuming beneficiaries reached is cumulative in reports)
+ */
+export function getCumulativeBeneficiariesReached(
+	monthlyProgress: MonthlyProgress[] | undefined
+): number {
+	if (!monthlyProgress || monthlyProgress.length === 0) {
+		return 0;
+	}
+
+	// Get the latest (most recent) beneficiaries_reached value
+	const sorted = [...monthlyProgress].sort((a, b) => b.month_year.localeCompare(a.month_year));
+
+	return sorted[0]?.beneficiaries_reached || 0;
 }

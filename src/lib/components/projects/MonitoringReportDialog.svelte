@@ -3,7 +3,7 @@
 	import { PhotoGallery } from '$lib/components/ui/photo-gallery';
 	import type { MonthlyReport } from '$lib/types';
 	import { formatCurrency } from '$lib/utils/formatters';
-	import { Activity, Banknote, Camera } from '@lucide/svelte';
+	import { Activity, Banknote, Camera, CheckCircle2, Users } from '@lucide/svelte';
 
 	interface Props {
 		open: boolean;
@@ -11,6 +11,14 @@
 	}
 
 	let { open = $bindable(), selectedReport }: Props = $props();
+
+	// Format indicator key for display (e.g., 'seedlings_distributed' -> 'Seedlings Distributed')
+	function formatIndicatorKey(key: string): string {
+		return key
+			.split('_')
+			.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+			.join(' ');
+	}
 
 	function getStatusColor(status: string): string {
 		switch (status) {
@@ -117,6 +125,55 @@
 						</div>
 					</div>
 				</div>
+
+				<!-- Achieved Outputs & Beneficiaries -->
+				{#if (selectedReport.achieved_outputs && Object.keys(selectedReport.achieved_outputs).length > 0) || (selectedReport.beneficiaries_reached && selectedReport.beneficiaries_reached > 0)}
+					<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+						<!-- Achieved Outputs -->
+						{#if selectedReport.achieved_outputs && Object.keys(selectedReport.achieved_outputs).length > 0}
+							<div
+								class="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800"
+							>
+								<h4
+									class="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-200"
+								>
+									<CheckCircle2 class="size-4 text-violet-600" /> Achieved Outputs
+								</h4>
+								<div class="space-y-2">
+									{#each Object.entries(selectedReport.achieved_outputs) as [key, value]}
+										<div class="flex justify-between text-sm">
+											<span class="text-slate-500 dark:text-slate-400"
+												>{formatIndicatorKey(key)}</span
+											>
+											<span class="font-medium text-slate-900 dark:text-slate-100"
+												>{value.toLocaleString()}</span
+											>
+										</div>
+									{/each}
+								</div>
+							</div>
+						{/if}
+
+						<!-- Beneficiaries Reached -->
+						{#if selectedReport.beneficiaries_reached && selectedReport.beneficiaries_reached > 0}
+							<div
+								class="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800"
+							>
+								<h4
+									class="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-200"
+								>
+									<Users class="size-4 text-amber-600" /> Beneficiaries Reached
+								</h4>
+								<div class="flex items-baseline gap-2">
+									<span class="text-3xl font-bold text-slate-900 dark:text-slate-100">
+										{selectedReport.beneficiaries_reached.toLocaleString()}
+									</span>
+									<span class="text-sm text-slate-500 dark:text-slate-400">individuals</span>
+								</div>
+							</div>
+						{/if}
+					</div>
+				{/if}
 
 				<!-- Site Documentation / Images -->
 				<div>

@@ -264,6 +264,9 @@ export interface MonthlyReport {
 	status: string; // 'On Track' | 'Delayed' | 'Ahead of Schedule' | 'Not Started'
 	remarks: string;
 	photos: PhotoDocumentation[];
+	// Enhanced fields for detailed reporting
+	achieved_outputs?: Record<string, number>;
+	beneficiaries_reached?: number;
 }
 
 export interface MonthlyProgress {
