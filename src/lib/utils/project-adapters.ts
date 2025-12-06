@@ -52,10 +52,16 @@ export interface QuickUpdateFormData {
 export function projectToQuickUpdate(project: Project): QuickUpdateFormData {
 	const currentMonth = getCurrentMonth();
 
-	// Get latest monthly progress for current beneficiaries
-	const latestMonthlyProgress = project.monthly_progress?.find(
+	// Get current month's progress entry (if exists)
+	const currentMonthProgress = project.monthly_progress?.find(
 		(mp: MonthlyProgress) => mp.month_year === currentMonth
 	);
+
+	// Get the most recent monthly progress entry (for loading previous values)
+	const sortedProgress = [...(project.monthly_progress || [])].sort((a, b) =>
+		b.month_year.localeCompare(a.month_year)
+	);
+	const latestMonthlyProgress = sortedProgress[0];
 
 	// Get planned percentage from monthly_targets
 	const monthlyTarget = project.monthly_targets?.find(
@@ -73,8 +79,8 @@ export function projectToQuickUpdate(project: Project): QuickUpdateFormData {
 			return sum;
 		}, 0) || 0;
 
-	// Get THIS month's disbursement only (not cumulative)
-	const monthlyDisbursement = latestMonthlyProgress?.budget_utilized || 0;
+	// Get THIS month's disbursement only (not cumulative) - use current month if exists, otherwise 0
+	const monthlyDisbursement = currentMonthProgress?.budget_utilized || 0;
 
 	// Get target disbursement for this month from monthly_targets
 	const targetDisbursementThisMonth = monthlyTarget?.planned_budget || 0;
@@ -87,9 +93,11 @@ export function projectToQuickUpdate(project: Project): QuickUpdateFormData {
 		status: project.status,
 		physicalActual: completionPct,
 		plannedPercentage: plannedPercentage?.toString() || '0',
-		issues: project.issues || '',
-		recommendations: project.recommendations || '',
-		catchUpPlan: project.catch_up_plan || '',
+		// Status tracking - use current month's values if available, otherwise latest
+		issues: currentMonthProgress?.issues || latestMonthlyProgress?.issues || '',
+		recommendations:
+			currentMonthProgress?.recommendations || latestMonthlyProgress?.recommendations || '',
+		catchUpPlan: currentMonthProgress?.catch_up_plan || latestMonthlyProgress?.catch_up_plan || '',
 		// Employment
 		maleEmployment: project.employment_generated?.male || 0,
 		femaleEmployment: project.employment_generated?.female || 0,
@@ -108,9 +116,9 @@ export function projectToQuickUpdate(project: Project): QuickUpdateFormData {
 			project.beneficiaries?.toString() ||
 			'0',
 		householdsReached: '0', // This could be enhanced to pull from sitio data
-		// Photo Documentation
-		photoDocumentation: latestMonthlyProgress?.photo_documentation || [],
-		// Performance Indicators
+		// Photo Documentation - current month's photos, or empty for new month
+		photoDocumentation: currentMonthProgress?.photo_documentation || [],
+		// Performance Indicators - use latest achieved outputs as starting point
 		achievedOutputs: Object.fromEntries(
 			Object.entries(latestMonthlyProgress?.achieved_outputs || {}).map(([k, v]) => [
 				k,
@@ -152,7 +160,9 @@ export function applyQuickUpdateToProject(
 						physical_progress_percentage: actualPct,
 						budget_utilized: monthlyAmount,
 						beneficiaries_reached: Number(formData.currentBeneficiaries || 0),
-						issues_encountered: formData.issues,
+						issues: formData.issues,
+						recommendations: formData.recommendations,
+						catch_up_plan: formData.catchUpPlan,
 						photo_documentation: formData.photoDocumentation,
 						achieved_outputs: { ...formData.achievedOutputs },
 						status: slippage > 10 ? 'delayed' : slippage < -5 ? 'ahead' : ('on-track' as const),
@@ -170,7 +180,9 @@ export function applyQuickUpdateToProject(
 			budget_utilized: monthlyAmount,
 			achieved_outputs: { ...formData.achievedOutputs },
 			beneficiaries_reached: Number(formData.currentBeneficiaries || 0),
-			issues_encountered: formData.issues,
+			issues: formData.issues,
+			recommendations: formData.recommendations,
+			catch_up_plan: formData.catchUpPlan,
 			photo_documentation: formData.photoDocumentation,
 			status: slippage > 10 ? 'delayed' : slippage < -5 ? 'ahead' : ('on-track' as const),
 			created_at: new Date().toISOString(),
@@ -184,9 +196,6 @@ export function applyQuickUpdateToProject(
 		status: formData.status,
 		contract_duration: formData.contractDuration,
 		beneficiaries: Number(formData.currentBeneficiaries || project.beneficiaries || 0),
-		issues: formData.issues || undefined,
-		recommendations: formData.recommendations || undefined,
-		catch_up_plan: formData.catchUpPlan,
 		monthly_progress: updatedMonthlyProgress,
 		employment_generated: {
 			male: formData.maleEmployment,
@@ -415,11 +424,15 @@ export function transformToMonthlyReports(
 			plan_financial: target?.planned_budget ?? 0,
 			actual_financial: progress.budget_utilized,
 			status: mapProgressStatus(progress.status),
-			remarks: progress.issues_encountered || '',
+			remarks: progress.issues || '',
 			photos: progress.photo_documentation || [],
 			// Enhanced fields
 			achieved_outputs: progress.achieved_outputs,
-			beneficiaries_reached: progress.beneficiaries_reached
+			beneficiaries_reached: progress.beneficiaries_reached,
+			// Status tracking fields
+			issues: progress.issues,
+			recommendations: progress.recommendations,
+			catch_up_plan: progress.catch_up_plan
 		};
 	});
 

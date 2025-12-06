@@ -157,7 +157,7 @@ export function generateProjectMonitoringPDF(projects: Project[], quarter: strin
 				fontSize: 8,
 				margin: [2, 4, 2, 4] as [number, number, number, number]
 			},
-			// Remarks/Justification
+			// Remarks/Justification (from latest monthly progress)
 			{
 				text: [
 					{
@@ -166,7 +166,7 @@ export function generateProjectMonitoringPDF(projects: Project[], quarter: strin
 						fontSize: 7
 					},
 					{
-						text: `${project.issues || 'None'}\n\n`,
+						text: `${project.monthly_progress?.[project.monthly_progress.length - 1]?.issues || 'None'}\n\n`,
 						fontSize: 7
 					},
 					{
@@ -175,15 +175,17 @@ export function generateProjectMonitoringPDF(projects: Project[], quarter: strin
 						fontSize: 7
 					},
 					{
-						text: project.recommendations || 'None',
+						text:
+							project.monthly_progress?.[project.monthly_progress.length - 1]?.recommendations ||
+							'None',
 						fontSize: 7
 					}
 				],
 				margin: [2, 4, 2, 4] as [number, number, number, number]
 			},
-			// CATCH-UP Plans
+			// CATCH-UP Plans (from latest monthly progress)
 			{
-				text: project.catch_up_plan || '',
+				text: project.monthly_progress?.[project.monthly_progress.length - 1]?.catch_up_plan || '',
 				fontSize: 7,
 				margin: [2, 4, 2, 4] as [number, number, number, number]
 			}

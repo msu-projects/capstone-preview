@@ -898,16 +898,27 @@ function generateMonthlyProgress(
 		const hasIssue = rng.next() < issueChance;
 
 		// Generate detailed issue description based on status
-		let issuesEncountered: string | undefined;
+		let issues: string | undefined;
+		let recommendations: string | undefined;
+		let catch_up_plan: string | undefined;
+
 		if (hasIssue) {
 			const baseIssue = rng.pick(categoryIssues);
 			if (status === 'delayed') {
-				issuesEncountered = `${baseIssue}. Implementing catch-up measures to address delays.`;
+				issues = `${baseIssue}. Implementing catch-up measures to address delays.`;
+				recommendations = rng.pick([
+					'Extend contract duration by 30 days',
+					'Coordinate with local suppliers for materials',
+					'Expedite permit processing through LGU',
+					'Submit budget modification request',
+					'Increase community engagement activities'
+				]);
+				catch_up_plan = rng.pick(CATCH_UP_PLANS);
 			} else {
-				issuesEncountered = baseIssue;
+				issues = baseIssue;
 			}
 		} else if (status === 'ahead' && rng.next() > 0.7) {
-			issuesEncountered = 'No significant issues. Project progressing ahead of schedule.';
+			issues = 'No significant issues. Project progressing ahead of schedule.';
 		}
 
 		progress.push({
@@ -918,7 +929,9 @@ function generateMonthlyProgress(
 			budget_utilized: cumulativeBudget,
 			achieved_outputs: achievedOutputs,
 			beneficiaries_reached: cumulativeBeneficiaries,
-			issues_encountered: issuesEncountered,
+			issues,
+			recommendations,
+			catch_up_plan,
 			photo_documentation: [], // Empty array - photos are uploaded via Quick Update form
 			status,
 			created_at: date.toISOString(),
@@ -1160,30 +1173,6 @@ export function generateProjects(
 		// Contract cost is slightly less than total budget
 		const contractCost = Math.floor(budget * (0.85 + rng.next() * 0.1));
 
-		// Issues and recommendations for some projects
-		const hasIssues = rng.next() > 0.6;
-		const issues = hasIssues
-			? rng.pick([
-					'Weather delays affecting construction timeline',
-					'Material supply chain disruptions',
-					'Pending local permits and clearances',
-					'Budget realignment needed for additional scope',
-					'Community coordination challenges'
-				])
-			: undefined;
-		const recommendations = hasIssues
-			? rng.pick([
-					'Extend contract duration by 30 days',
-					'Coordinate with local suppliers for materials',
-					'Expedite permit processing through LGU',
-					'Submit budget modification request',
-					'Increase community engagement activities'
-				])
-			: undefined;
-
-		// Catch-up plan for projects with issues
-		const catch_up_plan = hasIssues ? rng.pick(CATCH_UP_PLANS) : undefined;
-
 		// Generate performance targets first so they can be used for monthly progress
 		const performanceTargets = generatePerformanceTargets(
 			i,
@@ -1206,9 +1195,6 @@ export function generateProjects(
 			contract_cost: contractCost,
 			beneficiaries: totalBeneficiaries,
 			project_year: year,
-			issues,
-			recommendations,
-			catch_up_plan,
 			project_sitios: projectSitios,
 			monthly_progress:
 				monthsElapsed > 0

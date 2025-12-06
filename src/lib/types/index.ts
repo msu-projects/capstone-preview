@@ -267,6 +267,10 @@ export interface MonthlyReport {
 	// Enhanced fields for detailed reporting
 	achieved_outputs?: Record<string, number>;
 	beneficiaries_reached?: number;
+	// Status tracking fields (from MonthlyProgress)
+	issues?: string;
+	recommendations?: string;
+	catch_up_plan?: string;
 }
 
 export interface MonthlyProgress {
@@ -283,7 +287,12 @@ export interface MonthlyProgress {
 	// Other actuals
 	achieved_outputs: Record<string, number>; // { 'seedlings_distributed': 500, 'training_sessions': 3 }
 	beneficiaries_reached: number;
-	issues_encountered?: string;
+
+	// Status tracking (per-month)
+	issues?: string;
+	recommendations?: string;
+	catch_up_plan?: string;
+
 	photo_documentation?: PhotoDocumentation[];
 	status: 'on-track' | 'delayed' | 'ahead';
 	created_at: string;
@@ -326,11 +335,6 @@ export interface Project {
 	contract_cost: number;
 	beneficiaries: number;
 	project_year: number;
-
-	// Status tracking
-	issues?: string;
-	recommendations?: string;
-	catch_up_plan?: string;
 
 	// Enhanced fields
 	project_sitios?: ProjectSitio[];

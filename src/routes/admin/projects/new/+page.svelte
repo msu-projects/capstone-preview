@@ -237,8 +237,6 @@
 				contract_cost: Number(totalBudget), // Same as budget for new projects
 				beneficiaries: totalBeneficiaries,
 				project_year: currentYear,
-				issues: '',
-				recommendations: '',
 				// New enhanced fields
 				project_sitios: projectSitios.map((ps) => ({
 					...ps,
