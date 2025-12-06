@@ -58,6 +58,15 @@
 	function toggleToiletType(type: string) {
 		toilet_facility_types = toggleItem(toilet_facility_types, type);
 	}
+
+	// Get available water sources for a specific row (exclude already selected ones except current)
+	function getAvailableWaterSources(currentIndex: number): string[] {
+		const selectedSources = water_sources
+			.filter((_, i) => i !== currentIndex)
+			.map((ws) => ws.source)
+			.filter((s) => s !== '');
+		return waterSourceOptions.filter((opt) => !selectedSources.includes(opt));
+	}
 </script>
 
 <div class="space-y-6">
@@ -129,7 +138,7 @@
 									<td class="w-full px-3 py-2">
 										<Combobox
 											bind:value={source.source}
-											options={waterSourceOptions}
+											options={getAvailableWaterSources(i)}
 											placeholder="Select source"
 											searchPlaceholder="Search source..."
 										/>

@@ -26,7 +26,7 @@
 		value = $bindable(''),
 		options = [],
 		placeholder = 'Select...',
-		searchPlaceholder = 'Search...',
+		searchPlaceholder = 'Add/Search...',
 		allowCustom = true,
 		class: className = '',
 		disabled = false
@@ -34,6 +34,8 @@
 
 	let open = $state(false);
 	let search = $state('');
+
+	searchPlaceholder = 'Add/' + searchPlaceholder;
 
 	// Filtered by search
 	const filteredOptions = $derived(
@@ -73,7 +75,7 @@
 			<Command.Input placeholder={searchPlaceholder} bind:value={search} />
 			<Command.List>
 				{#if filteredOptions.length === 0 && !isCustomEntry}
-					<Command.Empty>No options found.</Command.Empty>
+					<Command.Empty class="py-3">No options found.</Command.Empty>
 				{/if}
 				<Command.Group>
 					{#each filteredOptions as option (option)}
