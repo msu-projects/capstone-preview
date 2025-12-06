@@ -69,8 +69,6 @@
 	const hasLivestock = $derived(sitio.livestock_poultry && sitio.livestock_poultry.length > 0);
 	const livestockCount = $derived(sitio.livestock_poultry?.length || 0);
 
-	$inspect(sitio);
-
 	// Treemap data for employment types (better than bar chart for many categories)
 	const treemapEmploymentData = $derived(
 		sitio.economic_condition?.employments

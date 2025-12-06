@@ -21,6 +21,7 @@ import {
 	type SitioIssue,
 	type SitioPPA
 } from '$lib/types';
+import type { SitioYearlySnapshot } from '$lib/types/sitio-yearly';
 
 // ===== SEEDED RANDOM NUMBER GENERATOR =====
 // For consistent but random-looking data generation
@@ -1263,12 +1264,272 @@ export function generateProjects(
 	return projects;
 }
 
-// ===== STORAGE KEYS =====
+// ===== YEARLY SNAPSHOT GENERATOR =====
+
+/**
+ * Generate yearly snapshots for a sitio with realistic year-over-year changes.
+ * Creates historical data showing growth/decline patterns.
+ */
+export function generateSitioYearlySnapshots(
+	sitio: Sitio,
+	years: number[] = [2020, 2021, 2022, 2023, 2024, 2025],
+	seed: number = 42
+): SitioYearlySnapshot[] {
+	const rng = new SeededRandom(seed + sitio.id); // Use sitio ID for consistent but unique data
+	const snapshots: SitioYearlySnapshot[] = [];
+
+	// Start with a base population (current sitio data represents the most recent year)
+	let currentPopulation = sitio.population;
+	let currentHouseholds = sitio.households;
+
+	// Calculate backwards to show historical growth
+	const latestYear = Math.max(...years);
+	const yearsFromLatest = latestYear - Math.min(...years);
+	const annualGrowthRate = 0.02 + rng.next() * 0.02; // 2-4% annual growth
+
+	// Calculate starting population (working backwards from current)
+	const startingPopulation = Math.round(
+		currentPopulation / Math.pow(1 + annualGrowthRate, yearsFromLatest)
+	);
+	const startingHouseholds = Math.round(
+		currentHouseholds / Math.pow(1 + annualGrowthRate, yearsFromLatest)
+	);
+
+	let previousPopulation = startingPopulation;
+	let previousHouseholds = startingHouseholds;
+
+	for (const year of years.sort((a, b) => a - b)) {
+		// Calculate growth for this year
+		const yearGrowth = annualGrowthRate * (0.8 + rng.next() * 0.4); // Vary growth rate
+		const population =
+			year === latestYear ? currentPopulation : Math.round(previousPopulation * (1 + yearGrowth));
+		const households =
+			year === latestYear ? currentHouseholds : Math.round(previousHouseholds * (1 + yearGrowth));
+
+		// Demographics (maintain similar ratios but with some variation)
+		const malePercent = 0.48 + rng.next() * 0.04; // 48-52%
+		const male = Math.round(population * malePercent);
+		const female = population - male;
+
+		// Age distribution (slightly shifting over time)
+		const age_0_14_percent = 0.28 + rng.next() * 0.08; // 28-36%
+		const age_65_above_percent = 0.06 + rng.next() * 0.06; // 6-12%
+		const age_0_14 = Math.round(population * age_0_14_percent);
+		const age_65_above = Math.round(population * age_65_above_percent);
+		const age_15_64 = population - age_0_14 - age_65_above;
+
+		// Social services (improving coverage over time)
+		const yearProgress = (year - Math.min(...years)) / yearsFromLatest;
+		const voterRatio = 0.55 + yearProgress * 0.1; // Improving voter registration
+		const philhealthRatio = 0.3 + yearProgress * 0.2; // Improving PhilHealth coverage
+		const fourpsRatio = 0.15 + yearProgress * 0.05; // Slightly improving 4Ps coverage
+
+		const social_services = {
+			registered_voters: Math.round(age_15_64 * voterRatio * (0.9 + rng.next() * 0.2)),
+			philhealth_beneficiaries: Math.round(population * philhealthRatio * (0.9 + rng.next() * 0.2)),
+			fourps_beneficiaries: Math.round(households * fourpsRatio * (0.9 + rng.next() * 0.2))
+		};
+
+		// Economic condition (similar structure, varying counts)
+		const economic_condition = sitio.economic_condition
+			? {
+					employments: sitio.economic_condition.employments.map((emp) => ({
+						type: emp.type,
+						count: Math.round(
+							emp.count * (population / currentPopulation) * (0.9 + rng.next() * 0.2)
+						)
+					})),
+					income_brackets: sitio.economic_condition.income_brackets.map((bracket) => ({
+						bracket: bracket.bracket,
+						households: Math.round(
+							bracket.households * (households / currentHouseholds) * (0.9 + rng.next() * 0.2)
+						)
+					}))
+				}
+			: undefined;
+
+		// Agriculture (gradually changing)
+		const agriculture = sitio.agriculture
+			? {
+					farmers_count: Math.round(
+						sitio.agriculture.farmers_count *
+							(population / currentPopulation) *
+							(0.85 + rng.next() * 0.3)
+					),
+					farmer_associations: sitio.agriculture.farmer_associations,
+					farm_area_hectares: Math.round(
+						sitio.agriculture.farm_area_hectares * (0.95 + rng.next() * 0.1)
+					),
+					top_crops: sitio.agriculture.top_crops
+				}
+			: undefined;
+
+		// Water and sanitation (improving over time)
+		const water_sanitation = sitio.water_sanitation
+			? {
+					water_systems_count: Math.max(
+						1,
+						sitio.water_sanitation.water_systems_count - Math.floor((latestYear - year) / 3)
+					), // Gradual increase
+					water_sources: sitio.water_sanitation.water_sources,
+					households_without_toilet: Math.round(
+						sitio.water_sanitation.households_without_toilet *
+							(households / currentHouseholds) *
+							(1.2 - yearProgress * 0.3) // Improving sanitation
+					),
+					toilet_facility_types: sitio.water_sanitation.toilet_facility_types,
+					waste_segregation_practice:
+						yearProgress > 0.6 ? sitio.water_sanitation.waste_segregation_practice : null
+				}
+			: undefined;
+
+		// Livestock and poultry (same types)
+		const livestock_poultry = sitio.livestock_poultry;
+
+		// Food security (improving over time)
+		const food_security = sitio.food_security
+			? {
+					households_with_backyard_garden: Math.round(
+						sitio.food_security.households_with_backyard_garden *
+							(households / currentHouseholds) *
+							(0.8 + yearProgress * 0.4) // Growing trend
+					),
+					common_garden_commodities: sitio.food_security.common_garden_commodities
+				}
+			: undefined;
+
+		// Housing (gradually improving quality)
+		const housing = sitio.housing
+			? {
+					quality_types: sitio.housing.quality_types.map((type, idx) => {
+						const baseCount = type.count * (households / currentHouseholds);
+						// Concrete/semi-concrete increases, makeshift decreases over time
+						const trend = idx === 0 ? 1 + yearProgress * 0.2 : 1 - yearProgress * 0.15;
+						return {
+							type: type.type,
+							count: Math.round(baseCount * trend * (0.9 + rng.next() * 0.2))
+						};
+					}),
+					ownership_types: sitio.housing.ownership_types.map((type) => ({
+						type: type.type,
+						count: Math.round(
+							type.count * (households / currentHouseholds) * (0.9 + rng.next() * 0.2)
+						)
+					}))
+				}
+			: undefined;
+
+		// Domestic animals (varies with population)
+		const domestic_animals = sitio.domestic_animals
+			? {
+					dogs: Math.round(
+						sitio.domestic_animals.dogs *
+							(population / currentPopulation) *
+							(0.9 + rng.next() * 0.2)
+					),
+					cats: Math.round(
+						sitio.domestic_animals.cats *
+							(population / currentPopulation) *
+							(0.9 + rng.next() * 0.2)
+					),
+					dogs_vaccinated: Math.round(
+						sitio.domestic_animals.dogs_vaccinated *
+							(population / currentPopulation) *
+							(0.7 + yearProgress * 0.5) // Improving vaccination
+					),
+					cats_vaccinated: Math.round(
+						sitio.domestic_animals.cats_vaccinated *
+							(population / currentPopulation) *
+							(0.7 + yearProgress * 0.5)
+					)
+				}
+			: undefined;
+
+		// Community empowerment (same methods)
+		const community_empowerment = sitio.community_empowerment
+			? {
+					sectoral_organizations: Math.max(
+						1,
+						sitio.community_empowerment.sectoral_organizations - Math.floor((latestYear - year) / 4)
+					), // Gradual increase
+					info_dissemination_methods: sitio.community_empowerment.info_dissemination_methods,
+					transportation_methods: sitio.community_empowerment.transportation_methods
+				}
+			: undefined;
+
+		// Utilities (improving coverage)
+		const utilities = sitio.utilities
+			? {
+					households_with_electricity: Math.round(
+						sitio.utilities.households_with_electricity *
+							(households / currentHouseholds) *
+							(0.7 + yearProgress * 0.3) // Improving coverage
+					),
+					alternative_electricity_sources: sitio.utilities.alternative_electricity_sources
+				}
+			: undefined;
+
+		// Record date for this year (set to end of year)
+		const recorded_at = new Date(year, 11, 31).toISOString();
+
+		snapshots.push({
+			year,
+			sitio_id: sitio.id,
+			recorded_at,
+			population,
+			households,
+			demographics: {
+				male,
+				female,
+				total: population,
+				age_0_14,
+				age_15_64,
+				age_65_above
+			},
+			social_services,
+			economic_condition,
+			agriculture,
+			water_sanitation,
+			livestock_poultry,
+			food_security,
+			housing,
+			domestic_animals,
+			community_empowerment,
+			utilities
+		});
+
+		previousPopulation = population;
+		previousHouseholds = households;
+	}
+
+	return snapshots;
+}
+
+/**
+ * Generate yearly snapshots for all sitios
+ */
+export function generateAllSitioSnapshots(
+	sitios: Sitio[],
+	years: number[] = [2020, 2021, 2022, 2023, 2024, 2025],
+	seed: number = 42
+): Map<number, SitioYearlySnapshot[]> {
+	const snapshotsMap = new Map<number, SitioYearlySnapshot[]>();
+
+	for (const sitio of sitios) {
+		const snapshots = generateSitioYearlySnapshots(sitio, years, seed);
+		snapshotsMap.set(sitio.id, snapshots);
+	}
+
+	return snapshotsMap;
+}
+
+// ===== STORAGE KEYS ====="
 export const STORAGE_VERSION = 1; // Increment when types change to clear outdated data
 export const STORAGE_VERSION_KEY = 'sccdp_storage_version';
 export const MOCK_DATA_INITIALIZED_KEY = 'sccdp_mock_data_initialized';
 export const MOCK_SITIOS_KEY = 'sccdp_sitios';
 export const MOCK_PROJECTS_KEY = 'sccdp_projects';
+export const MOCK_SITIO_SNAPSHOTS_KEY = 'sccdp_sitio_snapshots';
 
 // ===== STORAGE VERSION CHECK =====
 
@@ -1336,8 +1597,16 @@ export function initializeMockDataIfNeeded(): { sitios: Sitio[]; projects: Proje
 	const sitios = generateSitios(100);
 	const projects = generateProjects(sitios, 50);
 
+	// Generate yearly snapshots for all sitios
+	const snapshotsMap = generateAllSitioSnapshots(sitios);
+	const snapshotsArray = Array.from(snapshotsMap.entries()).map(([sitio_id, snapshots]) => ({
+		sitio_id,
+		snapshots
+	}));
+
 	localStorage.setItem(MOCK_SITIOS_KEY, JSON.stringify(sitios));
 	localStorage.setItem(MOCK_PROJECTS_KEY, JSON.stringify(projects));
+	localStorage.setItem(MOCK_SITIO_SNAPSHOTS_KEY, JSON.stringify(snapshotsArray));
 	markMockDataInitialized();
 	setStorageVersion();
 
@@ -1355,15 +1624,81 @@ export function resetMockData(): { sitios: Sitio[]; projects: Project[] } {
 	localStorage.removeItem(MOCK_DATA_INITIALIZED_KEY);
 	localStorage.removeItem(MOCK_SITIOS_KEY);
 	localStorage.removeItem(MOCK_PROJECTS_KEY);
+	localStorage.removeItem(MOCK_SITIO_SNAPSHOTS_KEY);
 
 	// Regenerate with new seed based on current time
 	const seed = Date.now() % 1000000;
 	const sitios = generateSitios(150, seed);
 	const projects = generateProjects(sitios, 50, seed);
 
+	// Generate yearly snapshots for all sitios
+	const snapshotsMap = generateAllSitioSnapshots(sitios, undefined, seed);
+	const snapshotsArray = Array.from(snapshotsMap.entries()).map(([sitio_id, snapshots]) => ({
+		sitio_id,
+		snapshots
+	}));
+
 	localStorage.setItem(MOCK_SITIOS_KEY, JSON.stringify(sitios));
 	localStorage.setItem(MOCK_PROJECTS_KEY, JSON.stringify(projects));
+	localStorage.setItem(MOCK_SITIO_SNAPSHOTS_KEY, JSON.stringify(snapshotsArray));
 	markMockDataInitialized();
 
 	return { sitios, projects };
+}
+
+// ===== SNAPSHOT LOADING FUNCTIONS =====
+
+/**
+ * Load all yearly snapshots from storage
+ */
+export function loadAllSnapshots(): Map<number, SitioYearlySnapshot[]> | null {
+	if (typeof window === 'undefined') return null;
+
+	const snapshotsJson = localStorage.getItem(MOCK_SITIO_SNAPSHOTS_KEY);
+	if (!snapshotsJson) return null;
+
+	try {
+		const snapshotsArray: Array<{ sitio_id: number; snapshots: SitioYearlySnapshot[] }> =
+			JSON.parse(snapshotsJson);
+		const snapshotsMap = new Map<number, SitioYearlySnapshot[]>();
+
+		for (const entry of snapshotsArray) {
+			snapshotsMap.set(entry.sitio_id, entry.snapshots);
+		}
+
+		return snapshotsMap;
+	} catch (error) {
+		console.error('Error loading snapshots:', error);
+		return null;
+	}
+}
+
+/**
+ * Load snapshots for a specific sitio
+ */
+export function loadSitioSnapshots(sitioId: number): SitioYearlySnapshot[] | null {
+	const allSnapshots = loadAllSnapshots();
+	if (!allSnapshots) return null;
+
+	return allSnapshots.get(sitioId) || null;
+}
+
+/**
+ * Load snapshot for a specific sitio and year
+ */
+export function loadSitioSnapshotByYear(sitioId: number, year: number): SitioYearlySnapshot | null {
+	const snapshots = loadSitioSnapshots(sitioId);
+	if (!snapshots) return null;
+
+	return snapshots.find((s) => s.year === year) || null;
+}
+
+/**
+ * Get available years for a sitio's snapshots
+ */
+export function getAvailableYears(sitioId: number): number[] {
+	const snapshots = loadSitioSnapshots(sitioId);
+	if (!snapshots) return [];
+
+	return snapshots.map((s) => s.year).sort((a, b) => a - b);
 }
