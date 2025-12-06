@@ -46,14 +46,13 @@
 			items: [
 				{ title: 'Sitios', url: '/admin/sitios', icon: MapPin },
 				{ title: 'Projects', url: '/admin/projects', icon: Folder }
-				// { title: 'Import Data', url: '/admin/import', icon: CloudUpload }
 			]
 		},
 		{
 			title: 'System',
 			items: [
-				{ title: 'Configuration', url: '/admin/config', icon: Settings2, requiresSuperadmin: true },
 				{ title: 'Users', url: '/admin/users', icon: Users, requiresSuperadmin: true },
+				{ title: 'Configuration', url: '/admin/config', icon: Settings2, requiresSuperadmin: true },
 				{ title: 'Audit Logs', url: '/admin/audit', icon: FileText, requiresAdmin: true },
 				{ title: 'View Public Portal', url: '/', icon: ExternalLink }
 			]

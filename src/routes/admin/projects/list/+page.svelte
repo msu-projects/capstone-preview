@@ -149,6 +149,11 @@
 
 	const totalPages = $derived(Math.ceil(filteredProjects.length / itemsPerPage));
 
+	// Derived value for checking if any filters are active
+	const hasActiveFilters = $derived(
+		searchQuery !== '' || statusFilter !== '' || categoryFilter !== ''
+	);
+
 	// Event handlers
 	function resetFilters() {
 		searchQuery = '';
@@ -257,6 +262,8 @@
 			onDownloadPDF={handleDownloadPDF}
 			onQuickEdit={handleQuickEdit}
 			onPageChange={(page) => (currentPage = page)}
+			onClearFilters={resetFilters}
+			{hasActiveFilters}
 		/>
 	</div>
 </div>
