@@ -714,7 +714,7 @@
 			</Card.Header>
 			<Card.Content class="space-y-4">
 				<div class="grid gap-4 md:grid-cols-2">
-					{#each performanceTargets as target (target.indicator_type)}
+					{#each performanceTargets as target, index (target.id ?? `target-${index}`)}
 						{@const achieved = achievedOutputs[target.indicator_type] || 0}
 						{@const progressPct =
 							target.target_value > 0 ? (achieved / target.target_value) * 100 : 0}
