@@ -405,7 +405,8 @@
 									>Ethnicities</span
 								>
 								<Badge variant="outline" class="ml-auto text-xs">
-									{sitio.ethnicities.length} groups
+									{sitio.ethnicities.length}
+									{sitio.ethnicities.length > 1 ? 'Groups' : 'Group'}
 								</Badge>
 							</div>
 							<div class="flex flex-wrap gap-2">
@@ -436,7 +437,8 @@
 								<span class="text-sm font-medium text-slate-700 dark:text-slate-300">Religions</span
 								>
 								<Badge variant="outline" class="ml-auto text-xs">
-									{sitio.religions.length} faiths
+									{sitio.religions.length}
+									{sitio.religions.length > 1 ? 'Faiths' : 'Faith'}
 								</Badge>
 							</div>
 							<div class="flex flex-wrap gap-2">
