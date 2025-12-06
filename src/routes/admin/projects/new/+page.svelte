@@ -42,6 +42,9 @@
 	let activeStep = $state('category');
 	let cancelDialogOpen = $state(false);
 
+	// Track visited steps to only show errors after user has visited them
+	let visitedSteps = $state<Set<string>>(new Set(['category']));
+
 	// Tab 1: Category & Project Selection
 	let title = $state('');
 	let description = $state('');
@@ -103,7 +106,7 @@
 			shortLabel: 'Category',
 			icon: FolderOpen,
 			isValid: isTab1Valid,
-			hasError: !isTab1Valid && activeStep !== 'category'
+			hasError: !isTab1Valid && visitedSteps.has('category') && activeStep !== 'category'
 		},
 		{
 			id: 'location',
@@ -111,7 +114,7 @@
 			shortLabel: 'Location',
 			icon: MapPin,
 			isValid: isTab2Valid,
-			hasError: !isTab2Valid && activeStep !== 'location'
+			hasError: !isTab2Valid && visitedSteps.has('location') && activeStep !== 'location'
 		},
 		{
 			id: 'performance',
@@ -119,7 +122,7 @@
 			shortLabel: 'Targets',
 			icon: Target,
 			isValid: isTab3Valid,
-			hasError: !isTab3Valid && activeStep !== 'performance'
+			hasError: !isTab3Valid && visitedSteps.has('performance') && activeStep !== 'performance'
 		},
 		{
 			id: 'budget',
@@ -127,7 +130,7 @@
 			shortLabel: 'Budget',
 			icon: Banknote,
 			isValid: isTab4Valid,
-			hasError: !isTab4Valid && activeStep !== 'budget'
+			hasError: !isTab4Valid && visitedSteps.has('budget') && activeStep !== 'budget'
 		},
 		{
 			id: 'monthly',
@@ -135,7 +138,7 @@
 			shortLabel: 'Planning',
 			icon: Calendar,
 			isValid: isTab5Valid,
-			hasError: !isTab5Valid && activeStep !== 'monthly'
+			hasError: !isTab5Valid && visitedSteps.has('monthly') && activeStep !== 'monthly'
 		}
 	]);
 
@@ -171,14 +174,23 @@
 			return;
 		}
 		if (canGoNext) {
-			activeStep = stepOrder[currentStepIndex + 1];
+			const nextStepId = stepOrder[currentStepIndex + 1];
+			visitedSteps = new Set([...visitedSteps, nextStepId]);
+			activeStep = nextStepId;
 		}
 	}
 
 	function previousStep() {
 		if (canGoPrevious) {
-			activeStep = stepOrder[currentStepIndex - 1];
+			const prevStepId = stepOrder[currentStepIndex - 1];
+			visitedSteps = new Set([...visitedSteps, prevStepId]);
+			activeStep = prevStepId;
 		}
+	}
+
+	function goToStep(stepId: string) {
+		visitedSteps = new Set([...visitedSteps, stepId]);
+		activeStep = stepId;
 	}
 
 	async function handleSave() {
@@ -388,7 +400,7 @@
 							{#each steps as step, index (step.id)}
 								<button
 									type="button"
-									onclick={() => (activeStep = step.id)}
+									onclick={() => goToStep(step.id)}
 									class="h-2 w-2 rounded-full transition-all {step.id === activeStep
 										? 'w-4 bg-primary'
 										: step.isValid
