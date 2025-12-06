@@ -256,13 +256,6 @@
 			<Label>Alternative Electricity Sources</Label>
 			<div class="flex flex-wrap gap-2">
 				{#each alternativeElectricitySourceOptions as source}
-					<!-- <div
-						class="flex items-center gap-2 rounded-lg border px-3 py-2 transition-colors hover:bg-muted/50 {alternative_electricity_sources.includes(
-							source
-						)
-							? 'border-warning/30 bg-warning/10'
-							: ''}"
-					> -->
 					<Label
 						for={`elec_${source}`}
 						class="flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm font-normal transition-colors hover:bg-muted/50 

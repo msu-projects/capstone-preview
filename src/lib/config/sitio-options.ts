@@ -321,60 +321,25 @@ export function hasSitioOptionsOverride(): boolean {
 }
 
 // ============================================
-// LEGACY EXPORTS (for backward compatibility)
-// Keep these for existing code that imports directly
+// CONVENIENCE EXPORTS
+// These are evaluated at module load time and reflect localStorage overrides.
+// Values update on page reload after config changes.
 // ============================================
 
-/** @deprecated Use getEthnicityOptions() instead */
-export const ethnicityOptions = DEFAULT_ETHNICITY_OPTIONS;
-
-/** @deprecated Use getReligionOptions() instead */
-export const religionOptions = DEFAULT_RELIGION_OPTIONS;
-
-/** @deprecated Use getEmploymentTypeOptions() instead */
-export const employmentTypeOptions = DEFAULT_EMPLOYMENT_TYPE_OPTIONS;
-
-/** @deprecated Use getIncomeBracketOptions() instead */
-export const incomeBracketOptions = DEFAULT_INCOME_BRACKET_OPTIONS as readonly {
-	label: string;
-	value: string;
-}[];
-
-/** @deprecated Use getLivestockPoultryOptions() instead */
-export const livestockPoultryOptions = DEFAULT_LIVESTOCK_POULTRY_OPTIONS;
-
-/** @deprecated Use getCropOptions() instead */
-export const cropOptions = DEFAULT_CROP_OPTIONS;
-
-/** @deprecated Use getGardenCommodityOptions() instead */
-export const gardenCommodityOptions = DEFAULT_GARDEN_COMMODITY_OPTIONS;
-
-/** @deprecated Use getWaterSourceOptions() instead */
-export const waterSourceOptions = DEFAULT_WATER_SOURCE_OPTIONS;
-
-/** @deprecated Use getWaterStatusOptions() instead */
-export const waterStatusOptions = DEFAULT_WATER_STATUS_OPTIONS;
-
-/** @deprecated Use getToiletFacilityTypeOptions() instead */
-export const toiletFacilityTypeOptions = DEFAULT_TOILET_FACILITY_TYPE_OPTIONS;
-
-/** @deprecated Use getAlternativeElectricitySourceOptions() instead */
-export const alternativeElectricitySourceOptions = DEFAULT_ALTERNATIVE_ELECTRICITY_SOURCE_OPTIONS;
-
-/** @deprecated Use getHousingQualityOptions() instead */
-export const housingQualityOptions = DEFAULT_HOUSING_QUALITY_OPTIONS;
-
-/** @deprecated Use getHousingOwnershipOptions() instead */
-export const housingOwnershipOptions = DEFAULT_HOUSING_OWNERSHIP_OPTIONS;
-
-/** @deprecated Use getInfoDisseminationMethodOptions() instead */
-export const infoDisseminationMethodOptions = DEFAULT_INFO_DISSEMINATION_METHOD_OPTIONS;
-
-/** @deprecated Use getTransportationMethodOptions() instead */
-export const transportationMethodOptions = DEFAULT_TRANSPORTATION_METHOD_OPTIONS;
-
-/** @deprecated Use getLocalOfficialPositionOptions() instead */
-export const localOfficialPositionOptions = DEFAULT_LOCAL_OFFICIAL_POSITION_OPTIONS;
-
-/** @deprecated Use getRstOfficialPositionOptions() instead */
-export const rstOfficialPositionOptions = DEFAULT_RST_OFFICIAL_POSITION_OPTIONS;
+export const ethnicityOptions = getEthnicityOptions();
+export const religionOptions = getReligionOptions();
+export const employmentTypeOptions = getEmploymentTypeOptions();
+export const incomeBracketOptions = getIncomeBracketOptions();
+export const livestockPoultryOptions = getLivestockPoultryOptions();
+export const cropOptions = getCropOptions();
+export const gardenCommodityOptions = getGardenCommodityOptions();
+export const waterSourceOptions = getWaterSourceOptions();
+export const waterStatusOptions = getWaterStatusOptions();
+export const toiletFacilityTypeOptions = getToiletFacilityTypeOptions();
+export const alternativeElectricitySourceOptions = getAlternativeElectricitySourceOptions();
+export const housingQualityOptions = getHousingQualityOptions();
+export const housingOwnershipOptions = getHousingOwnershipOptions();
+export const infoDisseminationMethodOptions = getInfoDisseminationMethodOptions();
+export const transportationMethodOptions = getTransportationMethodOptions();
+export const localOfficialPositionOptions = getLocalOfficialPositionOptions();
+export const rstOfficialPositionOptions = getRstOfficialPositionOptions();
