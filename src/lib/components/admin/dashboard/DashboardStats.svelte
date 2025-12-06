@@ -91,7 +91,7 @@
 			icon: Banknote,
 			iconClass: 'text-emerald-600',
 			iconBgClass: 'bg-emerald-500/10',
-			href: '/admin/projects'
+			href: '/admin/projects?tab=budget'
 		}
 	]);
 </script>
