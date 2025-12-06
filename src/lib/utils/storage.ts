@@ -1,12 +1,13 @@
 import type { Project, Sitio } from '$lib/types';
 import type { SitioYearlySnapshot } from '$lib/types/sitio-yearly';
-import { createSnapshotFromSitio } from '$lib/types/sitio-yearly';
+import { createSnapshotFromSitio, safeValidateSnapshot } from '$lib/types/sitio-yearly';
 import { calculateChanges, logAuditAction } from './audit';
 import { getCategoryName } from './project-calculations';
 
 const SITIOS_STORAGE_KEY = 'sccdp_sitios';
 const PROJECTS_STORAGE_KEY = 'sccdp_projects';
 const SITIO_YEARLY_STORAGE_KEY = 'sccdp_sitio_yearly';
+const MOCK_SITIO_SNAPSHOTS_KEY = 'sccdp_sitio_snapshots'; // Centralized mock data storage
 const MAX_STORAGE_SIZE = 5 * 1024 * 1024; // 5MB
 
 // ===== SITIOS STORAGE FUNCTIONS =====
@@ -157,6 +158,9 @@ export function deleteSitio(id: number): boolean {
 
 	const success = saveSitios(filteredSitios);
 	if (success && sitioToDelete) {
+		// Clean up associated yearly snapshots to prevent orphaned data
+		clearSitioYearlySnapshots(id);
+
 		logAuditAction(
 			'delete',
 			'sitio',
@@ -370,15 +374,45 @@ function getSitioYearlyKey(sitioId: number): string {
 }
 
 /**
+ * Load snapshots from the centralized mock data storage for a specific sitio
+ * @param sitioId The sitio ID
+ * @returns Array of snapshots for this sitio from mock data, or empty array
+ */
+function loadMockSnapshots(sitioId: number): SitioYearlySnapshot[] {
+	try {
+		const json = localStorage.getItem(MOCK_SITIO_SNAPSHOTS_KEY);
+		if (!json) return [];
+
+		const allSnapshots: Array<{ sitio_id: number; snapshots: SitioYearlySnapshot[] }> =
+			JSON.parse(json);
+		const sitioEntry = allSnapshots.find((entry) => entry.sitio_id === sitioId);
+		return sitioEntry?.snapshots || [];
+	} catch (error) {
+		console.error(`Failed to load mock snapshots for sitio ${sitioId}:`, error);
+		return [];
+	}
+}
+
+/**
  * Load all yearly snapshots for a sitio
+ * Checks both per-sitio storage and centralized mock data storage
  * @param sitioId The sitio ID
  * @returns Array of yearly snapshots sorted by year descending
  */
 export function loadSitioYearlySnapshots(sitioId: number): SitioYearlySnapshot[] {
 	try {
-		const json = localStorage.getItem(getSitioYearlyKey(sitioId));
-		const snapshots: SitioYearlySnapshot[] = json ? JSON.parse(json) : [];
-		return snapshots.sort((a, b) => b.year - a.year);
+		// First, try to load from per-sitio storage (user-created snapshots)
+		const perSitioJson = localStorage.getItem(getSitioYearlyKey(sitioId));
+		const perSitioSnapshots: SitioYearlySnapshot[] = perSitioJson ? JSON.parse(perSitioJson) : [];
+
+		// If we have per-sitio data, use it (user has saved their own snapshots)
+		if (perSitioSnapshots.length > 0) {
+			return perSitioSnapshots.sort((a, b) => b.year - a.year);
+		}
+
+		// Otherwise, fall back to centralized mock data storage
+		const mockSnapshots = loadMockSnapshots(sitioId);
+		return mockSnapshots.sort((a, b) => b.year - a.year);
 	} catch (error) {
 		console.error(`Failed to load yearly snapshots for sitio ${sitioId}:`, error);
 		return [];
@@ -419,29 +453,51 @@ export function getSitioSnapshotByYear(sitioId: number, year: number): SitioYear
 /**
  * Save or update a yearly snapshot for a sitio.
  * If a snapshot for the same year exists, it will be overwritten.
+ * Validates snapshot data using Zod schema before saving.
  * @param sitioId The sitio ID
  * @param snapshot The snapshot to save
+ * @param sitioName Optional sitio name for audit logging
  * @returns true if successful, false otherwise
  */
 export function saveOrUpdateYearlySnapshot(
 	sitioId: number,
-	snapshot: SitioYearlySnapshot
+	snapshot: SitioYearlySnapshot,
+	sitioName?: string
 ): boolean {
-	const snapshots = loadSitioYearlySnapshots(sitioId);
-	const existingIndex = snapshots.findIndex((s) => s.year === snapshot.year);
+	// Validate snapshot data
+	const validation = safeValidateSnapshot(snapshot);
+	if (!validation.success) {
+		console.error(`Invalid snapshot data for sitio ${sitioId}:`, validation.error);
+		return false;
+	}
 
-	if (existingIndex >= 0) {
+	const validatedSnapshot = validation.data;
+	const snapshots = loadSitioYearlySnapshots(sitioId);
+	const existingIndex = snapshots.findIndex((s) => s.year === validatedSnapshot.year);
+	const isUpdate = existingIndex >= 0;
+
+	if (isUpdate) {
 		// Update existing snapshot for the same year
 		snapshots[existingIndex] = {
-			...snapshot,
+			...validatedSnapshot,
 			recorded_at: new Date().toISOString()
 		};
 	} else {
 		// Add new snapshot
-		snapshots.push(snapshot);
+		snapshots.push(validatedSnapshot);
 	}
 
-	return saveSitioYearlySnapshots(sitioId, snapshots);
+	const success = saveSitioYearlySnapshots(sitioId, snapshots);
+	if (success) {
+		logAuditAction(
+			isUpdate ? 'update' : 'create',
+			'sitio',
+			sitioId,
+			sitioName || `Sitio #${sitioId}`,
+			`${isUpdate ? 'Updated' : 'Created'} yearly snapshot for ${validatedSnapshot.year}`
+		);
+	}
+	return success;
 }
 
 /**
@@ -453,7 +509,7 @@ export function saveOrUpdateYearlySnapshot(
 export function saveSitioAsYearlySnapshot(sitio: Sitio, year?: number): boolean {
 	const snapshotYear = year ?? new Date().getFullYear();
 	const snapshot = createSnapshotFromSitio(sitio, snapshotYear);
-	return saveOrUpdateYearlySnapshot(sitio.id, snapshot);
+	return saveOrUpdateYearlySnapshot(sitio.id, snapshot, sitio.name);
 }
 
 /**
@@ -470,9 +526,10 @@ export function getSitioAvailableYears(sitioId: number): number[] {
  * Delete a specific year's snapshot
  * @param sitioId The sitio ID
  * @param year The year to delete
+ * @param sitioName Optional sitio name for audit logging
  * @returns true if successful, false otherwise
  */
-export function deleteYearlySnapshot(sitioId: number, year: number): boolean {
+export function deleteYearlySnapshot(sitioId: number, year: number, sitioName?: string): boolean {
 	const snapshots = loadSitioYearlySnapshots(sitioId);
 	const filteredSnapshots = snapshots.filter((s) => s.year !== year);
 
@@ -481,7 +538,17 @@ export function deleteYearlySnapshot(sitioId: number, year: number): boolean {
 		return false;
 	}
 
-	return saveSitioYearlySnapshots(sitioId, filteredSnapshots);
+	const success = saveSitioYearlySnapshots(sitioId, filteredSnapshots);
+	if (success) {
+		logAuditAction(
+			'delete',
+			'sitio',
+			sitioId,
+			sitioName || `Sitio #${sitioId}`,
+			`Deleted yearly snapshot for ${year}`
+		);
+	}
+	return success;
 }
 
 /**

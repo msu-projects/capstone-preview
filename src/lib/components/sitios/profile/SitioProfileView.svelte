@@ -66,10 +66,17 @@
 		return yearlySnapshots.find((s) => s.year === prevYear) || null;
 	});
 
-	// Get related projects for this sitio
+	// Get related projects for this sitio, filtered by selected year
+	// Only include projects that were active/completed in or before the selected year
 	const relatedProjects = $derived<Project[]>(
 		projects.filter((p) => {
-			return p.project_sitios?.some((ps) => ps.sitio_id === sitio.id) ?? false;
+			// Check if project is related to this sitio
+			const isRelated = p.project_sitios?.some((ps) => ps.sitio_id === sitio.id) ?? false;
+			if (!isRelated) return false;
+
+			// Filter by year: only include projects that started in or before the selected year
+			const projectYear = p.project_year || new Date(p.start_date).getFullYear();
+			return projectYear <= selectedYear;
 		})
 	);
 

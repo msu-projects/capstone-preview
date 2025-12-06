@@ -1269,6 +1269,7 @@ export function generateProjects(
 /**
  * Generate yearly snapshots for a sitio with realistic year-over-year changes.
  * Creates historical data showing growth/decline patterns.
+ * Need scores gradually improve as years progress (simulating project impact).
  */
 export function generateSitioYearlySnapshots(
 	sitio: Sitio,
@@ -1472,6 +1473,56 @@ export function generateSitioYearlySnapshots(
 		// Record date for this year (set to end of year)
 		const recorded_at = new Date(year, 11, 31).toISOString();
 
+		// Need score improves over time as projects address issues
+		// Start higher (more needs), gradually decrease (needs being addressed)
+		const baseNeedScore = sitio.need_score;
+		const improvement = Math.floor(yearProgress * 3); // Up to 3 point improvement over the years
+		const need_score = Math.max(
+			1,
+			Math.min(
+				10,
+				baseNeedScore +
+					(yearsFromLatest > 0 ? Math.floor((latestYear - year) / 2) : 0) -
+					rng.nextInt(0, 1)
+			)
+		);
+		const need_level = getNeedLevelFromScore(need_score);
+
+		// Ethnicities and religions (generally stable, occasional additions)
+		const ethnicities = sitio.ethnicities ? [...sitio.ethnicities] : undefined;
+		const religions = sitio.religions ? [...sitio.religions] : undefined;
+
+		// Local officials (term-based, might change)
+		// Simulate potential changes in officials (every ~3 years there might be changes)
+		const local_officials = sitio.local_officials?.map((official) => ({
+			...official,
+			name:
+				year < latestYear && rng.next() > 0.7
+					? `${rng.pick(FIRST_NAMES)} ${rng.pick(LAST_NAMES)}`
+					: official.name
+		}));
+
+		// RST officials (similar term-based changes)
+		const rst_officials = sitio.rst_officials?.map((official) => ({
+			...official,
+			name:
+				year < latestYear && rng.next() > 0.8
+					? `${rng.pick(FIRST_NAMES)} ${rng.pick(LAST_NAMES)}`
+					: official.name
+		}));
+
+		// Issues and PPAs - may change slightly over time as some get addressed
+		// Earlier years might have more/different issues
+		const issues_concerns = sitio.issues_concerns?.map((issue) => ({
+			...issue,
+			linkedPPAIds: issue.linkedPPAIds ? [...issue.linkedPPAIds] : undefined
+		}));
+
+		const proposed_ppas = sitio.proposed_ppas?.map((ppa) => ({
+			...ppa,
+			linkedIssueIds: ppa.linkedIssueIds ? [...ppa.linkedIssueIds] : undefined
+		}));
+
 		snapshots.push({
 			year,
 			sitio_id: sitio.id,
@@ -1486,6 +1537,8 @@ export function generateSitioYearlySnapshots(
 				age_15_64,
 				age_65_above
 			},
+			need_score,
+			need_level,
 			social_services,
 			economic_condition,
 			agriculture,
@@ -1495,7 +1548,13 @@ export function generateSitioYearlySnapshots(
 			housing,
 			domestic_animals,
 			community_empowerment,
-			utilities
+			utilities,
+			ethnicities,
+			religions,
+			local_officials,
+			rst_officials,
+			issues_concerns,
+			proposed_ppas
 		});
 
 		previousPopulation = population;

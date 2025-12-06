@@ -49,7 +49,7 @@
 		series: [
 			{
 				name: 'Population',
-				data: snapshots.sort((a, b) => a.year - b.year).map((s) => s.population),
+				data: snapshots.toSorted((a, b) => a.year - b.year).map((s) => s.population),
 				color: 'hsl(217, 91%, 60%)'
 			}
 		],
@@ -61,7 +61,7 @@
 		series: [
 			{
 				name: 'Households',
-				data: snapshots.sort((a, b) => a.year - b.year).map((s) => s.households),
+				data: snapshots.toSorted((a, b) => a.year - b.year).map((s) => s.households),
 				color: 'hsl(142, 71%, 45%)'
 			}
 		],
@@ -73,17 +73,17 @@
 		series: [
 			{
 				name: 'Children (0-14)',
-				data: snapshots.sort((a, b) => a.year - b.year).map((s) => s.demographics.age_0_14),
+				data: snapshots.toSorted((a, b) => a.year - b.year).map((s) => s.demographics.age_0_14),
 				color: 'hsl(217, 91%, 60%)'
 			},
 			{
 				name: 'Working Age (15-64)',
-				data: snapshots.sort((a, b) => a.year - b.year).map((s) => s.demographics.age_15_64),
+				data: snapshots.toSorted((a, b) => a.year - b.year).map((s) => s.demographics.age_15_64),
 				color: 'hsl(142, 71%, 45%)'
 			},
 			{
 				name: 'Seniors (65+)',
-				data: snapshots.sort((a, b) => a.year - b.year).map((s) => s.demographics.age_65_above),
+				data: snapshots.toSorted((a, b) => a.year - b.year).map((s) => s.demographics.age_65_above),
 				color: 'hsl(24, 95%, 53%)'
 			}
 		],
@@ -96,14 +96,14 @@
 			{
 				name: 'PhilHealth',
 				data: snapshots
-					.sort((a, b) => a.year - b.year)
+					.toSorted((a, b) => a.year - b.year)
 					.map((s) => s.social_services?.philhealth_beneficiaries || 0),
 				color: 'hsl(142, 71%, 45%)'
 			},
 			{
 				name: '4Ps',
 				data: snapshots
-					.sort((a, b) => a.year - b.year)
+					.toSorted((a, b) => a.year - b.year)
 					.map((s) => s.social_services?.fourps_beneficiaries || 0),
 				color: 'hsl(262, 83%, 58%)'
 			}
