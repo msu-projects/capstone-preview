@@ -226,19 +226,21 @@
 	<!-- Charts Row -->
 	<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
 		<!-- Gender Distribution -->
-		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50 dark:ring-slate-700/50">
-			<Card.Header>
-				<Card.Title class="flex items-center gap-2 text-base">
-					<Activity class="size-5 text-slate-500 dark:text-slate-400" />
-					Gender Distribution
-				</Card.Title>
+		<Card.Root class="gap-0 py-0 shadow-sm">
+			<Card.Header class="border-b bg-slate-50/50 py-6 dark:bg-slate-800/50">
+				<div class="flex items-center gap-2">
+					<div class="rounded-lg bg-slate-50/50 p-1.5 dark:bg-slate-800/50">
+						<Activity class="size-4 text-slate-500 dark:text-slate-400" />
+					</div>
+					<Card.Title class="text-lg">Gender Distribution</Card.Title>
+				</div>
 			</Card.Header>
-			<Card.Content>
+			<Card.Content class="py-6">
 				<DonutChart
 					data={genderChartData}
 					centerLabel="Total"
 					centerValue={formatNumber(sitio.population)}
-					height={0}
+					height={320}
 				/>
 			</Card.Content>
 		</Card.Root>
@@ -254,40 +256,12 @@
 				</div>
 			</Card.Header>
 			<Card.Content class="py-6">
-				<div style="height: 220px;">
-					<DonutChart
-						data={ageChartData}
-						centerValue={formatNumber(sitio.population)}
-						centerLabel="Total"
-						height={220}
-					/>
-				</div>
-
-				<!-- Age Group Details -->
-				<div class="mt-4 space-y-3">
-					{#each [{ label: 'Children (0-14)', value: sitio.demographics.age_0_14, percent: childrenPercentage, color: 'blue', icon: Baby }, { label: 'Working Age (15-64)', value: sitio.demographics.age_15_64, percent: workingAgePercentage, color: 'emerald', icon: Briefcase }, { label: 'Seniors (65+)', value: sitio.demographics.age_65_above, percent: seniorPercentage, color: 'amber', icon: PersonStanding }] as group}
-						{@const bgClass = {
-							blue: 'bg-blue-50',
-							emerald: 'bg-emerald-50',
-							amber: 'bg-amber-50'
-						}[group.color]}
-						{@const textClass = {
-							blue: 'text-blue-700',
-							emerald: 'text-emerald-700',
-							amber: 'text-amber-700'
-						}[group.color]}
-						<div class="flex items-center justify-between rounded-lg {bgClass} px-3 py-2">
-							<div class="flex items-center gap-2">
-								<group.icon class="size-4 {textClass}" />
-								<span class="text-sm {textClass}">{group.label}</span>
-							</div>
-							<div class="text-right">
-								<span class="font-semibold {textClass}">{formatNumber(group.value)}</span>
-								<span class="ml-1 text-xs {textClass}">({group.percent.toFixed(1)}%)</span>
-							</div>
-						</div>
-					{/each}
-				</div>
+				<DonutChart
+					data={ageChartData}
+					centerValue={formatNumber(sitio.population)}
+					centerLabel="Total"
+					height={320}
+				/>
 			</Card.Content>
 		</Card.Root>
 	</div>

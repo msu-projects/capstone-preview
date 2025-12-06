@@ -107,7 +107,7 @@
 				// Add popup
 				marker.bindPopup(`
 					<div class="p-2 min-w-[200px]">
-						<h4 class="font-semibold text-sm text-slate-900 mb-1">${project.title}</h4>
+						<a href="/projects/${project.id}" class="font-semibold text-sm text-slate-900 mb-1">${project.title}</a>
 						<p class="text-xs text-slate-600 mb-2">${sitio.sitio_name}, ${sitio.barangay}</p>
 						<div class="space-y-1 pt-2 border-t border-slate-200">
 							<div class="flex justify-between text-xs">
