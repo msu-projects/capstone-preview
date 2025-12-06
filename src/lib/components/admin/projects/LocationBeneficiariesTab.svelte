@@ -231,366 +231,372 @@
 	collapsible={false}
 >
 	<div class="space-y-6">
-	<!-- Summary Cards -->
-	{#if projectSitios.length > 0}
-		<div class="grid gap-4 md:grid-cols-4">
-			<Card.Card>
-				<Card.CardContent class="">
-					<div class="flex items-center gap-5">
-						<MapPin class="size-5 text-primary" />
-						<div>
-							<p class="text-sm text-muted-foreground">Total Sitios</p>
-							<p class="text-2xl font-bold">{totalSitios}</p>
+		<!-- Summary Cards -->
+		{#if projectSitios.length > 0}
+			<div class="grid gap-4 md:grid-cols-4">
+				<Card.Card>
+					<Card.CardContent class="">
+						<div class="flex items-center gap-5">
+							<MapPin class="size-5 text-primary" />
+							<div>
+								<p class="text-sm text-muted-foreground">Total Sitios</p>
+								<p class="text-2xl font-bold">{totalSitios}</p>
+							</div>
 						</div>
-					</div>
-				</Card.CardContent>
-			</Card.Card>
-			<Card.Card>
-				<Card.CardContent class="">
-					<div class="flex items-center gap-5">
-						<Users class="size-5 text-primary" />
-						<div>
-							<p class="text-sm text-muted-foreground">Total Beneficiaries</p>
-							<p class="text-2xl font-bold">{totalBeneficiaries.toLocaleString()}</p>
+					</Card.CardContent>
+				</Card.Card>
+				<Card.Card>
+					<Card.CardContent class="">
+						<div class="flex items-center gap-5">
+							<Users class="size-5 text-primary" />
+							<div>
+								<p class="text-sm text-muted-foreground">Total Beneficiaries</p>
+								<p class="text-2xl font-bold">{totalBeneficiaries.toLocaleString()}</p>
+							</div>
 						</div>
-					</div>
-				</Card.CardContent>
-			</Card.Card>
-			<Card.Card>
-				<Card.CardContent class="">
-					<div class="flex items-center gap-5">
-						<Home class="size-5 text-primary" />
-						<div>
-							<p class="text-sm text-muted-foreground">Municipalities</p>
-							<p class="text-2xl font-bold">{totalMunicipalities}</p>
+					</Card.CardContent>
+				</Card.Card>
+				<Card.Card>
+					<Card.CardContent class="">
+						<div class="flex items-center gap-5">
+							<Home class="size-5 text-primary" />
+							<div>
+								<p class="text-sm text-muted-foreground">Municipalities</p>
+								<p class="text-2xl font-bold">{totalMunicipalities}</p>
+							</div>
 						</div>
-					</div>
-				</Card.CardContent>
-			</Card.Card>
-			<Card.Card>
-				<Card.CardContent class="">
-					<div class="flex items-center gap-5">
-						<TrendingUp class="size-5 text-primary" />
-						<div>
-							<p class="text-sm text-muted-foreground">Barangays</p>
-							<p class="text-2xl font-bold">{totalBarangays}</p>
+					</Card.CardContent>
+				</Card.Card>
+				<Card.Card>
+					<Card.CardContent class="">
+						<div class="flex items-center gap-5">
+							<TrendingUp class="size-5 text-primary" />
+							<div>
+								<p class="text-sm text-muted-foreground">Barangays</p>
+								<p class="text-2xl font-bold">{totalBarangays}</p>
+							</div>
 						</div>
-					</div>
-				</Card.CardContent>
-			</Card.Card>
-		</div>
-	{/if}
+					</Card.CardContent>
+				</Card.Card>
+			</div>
+		{/if}
 
-	<!-- Selected Sitios Table -->
-	{#if projectSitios.length > 0}
-		<Card.Card>
-			<Card.CardHeader>
-				<Card.CardTitle>Selected Sitios</Card.CardTitle>
-				<Card.CardDescription>
-					Multi-sitio projects allow a single project to benefit multiple communities simultaneously
-				</Card.CardDescription>
-			</Card.CardHeader>
-			<Card.CardContent>
-				<Table.Root>
-					<Table.Header>
-						<Table.Row>
-							<Table.Head>Sitio Name</Table.Head>
-							<Table.Head>Need Level</Table.Head>
-							<Table.Head>Municipality</Table.Head>
-							<Table.Head>Barangay</Table.Head>
-							<Table.Head>Beneficiaries</Table.Head>
-							<Table.Head>Focal Person</Table.Head>
-							<Table.Head class="text-right">Actions</Table.Head>
-						</Table.Row>
-					</Table.Header>
-					<Table.Body>
-						{#each projectSitios as ps}
-							{@const sitioData = getSitioById(ps.sitio_id)}
-							{@const needScore = sitioData?.need_score ?? 5}
-							{@const needLevel = getNeedLevelFromScore(needScore)}
-							{@const needConfig = getNeedLevelConfig(needLevel)}
+		<!-- Selected Sitios Table -->
+		{#if projectSitios.length > 0}
+			<Card.Card>
+				<Card.CardHeader>
+					<Card.CardTitle>Selected Sitios</Card.CardTitle>
+					<Card.CardDescription>
+						Multi-sitio projects allow a single project to benefit multiple communities
+						simultaneously
+					</Card.CardDescription>
+				</Card.CardHeader>
+				<Card.CardContent>
+					<Table.Root>
+						<Table.Header>
 							<Table.Row>
-								<Table.Cell class="font-medium">{ps.sitio_name}</Table.Cell>
-								<Table.Cell>
-									<Badge variant="secondary" class="gap-1 {getNeedLevelBadgeClasses(needLevel)}">
-										<Gauge class="size-3" />
-										{needScore}/10
-									</Badge>
-								</Table.Cell>
-								<Table.Cell>{ps.municipality}</Table.Cell>
-								<Table.Cell>{ps.barangay}</Table.Cell>
-								<Table.Cell>{ps.beneficiaries_target}</Table.Cell>
-								<Table.Cell>
-									<div class="text-sm">
-										{ps.focal_person || '—'}
-										{#if ps.focal_contact}
-											<br />
-											<span class="text-muted-foreground">{ps.focal_contact}</span>
-										{/if}
-									</div>
-								</Table.Cell>
-								<Table.Cell class="text-right">
-									<Button
-										variant="ghost"
-										size="sm"
-										onclick={() => removeSitio(ps.sitio_id)}
-										class="text-destructive hover:text-destructive"
-									>
-										<Trash2 class="size-4" />
-									</Button>
-								</Table.Cell>
+								<Table.Head>Sitio Name</Table.Head>
+								<Table.Head>Need Level</Table.Head>
+								<Table.Head>Municipality</Table.Head>
+								<Table.Head>Barangay</Table.Head>
+								<Table.Head>Beneficiaries</Table.Head>
+								<Table.Head>Focal Person</Table.Head>
+								<Table.Head class="text-right">Actions</Table.Head>
 							</Table.Row>
-						{/each}
-					</Table.Body>
-				</Table.Root>
-			</Card.CardContent>
-		</Card.Card>
-	{/if}
-
-	<!-- Sitio Recommendation Panel -->
-	{#if projectType}
-		<SitioRecommendationPanel
-			{projectType}
-			{selectedSitioIds}
-			onAddSitio={addSitioFromRecommendation}
-		/>
-	{/if}
-
-	<!-- Add Sitio Form -->
-	<Card.Card>
-		<Card.CardHeader>
-			<Card.CardTitle>
-				{projectSitios.length === 0 ? 'Select Project Location(s)' : 'Add Another Sitio'}
-			</Card.CardTitle>
-			<Card.CardDescription>
-				{projectSitios.length === 0
-					? 'Start by selecting the first sitio for this project'
-					: 'You can add multiple sitios to create a multi-sitio project'}
-			</Card.CardDescription>
-		</Card.CardHeader>
-		<Card.CardContent>
-			{#if showSitioSelection || projectSitios.length === 0}
-				<div class="grid gap-4 md:grid-cols-2">
-					<!-- Sitio Selection with Popover -->
-					<div class="space-y-2 md:col-span-2">
-						<Label for="sitio" class="required">Select Sitio</Label>
-						<Popover.Root bind:open={popoverOpen}>
-							<Popover.Trigger
-								class={cn(
-									'flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50'
-								)}
-							>
-								{#if selectedSitioData}
-									<div class="flex flex-col items-start">
-										<span class="font-medium">{selectedSitioData.name}</span>
-										<span class="text-xs text-muted-foreground">
-											{selectedSitioData.barangay}, {selectedSitioData.municipality}
-										</span>
-									</div>
-								{:else}
-									<span class="text-muted-foreground">Select a sitio...</span>
-								{/if}
-								<Search class="ml-2 size-4 shrink-0 opacity-50" />
-							</Popover.Trigger>
-							<Popover.Content class="w-full p-0 md:w-[500px]" align="start">
-								<div class="space-y-3 border-b p-3">
-									<!-- Search Input -->
-									<div class="relative">
-										<Search class="absolute top-2.5 left-2 size-4 text-muted-foreground" />
-										<Input placeholder="Search sitios..." bind:value={searchQuery} class="pl-8" />
-									</div>
-
-									<!-- Filter Dropdowns -->
-									<!-- <div class="grid gap-2 md:grid-cols-2"> -->
-									<div class="flex gap-3">
-										<Select.Root type="single" bind:value={selectedMunicipality}>
-											<Select.Trigger class="h-9">
-												<span class="text-xs">
-													{selectedMunicipality || 'All Municipalities'}
-												</span>
-											</Select.Trigger>
-											<Select.Content>
-												<Select.Item value="">All Municipalities</Select.Item>
-												{#each municipalities as municipality}
-													<Select.Item value={municipality}>{municipality}</Select.Item>
-												{/each}
-											</Select.Content>
-										</Select.Root>
-
-										<Select.Root type="single" bind:value={selectedBarangay}>
-											<Select.Trigger class="h-9">
-												<span class="text-xs">
-													{selectedBarangay || 'All Barangays'}
-												</span>
-											</Select.Trigger>
-											<Select.Content>
-												<Select.Item value="">All Barangays</Select.Item>
-												{#each barangays as barangay}
-													<Select.Item value={barangay}>{barangay}</Select.Item>
-												{/each}
-											</Select.Content>
-										</Select.Root>
-
-										<!-- Sort by Need Score Button -->
-										<Button
-											variant={sortByNeedScore !== 'none' ? 'secondary' : 'outline'}
-											size="sm"
-											class="h-9 gap-1.5 text-xs"
-											onclick={toggleNeedScoreSort}
-											title="Sort by need score"
-										>
-											{#if sortByNeedScore === 'desc'}
-												<ArrowDownWideNarrow class="size-3.5" />
-												<span>Need ↓</span>
-											{:else if sortByNeedScore === 'asc'}
-												<ArrowUpNarrowWide class="size-3.5" />
-												<span>Need ↑</span>
-											{:else}
-												<Gauge class="size-3.5" />
-												<span>Sort</span>
+						</Table.Header>
+						<Table.Body>
+							{#each projectSitios as ps}
+								{@const sitioData = getSitioById(ps.sitio_id)}
+								{@const needScore = sitioData?.need_score ?? 5}
+								{@const needLevel = getNeedLevelFromScore(needScore)}
+								{@const needConfig = getNeedLevelConfig(needLevel)}
+								<Table.Row>
+									<Table.Cell class="font-medium">{ps.sitio_name}</Table.Cell>
+									<Table.Cell>
+										<Badge variant="secondary" class="gap-1 {getNeedLevelBadgeClasses(needLevel)}">
+											<Gauge class="size-3" />
+											{needScore}/10
+										</Badge>
+									</Table.Cell>
+									<Table.Cell>{ps.municipality}</Table.Cell>
+									<Table.Cell>{ps.barangay}</Table.Cell>
+									<Table.Cell>{ps.beneficiaries_target}</Table.Cell>
+									<Table.Cell>
+										<div class="text-sm">
+											{ps.focal_person || '—'}
+											{#if ps.focal_contact}
+												<br />
+												<span class="text-muted-foreground">{ps.focal_contact}</span>
 											{/if}
-										</Button>
-									</div>
-									<!-- Clear Filters Button -->
-									{#if searchQuery || selectedMunicipality || selectedBarangay}
+										</div>
+									</Table.Cell>
+									<Table.Cell class="text-right">
 										<Button
 											variant="ghost"
 											size="sm"
-											class="h-7 w-full text-xs"
-											onclick={clearFilters}
+											onclick={() => removeSitio(ps.sitio_id)}
+											class="text-destructive hover:text-destructive"
 										>
-											Clear Filters
+											<Trash2 class="size-4" />
 										</Button>
-									{/if}
-								</div>
+									</Table.Cell>
+								</Table.Row>
+							{/each}
+						</Table.Body>
+					</Table.Root>
+				</Card.CardContent>
+			</Card.Card>
+		{/if}
 
-								<!-- Sitio List -->
-								<div class="max-h-[300px] overflow-y-auto">
-									{#if filteredSitios.length === 0}
-										<div class="p-4 text-center text-sm text-muted-foreground">
-											{availableSitios.length === 0
-												? 'All sitios have been selected'
-												: 'No sitios found matching your filters'}
+		<!-- Sitio Recommendation Panel -->
+		{#if projectType}
+			<SitioRecommendationPanel
+				{projectType}
+				{selectedSitioIds}
+				onAddSitio={addSitioFromRecommendation}
+			/>
+		{/if}
+
+		<!-- Add Sitio Form -->
+		<Card.Card>
+			<Card.CardHeader>
+				<Card.CardTitle>
+					{projectSitios.length === 0 ? 'Select Project Location(s)' : 'Add Another Sitio'}
+				</Card.CardTitle>
+				<Card.CardDescription>
+					{projectSitios.length === 0
+						? 'Start by selecting the first sitio for this project'
+						: 'You can add multiple sitios to create a multi-sitio project'}
+				</Card.CardDescription>
+			</Card.CardHeader>
+			<Card.CardContent>
+				{#if showSitioSelection || projectSitios.length === 0}
+					<div class="grid gap-4 md:grid-cols-2">
+						<!-- Sitio Selection with Popover -->
+						<div class="space-y-2 md:col-span-2">
+							<Label for="sitio" class="required">Select Sitio</Label>
+							<Popover.Root bind:open={popoverOpen}>
+								<Popover.Trigger
+									class={cn(
+										'flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50'
+									)}
+								>
+									{#if selectedSitioData}
+										<div class="flex flex-col items-start">
+											<span class="font-medium">{selectedSitioData.name}</span>
+											<span class="text-xs text-muted-foreground">
+												{selectedSitioData.barangay}, {selectedSitioData.municipality}
+											</span>
 										</div>
 									{:else}
-										<div class="p-1">
-											{#each filteredSitios as sitio (sitio.id)}
-												{@const needScore = sitio.need_score ?? 5}
-												{@const needLevel = getNeedLevelFromScore(needScore)}
-												{@const needConfig = getNeedLevelConfig(needLevel)}
-												<button
-													type="button"
-													class={cn(
-														'relative flex w-full cursor-pointer items-center rounded-sm px-2 py-2 text-sm transition-colors outline-none select-none hover:bg-accent/30',
-														selectedSitioId === sitio.id && 'bg-accent'
-													)}
-													onclick={() => selectSitio(sitio)}
-												>
-													<div class="flex flex-1 flex-col items-start gap-1">
-														<div class="flex w-full items-center justify-between gap-2">
-															<span class="font-medium">{sitio.name}</span>
-															<Badge
-																variant="secondary"
-																class="flex h-5 gap-1 px-1.5 text-[10px] 
-																{getNeedLevelBadgeClasses(needLevel)}"
-															>
-																<Gauge class="size-2.5" />
-																{needConfig.shortLabel} ({needScore})
-															</Badge>
-														</div>
-														<span class="text-xs text-muted-foreground">
-															{sitio.barangay}, {sitio.municipality}
-														</span>
-														<div class="flex gap-2 text-xs text-muted-foreground">
-															<span>Pop: {sitio.population.toLocaleString()}</span>
-															<span>•</span>
-															<span>HH: {sitio.households.toLocaleString()}</span>
-														</div>
-													</div>
-													{#if selectedSitioId === sitio.id}
-														<Check class="size-4 shrink-0" />
-													{/if}
-												</button>
-											{/each}
-										</div>
+										<span class="text-muted-foreground">Select a sitio...</span>
 									{/if}
-								</div>
-							</Popover.Content>
-						</Popover.Root>
-					</div>
+									<Search class="ml-2 size-4 shrink-0 opacity-50" />
+								</Popover.Trigger>
+								<Popover.Content class="w-full p-0 md:w-[500px]" align="start">
+									<div class="space-y-3 border-b p-3">
+										<!-- Search Input -->
+										<div class="relative">
+											<Search class="absolute top-2.5 left-2 size-4 text-muted-foreground" />
+											<Input placeholder="Search sitios..." bind:value={searchQuery} class="pl-8" />
+										</div>
 
-					<!-- Beneficiaries Target -->
-					<div class="space-y-2">
-						<Label for="beneficiaries-target" class="required">Target Beneficiary Households</Label>
-						<Input
-							id="beneficiaries-target"
-							type="number"
-							bind:value={beneficiariesTarget}
-							placeholder="Enter number of households"
-							min="1"
-							max={selectedSitioData?.households}
-						/>
-						{#if selectedSitioData && beneficiariesTarget}
-							<div class="flex items-center gap-2 text-xs">
-								<div class="flex-1">
-									<div class="mb-1 flex items-center justify-between">
-										<span class="text-muted-foreground">
-											{beneficiariesTarget} of {selectedSitioData.households.toLocaleString()} households
-										</span>
-										<span class="font-medium">{Math.round(beneficiariesPercentage.current)}%</span>
+										<!-- Filter Dropdowns -->
+										<!-- <div class="grid gap-2 md:grid-cols-2"> -->
+										<div class="flex gap-3">
+											<Select.Root type="single" bind:value={selectedMunicipality}>
+												<Select.Trigger class="h-9">
+													<span class="text-xs">
+														{selectedMunicipality || 'All Municipalities'}
+													</span>
+												</Select.Trigger>
+												<Select.Content>
+													<Select.Item value="">All Municipalities</Select.Item>
+													{#each municipalities as municipality}
+														<Select.Item value={municipality}>{municipality}</Select.Item>
+													{/each}
+												</Select.Content>
+											</Select.Root>
+
+											<Select.Root type="single" bind:value={selectedBarangay}>
+												<Select.Trigger class="h-9">
+													<span class="text-xs">
+														{selectedBarangay || 'All Barangays'}
+													</span>
+												</Select.Trigger>
+												<Select.Content>
+													<Select.Item value="">All Barangays</Select.Item>
+													{#each barangays as barangay}
+														<Select.Item value={barangay}>{barangay}</Select.Item>
+													{/each}
+												</Select.Content>
+											</Select.Root>
+
+											<!-- Sort by Need Score Button -->
+											<Button
+												variant={sortByNeedScore !== 'none' ? 'secondary' : 'outline'}
+												size="sm"
+												class="h-9 gap-1.5 text-xs"
+												onclick={toggleNeedScoreSort}
+												title="Sort by need score"
+											>
+												{#if sortByNeedScore === 'desc'}
+													<ArrowDownWideNarrow class="size-3.5" />
+													<span>Need ↓</span>
+												{:else if sortByNeedScore === 'asc'}
+													<ArrowUpNarrowWide class="size-3.5" />
+													<span>Need ↑</span>
+												{:else}
+													<Gauge class="size-3.5" />
+													<span>Sort</span>
+												{/if}
+											</Button>
+										</div>
+										<!-- Clear Filters Button -->
+										{#if searchQuery || selectedMunicipality || selectedBarangay}
+											<Button
+												variant="ghost"
+												size="sm"
+												class="h-7 w-full text-xs"
+												onclick={clearFilters}
+											>
+												Clear Filters
+											</Button>
+										{/if}
 									</div>
-									<div class="h-2 overflow-hidden rounded-full bg-secondary">
-										<div
-											class="h-full bg-primary"
-											style="width: {Math.min(beneficiariesPercentage.current, 100)}%"
-										></div>
+
+									<!-- Sitio List -->
+									<div class="max-h-[300px] overflow-y-auto">
+										{#if filteredSitios.length === 0}
+											<div class="p-4 text-center text-sm text-muted-foreground">
+												{availableSitios.length === 0
+													? 'All sitios have been selected'
+													: 'No sitios found matching your filters'}
+											</div>
+										{:else}
+											<div class="p-1">
+												{#each filteredSitios as sitio (sitio.id)}
+													{@const needScore = sitio.need_score ?? 5}
+													{@const needLevel = getNeedLevelFromScore(needScore)}
+													{@const needConfig = getNeedLevelConfig(needLevel)}
+													<button
+														type="button"
+														class={cn(
+															'relative flex w-full cursor-pointer items-center rounded-sm px-2 py-2 text-sm transition-colors outline-none select-none hover:bg-accent/30',
+															selectedSitioId === sitio.id && 'bg-accent'
+														)}
+														onclick={() => selectSitio(sitio)}
+													>
+														<div class="flex flex-1 flex-col items-start gap-1">
+															<div class="flex w-full items-center justify-between gap-2">
+																<span class="font-medium">{sitio.name}</span>
+																<Badge
+																	variant="secondary"
+																	class="flex h-5 gap-1 px-1.5 text-[10px] 
+																{getNeedLevelBadgeClasses(needLevel)}"
+																>
+																	<Gauge class="size-2.5" />
+																	{needConfig.shortLabel} ({needScore})
+																</Badge>
+															</div>
+															<span class="text-xs text-muted-foreground">
+																{sitio.barangay}, {sitio.municipality}
+															</span>
+															<div class="flex gap-2 text-xs text-muted-foreground">
+																<span>Pop: {sitio.population.toLocaleString()}</span>
+																<span>•</span>
+																<span>HH: {sitio.households.toLocaleString()}</span>
+															</div>
+														</div>
+														{#if selectedSitioId === sitio.id}
+															<Check class="size-4 shrink-0" />
+														{/if}
+													</button>
+												{/each}
+											</div>
+										{/if}
+									</div>
+								</Popover.Content>
+							</Popover.Root>
+						</div>
+
+						<!-- Beneficiaries Target -->
+						<div class="space-y-2">
+							<Label for="beneficiaries-target" class="required"
+								>Target Beneficiary Households</Label
+							>
+							<Input
+								id="beneficiaries-target"
+								type="number"
+								bind:value={beneficiariesTarget}
+								placeholder="Enter number of households"
+								min="1"
+								max={selectedSitioData?.households}
+							/>
+							{#if selectedSitioData && beneficiariesTarget}
+								<div class="flex items-center gap-2 text-xs">
+									<div class="flex-1">
+										<div class="mb-1 flex items-center justify-between">
+											<span class="text-muted-foreground">
+												{beneficiariesTarget} of {selectedSitioData.households.toLocaleString()} households
+											</span>
+											<span class="font-medium">{Math.round(beneficiariesPercentage.current)}%</span
+											>
+										</div>
+										<div class="h-2 overflow-hidden rounded-full bg-secondary">
+											<div
+												class="h-full bg-primary"
+												style="width: {Math.min(beneficiariesPercentage.current, 100)}%"
+											></div>
+										</div>
 									</div>
 								</div>
-							</div>
-						{/if}
-					</div>
+							{/if}
+						</div>
 
-					<div class="hidden md:block"></div>
+						<div class="hidden md:block"></div>
 
-					<!-- Focal Person -->
-					<div class="space-y-2">
-						<Label for="focal-person">Local Focal Person</Label>
-						<Input
-							id="focal-person"
-							bind:value={focalPerson}
-							placeholder="Name of local coordinator"
-						/>
-					</div>
+						<!-- Focal Person -->
+						<div class="space-y-2">
+							<Label for="focal-person">Local Focal Person</Label>
+							<Input
+								id="focal-person"
+								bind:value={focalPerson}
+								placeholder="Name of local coordinator"
+							/>
+						</div>
 
-					<!-- Focal Contact -->
-					<div class="space-y-2">
-						<Label for="focal-contact">Contact Number</Label>
-						<Input id="focal-contact" bind:value={focalContact} placeholder="0912-345-6789" />
-					</div>
+						<!-- Focal Contact -->
+						<div class="space-y-2">
+							<Label for="focal-contact">Contact Number</Label>
+							<Input id="focal-contact" bind:value={focalContact} placeholder="0912-345-6789" />
+						</div>
 
-					<!-- Action Buttons -->
-					<div class="flex gap-2 md:col-span-2">
-						<Button
-							onclick={addSitio}
-							disabled={!selectedSitioId || !beneficiariesTarget}
-							class="gap-2"
-						>
-							<Plus class="size-4" />
-							Add Sitio
-						</Button>
-						{#if projectSitios.length > 0}
-							<Button variant="outline" onclick={() => (showSitioSelection = false)}>Cancel</Button>
-						{/if}
+						<!-- Action Buttons -->
+						<div class="flex gap-2 md:col-span-2">
+							<Button
+								onclick={addSitio}
+								disabled={!selectedSitioId || !beneficiariesTarget}
+								class="gap-2"
+							>
+								<Plus class="size-4" />
+								Add Sitio
+							</Button>
+							{#if projectSitios.length > 0}
+								<Button variant="outline" onclick={() => (showSitioSelection = false)}
+									>Cancel</Button
+								>
+							{/if}
+						</div>
 					</div>
-				</div>
-			{:else}
-				<Button onclick={() => (showSitioSelection = true)} variant="outline" class="gap-2">
-					<Plus class="size-4" />
-					Add Another Sitio
-				</Button>
-			{/if}
-		</Card.CardContent>
-	</Card.Card>
+				{:else}
+					<Button onclick={() => (showSitioSelection = true)} variant="outline" class="gap-2">
+						<Plus class="size-4" />
+						Add Another Sitio
+					</Button>
+				{/if}
+			</Card.CardContent>
+		</Card.Card>
 	</div>
 </FormSection>
 

@@ -3,13 +3,13 @@
 	import BasicInfoTab from '$lib/components/admin/sitios/BasicInfoTab.svelte';
 	import CommunityServicesTab from '$lib/components/admin/sitios/CommunityServicesTab.svelte';
 	import DemographicsSocialTab from '$lib/components/admin/sitios/DemographicsSocialTab.svelte';
-	import { FormStepper, type Step } from '$lib/components/ui/form-stepper';
 	import InfrastructureHousingTab from '$lib/components/admin/sitios/InfrastructureHousingTab.svelte';
 	import LivelihoodsEconomyTab from '$lib/components/admin/sitios/LivelihoodsEconomyTab.svelte';
 	import NeedsAssessmentTab from '$lib/components/admin/sitios/NeedsAssessmentTab.svelte';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
+	import { FormStepper, type Step } from '$lib/components/ui/form-stepper';
 	import type { Sitio, SitioIssue, SitioPPA } from '$lib/types';
 	import { getNeedLevelFromScore } from '$lib/types';
 	import { logAuditAction } from '$lib/utils/audit';
