@@ -372,8 +372,8 @@
 	>
 		{#snippet actions()}
 			<Button variant="ghost" size="sm" onclick={() => goto('/admin/config')}>
-				<ArrowLeft class="mr-2 size-4" />
-				Back
+				<ArrowLeft class="size-4 sm:mr-2" />
+				<span class="hidden sm:inline">Back</span>
 			</Button>
 			{#if hasOverride}
 				<Button
@@ -384,13 +384,13 @@
 						isResetDialogOpen = true;
 					}}
 				>
-					<RotateCcw class="mr-2 size-4" />
-					Reset
+					<RotateCcw class="size-4 sm:mr-2" />
+					<span class="hidden sm:inline">Reset</span>
 				</Button>
 			{/if}
 			<Button size="sm" onclick={handleSave} disabled={!hasChanges || !canManageConfig}>
-				<Save class="mr-2 size-4" />
-				Save Changes
+				<Save class="size-4 sm:mr-2" />
+				<span class="hidden sm:inline">Save Changes</span>
 			</Button>
 		{/snippet}
 		{#snippet badges()}
@@ -445,12 +445,12 @@
 
 				<Tabs.Content value="categories" class="mt-4">
 					<Card.Root>
-						<Card.Header class="flex flex-row items-center justify-between">
+						<Card.Header class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 							<div>
 								<Card.Title>Project Categories</Card.Title>
 								<Card.Description>Manage project categories and their properties</Card.Description>
 							</div>
-							<Button size="sm" onclick={() => openCategoryDialog()}>
+							<Button size="sm" class="w-full sm:w-auto" onclick={() => openCategoryDialog()}>
 								<Plus class="mr-2 size-4" />
 								Add Category
 							</Button>
@@ -519,14 +519,14 @@
 
 				<Tabs.Content value="types" class="mt-4 space-y-4">
 					<Card.Root>
-						<Card.Header class="flex flex-row items-center justify-between">
+						<Card.Header class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 							<div>
 								<Card.Title>Project Types</Card.Title>
 								<Card.Description>
 									Manage project types and their default performance indicators
 								</Card.Description>
 							</div>
-							<Button size="sm" onclick={() => openTypeDialog()}>
+							<Button size="sm" class="w-full sm:w-auto" onclick={() => openTypeDialog()}>
 								<Plus class="mr-2 size-4" />
 								Add Type
 							</Button>
@@ -590,7 +590,7 @@
 
 <!-- Project Type Dialog -->
 <Dialog.Root bind:open={isTypeDialogOpen}>
-	<Dialog.Content class="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+	<Dialog.Content class="max-h-[90vh] max-w-[95vw] overflow-y-auto sm:max-w-2xl">
 		<Dialog.Header>
 			<Dialog.Title>{editingType ? 'Edit' : 'Add'} Project Type</Dialog.Title>
 			<Dialog.Description>
@@ -634,10 +634,14 @@
 
 				<!-- Add indicator form -->
 				<div class="grid gap-2 rounded-md bg-muted/50 p-3 sm:grid-cols-4">
-					<Input bind:value={newIndicator.id} placeholder="ID (e.g., km_built)" />
-					<Input bind:value={newIndicator.name} placeholder="Name" />
+					<Input
+						bind:value={newIndicator.id}
+						placeholder="ID (e.g., km_built)"
+						class="sm:col-span-1"
+					/>
+					<Input bind:value={newIndicator.name} placeholder="Name" class="sm:col-span-1" />
 					<Select.Root type="single" bind:value={newIndicator.unit}>
-						<Select.Trigger>
+						<Select.Trigger class="sm:col-span-1">
 							{newIndicator.unit || 'Unit'}
 						</Select.Trigger>
 						<Select.Content class="max-h-60">
@@ -648,6 +652,7 @@
 					</Select.Root>
 					<Button
 						size="sm"
+						class="w-full sm:col-span-1"
 						onclick={addIndicator}
 						disabled={!newIndicator.id || !newIndicator.name || !newIndicator.unit}
 					>
@@ -695,7 +700,7 @@
 
 <!-- Category Dialog -->
 <Dialog.Root bind:open={isCategoryDialogOpen}>
-	<Dialog.Content class="sm:max-w-lg">
+	<Dialog.Content class="max-w-[95vw] sm:max-w-lg">
 		<Dialog.Header>
 			<Dialog.Title>{editingCategory ? 'Edit' : 'Add'} Category</Dialog.Title>
 			<Dialog.Description>

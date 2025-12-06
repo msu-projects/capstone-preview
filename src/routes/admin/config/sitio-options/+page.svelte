@@ -159,18 +159,18 @@
 	<AdminHeader title="Sitio Form Options" description="Configure dropdown options for sitio forms">
 		{#snippet actions()}
 			<Button variant="ghost" size="sm" onclick={() => goto('/admin/config')}>
-				<ArrowLeft class="mr-2 size-4" />
-				Back
+				<ArrowLeft class="size-4 sm:mr-2" />
+				<span class="hidden sm:inline">Back</span>
 			</Button>
 			{#if hasOverride}
 				<Button variant="outline" size="sm" onclick={() => (isResetDialogOpen = true)}>
-					<RotateCcw class="mr-2 size-4" />
-					Reset
+					<RotateCcw class="size-4 sm:mr-2" />
+					<span class="hidden sm:inline">Reset</span>
 				</Button>
 			{/if}
 			<Button size="sm" onclick={handleSave} disabled={!hasChanges || !canManageConfig}>
-				<Save class="mr-2 size-4" />
-				Save Changes
+				<Save class="size-4 sm:mr-2" />
+				<span class="hidden sm:inline">Save Changes</span>
 			</Button>
 		{/snippet}
 		{#snippet badges()}

@@ -260,18 +260,18 @@
 	>
 		{#snippet actions()}
 			<Button variant="ghost" size="sm" onclick={() => goto('/admin/config')}>
-				<ArrowLeft class="mr-2 size-4" />
-				Back
+				<ArrowLeft class="size-4 sm:mr-2" />
+				<span class="hidden sm:inline">Back</span>
 			</Button>
 			{#if hasOverride}
 				<Button variant="outline" size="sm" onclick={() => (isResetDialogOpen = true)}>
-					<RotateCcw class="mr-2 size-4" />
-					Reset
+					<RotateCcw class="size-4 sm:mr-2" />
+					<span class="hidden sm:inline">Reset</span>
 				</Button>
 			{/if}
 			<Button size="sm" onclick={handleSave} disabled={!hasChanges || !canManageConfig}>
-				<Save class="mr-2 size-4" />
-				Save Changes
+				<Save class="size-4 sm:mr-2" />
+				<span class="hidden sm:inline">Save Changes</span>
 			</Button>
 		{/snippet}
 		{#snippet badges()}
@@ -318,12 +318,12 @@
 
 				<Tabs.Content value="issues" class="mt-4 space-y-4">
 					<Card.Root>
-						<Card.Header class="flex flex-row items-center justify-between">
+						<Card.Header class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 							<div>
 								<Card.Title>Predefined Issues</Card.Title>
 								<Card.Description>Community issues that can be assigned to sitios</Card.Description>
 							</div>
-							<Button size="sm" onclick={() => openIssueDialog()}>
+							<Button size="sm" class="w-full sm:w-auto" onclick={() => openIssueDialog()}>
 								<Plus class="mr-2 size-4" />
 								Add Issue
 							</Button>
@@ -383,14 +383,14 @@
 
 				<Tabs.Content value="ppas" class="mt-4 space-y-4">
 					<Card.Root>
-						<Card.Header class="flex flex-row items-center justify-between">
+						<Card.Header class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 							<div>
 								<Card.Title>Predefined PPAs</Card.Title>
 								<Card.Description
 									>Programs, Projects, and Activities that address issues</Card.Description
 								>
 							</div>
-							<Button size="sm" onclick={() => openPPADialog()}>
+							<Button size="sm" class="w-full sm:w-auto" onclick={() => openPPADialog()}>
 								<Plus class="mr-2 size-4" />
 								Add PPA
 							</Button>
@@ -456,7 +456,7 @@
 
 <!-- Issue Dialog -->
 <Dialog.Root bind:open={isIssueDialogOpen}>
-	<Dialog.Content class="sm:max-w-lg">
+	<Dialog.Content class="max-w-[95vw] sm:max-w-lg">
 		<Dialog.Header>
 			<Dialog.Title>{editingIssue ? 'Edit' : 'Add'} Issue</Dialog.Title>
 		</Dialog.Header>
@@ -531,7 +531,7 @@
 
 <!-- PPA Dialog -->
 <Dialog.Root bind:open={isPPADialogOpen}>
-	<Dialog.Content class="sm:max-w-lg">
+	<Dialog.Content class="max-w-[95vw] sm:max-w-lg">
 		<Dialog.Header>
 			<Dialog.Title>{editingPPA ? 'Edit' : 'Add'} PPA</Dialog.Title>
 		</Dialog.Header>

@@ -139,18 +139,18 @@
 	>
 		{#snippet actions()}
 			<Button variant="ghost" size="sm" onclick={() => goto('/admin/config')}>
-				<ArrowLeft class="mr-2 size-4" />
-				Back
+				<ArrowLeft class="size-4 sm:mr-2" />
+				<span class="hidden sm:inline">Back</span>
 			</Button>
 			{#if hasOverride}
 				<Button variant="outline" size="sm" onclick={() => (isResetDialogOpen = true)}>
-					<RotateCcw class="mr-2 size-4" />
-					Reset
+					<RotateCcw class="size-4 sm:mr-2" />
+					<span class="hidden sm:inline">Reset</span>
 				</Button>
 			{/if}
 			<Button size="sm" onclick={handleSave} disabled={!hasChanges || !canManageConfig}>
-				<Save class="mr-2 size-4" />
-				Save Changes
+				<Save class="size-4 sm:mr-2" />
+				<span class="hidden sm:inline">Save Changes</span>
 			</Button>
 		{/snippet}
 		{#snippet badges()}
@@ -208,13 +208,18 @@
 					<Card.Description>Add a new municipality to the list</Card.Description>
 				</Card.Header>
 				<Card.Content>
-					<div class="flex gap-2">
+					<div class="flex flex-col gap-2 sm:flex-row">
 						<Input
 							bind:value={newMunicipality}
 							placeholder="Enter municipality name..."
 							onkeydown={(e) => e.key === 'Enter' && addMunicipality()}
+							class="flex-1"
 						/>
-						<Button onclick={addMunicipality} disabled={!newMunicipality.trim()}>
+						<Button
+							onclick={addMunicipality}
+							disabled={!newMunicipality.trim()}
+							class="w-full sm:w-auto"
+						>
 							<Plus class="mr-2 size-4" />
 							Add
 						</Button>
@@ -250,19 +255,22 @@
 									</Collapsible.Trigger>
 									<Collapsible.Content>
 										<div class="space-y-3 border-t p-3">
-											<div class="flex gap-2">
+											<div class="flex flex-col gap-2 sm:flex-row">
 												<Input
 													bind:value={newBarangays[municipality.name]}
 													placeholder="Add barangay..."
 													onkeydown={(e) => e.key === 'Enter' && addBarangay(municipality.name)}
+													class="flex-1"
 												/>
 												<Button
 													size="sm"
 													variant="outline"
 													onclick={() => addBarangay(municipality.name)}
 													disabled={!newBarangays[municipality.name]?.trim()}
+													class="w-full sm:w-auto"
 												>
-													<Plus class="size-4" />
+													<Plus class="size-4 sm:mr-2" />
+													<span class="sm:inline">Add</span>
 												</Button>
 											</div>
 											{#if municipality.barangays.length > 0}
