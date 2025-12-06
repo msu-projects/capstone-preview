@@ -10,6 +10,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import * as Select from '$lib/components/ui/select';
 	import type { Sitio } from '$lib/types';
+	import { downloadSitioProfilePDF } from '$lib/utils/pdf-generator';
 	import { deleteSitio, loadSitios } from '$lib/utils/storage';
 	import { BarChart3, Plus, Search, Upload, X } from '@lucide/svelte';
 	import { onMount, tick } from 'svelte';
@@ -229,9 +230,7 @@
 	function handleDownloadPDF(sitioId: number) {
 		const sitio = sitios.find((s) => s.id === sitioId);
 		if (sitio) {
-			console.log('Download PDF for sitio:', sitio.name);
-			// TODO: Implement PDF download functionality
-			alert(`PDF download for ${sitio.name} will be implemented soon.`);
+			downloadSitioProfilePDF(sitio);
 		}
 	}
 

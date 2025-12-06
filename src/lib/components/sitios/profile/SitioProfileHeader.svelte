@@ -3,6 +3,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import type { NeedLevel, Project, Sitio } from '$lib/types';
 	import { getNeedLevelFromScore } from '$lib/types';
+	import { downloadSitioProfilePDF } from '$lib/utils/pdf-generator';
 	import { Calendar, Download, Gauge, MapPin, Pencil } from '@lucide/svelte';
 	import YearSelector from './YearSelector.svelte';
 
@@ -143,9 +144,14 @@
 				/>
 				{#if isAdminView}
 					<div class="flex gap-2">
-						<Button variant="outline" size="sm" class="gap-2">
+						<Button
+							variant="outline"
+							size="sm"
+							class="gap-2"
+							onclick={() => downloadSitioProfilePDF(sitio)}
+						>
 							<Download class="size-4" />
-							Export
+							Download PDF
 						</Button>
 						<Button size="sm" class="gap-2" href="/admin/sitios/{sitio.id}/edit">
 							<Pencil class="size-4" />
