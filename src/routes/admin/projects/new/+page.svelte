@@ -363,7 +363,7 @@
 						title="Monthly Planning"
 						description="Plan monthly physical progress and budget allocation across the project timeline"
 						icon={Calendar}
-						variant="rose"
+						variant="info"
 						isComplete={isTab5Valid}
 						collapsible={false}
 					>

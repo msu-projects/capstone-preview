@@ -785,40 +785,42 @@ Save Updates
 End
 ```
 
-### 8.6 Sitio Recommendation
+### 8.6 Sitio Recommendation (Integrated)
 
 #### 8.6.1 Overview
 
-The Sitio Recommendation feature assists administrators in identifying the most suitable sitios for a project based on community-expressed needs. When assigning sitios to a project, the system analyzes each sitio's **Proposed PPAs** (Programs, Projects, and Activities) and matches them against the selected project type.
+The Sitio Recommendation feature assists administrators in identifying the most suitable sitios for a project based on community-expressed needs. When a project type is selected, the sitio selection popover automatically prioritizes sitios whose **Proposed PPAs** (Programs, Projects, and Activities) match the project type, displaying them at the top of the list with match indicators.
 
 #### 8.6.2 Recommendation Logic
 
-The system uses a two-tier scoring approach:
+The system uses a two-tier sorting approach integrated directly into the sitio selection:
 
 **Primary Factor: PPA Matching**
 
-- The system performs fuzzy text matching between the project type and the sitio's Proposed PPAs (including Health & Sanitation PPAs and Livelihood PPAs)
-- Keywords associated with each project type are matched against PPA text
-- Matched PPA excerpts are highlighted in the recommendation display
-- Higher match scores indicate stronger alignment with community-expressed needs
+- The system performs keyword matching between the project type and each sitio's Proposed PPAs
+- Keywords associated with each project type are matched against PPA names
+- Sitios with matching PPAs are displayed first in the selection list
+- A "Match" badge indicates sitios with relevant PPAs
 
-**Secondary Factor: Need Indicators**
+**Secondary Factor: Need Score**
 
-When PPA matches are equal or as a tiebreaker, the system considers:
+Within each group (matched and non-matched), sitios are sorted by:
 
-| Indicator           | Description                                              |
-| ------------------- | -------------------------------------------------------- |
-| Population Size     | Larger populations may indicate greater project impact   |
-| Income Level        | Lower daily household income indicates higher need       |
-| Infrastructure Gaps | Relevant gaps based on project type (e.g., water access) |
+| Indicator  | Description                                                         |
+| ---------- | ------------------------------------------------------------------- |
+| Need Score | Higher need scores (1-10) indicate greater community need           |
+| Sort Order | Descending by default (highest need first), can toggle to ascending |
 
-**Fallback Behavior**
+**Display Behavior**
 
-If no sitios have PPAs matching the project type, the system ranks sitios purely by secondary need indicators and displays a message indicating no direct PPA matches were found.
+- When a project type is selected, sitios with matching PPAs appear first with a highlighted background and "Match" badge
+- A header shows the count of sitios with matching PPAs
+- All sitios remain visible (not filtered out), allowing manual selection of any sitio
+- Matched PPA names are shown on hover (desktop) or inline (truncated)
 
 #### 8.6.3 Project Type to PPA Keyword Mapping
 
-Each project type has associated keywords used for fuzzy matching:
+Each project type has associated keywords used for matching:
 
 | Project Type          | Sample Keywords                                          |
 | --------------------- | -------------------------------------------------------- |
@@ -849,33 +851,35 @@ Start
 Admin selects Category & Project Type
   │
   ▼
-System generates recommendations
+System calculates PPA matches for all sitios
   │
-  ├──▶ Match PPAs against project type keywords (fuzzy matching)
-  ├──▶ Calculate match scores
-  └──▶ Apply secondary need indicators
+  ├──▶ Match PPAs against project type keywords
+  └──▶ Tag sitios with matching PPAs
   │
   ▼
-Display Recommendation Panel
+Admin opens sitio selection popover
   │
-  ├──▶ Ranked list of sitios
-  ├──▶ Match score for each sitio
-  ├──▶ Matched PPA text (highlighted)
-  └──▶ Secondary indicators summary
+  ▼
+Sitio list displayed with integrated recommendations
+  │
+  ├──▶ Header shows count of sitios with matching PPAs
+  ├──▶ Matched sitios displayed first (sorted by need score)
+  ├──▶ Non-matched sitios follow (sorted by need score)
+  └──▶ Match indicator and PPA names shown for matched sitios
   │
   ▼
 Admin applies filters (optional)
   │
-  ├──▶ Municipality
-  ├──▶ Barangay
-  ├──▶ Max Income (₱0-₱1,000/household/day slider)
-  └──▶ Exclude sitios with existing projects of same type
+  ├──▶ Search by name/location
+  ├──▶ Municipality filter
+  ├──▶ Barangay filter
+  └──▶ Need score sort toggle (desc/asc)
   │
   ▼
-Admin selects sitio(s) from recommendations
+Admin selects sitio from list
   │
   ▼
-Sitio(s) added to project assignment list
+Sitio added to project assignment with beneficiary form
   │
   ▼
 End
@@ -883,24 +887,28 @@ End
 
 #### 8.6.5 Filter Options
 
-| Filter                    | Type     | Description                                                                                                        |
-| ------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------ |
-| Municipality              | Select   | Filter sitios by municipality                                                                                      |
-| Barangay                  | Select   | Filter sitios by barangay (depends on municipality)                                                                |
-| Max Daily Income          | Slider   | Filter sitios where average household income is at or below the selected value (₱0-₱1,000/day range)               |
-| Exclude Existing Projects | Checkbox | Hide sitios that already have a project of the same type (any status: Planning, In Progress, Completed, Suspended) |
+| Filter       | Type   | Description                                          |
+| ------------ | ------ | ---------------------------------------------------- |
+| Search       | Text   | Search sitios by name, barangay, or municipality     |
+| Municipality | Select | Filter sitios by municipality                        |
+| Barangay     | Select | Filter sitios by barangay (depends on municipality)  |
+| Need Score   | Toggle | Sort by need score descending (default) or ascending |
 
-#### 8.6.6 Recommendation Display
+#### 8.6.6 Sitio Selection Display
 
-Each recommended sitio card shows:
+Each sitio in the selection list shows:
 
-- **Sitio Name** - Name and location (barangay, municipality)
-- **Match Score** - Visual indicator (badge) showing recommendation strength
-- **Matched PPAs** - Excerpts from the sitio's Proposed PPAs that match the project type, with matched keywords highlighted
-- **Need Indicators** - Summary of secondary factors (population, income level, relevant infrastructure gaps)
-- **Add Button** - Adds the sitio to the project's sitio assignment list
+- **Sitio Name** - Name with optional "Match" badge (sparkle icon) for recommended sitios
+- **Need Score Badge** - Color-coded badge showing need level (Critical, High, Medium, Low)
+- **Location** - Barangay and municipality
+- **Statistics** - Population and household count
+- **Matched PPA** - For matched sitios, shows the first matched PPA name with "+N more" if multiple (desktop only)
 
-**Note:** Multiple sitios can be added to the assignment list. The recommendation panel appears alongside manual sitio search, allowing admins to use either method.
+**Visual Indicators:**
+
+- Matched sitios have a subtle primary color background highlight
+- Match badge with sparkle icon indicates PPA alignment
+- Hover shows full list of matched PPA names via tooltip
 
 ---
 

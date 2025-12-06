@@ -8,9 +8,10 @@
 	import * as Popover from '$lib/components/ui/popover';
 	import * as Select from '$lib/components/ui/select';
 	import * as Table from '$lib/components/ui/table';
+	import { predefinedPPAs } from '$lib/config/issue-ppa-mappings';
 	import { getNeedLevelBadgeClasses, getNeedLevelConfig } from '$lib/config/status-config';
 	import { sitios } from '$lib/mock-data';
-	import type { ProjectSitio, ProjectType, Sitio } from '$lib/types';
+	import type { ProjectSitio, ProjectType, Sitio, SitioPPA } from '$lib/types';
 	import { getNeedLevelFromScore } from '$lib/types';
 	import { cn } from '$lib/utils';
 	import {
@@ -22,13 +23,13 @@
 		MapPin,
 		Plus,
 		Search,
+		Sparkles,
 		Trash2,
 		TrendingUp,
 		Users
 	} from '@lucide/svelte';
 	import { cubicOut } from 'svelte/easing';
 	import { Tween } from 'svelte/motion';
-	import SitioRecommendationPanel from './SitioRecommendationPanel.svelte';
 
 	let {
 		projectSitios = $bindable([]),
@@ -73,8 +74,36 @@
 			: [...new Set(availableSitios.map((s) => s.barangay))].sort()
 	);
 
-	// Filtered and sorted sitios based on search and filters
-	const filteredSitios = $derived.by(() => {
+	// PPA matching keywords based on project type
+	const matchingKeywords = $derived.by((): string[] => {
+		if (!projectType) return [];
+		const keywords = new Set<string>();
+
+		// Get keywords from PPAs that match this project type
+		const matchingPPAs = predefinedPPAs.filter((ppa) => ppa.projectTypeId === projectType.id);
+		for (const ppa of matchingPPAs) {
+			for (const keyword of ppa.keywords) {
+				keywords.add(keyword.toLowerCase());
+			}
+		}
+
+		// Also add the project type name itself as keywords
+		const typeWords = projectType.name.toLowerCase().split(/\s+/);
+		for (const word of typeWords) {
+			if (word.length > 2) keywords.add(word);
+		}
+
+		return Array.from(keywords);
+	});
+
+	// Enhanced sitio type with match data
+	interface EnhancedSitio extends Sitio {
+		matchedPPAs: Array<{ ppa: SitioPPA; matchedKeywords: string[] }>;
+		hasMatch: boolean;
+	}
+
+	// Filtered and sorted sitios based on search, filters, and PPA matching
+	const filteredSitios = $derived.by((): EnhancedSitio[] => {
 		const filtered = availableSitios.filter((sitio) => {
 			const matchesSearch =
 				!searchQuery ||
@@ -89,14 +118,57 @@
 			return matchesSearch && matchesMunicipality && matchesBarangay;
 		});
 
-		// Sort by need score if enabled
-		if (sortByNeedScore === 'desc') {
-			return [...filtered].sort((a, b) => (b.need_score ?? 5) - (a.need_score ?? 5));
-		} else if (sortByNeedScore === 'asc') {
-			return [...filtered].sort((a, b) => (a.need_score ?? 5) - (b.need_score ?? 5));
-		}
-		return filtered;
+		// Compute PPA matches for each sitio
+		const enhanced: EnhancedSitio[] = filtered.map((sitio) => {
+			const matchedPPAs: EnhancedSitio['matchedPPAs'] = [];
+
+			if (projectType && matchingKeywords.length > 0 && sitio.proposed_ppas) {
+				for (const ppa of sitio.proposed_ppas) {
+					const ppaNameLower = ppa.name.toLowerCase();
+					const matchedKeywords: string[] = [];
+
+					for (const keyword of matchingKeywords) {
+						if (ppaNameLower.includes(keyword)) {
+							matchedKeywords.push(keyword);
+						}
+					}
+
+					if (matchedKeywords.length > 0) {
+						matchedPPAs.push({ ppa, matchedKeywords });
+					}
+				}
+			}
+
+			return {
+				...sitio,
+				matchedPPAs,
+				hasMatch: matchedPPAs.length > 0
+			};
+		});
+
+		// Sort: matched sitios first (by need score desc), then non-matched (by need score desc)
+		const needScoreMultiplier = sortByNeedScore === 'asc' ? 1 : -1;
+
+		return enhanced.sort((a, b) => {
+			// If project type is set, prioritize matched sitios
+			if (projectType) {
+				if (a.hasMatch && !b.hasMatch) return -1;
+				if (!a.hasMatch && b.hasMatch) return 1;
+			}
+
+			// Within the same group, sort by need score
+			if (sortByNeedScore !== 'none') {
+				return needScoreMultiplier * ((a.need_score ?? 5) - (b.need_score ?? 5));
+			}
+
+			return 0;
+		});
 	});
+
+	// Count of matched sitios for display
+	const matchedSitiosCount = $derived(
+		projectType ? filteredSitios.filter((s) => s.hasMatch).length : 0
+	);
 
 	// Get selected sitio data
 	const selectedSitioData = $derived(
@@ -197,26 +269,6 @@
 			(ps: Omit<ProjectSitio, 'project_id'>) => ps.sitio_id !== sitioId
 		);
 	}
-
-	// Add sitio from recommendation panel (auto-populates beneficiaries with household count)
-	function addSitioFromRecommendation(sitio: Sitio) {
-		const newProjectSitio: Omit<ProjectSitio, 'project_id'> = {
-			sitio_id: sitio.id,
-			sitio_name: sitio.name,
-			municipality: sitio.municipality,
-			barangay: sitio.barangay,
-			beneficiaries_target: sitio.households, // Default to all households
-			focal_person: undefined,
-			focal_contact: undefined
-		};
-
-		projectSitios = [...projectSitios, newProjectSitio];
-	}
-
-	// Get list of already selected sitio IDs for the recommendation panel
-	const selectedSitioIds = $derived(
-		projectSitios.map((ps: Omit<ProjectSitio, 'project_id'>) => ps.sitio_id)
-	);
 
 	// Check if section is complete
 	const isSectionComplete = $derived(projectSitios.length > 0);
@@ -348,15 +400,6 @@
 			</Card.Card>
 		{/if}
 
-		<!-- Sitio Recommendation Panel -->
-		{#if projectType}
-			<SitioRecommendationPanel
-				{projectType}
-				{selectedSitioIds}
-				onAddSitio={addSitioFromRecommendation}
-			/>
-		{/if}
-
 		<!-- Add Sitio Form -->
 		<Card.Card>
 			<Card.CardHeader>
@@ -465,6 +508,19 @@
 										{/if}
 									</div>
 
+									<!-- Match count indicator when project type is set -->
+									{#if projectType && matchedSitiosCount > 0}
+										<div
+											class="flex items-center gap-2 border-b bg-primary/5 px-3 py-2 text-xs text-primary"
+										>
+											<Sparkles class="size-3.5" />
+											<span
+												>{matchedSitiosCount} sitio{matchedSitiosCount !== 1 ? 's' : ''} with matching
+												PPAs</span
+											>
+										</div>
+									{/if}
+
 									<!-- Sitio List -->
 									<div class="max-h-[300px] overflow-y-auto">
 										{#if filteredSitios.length === 0}
@@ -483,17 +539,64 @@
 														type="button"
 														class={cn(
 															'relative flex w-full cursor-pointer items-center rounded-sm px-2 py-2 text-sm transition-colors outline-none select-none hover:bg-accent/30',
-															selectedSitioId === sitio.id && 'bg-accent'
+															selectedSitioId === sitio.id && 'bg-accent',
+															sitio.hasMatch && 'bg-primary/5 hover:bg-primary/10'
 														)}
 														onclick={() => selectSitio(sitio)}
 													>
 														<div class="flex flex-1 flex-col items-start gap-1">
 															<div class="flex w-full items-center justify-between gap-2">
-																<span class="font-medium">{sitio.name}</span>
+																<div class="flex items-center gap-1.5">
+																	<span class="font-medium">{sitio.name}</span>
+																	{#if sitio.hasMatch}
+																		<Popover.Root>
+																			<Popover.Trigger
+																				class="cursor-help"
+																				onclick={(e) => e.stopPropagation()}
+																				onmouseenter={(e) =>
+																					(e.target as HTMLButtonElement).click()}
+																				onmouseleave={(e) =>
+																					(e.target as HTMLButtonElement).click()}
+																			>
+																				<Badge
+																					variant="secondary"
+																					class="h-4 gap-0.5 bg-primary/20 px-1 text-[9px] text-primary hover:bg-primary/30"
+																				>
+																					<Sparkles class="size-2" />
+																					<span class="hidden sm:inline">Match</span>
+																					<span class="sm:hidden">{sitio.matchedPPAs.length}</span>
+																				</Badge>
+																			</Popover.Trigger>
+																			<Popover.Content class="w-72 p-3" side="top" align="start">
+																				<div class="space-y-2">
+																					<div
+																						class="flex items-center gap-1.5 text-xs font-medium text-primary"
+																					>
+																						<Sparkles class="size-3" />
+																						<span>Matching PPAs ({sitio.matchedPPAs.length})</span>
+																					</div>
+																					<ul class="space-y-1.5">
+																						{#each sitio.matchedPPAs as match}
+																							<li class="rounded bg-muted/50 px-2 py-1.5">
+																								<p class="text-xs leading-tight font-medium">
+																									{match.ppa.name}
+																								</p>
+																								<p class="mt-0.5 text-[10px] text-muted-foreground">
+																									Keywords: {match.matchedKeywords.join(', ')}
+																								</p>
+																							</li>
+																						{/each}
+																					</ul>
+																				</div>
+																			</Popover.Content>
+																		</Popover.Root>
+																	{/if}
+																</div>
 																<Badge
 																	variant="secondary"
-																	class="flex h-5 gap-1 px-1.5 text-[10px] 
-																{getNeedLevelBadgeClasses(needLevel)}"
+																	class="flex h-5 gap-1 px-1.5 text-[10px] {getNeedLevelBadgeClasses(
+																		needLevel
+																	)}"
 																>
 																	<Gauge class="size-2.5" />
 																	{needConfig.shortLabel} ({needScore})
@@ -502,7 +605,9 @@
 															<span class="text-xs text-muted-foreground">
 																{sitio.barangay}, {sitio.municipality}
 															</span>
-															<div class="flex gap-2 text-xs text-muted-foreground">
+															<div
+																class="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground"
+															>
 																<span>Pop: {sitio.population.toLocaleString()}</span>
 																<span>•</span>
 																<span>HH: {sitio.households.toLocaleString()}</span>

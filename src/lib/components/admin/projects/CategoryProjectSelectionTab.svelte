@@ -267,7 +267,7 @@
 				bind:value={title}
 				oninput={handleTitleInput}
 				placeholder="Enter descriptive project title"
-				class={cn('w-full', title.trim() && 'border-primary/30 bg-primary/5')}
+				class={cn('w-full text-sm', title.trim() && 'border-primary/30 bg-primary/5')}
 			/>
 			<p class="text-xs text-muted-foreground">
 				{#if selectedProjectTypeData}
@@ -286,7 +286,7 @@
 				bind:value={description}
 				placeholder="Provide a detailed description of the project objectives, scope, and expected outcomes"
 				rows={4}
-				class={cn('w-full', description.trim() && 'border-primary/30 bg-primary/5')}
+				class={cn('w-full text-sm', description.trim() && 'border-primary/30 bg-primary/5')}
 			/>
 			<p class="text-xs text-muted-foreground">
 				Include key objectives, target outcomes, and how this project addresses sitio needs.
@@ -303,7 +303,7 @@
 				id="implementing-agency"
 				bind:value={implementingAgency}
 				placeholder="e.g., Provincial Engineer's Office, DA - Region XII"
-				class={cn('w-full', implementingAgency.trim() && 'border-primary/30 bg-primary/5')}
+				class={cn('w-full text-sm', implementingAgency.trim() && 'border-primary/30 bg-primary/5')}
 			/>
 			<p class="text-xs text-muted-foreground">
 				The government office or agency primarily responsible for implementing this project.
