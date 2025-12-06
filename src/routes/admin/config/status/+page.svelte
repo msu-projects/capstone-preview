@@ -102,6 +102,7 @@
 	<AdminHeader
 		title="Status Configuration"
 		description="Configure labels and colors for project statuses and need levels"
+		breadcrumbs={[{ label: 'Configuration', href: '/admin/config' }, { label: 'Status' }]}
 	>
 		{#snippet actions()}
 			<Button variant="ghost" size="sm" onclick={() => goto('/admin/config')}>

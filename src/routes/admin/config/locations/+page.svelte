@@ -136,6 +136,7 @@
 	<AdminHeader
 		title="Location Data"
 		description="Configure municipalities and barangays in South Cotabato"
+		breadcrumbs={[{ label: 'Configuration', href: '/admin/config' }, { label: 'Locations' }]}
 	>
 		{#snippet actions()}
 			<Button variant="ghost" size="sm" onclick={() => goto('/admin/config')}>

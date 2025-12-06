@@ -210,7 +210,11 @@
 
 <div class="flex min-h-screen flex-col bg-muted/30">
 	<!-- Header -->
-	<AdminHeader title="Manage Projects" description="View, edit, and manage all projects">
+	<AdminHeader
+		title="Manage Projects"
+		description="View, edit, and manage all projects"
+		breadcrumbs={[{ label: 'Projects', href: '/admin/projects' }, { label: 'List' }]}
+	>
 		{#snippet actions()}
 			<Button variant="outline" size="sm" href="/admin/projects">
 				<ChartColumn class="size-4 sm:mr-2" />

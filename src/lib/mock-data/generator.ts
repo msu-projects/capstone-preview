@@ -1333,7 +1333,7 @@ export function initializeMockDataIfNeeded(): { sitios: Sitio[]; projects: Proje
 	}
 
 	// Generate and save mock data
-	const sitios = generateSitios(150);
+	const sitios = generateSitios(100);
 	const projects = generateProjects(sitios, 50);
 
 	localStorage.setItem(MOCK_SITIOS_KEY, JSON.stringify(sitios));

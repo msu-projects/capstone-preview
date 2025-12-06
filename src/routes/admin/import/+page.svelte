@@ -194,6 +194,7 @@
 	<AdminHeader
 		title="Import Sitio Data"
 		description="Upload a CSV or Excel file to import multiple sitios at once"
+		breadcrumbs={[{ label: 'Sitios', href: '/admin/sitios' }, { label: 'Import' }]}
 	/>
 
 	<!-- Content -->

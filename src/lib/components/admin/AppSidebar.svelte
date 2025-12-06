@@ -7,7 +7,6 @@
 	import { ThemeToggle } from '$lib/components/ui/theme-toggle';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import {
-		CloudUpload,
 		ExternalLink,
 		FileText,
 		Folder,
@@ -46,8 +45,8 @@
 			title: 'Data Management',
 			items: [
 				{ title: 'Sitios', url: '/admin/sitios', icon: MapPin },
-				{ title: 'Projects', url: '/admin/projects', icon: Folder },
-				{ title: 'Import Data', url: '/admin/import', icon: CloudUpload }
+				{ title: 'Projects', url: '/admin/projects', icon: Folder }
+				// { title: 'Import Data', url: '/admin/import', icon: CloudUpload }
 			]
 		},
 		{

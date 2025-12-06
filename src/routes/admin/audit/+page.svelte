@@ -220,7 +220,11 @@
 
 <div class="flex min-h-screen flex-col bg-muted/30">
 	<!-- Header -->
-	<AdminHeader title="Audit Logs" description="Track all system activities and user actions">
+	<AdminHeader
+		title="Audit Logs"
+		description="Track all system activities and user actions"
+		breadcrumbs={[{ label: 'Audit Logs' }]}
+	>
 		{#snippet actions()}
 			<Button variant="outline" onclick={exportLogs} size="sm">
 				<Download class="size-4 sm:mr-2" />

@@ -266,7 +266,11 @@
 
 <div class="flex min-h-screen flex-col bg-muted/30">
 	<!-- Header -->
-	<AdminHeader title="Sitio List" description="Manage sitio data and demographics">
+	<AdminHeader
+		title="Sitio List"
+		description="Manage sitio data and demographics"
+		breadcrumbs={[{ label: 'Sitios', href: '/admin/sitios' }, { label: 'List' }]}
+	>
 		{#snippet actions()}
 			<Button variant="outline" onclick={() => goto('/admin/sitios')} size="sm">
 				<BarChart3 class="size-4 sm:mr-2" />

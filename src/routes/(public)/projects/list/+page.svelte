@@ -1,4 +1,5 @@
 <script lang="ts">
+	import AppBreadcrumb from '$lib/components/AppBreadcrumb.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
@@ -11,7 +12,7 @@
 	import { formatCurrency } from '$lib/utils/formatters';
 	import { getCategoryName, getCompletionPercentage } from '$lib/utils/project-calculations';
 	import { loadProjects } from '$lib/utils/storage';
-	import { BarChart3, Eye, FolderKanban, Search, X } from '@lucide/svelte';
+	import { ArrowLeft, Eye, FolderKanban, Search, X } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 
 	let projects = $state<Project[]>([]);
@@ -73,19 +74,23 @@
 	<meta name="description" content="Browse all development projects across South Cotabato" />
 </svelte:head>
 
-<div class="bg-muted/30">
+<div class="min-h-screen bg-muted/30 dark:bg-slate-950">
+	<!-- Breadcrumb -->
+	<AppBreadcrumb
+		items={[{ label: 'Projects Dashboard', href: '/projects' }, { label: 'All Projects' }]}
+	/>
+
 	<!-- Header -->
 	<header class="border-b bg-card">
 		<div class="container mx-auto px-4 py-6">
-			<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-				<div>
+			<div class="flex items-center gap-4">
+				<Button href="/projects" variant="ghost" size="icon" class="shrink-0">
+					<ArrowLeft class="size-5" />
+				</Button>
+				<div class="flex-1">
 					<h1 class="mb-2 text-3xl font-bold">Development Projects</h1>
 					<p class="text-muted-foreground">Browse all development projects across South Cotabato</p>
 				</div>
-				<Button href="/projects" variant="outline" class="gap-2">
-					<BarChart3 class="size-4" />
-					View Dashboard
-				</Button>
 			</div>
 		</div>
 	</header>

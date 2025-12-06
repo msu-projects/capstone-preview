@@ -83,6 +83,7 @@
 	<AdminHeader
 		title="System Configuration"
 		description="Manage application settings and dropdown options"
+		breadcrumbs={[{ label: 'Configuration' }]}
 	/>
 
 	<div class="flex flex-col gap-6 p-4 md:p-6">

@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { Separator } from '$lib/components/ui/separator';
-	import * as Sidebar from '$lib/components/ui/sidebar';
+	import AppBreadcrumb, { type BreadcrumbItem } from '$lib/components/AppBreadcrumb.svelte';
 	import * as Tabs from '$lib/components/ui/tabs';
 	import { projects } from '$lib/mock-data';
 	import type { Project, Sitio } from '$lib/types';
@@ -14,7 +13,6 @@
 	} from '$lib/utils/storage';
 	import {
 		Briefcase,
-		ChevronRight,
 		FileText,
 		FolderKanban,
 		Heart,
@@ -106,43 +104,19 @@
 		{ id: 'trends', label: 'Trends', icon: TrendingUp },
 		{ id: 'projects', label: 'Projects', icon: FolderKanban }
 	];
+
+	const breadcrumbItems: BreadcrumbItem[] = $derived([
+		{ label: 'Sitios', href: isAdminView ? '/admin/sitios' : '/sitios' },
+		{ label: 'List', href: isAdminView ? '/admin/sitios/list' : '/sitios/list' },
+		{ label: sitio.name }
+	]);
 </script>
 
-<div class="min-h-screen bg-linear-to-b from-slate-50 to-white">
+<div
+	class="min-h-screen bg-linear-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900"
+>
 	<!-- Breadcrumb Navigation -->
-	<div class="sticky top-0 z-10 border-b bg-white/80 backdrop-blur-sm">
-		<div class="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
-			<nav class="flex items-center gap-2 text-sm">
-				{#if isAdminView}
-					<Sidebar.Trigger class="-ml-1" />
-				{/if}
-				<Separator orientation="vertical" class="h-6" />
-				<a
-					href={isAdminView ? '/admin' : '/'}
-					class="text-slate-500 transition-colors hover:text-slate-700"
-				>
-					{isAdminView ? 'Admin' : 'Home'}
-				</a>
-				<ChevronRight class="size-4 text-slate-400" />
-				<a
-					href={isAdminView ? '/admin/sitios' : '/sitios'}
-					class="text-slate-500 transition-colors hover:text-slate-700"
-				>
-					Sitios
-				</a>
-				<ChevronRight class="size-4 text-slate-400" />
-
-				<a
-					href={isAdminView ? '/admin/sitios/list' : '/sitios/list'}
-					class="text-slate-500 transition-colors hover:text-slate-700"
-				>
-					List
-				</a>
-				<ChevronRight class="size-4 text-slate-400" />
-				<span class="font-medium text-slate-900">{sitio.name}</span>
-			</nav>
-		</div>
-	</div>
+	<AppBreadcrumb items={breadcrumbItems} {isAdminView} />
 
 	<!-- Hero Header Section -->
 	<SitioProfileHeader

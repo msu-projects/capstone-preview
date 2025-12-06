@@ -156,7 +156,11 @@
 </svelte:head>
 
 <div class="flex flex-col">
-	<AdminHeader title="Sitio Form Options" description="Configure dropdown options for sitio forms">
+	<AdminHeader
+		title="Sitio Form Options"
+		description="Configure dropdown options for sitio forms"
+		breadcrumbs={[{ label: 'Configuration', href: '/admin/config' }, { label: 'Sitio Options' }]}
+	>
 		{#snippet actions()}
 			<Button variant="ghost" size="sm" onclick={() => goto('/admin/config')}>
 				<ArrowLeft class="size-4 sm:mr-2" />

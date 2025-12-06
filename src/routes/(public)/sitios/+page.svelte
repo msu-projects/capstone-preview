@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import AppBreadcrumb from '$lib/components/AppBreadcrumb.svelte';
 	import {
 		AggregatedDemographicsSection,
 		AggregatedEconomySection,
@@ -180,6 +181,9 @@
 </svelte:head>
 
 <div>
+	<!-- Breadcrumb -->
+	<AppBreadcrumb items={[{ label: 'Sitios Dashboard' }]} sticky={false} />
+
 	<!-- Hero Section -->
 	<section
 		class="relative overflow-hidden bg-linear-to-br from-slate-50 via-white to-blue-50/30 py-8 md:py-12 dark:from-slate-900 dark:via-slate-900 dark:to-blue-950/30"

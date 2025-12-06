@@ -369,6 +369,7 @@
 	<AdminHeader
 		title="Project Categories & Types"
 		description="Configure project categories and their associated project types"
+		breadcrumbs={[{ label: 'Configuration', href: '/admin/config' }, { label: 'Project Types' }]}
 	>
 		{#snippet actions()}
 			<Button variant="ghost" size="sm" onclick={() => goto('/admin/config')}>

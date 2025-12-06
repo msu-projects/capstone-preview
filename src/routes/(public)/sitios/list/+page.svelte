@@ -1,4 +1,5 @@
 <script lang="ts">
+	import AppBreadcrumb from '$lib/components/AppBreadcrumb.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
@@ -8,17 +9,7 @@
 	import type { Sitio } from '$lib/types';
 	import { formatNumber } from '$lib/utils/formatters';
 	import { loadSitios } from '$lib/utils/storage';
-	import {
-		ArrowLeft,
-		ArrowRight,
-		ChevronRight,
-		Home,
-		LayoutDashboard,
-		MapPin,
-		Search,
-		Users,
-		Zap
-	} from '@lucide/svelte';
+	import { ArrowLeft, ArrowRight, Home, MapPin, Search, Users, Zap } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 
 	let sitios = $state<Sitio[]>([]);
@@ -108,38 +99,25 @@
 	/>
 </svelte:head>
 
-<div class="bg-slate-50/50">
+<div class="min-h-screen bg-slate-50/50 dark:bg-slate-950">
 	<!-- Breadcrumb -->
-	<div class="border-b bg-white">
-		<div class="container mx-auto px-4 py-3">
-			<nav class="flex items-center gap-2 text-sm">
-				<a href="/" class="text-slate-500 transition-colors hover:text-slate-700">
-					<Home class="size-4" />
-				</a>
-				<ChevronRight class="size-4 text-slate-400" />
-				<a href="/sitios" class="text-slate-500 transition-colors hover:text-slate-700">
-					Sitios Dashboard
-				</a>
-				<ChevronRight class="size-4 text-slate-400" />
-				<span class="font-medium text-slate-900">All Sitios</span>
-			</nav>
-		</div>
-	</div>
+	<AppBreadcrumb
+		items={[{ label: 'Sitios Dashboard', href: '/sitios' }, { label: 'All Sitios' }]}
+	/>
 
 	<!-- Header -->
 	<section class="border-b bg-white py-6">
 		<div class="container mx-auto px-4">
-			<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-				<div>
+			<div class="flex items-center gap-4">
+				<Button href="/sitios" variant="ghost" size="icon" class="shrink-0">
+					<ArrowLeft class="size-5" />
+				</Button>
+				<div class="flex-1">
 					<h1 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">All Sitios</h1>
 					<p class="mt-1 text-slate-600">
 						Browse and search through all registered sitios in South Cotabato
 					</p>
 				</div>
-				<Button href="/sitios" variant="outline" class="shrink-0">
-					<LayoutDashboard class="mr-2 size-4" />
-					Back to Dashboard
-				</Button>
 			</div>
 		</div>
 	</section>

@@ -257,6 +257,7 @@
 	<AdminHeader
 		title="Issues & PPAs"
 		description="Configure predefined community issues and Programs/Projects/Activities"
+		breadcrumbs={[{ label: 'Configuration', href: '/admin/config' }, { label: 'Issues & PPAs' }]}
 	>
 		{#snippet actions()}
 			<Button variant="ghost" size="sm" onclick={() => goto('/admin/config')}>

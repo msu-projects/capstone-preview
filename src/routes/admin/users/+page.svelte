@@ -274,7 +274,11 @@
 
 <div class="flex min-h-screen flex-col bg-muted/30">
 	<!-- Header -->
-	<AdminHeader title="User Management" description="Manage user accounts and permissions">
+	<AdminHeader
+		title="User Management"
+		description="Manage user accounts and permissions"
+		breadcrumbs={[{ label: 'Users' }]}
+	>
 		{#snippet actions()}
 			{#if canManageUsers}
 				<Button onclick={openCreateDialog} size="sm">
