@@ -4,7 +4,15 @@
 	import { Progress } from '$lib/components/ui/progress';
 	import type { MonthlyProgress, MonthlyReport, PerformanceTarget } from '$lib/types';
 	import { formatCurrency } from '$lib/utils/formatters';
-	import { Activity, Banknote, Camera, Target } from '@lucide/svelte';
+	import {
+		Activity,
+		AlertTriangle,
+		Banknote,
+		Camera,
+		Lightbulb,
+		ListChecks,
+		Target
+	} from '@lucide/svelte';
 
 	interface Props {
 		open: boolean;
@@ -207,6 +215,56 @@
 								</div>
 							{/each}
 						</div>
+					</div>
+				{/if}
+
+				<!-- Issues, Recommendations & Catch-up Plan -->
+				{#if selectedReport.issues || selectedReport.recommendations || selectedReport.catch_up_plan}
+					<div class="space-y-4">
+						{#if selectedReport.issues}
+							<div
+								class="rounded-xl border border-rose-100 bg-rose-50 p-4 dark:border-rose-900/30 dark:bg-rose-950/20"
+							>
+								<h4
+									class="mb-2 flex items-center gap-2 text-sm font-semibold text-rose-800 dark:text-rose-300"
+								>
+									<AlertTriangle class="size-4" /> Issues Encountered
+								</h4>
+								<p class="text-sm whitespace-pre-wrap text-rose-700 dark:text-rose-400">
+									{selectedReport.issues}
+								</p>
+							</div>
+						{/if}
+
+						{#if selectedReport.recommendations}
+							<div
+								class="rounded-xl border border-amber-100 bg-amber-50 p-4 dark:border-amber-900/30 dark:bg-amber-950/20"
+							>
+								<h4
+									class="mb-2 flex items-center gap-2 text-sm font-semibold text-amber-800 dark:text-amber-300"
+								>
+									<Lightbulb class="size-4" /> Recommendations
+								</h4>
+								<p class="text-sm whitespace-pre-wrap text-amber-700 dark:text-amber-400">
+									{selectedReport.recommendations}
+								</p>
+							</div>
+						{/if}
+
+						{#if selectedReport.catch_up_plan}
+							<div
+								class="rounded-xl border border-blue-100 bg-blue-50 p-4 dark:border-blue-900/30 dark:bg-blue-950/20"
+							>
+								<h4
+									class="mb-2 flex items-center gap-2 text-sm font-semibold text-blue-800 dark:text-blue-300"
+								>
+									<ListChecks class="size-4" /> Catch-up Plan
+								</h4>
+								<p class="text-sm whitespace-pre-wrap text-blue-700 dark:text-blue-400">
+									{selectedReport.catch_up_plan}
+								</p>
+							</div>
+						{/if}
 					</div>
 				{/if}
 

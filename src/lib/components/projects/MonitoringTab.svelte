@@ -123,9 +123,9 @@
 <div class="relative space-y-6">
 	<!-- Progress Over Time Chart (Collapsible) -->
 	<Collapsible.Root bind:open={chartOpen}>
-		<Card.Root class="overflow-hidden">
-			<Collapsible.Trigger class="w-full">
-				<Card.Header class="cursor-pointer hover:bg-muted/50">
+		<Card.Root class="overflow-hidden py-0">
+			<Collapsible.Trigger class="w-full py-6 transition-colors hover:bg-muted/50">
+				<Card.Header class="cursor-pointer">
 					<div class="flex items-center justify-between">
 						<div class="flex items-center gap-2">
 							<div class="rounded-lg bg-blue-50 p-1.5 dark:bg-blue-900/30">
@@ -153,7 +153,7 @@
 	{#if performanceTargets && performanceTargets.length > 0}
 		<Collapsible.Root bind:open={targetsOpen}>
 			<Card.Root class="overflow-hidden py-0">
-				<Collapsible.Trigger class="w-full py-6 hover:bg-muted/50">
+				<Collapsible.Trigger class="w-full py-6 transition-colors hover:bg-muted/50">
 					<Card.Header class="cursor-pointer">
 						<div class="flex items-center justify-between">
 							<div class="flex items-center gap-2">
@@ -207,9 +207,9 @@
 		<!-- Performance Indicators Progress Chart (Collapsible) -->
 		{#if monthlyProgress && monthlyProgress.length > 0}
 			<Collapsible.Root bind:open={indicatorsChartOpen}>
-				<Card.Root class="overflow-hidden">
+				<Card.Root class="overflow-hidden py-0">
 					<Collapsible.Trigger class="w-full">
-						<Card.Header class="cursor-pointer hover:bg-muted/50">
+						<Card.Header class="cursor-pointer py-6 transition-colors hover:bg-muted/50">
 							<div class="flex items-center justify-between">
 								<div class="flex items-center gap-2">
 									<div class="rounded-lg bg-violet-50 p-1.5 dark:bg-violet-900/30">
