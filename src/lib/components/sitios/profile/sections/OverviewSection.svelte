@@ -228,7 +228,7 @@
 	<div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
 		{#each keyMetrics as metric}
 			<Card.Root
-				class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50"
+				class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50 dark:bg-slate-800/80 dark:ring-slate-700/50 dark:hover:ring-slate-600/50"
 			>
 				<div
 					class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full {metric.bgColor} opacity-50"
@@ -242,9 +242,11 @@
 							<metric.icon class="size-5 {metric.textColor} sm:size-6" />
 						</div>
 						<div class="min-w-0 flex-1">
-							<p class="truncate text-xs font-medium text-slate-500 sm:text-sm">{metric.label}</p>
+							<p class="truncate text-xs font-medium text-slate-500 sm:text-sm dark:text-slate-400">
+								{metric.label}
+							</p>
 							<p
-								class="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl"
+								class="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl dark:text-slate-100"
 							>
 								{metric.value}
 							</p>
@@ -258,11 +260,11 @@
 	<div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
 		<!-- Map Card (Takes 2 columns) -->
 		<Card.Root class="relative z-0 gap-0 overflow-hidden py-0 shadow-sm lg:col-span-2">
-			<Card.Header class="border-b bg-slate-50/50 py-6">
+			<Card.Header class="border-b bg-slate-50/50 py-6 dark:bg-slate-800/50">
 				<div class="flex items-center justify-between">
 					<div class="flex items-center gap-2">
-						<div class="rounded-lg bg-blue-100 p-1.5">
-							<MapPin class="size-4 text-blue-600" />
+						<div class="rounded-lg bg-blue-100 p-1.5 dark:bg-blue-900/30">
+							<MapPin class="size-4 text-blue-600 dark:text-blue-400" />
 						</div>
 						<Card.Title class="text-lg">Location Map</Card.Title>
 					</div>
@@ -288,40 +290,48 @@
 
 		<!-- Location Details Card -->
 		<Card.Root class="gap-0 py-0 shadow-sm">
-			<Card.Header class="border-b bg-slate-50/50 py-6">
+			<Card.Header class="border-b bg-slate-50/50 py-6 dark:bg-slate-800/50">
 				<div class="flex items-center gap-2">
-					<div class="rounded-lg bg-indigo-100 p-1.5">
-						<Building2 class="size-4 text-indigo-600" />
+					<div class="rounded-lg bg-indigo-100 p-1.5 dark:bg-indigo-900/30">
+						<Building2 class="size-4 text-indigo-600 dark:text-indigo-400" />
 					</div>
 					<Card.Title class="text-lg">Location Details</Card.Title>
 				</div>
 			</Card.Header>
 			<Card.Content class="space-y-4 py-6">
 				<div class="space-y-3">
-					<div class="rounded-lg bg-slate-50 p-3">
+					<div class="rounded-lg bg-slate-50 p-3 dark:bg-slate-800">
 						<div class="text-xs font-medium tracking-wider text-slate-400 uppercase">
 							Municipality
 						</div>
-						<div class="mt-1 text-base font-semibold text-slate-900">{sitio.municipality}</div>
+						<div class="mt-1 text-base font-semibold text-slate-900 dark:text-slate-100">
+							{sitio.municipality}
+						</div>
 					</div>
-					<div class="rounded-lg bg-slate-50 p-3">
+					<div class="rounded-lg bg-slate-50 p-3 dark:bg-slate-800">
 						<div class="text-xs font-medium tracking-wider text-slate-400 uppercase">Barangay</div>
-						<div class="mt-1 text-base font-semibold text-slate-900">{sitio.barangay}</div>
+						<div class="mt-1 text-base font-semibold text-slate-900 dark:text-slate-100">
+							{sitio.barangay}
+						</div>
 					</div>
 					{#if sitio.province}
-						<div class="rounded-lg bg-slate-50 p-3">
+						<div class="rounded-lg bg-slate-50 p-3 dark:bg-slate-800">
 							<div class="text-xs font-medium tracking-wider text-slate-400 uppercase">
 								Province
 							</div>
-							<div class="mt-1 text-base font-semibold text-slate-900">{sitio.province}</div>
+							<div class="mt-1 text-base font-semibold text-slate-900 dark:text-slate-100">
+								{sitio.province}
+							</div>
 						</div>
 					{/if}
 					{#if sitio.coding}
-						<div class="rounded-lg bg-slate-50 p-3">
+						<div class="rounded-lg bg-slate-50 p-3 dark:bg-slate-800">
 							<div class="text-xs font-medium tracking-wider text-slate-400 uppercase">
 								Sitio Code
 							</div>
-							<div class="mt-1 font-mono text-base font-semibold text-slate-900">
+							<div
+								class="mt-1 font-mono text-base font-semibold text-slate-900 dark:text-slate-100"
+							>
 								{sitio.coding}
 							</div>
 						</div>
@@ -334,28 +344,32 @@
 						Population Stats
 					</div>
 					<div class="grid grid-cols-2 gap-3">
-						<div class="rounded-lg bg-blue-50 p-3 text-center">
-							<div class="text-2xl font-bold text-blue-700">{formatNumber(sitio.population)}</div>
-							<div class="text-xs text-blue-600">Total Pop.</div>
+						<div class="rounded-lg bg-blue-50 p-3 text-center dark:bg-blue-900/30">
+							<div class="text-2xl font-bold text-blue-700 dark:text-blue-400">
+								{formatNumber(sitio.population)}
+							</div>
+							<div class="text-xs text-blue-600 dark:text-blue-400">Total Pop.</div>
 						</div>
-						<div class="rounded-lg bg-emerald-50 p-3 text-center">
-							<div class="text-2xl font-bold text-emerald-700">
+						<div class="rounded-lg bg-emerald-50 p-3 text-center dark:bg-emerald-900/30">
+							<div class="text-2xl font-bold text-emerald-700 dark:text-emerald-400">
 								{formatNumber(sitio.households)}
 							</div>
-							<div class="text-xs text-emerald-600">Households</div>
+							<div class="text-xs text-emerald-600 dark:text-emerald-400">Households</div>
 						</div>
 					</div>
 				</div>
 
 				<!-- Registered Voters -->
 				{#if sitio.social_services?.registered_voters}
-					<div class="mt-4 border-t pt-4">
-						<div class="flex items-center justify-between rounded-lg bg-slate-50 p-3">
+					<div class="mt-4 border-t pt-4 dark:border-slate-700">
+						<div
+							class="flex items-center justify-between rounded-lg bg-slate-50 p-3 dark:bg-slate-800"
+						>
 							<div class="flex items-center gap-2">
-								<Vote class="size-4 text-slate-500" />
-								<span class="text-sm text-slate-600">Registered Voters</span>
+								<Vote class="size-4 text-slate-500 dark:text-slate-400" />
+								<span class="text-sm text-slate-600 dark:text-slate-400">Registered Voters</span>
 							</div>
-							<span class="font-semibold text-slate-900">
+							<span class="font-semibold text-slate-900 dark:text-slate-100">
 								{formatNumber(sitio.social_services.registered_voters)}
 							</span>
 						</div>
@@ -367,10 +381,10 @@
 
 	<!-- Middle Row: Community Snapshot -->
 	<Card.Root class="gap-0 py-0 shadow-sm">
-		<Card.Header class="border-b bg-slate-50/50 py-6">
+		<Card.Header class="border-b bg-slate-50/50 py-6 dark:bg-slate-800/50">
 			<div class="flex items-center gap-2">
-				<div class="rounded-lg bg-violet-100 p-1.5">
-					<Sparkles class="size-4 text-violet-600" />
+				<div class="rounded-lg bg-violet-100 p-1.5 dark:bg-violet-900/30">
+					<Sparkles class="size-4 text-violet-600 dark:text-violet-400" />
 				</div>
 				<Card.Title class="text-lg">Community Snapshot</Card.Title>
 			</div>
@@ -413,26 +427,28 @@
 			<!-- Local Officials -->
 			{#if sitio.local_officials && sitio.local_officials.length > 0}
 				<Card.Root class="gap-0 py-0 shadow-sm">
-					<Card.Header class="border-b bg-amber-50/50 py-6">
+					<Card.Header class="border-b bg-amber-50/50 py-6 dark:bg-amber-950/50">
 						<div class="flex items-center gap-2">
-							<div class="rounded-lg bg-amber-100 p-1.5">
-								<Crown class="size-4 text-amber-600" />
+							<div class="rounded-lg bg-amber-100 p-1.5 dark:bg-amber-900/30">
+								<Crown class="size-4 text-amber-600 dark:text-amber-400" />
 							</div>
 							<Card.Title class="text-lg">Local Officials</Card.Title>
 						</div>
 						<Card.Description>Community leaders and barangay officials</Card.Description>
 					</Card.Header>
 					<Card.Content class="p-0">
-						<div class="divide-y divide-slate-100">
+						<div class="divide-y divide-slate-100 dark:divide-slate-700">
 							{#each sitio.local_officials as official}
 								<div class="flex items-center justify-between px-4 py-3 sm:px-6">
 									<div class="flex items-center gap-3">
 										<div
-											class="flex size-9 items-center justify-center rounded-full bg-amber-100 text-sm font-semibold text-amber-700"
+											class="flex size-9 items-center justify-center rounded-full bg-amber-100 text-sm font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
 										>
 											{official.name.charAt(0).toUpperCase()}
 										</div>
-										<span class="font-medium text-slate-900">{official.name}</span>
+										<span class="font-medium text-slate-900 dark:text-slate-100"
+											>{official.name}</span
+										>
 									</div>
 									<Badge variant="secondary" class="bg-amber-50 text-amber-700">
 										{official.position}

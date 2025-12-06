@@ -114,13 +114,25 @@
 	// Utility to get trend color and icon
 	function getTrendStyle(trend: 'up' | 'down' | 'stable', isPositiveGood: boolean = true) {
 		if (trend === 'stable') {
-			return { color: 'text-slate-500', bgColor: 'bg-slate-100', icon: Minus };
+			return {
+				color: 'text-slate-500 dark:text-slate-400',
+				bgColor: 'bg-slate-100 dark:bg-slate-800',
+				icon: Minus
+			};
 		}
 		const isGood = (trend === 'up') === isPositiveGood;
 		if (isGood) {
-			return { color: 'text-emerald-600', bgColor: 'bg-emerald-50', icon: TrendingUp };
+			return {
+				color: 'text-emerald-600 dark:text-emerald-400',
+				bgColor: 'bg-emerald-50 dark:bg-emerald-900/30',
+				icon: TrendingUp
+			};
 		}
-		return { color: 'text-red-600', bgColor: 'bg-red-50', icon: TrendingDown };
+		return {
+			color: 'text-red-600 dark:text-red-400',
+			bgColor: 'bg-red-50 dark:bg-red-900/30',
+			icon: TrendingDown
+		};
 	}
 </script>
 
@@ -128,11 +140,11 @@
 	<!-- Year-over-Year Comparison Cards -->
 	{#if comparisons.length > 0 && previousSnapshot}
 		<Card.Root class="gap-0 py-0 shadow-sm">
-			<Card.Header class="border-b bg-slate-50/50 py-6">
+			<Card.Header class="border-b bg-slate-50/50 py-6 dark:bg-slate-800/50">
 				<div class="flex items-center justify-between">
 					<div class="flex items-center gap-2">
-						<div class="rounded-lg bg-blue-100 p-1.5">
-							<BarChart3 class="size-4 text-blue-600" />
+						<div class="rounded-lg bg-blue-100 p-1.5 dark:bg-blue-900/30">
+							<BarChart3 class="size-4 text-blue-600 dark:text-blue-400" />
 						</div>
 						<Card.Title class="text-lg">Year-over-Year Comparison</Card.Title>
 					</div>
@@ -147,10 +159,12 @@
 					{#each comparisons as comparison}
 						{@const style = getTrendStyle(comparison.trend)}
 						<div
-							class="rounded-xl border border-slate-200 bg-white p-4 transition-all hover:shadow-sm"
+							class="rounded-xl border border-slate-200 bg-white p-4 transition-all hover:shadow-sm dark:border-slate-700 dark:bg-slate-800"
 						>
-							<p class="truncate text-xs font-medium text-slate-500">{comparison.metric}</p>
-							<p class="mt-1 text-xl font-bold text-slate-900">
+							<p class="truncate text-xs font-medium text-slate-500 dark:text-slate-400">
+								{comparison.metric}
+							</p>
+							<p class="mt-1 text-xl font-bold text-slate-900 dark:text-slate-100">
 								{formatNumber(comparison.currentValue)}
 							</p>
 							<div class="mt-2 flex items-center gap-1">
@@ -166,7 +180,7 @@
 								<span class="text-xs font-medium {style.color}">
 									{comparison.changePercent >= 0 ? '+' : ''}{comparison.changePercent.toFixed(1)}%
 								</span>
-								<span class="text-xs text-slate-400">
+								<span class="text-xs text-slate-400 dark:text-slate-500">
 									({comparison.change >= 0 ? '+' : ''}{formatNumber(comparison.change)})
 								</span>
 							</div>
@@ -182,10 +196,10 @@
 		<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
 			<!-- Population Trend -->
 			<Card.Root class="gap-0 py-0 shadow-sm">
-				<Card.Header class="border-b bg-slate-50/50 py-6">
+				<Card.Header class="border-b bg-slate-50/50 py-6 dark:bg-slate-800/50">
 					<div class="flex items-center gap-2">
-						<div class="rounded-lg bg-blue-100 p-1.5">
-							<TrendingUp class="size-4 text-blue-600" />
+						<div class="rounded-lg bg-blue-100 p-1.5 dark:bg-blue-900/30">
+							<TrendingUp class="size-4 text-blue-600 dark:text-blue-400" />
 						</div>
 						<Card.Title class="text-lg">Population Trend</Card.Title>
 					</div>
@@ -202,10 +216,10 @@
 
 			<!-- Households Trend -->
 			<Card.Root class="gap-0 py-0 shadow-sm">
-				<Card.Header class="border-b bg-slate-50/50 py-6">
+				<Card.Header class="border-b bg-slate-50/50 py-6 dark:bg-slate-800/50">
 					<div class="flex items-center gap-2">
-						<div class="rounded-lg bg-emerald-100 p-1.5">
-							<TrendingUp class="size-4 text-emerald-600" />
+						<div class="rounded-lg bg-emerald-100 p-1.5 dark:bg-emerald-900/30">
+							<TrendingUp class="size-4 text-emerald-600 dark:text-emerald-400" />
 						</div>
 						<Card.Title class="text-lg">Households Trend</Card.Title>
 					</div>
@@ -223,10 +237,10 @@
 
 		<!-- Demographics Age Groups Trend -->
 		<Card.Root class="gap-0 py-0 shadow-sm">
-			<Card.Header class="border-b bg-slate-50/50 py-6">
+			<Card.Header class="border-b bg-slate-50/50 py-6 dark:bg-slate-800/50">
 				<div class="flex items-center gap-2">
-					<div class="rounded-lg bg-violet-100 p-1.5">
-						<TrendingUp class="size-4 text-violet-600" />
+					<div class="rounded-lg bg-violet-100 p-1.5 dark:bg-violet-900/30">
+						<TrendingUp class="size-4 text-violet-600 dark:text-violet-400" />
 					</div>
 					<Card.Title class="text-lg">Age Distribution Trend</Card.Title>
 				</div>
@@ -244,10 +258,10 @@
 		<!-- Social Services Trend -->
 		{#if snapshots.some((s) => s.social_services)}
 			<Card.Root class="gap-0 py-0 shadow-sm">
-				<Card.Header class="border-b bg-slate-50/50 py-6">
+				<Card.Header class="border-b bg-slate-50/50 py-6 dark:bg-slate-800/50">
 					<div class="flex items-center gap-2">
-						<div class="rounded-lg bg-amber-100 p-1.5">
-							<TrendingUp class="size-4 text-amber-600" />
+						<div class="rounded-lg bg-amber-100 p-1.5 dark:bg-amber-900/30">
+							<TrendingUp class="size-4 text-amber-600 dark:text-amber-400" />
 						</div>
 						<Card.Title class="text-lg">Social Services Coverage Trend</Card.Title>
 					</div>
@@ -265,11 +279,13 @@
 	{:else}
 		<Card.Root class="gap-0 py-0 shadow-sm">
 			<Card.Content class="flex flex-col items-center justify-center py-12 text-center">
-				<div class="rounded-full bg-slate-100 p-4">
+				<div class="rounded-full bg-slate-100 p-4 dark:bg-slate-800">
 					<BarChart3 class="size-8 text-slate-400" />
 				</div>
-				<h3 class="mt-4 font-semibold text-slate-900">Not Enough Data for Trends</h3>
-				<p class="mt-2 max-w-md text-sm text-slate-500">
+				<h3 class="mt-4 font-semibold text-slate-900 dark:text-slate-100">
+					Not Enough Data for Trends
+				</h3>
+				<p class="mt-2 max-w-md text-sm text-slate-500 dark:text-slate-400">
 					Trend charts require at least 2 years of data. Save the current year's data and check back
 					next year to see how this sitio has changed over time.
 				</p>

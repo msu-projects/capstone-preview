@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { themeStore } from '$lib/stores/theme.svelte';
+	import { getChartColors } from '$lib/utils/chart-colors';
 	import { Chart } from '@flowbite-svelte-plugins/chart';
 	import type { ApexOptions } from 'apexcharts';
 
@@ -50,6 +52,9 @@
 		return ((value / total) * 100).toFixed(1);
 	}
 
+	// Get theme-aware colors
+	const colors = $derived(getChartColors());
+
 	// Prepare chart data with colors
 	const chartData = $derived(
 		data.map((d, i) => ({
@@ -89,13 +94,13 @@
 							show: true,
 							fontSize: '14px',
 							fontWeight: 500,
-							color: '#64748b'
+							color: colors.labelColor
 						},
 						value: {
 							show: true,
 							fontSize: '28px',
 							fontWeight: 700,
-							color: '#0f172a',
+							color: colors.valueColor,
 							formatter: () => displayValue
 						},
 						total: {
@@ -103,7 +108,7 @@
 							label: displayLabel,
 							fontSize: '14px',
 							fontWeight: 500,
-							color: '#64748b',
+							color: colors.labelColor,
 							formatter: () => displayValue
 						}
 					}
@@ -120,7 +125,7 @@
 			fontSize: '12px',
 			fontWeight: 500,
 			labels: {
-				colors: '#64748b'
+				colors: colors.labelColor
 			},
 			markers: {
 				size: 6,
@@ -146,12 +151,17 @@
 		},
 		stroke: {
 			width: 2,
-			colors: ['#ffffff']
+			colors: [themeStore.resolvedTheme === 'dark' ? '#1e293b' : '#ffffff']
 		}
 	});
 
-	// Create a key based on the data to force re-render when data changes
-	const chartKey = $derived(JSON.stringify(data.map((d) => ({ l: d.label, v: d.value }))));
+	// Create a key based on the data and theme to force re-render
+	const chartKey = $derived(
+		JSON.stringify({
+			data: data.map((d) => ({ l: d.label, v: d.value })),
+			theme: themeStore.resolvedTheme
+		})
+	);
 </script>
 
 <div class="w-full">

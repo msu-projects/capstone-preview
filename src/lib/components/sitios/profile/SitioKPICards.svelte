@@ -133,15 +133,17 @@
 			<Card.Content class="pt-5 pb-4">
 				<div class="flex items-start justify-between">
 					<div class="space-y-1">
-						<p class="text-sm font-medium text-slate-500">{kpi.label}</p>
-						<p class="text-2xl font-bold tracking-tight text-slate-900">{kpi.value}</p>
+						<p class="text-sm font-medium text-slate-500 dark:text-slate-400">{kpi.label}</p>
+						<p class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+							{kpi.value}
+						</p>
 						<div class="flex items-center gap-1.5">
 							{#if kpi.trend === 'positive'}
 								<TrendingUp class="size-3.5 text-emerald-500" />
 							{:else if kpi.trend === 'negative'}
 								<TrendingDown class="size-3.5 text-red-500" />
 							{/if}
-							<p class="text-xs text-slate-500">{kpi.sublabel}</p>
+							<p class="text-xs text-slate-500 dark:text-slate-400">{kpi.sublabel}</p>
 						</div>
 					</div>
 					<div class="rounded-xl p-2.5 {kpi.iconBg}">

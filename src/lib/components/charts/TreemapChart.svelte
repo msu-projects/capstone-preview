@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { themeStore } from '$lib/stores/theme.svelte';
+	import { getChartColors, getDefaultSeriesColors } from '$lib/utils/chart-colors';
 	import { Chart } from '@flowbite-svelte-plugins/chart';
 	import type { ApexOptions } from 'apexcharts';
 
@@ -17,17 +19,9 @@
 
 	let { data, height = 350, title, distributed = true }: Props = $props();
 
-	// Default color palette
-	const defaultColors = [
-		'hsl(217, 91%, 60%)', // blue
-		'hsl(142, 71%, 45%)', // green
-		'hsl(48, 96%, 53%)', // yellow
-		'hsl(280, 70%, 60%)', // purple
-		'hsl(340, 82%, 52%)', // pink
-		'hsl(24, 95%, 53%)', // orange
-		'hsl(173, 80%, 40%)', // teal
-		'hsl(199, 89%, 48%)' // sky
-	];
+	// Get theme-aware colors
+	const chartColors = $derived(getChartColors());
+	const defaultColors = $derived(getDefaultSeriesColors());
 
 	// Transform data for treemap
 	const treemapData = $derived(
@@ -36,6 +30,25 @@
 			y: d.value,
 			fillColor: d.color || defaultColors[i % defaultColors.length]
 		}))
+	);
+
+	// Color scale for non-distributed mode
+	const colorScale = $derived(
+		themeStore.resolvedTheme === 'dark'
+			? [
+					{ from: 0, to: 10, color: '#475569' },
+					{ from: 11, to: 50, color: '#64748b' },
+					{ from: 51, to: 100, color: '#94a3b8' },
+					{ from: 101, to: 500, color: '#cbd5e1' },
+					{ from: 501, to: 10000, color: '#e2e8f0' }
+				]
+			: [
+					{ from: 0, to: 10, color: '#cbd5e1' },
+					{ from: 11, to: 50, color: '#94a3b8' },
+					{ from: 51, to: 100, color: '#64748b' },
+					{ from: 101, to: 500, color: '#475569' },
+					{ from: 501, to: 10000, color: '#334155' }
+				]
 	);
 
 	const options = $derived<ApexOptions>({
@@ -73,32 +86,27 @@
 				enableShades: !distributed,
 				shadeIntensity: 0.5,
 				colorScale: {
-					ranges: distributed
-						? []
-						: [
-								{ from: 0, to: 10, color: '#cbd5e1' },
-								{ from: 11, to: 50, color: '#94a3b8' },
-								{ from: 51, to: 100, color: '#64748b' },
-								{ from: 101, to: 500, color: '#475569' },
-								{ from: 501, to: 10000, color: '#334155' }
-							]
+					ranges: distributed ? [] : colorScale
 				}
 			}
 		},
 		tooltip: {
+			theme: themeStore.resolvedTheme,
 			y: {
 				formatter: (val) => val.toLocaleString()
 			}
 		},
 		stroke: {
 			width: 2,
-			colors: ['#fff']
+			colors: [themeStore.resolvedTheme === 'dark' ? '#1e293b' : '#fff']
 		}
 	});
 </script>
 
 <div class="treemap-chart">
-	<Chart {options} />
+	{#key themeStore.resolvedTheme}
+		<Chart {options} />
+	{/key}
 </div>
 
 <style>

@@ -383,8 +383,10 @@
 								</Table.Cell>
 								<Table.Cell>
 									<div class="flex items-center gap-2">
-										<div class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100">
-											<User class="h-4 w-4 text-slate-600" />
+										<div
+											class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800"
+										>
+											<User class="h-4 w-4 text-slate-600 dark:text-slate-400" />
 										</div>
 										<span class="font-medium">{log.user_name}</span>
 									</div>

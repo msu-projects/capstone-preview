@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { themeStore } from '$lib/stores/theme.svelte';
+	import { getChartColors, getDefaultSeriesColors } from '$lib/utils/chart-colors';
 	import { Chart } from '@flowbite-svelte-plugins/chart';
 	import type { ApexOptions } from 'apexcharts';
 
@@ -28,16 +30,13 @@
 		showDataLabels = true
 	}: Props = $props();
 
-	// Default color palette
-	const defaultColors = [
-		'hsl(142, 71%, 45%)', // green (covered)
-		'hsl(0, 84%, 60%)', // red (not covered)
-		'hsl(217, 91%, 60%)', // blue
-		'hsl(48, 96%, 53%)', // yellow
-		'hsl(280, 70%, 60%)' // purple
-	];
+	// Get theme-aware colors
+	const chartColors = $derived(getChartColors());
+	const defaultColors = $derived(getDefaultSeriesColors());
 
-	const colors = $derived(series.map((s, i) => s.color || defaultColors[i % defaultColors.length]));
+	const seriesColors = $derived(
+		series.map((s, i) => s.color || defaultColors[i % defaultColors.length])
+	);
 
 	const options = $derived<ApexOptions>({
 		chart: {
@@ -59,7 +58,7 @@
 				columnWidth: '70%'
 			}
 		},
-		colors: colors,
+		colors: seriesColors,
 		dataLabels: {
 			enabled: showDataLabels,
 			formatter: (val) =>
@@ -78,7 +77,7 @@
 			categories: categories,
 			labels: {
 				style: {
-					colors: '#64748b',
+					colors: chartColors.labelColor,
 					fontSize: '12px',
 					fontWeight: 500
 				},
@@ -94,14 +93,14 @@
 		yaxis: {
 			labels: {
 				style: {
-					colors: '#64748b',
+					colors: chartColors.labelColor,
 					fontSize: '12px',
 					fontWeight: 500
 				}
 			}
 		},
 		grid: {
-			borderColor: '#e2e8f0',
+			borderColor: chartColors.gridColor,
 			strokeDashArray: 4,
 			xaxis: {
 				lines: {
@@ -120,7 +119,7 @@
 			fontSize: '13px',
 			fontWeight: 500,
 			labels: {
-				colors: '#334155'
+				colors: chartColors.labelColor
 			},
 			markers: {
 				size: 8,
@@ -128,6 +127,7 @@
 			}
 		},
 		tooltip: {
+			theme: themeStore.resolvedTheme,
 			y: {
 				formatter: (val) =>
 					stacked100 ? `${Number(val).toFixed(1)}%` : Number(val).toLocaleString()
@@ -137,7 +137,9 @@
 </script>
 
 <div class="stacked-bar-chart">
-	<Chart {options} />
+	{#key themeStore.resolvedTheme}
+		<Chart {options} />
+	{/key}
 </div>
 
 <style>

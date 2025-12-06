@@ -29,43 +29,45 @@
 <div class="space-y-6">
 	<!-- Map Header Stats -->
 	<div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
-		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50">
+		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50 dark:ring-slate-700/50">
 			<Card.Content class="p-4">
 				<div class="flex items-center justify-between">
 					<div>
-						<p class="text-sm text-slate-500">Total Sitios</p>
-						<p class="text-2xl font-bold text-slate-900">{sitios.length}</p>
+						<p class="text-sm text-slate-500 dark:text-slate-400">Total Sitios</p>
+						<p class="text-2xl font-bold text-slate-900 dark:text-slate-100">{sitios.length}</p>
 					</div>
-					<div class="rounded-lg bg-blue-50 p-2">
-						<MapPin class="size-5 text-blue-600" />
+					<div class="rounded-lg bg-blue-50 p-2 dark:bg-blue-900/30">
+						<MapPin class="size-5 text-blue-600 dark:text-blue-400" />
 					</div>
 				</div>
 			</Card.Content>
 		</Card.Root>
 
-		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50">
+		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50 dark:ring-slate-700/50">
 			<Card.Content class="p-4">
 				<div class="flex items-center justify-between">
 					<div>
-						<p class="text-sm text-slate-500">With Coordinates</p>
-						<p class="text-2xl font-bold text-slate-900">{sitiosWithCoords}</p>
+						<p class="text-sm text-slate-500 dark:text-slate-400">With Coordinates</p>
+						<p class="text-2xl font-bold text-slate-900 dark:text-slate-100">{sitiosWithCoords}</p>
 					</div>
-					<div class="rounded-lg bg-emerald-50 p-2">
-						<Navigation class="size-5 text-emerald-600" />
+					<div class="rounded-lg bg-emerald-50 p-2 dark:bg-emerald-900/30">
+						<Navigation class="size-5 text-emerald-600 dark:text-emerald-400" />
 					</div>
 				</div>
 			</Card.Content>
 		</Card.Root>
 
-		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50 sm:col-span-2">
+		<Card.Root
+			class="border-0 shadow-sm ring-1 ring-slate-200/50 sm:col-span-2 dark:ring-slate-700/50"
+		>
 			<Card.Content class="p-4">
 				<div class="flex items-center gap-3">
-					<div class="rounded-lg bg-purple-50 p-2">
-						<Map class="size-5 text-purple-600" />
+					<div class="rounded-lg bg-purple-50 p-2 dark:bg-purple-900/30">
+						<Map class="size-5 text-purple-600 dark:text-purple-400" />
 					</div>
 					<div>
-						<p class="text-sm text-slate-500">Viewing</p>
-						<p class="font-semibold text-slate-900">{filterLabel}</p>
+						<p class="text-sm text-slate-500 dark:text-slate-400">Viewing</p>
+						<p class="font-semibold text-slate-900 dark:text-slate-100">{filterLabel}</p>
 					</div>
 				</div>
 			</Card.Content>
@@ -73,12 +75,14 @@
 	</div>
 
 	<!-- Map Container -->
-	<Card.Root class="gap-0 overflow-hidden border-0 py-0 shadow-sm ring-1 ring-slate-200/50">
-		<Card.Header class="border-b bg-slate-50/50 pt-6">
+	<Card.Root
+		class="gap-0 overflow-hidden border-0 py-0 shadow-sm ring-1 ring-slate-200/50 dark:ring-slate-700/50"
+	>
+		<Card.Header class="border-b bg-slate-50/50 pt-6 dark:bg-slate-800/50">
 			<div class="flex items-center justify-between">
 				<div>
 					<Card.Title class="flex items-center gap-2 text-base">
-						<Map class="size-5 text-slate-500" />
+						<Map class="size-5 text-slate-500 dark:text-slate-400" />
 						Geographic Distribution
 					</Card.Title>
 					<Card.Description>
@@ -98,17 +102,21 @@
 	</Card.Root>
 
 	<!-- Map Legend / Help -->
-	<Card.Root class="border-0 bg-slate-50 py-0 shadow-sm ring-1 ring-slate-200/50">
+	<Card.Root
+		class="border-0 bg-slate-50 py-0 shadow-sm ring-1 ring-slate-200/50 dark:bg-slate-800 dark:ring-slate-700/50"
+	>
 		<Card.Content class="p-4">
 			<div class="flex flex-wrap items-center gap-4 text-sm">
 				<div class="flex items-center gap-2">
 					<MapPin class="size-3 text-primary" />
-					<span class="text-slate-600">Sitio Location</span>
+					<span class="text-slate-600 dark:text-slate-400">Sitio Location</span>
 				</div>
-				<div class="text-slate-400">•</div>
-				<span class="text-slate-600">Click on a marker to view sitio details</span>
-				<div class="text-slate-400">•</div>
-				<span class="text-slate-600">Use mouse wheel to zoom in/out</span>
+				<div class="text-slate-400 dark:text-slate-500">•</div>
+				<span class="text-slate-600 dark:text-slate-400"
+					>Click on a marker to view sitio details</span
+				>
+				<div class="text-slate-400 dark:text-slate-500">•</div>
+				<span class="text-slate-600 dark:text-slate-400">Use mouse wheel to zoom in/out</span>
 			</div>
 		</Card.Content>
 	</Card.Root>

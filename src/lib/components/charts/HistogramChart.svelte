@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { themeStore } from '$lib/stores/theme.svelte';
+	import { getChartColors } from '$lib/utils/chart-colors';
 	import { Chart } from '@flowbite-svelte-plugins/chart';
 	import type { ApexOptions } from 'apexcharts';
 
@@ -28,6 +30,9 @@
 		xAxisLabel,
 		yAxisLabel
 	}: Props = $props();
+
+	// Get theme-aware colors
+	const chartColors = $derived(getChartColors());
 
 	// Generate colors array - first bar highlighted if enabled
 	const barColors = $derived(
@@ -64,7 +69,7 @@
 			style: {
 				fontSize: '11px',
 				fontWeight: 600,
-				colors: ['#334155']
+				colors: [chartColors.dataLabelColor]
 			}
 		},
 		series: [
@@ -77,7 +82,7 @@
 			categories: data.map((d) => d.bracket),
 			labels: {
 				style: {
-					colors: '#64748b',
+					colors: chartColors.labelColor,
 					fontSize: '11px',
 					fontWeight: 500
 				},
@@ -94,7 +99,7 @@
 				title: {
 					text: xAxisLabel,
 					style: {
-						color: '#64748b',
+						color: chartColors.labelColor,
 						fontSize: '12px',
 						fontWeight: 500
 					}
@@ -104,7 +109,7 @@
 		yaxis: {
 			labels: {
 				style: {
-					colors: '#64748b',
+					colors: chartColors.labelColor,
 					fontSize: '12px',
 					fontWeight: 500
 				},
@@ -114,7 +119,7 @@
 				title: {
 					text: yAxisLabel,
 					style: {
-						color: '#64748b',
+						color: chartColors.labelColor,
 						fontSize: '12px',
 						fontWeight: 500
 					}
@@ -122,7 +127,7 @@
 			})
 		},
 		grid: {
-			borderColor: '#e2e8f0',
+			borderColor: chartColors.gridColor,
 			strokeDashArray: 4,
 			xaxis: {
 				lines: {
@@ -131,6 +136,7 @@
 			}
 		},
 		tooltip: {
+			theme: themeStore.resolvedTheme,
 			y: {
 				formatter: (val) => `${val.toLocaleString()} households`
 			}
@@ -139,7 +145,9 @@
 </script>
 
 <div class="histogram-chart">
-	<Chart {options} />
+	{#key themeStore.resolvedTheme}
+		<Chart {options} />
+	{/key}
 </div>
 
 <style>

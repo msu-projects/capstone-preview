@@ -148,10 +148,10 @@
 <div
 	bind:this={mapContainer}
 	style="height: {height}; width: 100%;"
-	class={cn('rounded-lg border bg-slate-100', className)}
+	class={cn('rounded-lg border bg-slate-100 dark:bg-slate-800', className)}
 >
 	{#if validSitios.length === 0}
-		<div class="flex h-full items-center justify-center text-sm text-slate-500">
+		<div class="flex h-full items-center justify-center text-sm text-slate-500 dark:text-slate-400">
 			No sitios with coordinates to display
 		</div>
 	{/if}

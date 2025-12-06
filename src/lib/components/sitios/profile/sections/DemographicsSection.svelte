@@ -89,29 +89,31 @@
 	<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
 		<!-- Total Population -->
 		<Card.Root
-			class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50"
+			class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50 dark:bg-slate-800/80 dark:ring-slate-700/50 dark:hover:ring-slate-600/50"
 		>
 			<div
-				class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-blue-50 opacity-50"
+				class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-blue-50 opacity-50 dark:bg-blue-900/30"
 			></div>
 			<div
-				class="absolute inset-0 bg-blue-50 opacity-0 transition-opacity group-hover:opacity-30"
+				class="absolute inset-0 bg-blue-50 opacity-0 transition-opacity group-hover:opacity-30 dark:bg-blue-900/30"
 			></div>
 			<Card.Content class="relative p-4 sm:p-5">
 				<div class="flex items-center gap-3 sm:gap-4">
-					<div class="rounded-xl bg-blue-50 p-2.5 ring-1 ring-black/5 sm:p-3">
-						<Users class="size-5 text-blue-700 sm:size-6" />
+					<div class="rounded-xl bg-blue-50 p-2.5 ring-1 ring-black/5 sm:p-3 dark:bg-blue-900/30">
+						<Users class="size-5 text-blue-700 sm:size-6 dark:text-blue-400" />
 					</div>
 					<div class="min-w-0 flex-1">
 						<div class="flex items-center gap-2">
-							<p class="truncate text-xs font-medium text-slate-500 sm:text-sm">Total Population</p>
+							<p class="truncate text-xs font-medium text-slate-500 sm:text-sm dark:text-slate-400">
+								Total Population
+							</p>
 							<TrendBadge
 								currentValue={sitio.population}
 								previousValue={previousSnapshot?.population ?? null}
 							/>
 						</div>
 						<p
-							class="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl"
+							class="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl dark:text-slate-100"
 						>
 							{formatNumber(sitio.population)}
 						</p>
@@ -122,29 +124,33 @@
 
 		<!-- Households -->
 		<Card.Root
-			class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50"
+			class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50 dark:bg-slate-800/80 dark:ring-slate-700/50 dark:hover:ring-slate-600/50"
 		>
 			<div
-				class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-emerald-50 opacity-50"
+				class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-emerald-50 opacity-50 dark:bg-emerald-900/30"
 			></div>
 			<div
-				class="absolute inset-0 bg-emerald-50 opacity-0 transition-opacity group-hover:opacity-30"
+				class="absolute inset-0 bg-emerald-50 opacity-0 transition-opacity group-hover:opacity-30 dark:bg-emerald-900/30"
 			></div>
 			<Card.Content class="relative p-4 sm:p-5">
 				<div class="flex items-center gap-3 sm:gap-4">
-					<div class="rounded-xl bg-emerald-50 p-2.5 ring-1 ring-black/5 sm:p-3">
-						<Home class="size-5 text-emerald-700 sm:size-6" />
+					<div
+						class="rounded-xl bg-emerald-50 p-2.5 ring-1 ring-black/5 sm:p-3 dark:bg-emerald-900/30"
+					>
+						<Home class="size-5 text-emerald-700 sm:size-6 dark:text-emerald-400" />
 					</div>
 					<div class="min-w-0 flex-1">
 						<div class="flex items-center gap-2">
-							<p class="truncate text-xs font-medium text-slate-500 sm:text-sm">Households</p>
+							<p class="truncate text-xs font-medium text-slate-500 sm:text-sm dark:text-slate-400">
+								Households
+							</p>
 							<TrendBadge
 								currentValue={sitio.households}
 								previousValue={previousSnapshot?.households ?? null}
 							/>
 						</div>
 						<p
-							class="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl"
+							class="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl dark:text-slate-100"
 						>
 							{formatNumber(sitio.households)}
 						</p>
@@ -155,25 +161,27 @@
 
 		<!-- Avg Household Size -->
 		<Card.Root
-			class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50"
+			class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50 dark:bg-slate-800/80 dark:ring-slate-700/50 dark:hover:ring-slate-600/50"
 		>
 			<div
-				class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-violet-50 opacity-50"
+				class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-violet-50 opacity-50 dark:bg-violet-900/30"
 			></div>
 			<div
-				class="absolute inset-0 bg-violet-50 opacity-0 transition-opacity group-hover:opacity-30"
+				class="absolute inset-0 bg-violet-50 opacity-0 transition-opacity group-hover:opacity-30 dark:bg-violet-900/30"
 			></div>
 			<Card.Content class="relative p-4 sm:p-5">
 				<div class="flex items-center gap-3 sm:gap-4">
-					<div class="rounded-xl bg-violet-50 p-2.5 ring-1 ring-black/5 sm:p-3">
-						<PersonStanding class="size-5 text-violet-700 sm:size-6" />
+					<div
+						class="rounded-xl bg-violet-50 p-2.5 ring-1 ring-black/5 sm:p-3 dark:bg-violet-900/30"
+					>
+						<PersonStanding class="size-5 text-violet-700 sm:size-6 dark:text-violet-400" />
 					</div>
 					<div class="min-w-0 flex-1">
-						<p class="truncate text-xs font-medium text-slate-500 sm:text-sm">
+						<p class="truncate text-xs font-medium text-slate-500 sm:text-sm dark:text-slate-400">
 							Avg. Household Size
 						</p>
 						<p
-							class="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl"
+							class="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl dark:text-slate-100"
 						>
 							{avgHouseholdSize.toFixed(1)}
 						</p>
@@ -184,26 +192,28 @@
 
 		<!-- Working Age Population -->
 		<Card.Root
-			class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50"
+			class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50 dark:bg-slate-800/80 dark:ring-slate-700/50 dark:hover:ring-slate-600/50"
 			title="{formatNumber(sitio.demographics.age_15_64)} out of {formatNumber(
 				sitio.population
 			)} people"
 		>
 			<div
-				class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-amber-50 opacity-50"
+				class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-amber-50 opacity-50 dark:bg-amber-900/30"
 			></div>
 			<div
-				class="absolute inset-0 bg-amber-50 opacity-0 transition-opacity group-hover:opacity-30"
+				class="absolute inset-0 bg-amber-50 opacity-0 transition-opacity group-hover:opacity-30 dark:bg-amber-900/30"
 			></div>
 			<Card.Content class="relative p-4 sm:p-5">
 				<div class="flex items-center gap-3 sm:gap-4">
-					<div class="rounded-xl bg-amber-50 p-2.5 ring-1 ring-black/5 sm:p-3">
-						<Briefcase class="size-5 text-amber-700 sm:size-6" />
+					<div class="rounded-xl bg-amber-50 p-2.5 ring-1 ring-black/5 sm:p-3 dark:bg-amber-900/30">
+						<Briefcase class="size-5 text-amber-700 sm:size-6 dark:text-amber-400" />
 					</div>
 					<div class="min-w-0 flex-1">
-						<p class="truncate text-xs font-medium text-slate-500 sm:text-sm">Working Age</p>
+						<p class="truncate text-xs font-medium text-slate-500 sm:text-sm dark:text-slate-400">
+							Working Age
+						</p>
 						<p
-							class="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl"
+							class="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl dark:text-slate-100"
 						>
 							{workingAgePercentage.toFixed(0)}%
 						</p>
@@ -216,10 +226,10 @@
 	<!-- Charts Row -->
 	<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
 		<!-- Gender Distribution -->
-		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50">
+		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50 dark:ring-slate-700/50">
 			<Card.Header>
 				<Card.Title class="flex items-center gap-2 text-base">
-					<Activity class="size-5 text-slate-500" />
+					<Activity class="size-5 text-slate-500 dark:text-slate-400" />
 					Gender Distribution
 				</Card.Title>
 			</Card.Header>
@@ -235,10 +245,10 @@
 
 		<!-- Age Distribution -->
 		<Card.Root class="gap-0 py-0 shadow-sm">
-			<Card.Header class="border-b bg-slate-50/50 py-6">
+			<Card.Header class="border-b bg-slate-50/50 py-6 dark:bg-slate-800/50">
 				<div class="flex items-center gap-2">
-					<div class="rounded-lg bg-emerald-100 p-1.5">
-						<Activity class="size-4 text-emerald-600" />
+					<div class="rounded-lg bg-emerald-100 p-1.5 dark:bg-emerald-900/30">
+						<Activity class="size-4 text-emerald-600 dark:text-emerald-400" />
 					</div>
 					<Card.Title class="text-lg">Age Distribution</Card.Title>
 				</div>
@@ -284,11 +294,11 @@
 
 	<!-- Dependency Ratio Analysis -->
 	<Card.Root class="gap-0 py-0 shadow-sm">
-		<Card.Header class="border-b bg-slate-50/50 py-6">
+		<Card.Header class="border-b bg-slate-50/50 py-6 dark:bg-slate-800/50">
 			<div class="flex items-center justify-between">
 				<div class="flex items-center gap-2">
-					<div class="rounded-lg bg-purple-100 p-1.5">
-						<TrendingUp class="size-4 text-purple-600" />
+					<div class="rounded-lg bg-purple-100 p-1.5 dark:bg-purple-900/30">
+						<TrendingUp class="size-4 text-purple-600 dark:text-purple-400" />
 					</div>
 					<div>
 						<Card.Title class="text-lg">Dependency Ratio Analysis</Card.Title>
@@ -313,11 +323,13 @@
 			<div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
 				<!-- Dependency Ratio Display -->
 				<div
-					class="flex flex-col items-center justify-center rounded-xl bg-slate-50 p-6 text-center"
+					class="flex flex-col items-center justify-center rounded-xl bg-slate-50 p-6 text-center dark:bg-slate-800"
 				>
-					<div class="text-5xl font-bold text-slate-900">{dependencyRatio.toFixed(1)}%</div>
-					<div class="mt-2 text-sm text-slate-600">Dependency Ratio</div>
-					<div class="mt-3 max-w-xs text-xs text-slate-500">
+					<div class="text-5xl font-bold text-slate-900 dark:text-slate-100">
+						{dependencyRatio.toFixed(1)}%
+					</div>
+					<div class="mt-2 text-sm text-slate-600 dark:text-slate-400">Dependency Ratio</div>
+					<div class="mt-3 max-w-xs text-xs text-slate-500 dark:text-slate-400">
 						{dependencyInterpretation.description}
 					</div>
 				</div>
@@ -327,11 +339,11 @@
 					<div class="space-y-4">
 						<div>
 							<div class="mb-2 flex justify-between text-sm">
-								<span class="flex items-center gap-2 text-slate-600">
-									<Briefcase class="size-4 text-emerald-600" />
+								<span class="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+									<Briefcase class="size-4 text-emerald-600 dark:text-emerald-400" />
 									Working Age Population (15-64)
 								</span>
-								<span class="font-semibold text-slate-900">
+								<span class="font-semibold text-slate-900 dark:text-slate-100">
 									{formatNumber(sitio.demographics.age_15_64)} ({workingAgePercentage.toFixed(1)}%)
 								</span>
 							</div>
@@ -340,11 +352,11 @@
 
 						<div>
 							<div class="mb-2 flex justify-between text-sm">
-								<span class="flex items-center gap-2 text-slate-600">
-									<Baby class="size-4 text-blue-600" />
+								<span class="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+									<Baby class="size-4 text-blue-600 dark:text-blue-400" />
 									Young Dependents (0-14)
 								</span>
-								<span class="font-semibold text-slate-900">
+								<span class="font-semibold text-slate-900 dark:text-slate-100">
 									{formatNumber(sitio.demographics.age_0_14)} ({childrenPercentage.toFixed(1)}%)
 								</span>
 							</div>
@@ -353,11 +365,11 @@
 
 						<div>
 							<div class="mb-2 flex justify-between text-sm">
-								<span class="flex items-center gap-2 text-slate-600">
-									<PersonStanding class="size-4 text-amber-600" />
+								<span class="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+									<PersonStanding class="size-4 text-amber-600 dark:text-amber-400" />
 									Senior Dependents (65+)
 								</span>
-								<span class="font-semibold text-slate-900">
+								<span class="font-semibold text-slate-900 dark:text-slate-100">
 									{formatNumber(sitio.demographics.age_65_above)} ({seniorPercentage.toFixed(1)}%)
 								</span>
 							</div>
@@ -366,9 +378,13 @@
 					</div>
 
 					<!-- Interpretation Box -->
-					<div class="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4">
-						<div class="text-sm font-medium text-slate-700">What this means:</div>
-						<p class="mt-1 text-sm text-slate-600">
+					<div
+						class="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800"
+					>
+						<div class="text-sm font-medium text-slate-700 dark:text-slate-300">
+							What this means:
+						</div>
+						<p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
 							{#if dependencyRatio < 50}
 								This community has a favorable age structure with a strong working-age population
 								that can support economic development and social programs.
@@ -389,10 +405,14 @@
 	<!-- Cultural Diversity -->
 	{#if (sitio.ethnicities && sitio.ethnicities.length > 0) || (sitio.religions && sitio.religions.length > 0)}
 		<Card.Root class="gap-0 py-0 shadow-sm">
-			<Card.Header class="border-b bg-linear-to-r from-violet-50/50 to-pink-50/50 py-6">
+			<Card.Header
+				class="border-b bg-linear-to-r from-violet-50/50 to-pink-50/50 py-6 dark:from-violet-950/50 dark:to-pink-950/50"
+			>
 				<div class="flex items-center gap-2">
-					<div class="rounded-lg bg-linear-to-br from-violet-100 to-pink-100 p-1.5">
-						<Globe class="size-4 text-violet-600" />
+					<div
+						class="rounded-lg bg-linear-to-br from-violet-100 to-pink-100 p-1.5 dark:from-violet-900/50 dark:to-pink-900/50"
+					>
+						<Globe class="size-4 text-violet-600 dark:text-violet-400" />
 					</div>
 					<div>
 						<Card.Title class="text-lg">Cultural Diversity</Card.Title>
@@ -406,8 +426,10 @@
 					{#if sitio.ethnicities && sitio.ethnicities.length > 0}
 						<div class="space-y-3">
 							<div class="flex items-center gap-2">
-								<Globe class="size-4 text-violet-500" />
-								<span class="text-sm font-medium text-slate-700">Ethnicities</span>
+								<Globe class="size-4 text-violet-500 dark:text-violet-400" />
+								<span class="text-sm font-medium text-slate-700 dark:text-slate-300"
+									>Ethnicities</span
+								>
 								<Badge variant="outline" class="ml-auto text-xs">
 									{sitio.ethnicities.length} groups
 								</Badge>
@@ -436,8 +458,9 @@
 					{#if sitio.religions && sitio.religions.length > 0}
 						<div class="space-y-3">
 							<div class="flex items-center gap-2">
-								<Church class="size-4 text-amber-500" />
-								<span class="text-sm font-medium text-slate-700">Religions</span>
+								<Church class="size-4 text-amber-500 dark:text-amber-400" />
+								<span class="text-sm font-medium text-slate-700 dark:text-slate-300">Religions</span
+								>
 								<Badge variant="outline" class="ml-auto text-xs">
 									{sitio.religions.length} faiths
 								</Badge>

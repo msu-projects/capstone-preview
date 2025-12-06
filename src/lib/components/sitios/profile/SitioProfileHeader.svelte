@@ -59,9 +59,11 @@
 </script>
 
 <!-- Hero Header -->
-<header class="relative overflow-hidden bg-white">
+<header class="relative overflow-hidden bg-white dark:bg-slate-900">
 	<!-- Background Pattern -->
-	<div class="absolute inset-0 bg-linear-to-br from-slate-50 via-white to-blue-50/30"></div>
+	<div
+		class="absolute inset-0 bg-linear-to-br from-slate-50 via-white to-blue-50/30 dark:from-slate-900 dark:via-slate-900 dark:to-blue-950/30"
+	></div>
 	<div
 		class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMwMDAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50"
 	></div>
@@ -98,10 +100,12 @@
 
 				<!-- Title -->
 				<div>
-					<h1 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl lg:text-5xl">
+					<h1
+						class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl lg:text-5xl dark:text-slate-100"
+					>
 						{sitio.name}
 					</h1>
-					<p class="mt-2 max-w-2xl text-lg text-slate-600">
+					<p class="mt-2 max-w-2xl text-lg text-slate-600 dark:text-slate-400">
 						Community profile for {sitio.name}, Barangay {sitio.barangay}, {sitio.municipality}.
 						{#if sitio.province}
 							{sitio.province} Province.
@@ -110,7 +114,7 @@
 				</div>
 
 				<!-- Quick Info -->
-				<div class="flex flex-wrap items-center gap-4 text-sm text-slate-500">
+				<div class="flex flex-wrap items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
 					<span class="flex items-center gap-1.5">
 						<Calendar class="size-4" />
 						Last updated: {new Date(sitio.updated_at || sitio.created_at).toLocaleDateString(

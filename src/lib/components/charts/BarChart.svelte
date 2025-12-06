@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { themeStore } from '$lib/stores/theme.svelte';
+	import { getChartColors, getDefaultSeriesColors } from '$lib/utils/chart-colors';
 	import { Chart } from '@flowbite-svelte-plugins/chart';
 	import type { ApexOptions } from 'apexcharts';
 
@@ -18,14 +20,9 @@
 
 	let { data, orientation = 'vertical', height = 300, showGrid = true, title }: Props = $props();
 
-	// Default color palette for fallback
-	const defaultColors = [
-		'hsl(217, 91%, 60%)', // blue
-		'hsl(142, 71%, 45%)', // green
-		'hsl(48, 96%, 53%)', // yellow
-		'hsl(280, 70%, 60%)', // purple
-		'hsl(340, 82%, 52%)' // pink
-	];
+	// Get theme-aware colors
+	const colors = $derived(getChartColors());
+	const defaultColors = $derived(getDefaultSeriesColors());
 
 	// Prepare chart data with colors
 	const chartData = $derived(
@@ -70,7 +67,7 @@
 			categories: chartData.map((d) => d.label),
 			labels: {
 				style: {
-					colors: '#64748b',
+					colors: colors.labelColor,
 					fontSize: '12px',
 					fontWeight: 500
 				}
@@ -85,7 +82,7 @@
 		yaxis: {
 			labels: {
 				style: {
-					colors: '#64748b',
+					colors: colors.labelColor,
 					fontSize: '12px',
 					fontWeight: 500
 				},
@@ -94,7 +91,7 @@
 		},
 		grid: {
 			show: showGrid,
-			borderColor: '#e2e8f0',
+			borderColor: colors.gridColor,
 			strokeDashArray: 4,
 			xaxis: {
 				lines: {
@@ -133,9 +130,11 @@
 
 <div class="w-full">
 	{#if title}
-		<h3 class="mb-2 text-sm font-semibold text-slate-700">{title}</h3>
+		<h3 class="mb-2 text-sm font-semibold text-foreground">{title}</h3>
 	{/if}
 	<div class="w-full" style="height: {height}px;">
-		<Chart {options} />
+		{#key themeStore.resolvedTheme}
+			<Chart {options} />
+		{/key}
 	</div>
 </div>

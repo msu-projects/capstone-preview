@@ -26,12 +26,12 @@
 		<div class="flex min-h-[60vh] items-center justify-center">
 			<div class="text-center">
 				<div
-					class="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-slate-100"
+					class="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800"
 				>
 					<MapPin class="size-8 text-slate-400" />
 				</div>
-				<h1 class="mb-2 text-2xl font-bold text-slate-900">Sitio Not Found</h1>
-				<p class="mb-6 text-slate-500">
+				<h1 class="mb-2 text-2xl font-bold text-slate-900 dark:text-slate-100">Sitio Not Found</h1>
+				<p class="mb-6 text-slate-500 dark:text-slate-400">
 					The sitio you're looking for doesn't exist or has been removed.
 				</p>
 				<Button href="/sitios">

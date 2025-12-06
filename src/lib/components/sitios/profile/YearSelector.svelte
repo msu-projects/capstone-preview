@@ -69,7 +69,9 @@
 
 <div class="flex items-center gap-2">
 	<!-- Year Navigation -->
-	<div class="flex items-center rounded-lg bg-white shadow-sm ring-1 ring-slate-200">
+	<div
+		class="flex items-center rounded-lg bg-white shadow-sm ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-slate-700"
+	>
 		<Button
 			variant="ghost"
 			size="icon"
@@ -84,7 +86,7 @@
 			<Select.Trigger
 				class="h-9 w-[100px] gap-1 rounded-none border-0 border-x bg-transparent shadow-none ring-0 focus:ring-0"
 			>
-				<Calendar class="size-4 text-slate-500" />
+				<Calendar class="size-4 text-slate-500 dark:text-slate-400" />
 				<span class="font-medium">{selectedYear}</span>
 			</Select.Trigger>
 			<Select.Content>
@@ -118,7 +120,7 @@
 	<!-- Historical Data Indicator -->
 	{#if isViewingHistorical}
 		<div
-			class="rounded-lg bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-700 ring-1 ring-amber-200"
+			class="rounded-lg bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-700 ring-1 ring-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:ring-amber-700"
 		>
 			Viewing historical data
 		</div>

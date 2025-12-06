@@ -306,7 +306,7 @@
 									<div class="text-sm text-muted-foreground">New Sitios Added</div>
 								</div>
 								{#if importResult.replaced > 0}
-									<div class="rounded-lg bg-blue-50 p-4 text-center">
+									<div class="rounded-lg bg-blue-50 p-4 text-center dark:bg-blue-900/20">
 										<div class="text-3xl font-bold text-blue-600">{importResult.replaced}</div>
 										<div class="text-sm text-muted-foreground">Sitios Updated</div>
 									</div>

@@ -370,9 +370,9 @@
 								<Table.Cell>
 									<div class="flex items-center gap-3">
 										<div
-											class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100"
+											class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800"
 										>
-											<RoleIcon class="h-5 w-5 text-slate-600" />
+											<RoleIcon class="h-5 w-5 text-slate-600 dark:text-slate-400" />
 										</div>
 										<div>
 											<div class="font-medium">{user.name}</div>
@@ -388,11 +388,17 @@
 								<Table.Cell>{user.department}</Table.Cell>
 								<Table.Cell>
 									{#if user.is_active}
-										<Badge variant="outline" class="border-green-200 bg-green-50 text-green-700">
+										<Badge
+											variant="outline"
+											class="border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-900/20 dark:text-green-400"
+										>
 											Active
 										</Badge>
 									{:else}
-										<Badge variant="outline" class="border-red-200 bg-red-50 text-red-700">
+										<Badge
+											variant="outline"
+											class="border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400"
+										>
 											Inactive
 										</Badge>
 									{/if}
@@ -555,7 +561,7 @@
 
 <!-- Edit User Dialog -->
 <Dialog.Root bind:open={isEditDialogOpen}>
-	<Dialog.Content class="max-w-2xl">
+	<Dialog.Content class="max-w-3xl!">
 		<Dialog.Header>
 			<Dialog.Title>Edit User</Dialog.Title>
 			<Dialog.Description>Update user information and permissions</Dialog.Description>

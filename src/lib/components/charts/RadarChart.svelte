@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { themeStore } from '$lib/stores/theme.svelte';
+	import { getChartColors } from '$lib/utils/chart-colors';
 	import { Chart } from '@flowbite-svelte-plugins/chart';
 	import type { ApexOptions } from 'apexcharts';
 
@@ -24,6 +26,9 @@
 		fillOpacity = 0.25,
 		showDataLabels = true
 	}: Props = $props();
+
+	// Get theme-aware colors
+	const colors = $derived(getChartColors());
 
 	const options = $derived<ApexOptions>({
 		chart: {
@@ -66,7 +71,7 @@
 			categories: data.map((d) => d.label),
 			labels: {
 				style: {
-					colors: '#64748b',
+					colors: colors.labelColor,
 					fontSize: '12px',
 					fontWeight: 500
 				}
@@ -78,7 +83,7 @@
 			tickAmount: 4,
 			labels: {
 				style: {
-					colors: '#64748b',
+					colors: colors.labelColor,
 					fontSize: '10px'
 				},
 				formatter: (val) => `${val}%`
@@ -91,11 +96,12 @@
 				borderRadius: 2,
 				padding: 4,
 				borderColor: 'transparent',
-				foreColor: '#334155'
+				foreColor: colors.dataLabelColor
 			},
 			formatter: (val) => `${Number(val).toFixed(0)}%`
 		},
 		tooltip: {
+			theme: themeStore.resolvedTheme,
 			y: {
 				formatter: (val) => `${val.toFixed(1)}%`
 			}
@@ -103,10 +109,11 @@
 		plotOptions: {
 			radar: {
 				polygons: {
-					strokeColors: '#e2e8f0',
-					connectorColors: '#e2e8f0',
+					strokeColors: colors.gridColor,
+					connectorColors: colors.gridColor,
 					fill: {
-						colors: ['#f8fafc', '#ffffff']
+						colors:
+							themeStore.resolvedTheme === 'dark' ? ['#1e293b', '#0f172a'] : ['#f8fafc', '#ffffff']
 					}
 				}
 			}
@@ -115,7 +122,9 @@
 </script>
 
 <div class="radar-chart">
-	<Chart {options} />
+	{#key themeStore.resolvedTheme}
+		<Chart {options} />
+	{/key}
 </div>
 
 <style>

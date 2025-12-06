@@ -32,7 +32,9 @@
 	}
 </script>
 
-<div class="min-h-screen bg-slate-50 pb-12 font-sans text-slate-900">
+<div
+	class="min-h-screen bg-slate-50 pb-12 font-sans text-slate-900 dark:bg-slate-900 dark:text-slate-100"
+>
 	<BreadCrumb {project} {isAdminView} />
 	<!-- Main Content Area -->
 	<main class="w-full px-4 py-6 sm:px-6 lg:px-8">

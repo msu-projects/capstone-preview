@@ -182,7 +182,7 @@
 <div>
 	<!-- Hero Section -->
 	<section
-		class="relative overflow-hidden bg-linear-to-br from-slate-50 via-white to-blue-50/30 py-8 md:py-12"
+		class="relative overflow-hidden bg-linear-to-br from-slate-50 via-white to-blue-50/30 py-8 md:py-12 dark:from-slate-900 dark:via-slate-900 dark:to-blue-950/30"
 	>
 		<div
 			class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMwMDAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50"
@@ -190,14 +190,19 @@
 
 		<div class="relative container mx-auto px-4">
 			<div class="mx-auto max-w-3xl text-center">
-				<Badge variant="secondary" class="mb-4 gap-1.5 bg-blue-50 text-blue-700">
+				<Badge
+					variant="secondary"
+					class="mb-4 gap-1.5 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300"
+				>
 					<MapPin class="size-3" />
 					{toTitleCase(filterLabel) || 'All Sitios'} Data Dashboard
 				</Badge>
-				<h1 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl lg:text-5xl">
+				<h1
+					class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl lg:text-5xl dark:text-slate-100"
+				>
 					Sitio Dashboard
 				</h1>
-				<p class="mt-4 text-lg text-slate-600">
+				<p class="mt-4 text-lg text-slate-600 dark:text-slate-400">
 					Aggregated community data across South Cotabato. Filter by municipality or barangay to
 					explore specific areas.
 				</p>
@@ -212,14 +217,14 @@
 					<Card.Content class="pt-5 pb-4">
 						<div class="flex items-start justify-between">
 							<div class="space-y-1">
-								<p class="text-sm font-medium text-slate-500">
+								<p class="text-sm font-medium text-slate-500 dark:text-slate-400">
 									{hasActiveFilters ? 'Filtered Sitios' : 'Total Sitios'}
 								</p>
-								<p class="text-2xl font-bold tracking-tight text-slate-900">
+								<p class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
 									{filteredSitios.length}
 								</p>
 							</div>
-							<div class="rounded-xl bg-blue-100 p-2.5">
+							<div class="rounded-xl bg-blue-100 p-2.5 dark:bg-blue-900/30">
 								<MapPin class="size-5 text-blue-600" />
 							</div>
 						</div>
@@ -232,12 +237,12 @@
 					<Card.Content class="pt-5 pb-4">
 						<div class="flex items-start justify-between">
 							<div class="space-y-1">
-								<p class="text-sm font-medium text-slate-500">Population</p>
-								<p class="text-2xl font-bold tracking-tight text-slate-900">
+								<p class="text-sm font-medium text-slate-500 dark:text-slate-400">Population</p>
+								<p class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
 									{formatNumber(totalPopulation)}
 								</p>
 							</div>
-							<div class="rounded-xl bg-indigo-100 p-2.5">
+							<div class="rounded-xl bg-indigo-100 p-2.5 dark:bg-indigo-900/30">
 								<Users class="size-5 text-indigo-600" />
 							</div>
 						</div>
@@ -250,12 +255,12 @@
 					<Card.Content class="pt-5 pb-4">
 						<div class="flex items-start justify-between">
 							<div class="space-y-1">
-								<p class="text-sm font-medium text-slate-500">Households</p>
-								<p class="text-2xl font-bold tracking-tight text-slate-900">
+								<p class="text-sm font-medium text-slate-500 dark:text-slate-400">Households</p>
+								<p class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
 									{formatNumber(totalHouseholds)}
 								</p>
 							</div>
-							<div class="rounded-xl bg-emerald-100 p-2.5">
+							<div class="rounded-xl bg-emerald-100 p-2.5 dark:bg-emerald-900/30">
 								<Home class="size-5 text-emerald-600" />
 							</div>
 						</div>
@@ -268,12 +273,12 @@
 					<Card.Content class="pt-5 pb-4">
 						<div class="flex items-start justify-between">
 							<div class="space-y-1">
-								<p class="text-sm font-medium text-slate-500">Municipalities</p>
-								<p class="text-2xl font-bold tracking-tight text-slate-900">
+								<p class="text-sm font-medium text-slate-500 dark:text-slate-400">Municipalities</p>
+								<p class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
 									{uniqueMunicipalities.length}
 								</p>
 							</div>
-							<div class="rounded-xl bg-amber-100 p-2.5">
+							<div class="rounded-xl bg-amber-100 p-2.5 dark:bg-amber-900/30">
 								<Landmark class="size-5 text-amber-600" />
 							</div>
 						</div>
@@ -352,12 +357,12 @@
 			<Card.Root class="py-16 text-center">
 				<Card.Content>
 					<div
-						class="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-slate-100"
+						class="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800"
 					>
 						<MapPin class="size-8 text-slate-400" />
 					</div>
-					<h3 class="text-lg font-semibold text-slate-900">No Sitios Found</h3>
-					<p class="mt-2 text-slate-500">
+					<h3 class="text-lg font-semibold text-slate-900 dark:text-slate-100">No Sitios Found</h3>
+					<p class="mt-2 text-slate-500 dark:text-slate-400">
 						No sitios match your current filter criteria. Try adjusting your filters.
 					</p>
 					<Button onclick={clearFilters} class="mt-4">Clear Filters</Button>
@@ -367,15 +372,15 @@
 			<!-- Tabs -->
 			<Tabs.Root value={activeTab} onValueChange={handleTabChange}>
 				<div
-					class="sticky top-0 z-50 -mx-4 bg-linear-to-b from-slate-50 to-transparent px-4 pt-2 pb-2 sm:-mx-6 sm:px-6"
+					class="sticky top-0 z-50 -mx-4 bg-linear-to-b from-slate-50 to-transparent px-4 pt-2 pb-2 sm:-mx-6 sm:px-6 dark:from-slate-900"
 				>
 					<Tabs.List
-						class="inline-flex h-auto w-full justify-start gap-1 overflow-x-auto rounded-xl bg-white p-1.5 shadow-sm ring-1 ring-slate-200/50"
+						class="inline-flex h-auto w-full justify-start gap-1 overflow-x-auto rounded-xl bg-white p-1.5 shadow-sm ring-1 ring-slate-200/50 dark:bg-slate-800 dark:ring-slate-700/50"
 					>
 						{#each tabs as tab}
 							<Tabs.Trigger
 								value={tab.id}
-								class="inline-flex shrink-0 items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-slate-600 transition-all hover:bg-slate-50 hover:text-slate-900 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-sm"
+								class="inline-flex shrink-0 items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-slate-600 transition-all hover:bg-slate-50 hover:text-slate-900 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-sm dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-100"
 							>
 								<tab.icon class="size-4" />
 								<span class="hidden sm:inline">{tab.label}</span>

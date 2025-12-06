@@ -44,31 +44,39 @@
 				>
 					<div class="flex items-center gap-3">
 						<div class="size-3 rounded-full {getStatusColor(selectedReport.status)}"></div>
-						<span class="font-semibold text-slate-900">{selectedReport.status}</span>
+						<span class="font-semibold text-slate-900 dark:text-slate-100"
+							>{selectedReport.status}</span
+						>
 						{#if selectedReport.remarks}
-							<span class="text-sm text-slate-500">- {selectedReport.remarks}</span>
+							<span class="text-sm text-slate-500 dark:text-slate-400"
+								>- {selectedReport.remarks}</span
+							>
 						{/if}
 					</div>
 				</div>
 
 				<!-- Detailed Stats -->
 				<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-					<div class="rounded-xl border border-slate-100 bg-slate-50 p-4">
-						<h4 class="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800">
+					<div
+						class="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800"
+					>
+						<h4
+							class="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-200"
+						>
 							<Activity class="size-4 text-blue-600" /> Physical Progress
 						</h4>
 						<div class="space-y-3">
 							<div class="flex justify-between text-sm">
-								<span class="text-slate-500">Planned</span>
+								<span class="text-slate-500 dark:text-slate-400">Planned</span>
 								<span class="font-medium">{selectedReport.plan_physical}%</span>
 							</div>
 							<div class="flex justify-between text-sm">
-								<span class="text-slate-500">Actual</span>
-								<span class="font-bold text-slate-900"
+								<span class="text-slate-500 dark:text-slate-400">Actual</span>
+								<span class="font-bold text-slate-900 dark:text-slate-100"
 									>{selectedReport.actual_physical ?? '-'}%</span
 								>
 							</div>
-							<div class="mt-2 h-1.5 w-full rounded-full bg-slate-200">
+							<div class="mt-2 h-1.5 w-full rounded-full bg-slate-200 dark:bg-slate-700">
 								<div
 									class="h-1.5 rounded-full bg-blue-600"
 									style="width: {selectedReport.actual_physical || 0}%"
@@ -77,24 +85,28 @@
 						</div>
 					</div>
 
-					<div class="rounded-xl border border-slate-100 bg-slate-50 p-4">
-						<h4 class="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800">
+					<div
+						class="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800"
+					>
+						<h4
+							class="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-200"
+						>
 							<Banknote class="size-4 text-emerald-600" /> Financial Releases
 						</h4>
 						<div class="space-y-3">
 							<div class="flex justify-between text-sm">
-								<span class="text-slate-500">Planned</span>
+								<span class="text-slate-500 dark:text-slate-400">Planned</span>
 								<span class="font-medium">{formatCurrency(selectedReport.plan_financial)}</span>
 							</div>
 							<div class="flex justify-between text-sm">
-								<span class="text-slate-500">Actual</span>
-								<span class="font-bold text-slate-900"
+								<span class="text-slate-500 dark:text-slate-400">Actual</span>
+								<span class="font-bold text-slate-900 dark:text-slate-100"
 									>{selectedReport.actual_financial
 										? formatCurrency(selectedReport.actual_financial)
 										: '-'}</span
 								>
 							</div>
-							<div class="mt-2 h-1.5 w-full rounded-full bg-slate-200">
+							<div class="mt-2 h-1.5 w-full rounded-full bg-slate-200 dark:bg-slate-700">
 								<div
 									class="h-1.5 rounded-full bg-emerald-500"
 									style="width: {selectedReport.actual_financial && selectedReport.plan_financial
@@ -108,7 +120,9 @@
 
 				<!-- Site Documentation / Images -->
 				<div>
-					<h4 class="mb-4 flex items-center gap-2 text-sm font-semibold text-slate-800">
+					<h4
+						class="mb-4 flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-200"
+					>
 						<Camera class="size-4 text-slate-600" /> Site Documentation
 					</h4>
 

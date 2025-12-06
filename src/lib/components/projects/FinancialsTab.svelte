@@ -22,49 +22,53 @@
 	<!-- Key Metrics Row -->
 	<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
 		<!-- Total Budget -->
-		<Card.Root class="border-l-4 border-l-blue-600 bg-white py-0">
+		<Card.Root class="border-l-4 border-l-blue-600 bg-white py-0 dark:bg-slate-800">
 			<Card.Content class="p-5">
 				<div class="flex items-start justify-between">
 					<div>
-						<p class="text-xs font-medium tracking-wider text-slate-500 uppercase">
+						<p
+							class="text-xs font-medium tracking-wider text-slate-500 uppercase dark:text-slate-400"
+						>
 							Total Allocation
 						</p>
-						<h3 class="mt-1 text-2xl font-bold text-slate-900">
+						<h3 class="mt-1 text-2xl font-bold text-slate-900 dark:text-slate-100">
 							{formatCurrency(project.total_budget)}
 						</h3>
 					</div>
-					<div class="rounded-lg bg-blue-50 p-2 text-blue-600">
+					<div class="rounded-lg bg-blue-50 p-2 text-blue-600 dark:bg-blue-900/30">
 						<Banknote class="size-5" />
 					</div>
 				</div>
-				<div class="mt-4 text-xs text-slate-500">100% Funded</div>
+				<div class="mt-4 text-xs text-slate-500 dark:text-slate-400">100% Funded</div>
 			</Card.Content>
 		</Card.Root>
 
 		<!-- Utilized -->
-		<Card.Root class="border-l-4 border-l-emerald-500 bg-white py-0">
+		<Card.Root class="border-l-4 border-l-emerald-500 bg-white py-0 dark:bg-slate-800">
 			<Card.Content class="p-5">
 				<div class="flex items-start justify-between">
 					<div>
-						<p class="text-xs font-medium tracking-wider text-slate-500 uppercase">
+						<p
+							class="text-xs font-medium tracking-wider text-slate-500 uppercase dark:text-slate-400"
+						>
 							Utilized Budget
 						</p>
-						<h3 class="mt-1 text-2xl font-bold text-slate-900">
+						<h3 class="mt-1 text-2xl font-bold text-slate-900 dark:text-slate-100">
 							{formatCurrency(utilized)}
 						</h3>
 					</div>
-					<div class="rounded-lg bg-emerald-50 p-2 text-emerald-600">
+					<div class="rounded-lg bg-emerald-50 p-2 text-emerald-600 dark:bg-emerald-900/30">
 						<TrendingUp class="size-5" />
 					</div>
 				</div>
 				<div class="mt-4">
 					<div class="mb-1 flex justify-between text-xs">
-						<span class="text-slate-500">Utilization Rate</span>
-						<span class="font-medium text-emerald-700">
+						<span class="text-slate-500 dark:text-slate-400">Utilization Rate</span>
+						<span class="font-medium text-emerald-700 dark:text-emerald-400">
 							{utilizationRate.toFixed(1)}%
 						</span>
 					</div>
-					<div class="h-1.5 w-full rounded-full bg-slate-100">
+					<div class="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-700">
 						<div class="h-1.5 rounded-full bg-emerald-500" style="width: {utilizationRate}%"></div>
 					</div>
 				</div>
@@ -72,22 +76,26 @@
 		</Card.Root>
 
 		<!-- Remaining -->
-		<Card.Root class="border-l-4 border-l-amber-500 bg-white py-0">
+		<Card.Root class="border-l-4 border-l-amber-500 bg-white py-0 dark:bg-slate-800">
 			<Card.Content class="p-5">
 				<div class="flex items-start justify-between">
 					<div>
-						<p class="text-xs font-medium tracking-wider text-slate-500 uppercase">
+						<p
+							class="text-xs font-medium tracking-wider text-slate-500 uppercase dark:text-slate-400"
+						>
 							Remaining Balance
 						</p>
-						<h3 class="mt-1 text-2xl font-bold text-slate-900">
+						<h3 class="mt-1 text-2xl font-bold text-slate-900 dark:text-slate-100">
 							{formatCurrency(remaining)}
 						</h3>
 					</div>
-					<div class="rounded-lg bg-amber-50 p-2 text-amber-600">
+					<div class="rounded-lg bg-amber-50 p-2 text-amber-600 dark:bg-amber-900/30">
 						<PieChart class="size-5" />
 					</div>
 				</div>
-				<div class="mt-4 text-xs text-slate-500">Available for disbursement</div>
+				<div class="mt-4 text-xs text-slate-500 dark:text-slate-400">
+					Available for disbursement
+				</div>
 			</Card.Content>
 		</Card.Root>
 	</div>
@@ -96,13 +104,15 @@
 	<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
 		<!-- Funding Sources -->
 		<Card.Root class="flex h-[500px] flex-col gap-0 py-0">
-			<Card.Header class="shrink-0 border-b border-slate-100 p-6 pb-4!">
+			<Card.Header class="shrink-0 border-b border-slate-100 p-6 pb-4! dark:border-slate-700">
 				<div class="flex items-center justify-between">
 					<div class="flex items-center gap-2">
-						<div class="rounded-lg bg-blue-50 p-1.5">
+						<div class="rounded-lg bg-blue-50 p-1.5 dark:bg-blue-900/30">
 							<Wallet class="size-4 text-blue-600" />
 						</div>
-						<h3 class="text-lg font-semibold text-slate-800">Funding Sources</h3>
+						<h3 class="text-lg font-semibold text-slate-800 dark:text-slate-200">
+							Funding Sources
+						</h3>
 					</div>
 					<Badge variant="secondary">
 						{project.funding_sources?.length || 0} Sources
@@ -114,14 +124,14 @@
 					{#if project.funding_sources && project.funding_sources.length > 0}
 						{#each project.funding_sources as source}
 							<div
-								class="group rounded-xl border border-slate-100 bg-slate-50/50 p-4 transition-colors hover:border-blue-200 hover:bg-slate-50"
+								class="group rounded-xl border border-slate-100 bg-slate-50/50 p-4 transition-colors hover:border-blue-200 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800/50 dark:hover:border-blue-800 dark:hover:bg-slate-800"
 							>
 								<div class="mb-2 flex items-start justify-between">
 									<div>
-										<h4 class="text-sm font-semibold text-slate-900">
+										<h4 class="text-sm font-semibold text-slate-900 dark:text-slate-100">
 											{source.source_name}
 										</h4>
-										<p class="mt-0.5 text-xs text-slate-500">
+										<p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
 											{source.source_type === 'national' ? 'National' : 'Provincial'} Funding
 										</p>
 									</div>
@@ -129,15 +139,19 @@
 										{source.percentage}%
 									</Badge>
 								</div>
-								<div class="mt-3 flex items-end justify-between border-t border-slate-200/60 pt-3">
-									<span class="text-xl font-bold text-slate-900">
+								<div
+									class="mt-3 flex items-end justify-between border-t border-slate-200/60 pt-3 dark:border-slate-700/60"
+								>
+									<span class="text-xl font-bold text-slate-900 dark:text-slate-100">
 										{formatCurrency(source.amount)}
 									</span>
 								</div>
 							</div>
 						{/each}
 					{:else}
-						<div class="py-4 text-center text-sm text-slate-500">No funding sources specified</div>
+						<div class="py-4 text-center text-sm text-slate-500 dark:text-slate-400">
+							No funding sources specified
+						</div>
 					{/if}
 				</div>
 			</Card.Content>
@@ -145,12 +159,12 @@
 
 		<!-- Budget Breakdown -->
 		<Card.Root class="flex h-[500px] flex-col gap-0 py-0">
-			<Card.Header class="shrink-0 border-b border-slate-100 p-6 pb-4!">
+			<Card.Header class="shrink-0 border-b border-slate-100 p-6 pb-4! dark:border-slate-700">
 				<div class="flex items-center gap-2">
-					<div class="rounded-lg bg-blue-50 p-1.5">
+					<div class="rounded-lg bg-blue-50 p-1.5 dark:bg-blue-900/30">
 						<PiggyBank class="size-4 text-blue-600" />
 					</div>
-					<h3 class="text-lg font-semibold text-slate-800">Budget Breakdown</h3>
+					<h3 class="text-lg font-semibold text-slate-800 dark:text-slate-200">Budget Breakdown</h3>
 				</div>
 			</Card.Header>
 			<Card.Content class="flex-1 overflow-y-auto p-6">
@@ -160,18 +174,18 @@
 							<div>
 								<div class="mb-3 flex items-center justify-between">
 									<div class="flex items-center gap-2">
-										<span class="text-sm font-semibold text-slate-900">
+										<span class="text-sm font-semibold text-slate-900 dark:text-slate-100">
 											{comp.component_name}
 										</span>
 										<Badge variant="secondary" class="text-xs">
 											{comp.percentage}%
 										</Badge>
 									</div>
-									<span class="text-base font-bold text-slate-900">
+									<span class="text-base font-bold text-slate-900 dark:text-slate-100">
 										{formatCurrency(comp.amount)}
 									</span>
 								</div>
-								<div class="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+								<div class="h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
 									<div
 										class="h-2 rounded-full bg-blue-500 transition-all"
 										style="width: {comp.percentage}%"
@@ -180,7 +194,9 @@
 							</div>
 						{/each}
 					{:else}
-						<div class="py-4 text-center text-sm text-slate-500">No budget breakdown available</div>
+						<div class="py-4 text-center text-sm text-slate-500 dark:text-slate-400">
+							No budget breakdown available
+						</div>
 					{/if}
 				</div>
 			</Card.Content>

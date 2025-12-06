@@ -26,7 +26,7 @@
 			<div
 				class="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"
 			></div>
-			<p class="mt-4 text-sm text-slate-600">Loading...</p>
+			<p class="mt-4 text-sm text-slate-600 dark:text-slate-400">Loading...</p>
 		</div>
 	</div>
 {:else}

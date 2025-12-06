@@ -29,14 +29,18 @@
 				{getCategoryName(project.category_key)}
 			</Badge>
 		</div>
-		<h1 class="text-3xl leading-tight font-bold tracking-tight text-slate-900">
+		<h1 class="text-3xl leading-tight font-bold tracking-tight text-slate-900 dark:text-slate-100">
 			{project.title}
 		</h1>
 	</div>
 	<div
-		class="flex flex-col items-start gap-1 rounded-lg border border-slate-200 bg-slate-50 px-6 py-4 md:min-w-[200px] md:items-end"
+		class="flex flex-col items-start gap-1 rounded-lg border border-slate-200 bg-slate-50 px-6 py-4 md:min-w-[200px] md:items-end dark:border-slate-700 dark:bg-slate-800"
 	>
-		<span class="text-xs font-semibold tracking-wider text-slate-500 uppercase">Total Budget</span>
-		<span class="text-2xl font-bold text-slate-900">{formatCurrency(project.total_budget)}</span>
+		<span class="text-xs font-semibold tracking-wider text-slate-500 uppercase dark:text-slate-400"
+			>Total Budget</span
+		>
+		<span class="text-2xl font-bold text-slate-900 dark:text-slate-100"
+			>{formatCurrency(project.total_budget)}</span
+		>
 	</div>
 </div>

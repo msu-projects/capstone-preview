@@ -91,18 +91,20 @@
 	<!-- Budget Summary Cards -->
 	<div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
 		{#each budgetMetrics as metric}
-			<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50">
+			<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50 dark:ring-slate-700/50">
 				<Card.Content class="p-4 sm:p-5">
 					<div class="flex items-start gap-4">
 						<div class="rounded-xl {metric.bgColor} p-3 ring-1 ring-black/5">
 							<metric.icon class="size-6 {metric.textColor}" />
 						</div>
 						<div class="min-w-0 flex-1">
-							<p class="text-sm font-medium text-slate-500">{metric.label}</p>
-							<p class="mt-1 text-xl font-bold tracking-tight text-slate-900 lg:text-2xl">
+							<p class="text-sm font-medium text-slate-500 dark:text-slate-400">{metric.label}</p>
+							<p
+								class="mt-1 text-xl font-bold tracking-tight text-slate-900 lg:text-2xl dark:text-slate-100"
+							>
 								{formatCurrency(metric.value)}
 							</p>
-							<p class="mt-0.5 text-xs text-slate-400">{metric.description}</p>
+							<p class="mt-0.5 text-xs text-slate-400 dark:text-slate-500">{metric.description}</p>
 						</div>
 					</div>
 				</Card.Content>
@@ -112,7 +114,7 @@
 
 	<div class="grid gap-6 lg:grid-cols-2">
 		<!-- Budget by Status Chart -->
-		<Card.Root class="border-0 pb-0 shadow-sm ring-1 ring-slate-200/50">
+		<Card.Root class="border-0 pb-0 shadow-sm ring-1 ring-slate-200/50 dark:ring-slate-700/50">
 			<Card.Header>
 				<Card.Title class="flex items-center gap-2 text-base">
 					<PieChart class="size-5 text-slate-500" />
@@ -130,7 +132,9 @@
 						/>
 					</div>
 				{:else}
-					<div class="flex h-[200px] items-center justify-center text-sm text-slate-500">
+					<div
+						class="flex h-[200px] items-center justify-center text-sm text-slate-500 dark:text-slate-400"
+					>
 						No budget data available
 					</div>
 				{/if}
@@ -138,7 +142,7 @@
 		</Card.Root>
 
 		<!-- Budget by Category Chart -->
-		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50">
+		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50 dark:ring-slate-700/50">
 			<Card.Header>
 				<Card.Title class="flex items-center gap-2 text-base">
 					<Banknote class="size-5 text-slate-500" />
@@ -159,7 +163,7 @@
 	</div>
 
 	<!-- Detailed Budget Table -->
-	<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50">
+	<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50 dark:ring-slate-700/50">
 		<Card.Header>
 			<Card.Title class="flex items-center gap-2 text-base">
 				<Wallet class="size-5 text-slate-500" />
@@ -173,38 +177,53 @@
 					<table class="w-full text-sm">
 						<thead>
 							<tr class="border-b text-left">
-								<th class="pb-3 font-medium text-slate-500">Category</th>
-								<th class="pb-3 text-right font-medium text-slate-500">Projects</th>
-								<th class="pb-3 text-right font-medium text-slate-500">Budget</th>
-								<th class="pb-3 text-right font-medium text-slate-500">Share</th>
+								<th class="pb-3 font-medium text-slate-500 dark:text-slate-400">Category</th>
+								<th class="pb-3 text-right font-medium text-slate-500 dark:text-slate-400"
+									>Projects</th
+								>
+								<th class="pb-3 text-right font-medium text-slate-500 dark:text-slate-400"
+									>Budget</th
+								>
+								<th class="pb-3 text-right font-medium text-slate-500 dark:text-slate-400">Share</th
+								>
 							</tr>
 						</thead>
 						<tbody>
 							{#each budgetByCategory as item}
-								<tr class="border-b border-slate-100 last:border-0">
-									<td class="py-3 font-medium text-slate-900">{item.category}</td>
-									<td class="py-3 text-right text-slate-600">{item.count}</td>
-									<td class="py-3 text-right font-medium text-slate-900">
+								<tr class="border-b border-slate-100 last:border-0 dark:border-slate-700">
+									<td class="py-3 font-medium text-slate-900 dark:text-slate-100"
+										>{item.category}</td
+									>
+									<td class="py-3 text-right text-slate-600 dark:text-slate-400">{item.count}</td>
+									<td class="py-3 text-right font-medium text-slate-900 dark:text-slate-100">
 										{formatCurrency(item.budget)}
 									</td>
-									<td class="py-3 text-right text-slate-600">{item.percentage.toFixed(1)}%</td>
+									<td class="py-3 text-right text-slate-600 dark:text-slate-400"
+										>{item.percentage.toFixed(1)}%</td
+									>
 								</tr>
 							{/each}
 						</tbody>
 						<tfoot>
-							<tr class="border-t-2 border-slate-200">
-								<td class="pt-3 font-semibold text-slate-900">Total</td>
-								<td class="pt-3 text-right font-semibold text-slate-900">{projects.length}</td>
-								<td class="pt-3 text-right font-semibold text-slate-900">
+							<tr class="border-t-2 border-slate-200 dark:border-slate-700">
+								<td class="pt-3 font-semibold text-slate-900 dark:text-slate-100">Total</td>
+								<td class="pt-3 text-right font-semibold text-slate-900 dark:text-slate-100"
+									>{projects.length}</td
+								>
+								<td class="pt-3 text-right font-semibold text-slate-900 dark:text-slate-100">
 									{formatCurrency(stats.totalBudget)}
 								</td>
-								<td class="pt-3 text-right font-semibold text-slate-900">100%</td>
+								<td class="pt-3 text-right font-semibold text-slate-900 dark:text-slate-100"
+									>100%</td
+								>
 							</tr>
 						</tfoot>
 					</table>
 				</div>
 			{:else}
-				<div class="py-8 text-center text-sm text-slate-500">No budget data available</div>
+				<div class="py-8 text-center text-sm text-slate-500 dark:text-slate-400">
+					No budget data available
+				</div>
 			{/if}
 		</Card.Content>
 	</Card.Root>

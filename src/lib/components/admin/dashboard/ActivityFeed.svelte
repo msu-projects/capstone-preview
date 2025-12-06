@@ -138,8 +138,10 @@
 						class="flex w-full gap-3 rounded-lg p-2 text-left transition-colors hover:bg-muted/50"
 						onclick={() => openLogDetail(activity)}
 					>
-						<div class="flex size-8 shrink-0 items-center justify-center rounded-full bg-slate-100">
-							<User class="size-4 text-slate-600" />
+						<div
+							class="flex size-8 shrink-0 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800"
+						>
+							<User class="size-4 text-slate-600 dark:text-slate-400" />
 						</div>
 						<div class="min-w-0 flex-1 space-y-1">
 							<div class="flex items-center gap-2">

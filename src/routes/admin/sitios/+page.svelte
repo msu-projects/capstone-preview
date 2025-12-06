@@ -262,7 +262,7 @@
 					<div
 						class="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800"
 					>
-						<MapPin class="size-8 text-slate-400" />
+						<MapPin class="size-8 text-slate-400 dark:text-slate-500" />
 					</div>
 					<h3 class="text-lg font-semibold text-slate-900 dark:text-slate-100">No Sitios Found</h3>
 					<p class="mt-2 text-slate-500 dark:text-slate-400">

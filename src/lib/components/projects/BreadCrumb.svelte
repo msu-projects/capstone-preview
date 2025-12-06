@@ -15,7 +15,9 @@
 </script>
 
 <!-- Breadcrumb Navigation -->
-<div class="sticky top-0 z-10 border-b bg-white/80 backdrop-blur-sm">
+<div
+	class="sticky top-0 z-10 border-b border-border bg-white/80 backdrop-blur-sm dark:bg-slate-900/80"
+>
 	<div class="w-full px-4 py-3 sm:px-6 lg:px-8">
 		<div class="flex items-center justify-between">
 			<nav class="flex items-center gap-2 text-sm">
@@ -25,21 +27,23 @@
 				<Separator orientation="vertical" class="h-6" />
 				<a
 					href={isAdminView ? '/admin' : '/'}
-					class="text-slate-500 transition-colors hover:text-slate-700"
+					class="text-slate-500 transition-colors hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
 				>
 					{isAdminView ? 'Admin' : 'Home'}
 				</a>
 				<ChevronRight class="size-4 text-slate-400" />
 				<a
 					href={isAdminView ? '/admin/projects' : '/projects'}
-					class="text-slate-500 transition-colors hover:text-slate-700"
+					class="text-slate-500 transition-colors hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
 				>
 					Projects
 				</a>
 				<ChevronRight class="size-4 text-slate-400" />
-				<span class="text-slate-500">{getCategoryName(project.category_key)}</span>
+				<span class="text-slate-500 dark:text-slate-400"
+					>{getCategoryName(project.category_key)}</span
+				>
 				<ChevronRight class="size-4 text-slate-400" />
-				<span class="font-medium text-slate-900">PROJ-{project.id}</span>
+				<span class="font-medium text-slate-900 dark:text-slate-100">PROJ-{project.id}</span>
 			</nav>
 			{#if isAdminView}
 				<div class="flex items-center gap-3">

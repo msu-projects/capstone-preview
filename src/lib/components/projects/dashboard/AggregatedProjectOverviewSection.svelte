@@ -112,7 +112,7 @@
 	<div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
 		{#each keyMetrics as metric}
 			<Card.Root
-				class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50"
+				class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50 dark:bg-slate-800/80 dark:ring-slate-700/50 dark:hover:ring-slate-600/50"
 			>
 				<div
 					class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full {metric.bgColor} opacity-50"
@@ -126,9 +126,11 @@
 							<metric.icon class="size-5 {metric.textColor} sm:size-6" />
 						</div>
 						<div class="min-w-0 flex-1">
-							<p class="truncate text-xs font-medium text-slate-500 sm:text-sm">{metric.label}</p>
+							<p class="truncate text-xs font-medium text-slate-500 sm:text-sm dark:text-slate-400">
+								{metric.label}
+							</p>
 							<p
-								class="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl"
+								class="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl dark:text-slate-100"
 							>
 								{metric.value}
 							</p>
@@ -141,7 +143,7 @@
 
 	<div class="grid gap-6 lg:grid-cols-2">
 		<!-- Status Distribution -->
-		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50">
+		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50 dark:ring-slate-700/50">
 			<Card.Header>
 				<Card.Title class="flex items-center gap-2 text-base">
 					<TrendingUp class="size-5 text-slate-500" />
@@ -155,7 +157,9 @@
 						<DonutChart data={statusChartData} />
 					</div>
 				{:else}
-					<div class="flex h-[180px] items-center justify-center text-sm text-slate-500">
+					<div
+						class="flex h-[180px] items-center justify-center text-sm text-slate-500 dark:text-slate-400"
+					>
 						No project data available
 					</div>
 				{/if}
@@ -163,7 +167,7 @@
 		</Card.Root>
 
 		<!-- Category Distribution -->
-		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50">
+		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50 dark:ring-slate-700/50">
 			<Card.Header>
 				<Card.Title class="flex items-center gap-2 text-base">
 					<Building2 class="size-5 text-slate-500" />
@@ -175,7 +179,9 @@
 				{#if categoryChartData.length > 0}
 					<BarChart data={categoryChartData} orientation="horizontal" height={220} />
 				{:else}
-					<div class="flex h-[220px] items-center justify-center text-sm text-slate-500">
+					<div
+						class="flex h-[220px] items-center justify-center text-sm text-slate-500 dark:text-slate-400"
+					>
 						No data available
 					</div>
 				{/if}
@@ -198,8 +204,8 @@
 				<!-- Average Progress -->
 				<div class="space-y-2">
 					<div class="flex items-center justify-between text-sm">
-						<span class="font-medium text-slate-700">Average Completion</span>
-						<span class="font-semibold text-slate-900"
+						<span class="font-medium text-slate-700 dark:text-slate-300">Average Completion</span>
+						<span class="font-semibold text-slate-900 dark:text-slate-100"
 							>{progressStats.averageCompletion.toFixed(1)}%</span
 						>
 					</div>
@@ -208,7 +214,9 @@
 
 				<!-- Progress Status Breakdown -->
 				<div class="grid grid-cols-2 gap-3 pt-2">
-					<div class="rounded-lg bg-emerald-50 p-3 ring-1 ring-emerald-100">
+					<div
+						class="rounded-lg bg-emerald-50 p-3 ring-1 ring-emerald-100 dark:bg-emerald-900/30 dark:ring-emerald-900/50"
+					>
 						<div class="flex items-center gap-2">
 							<CheckCircle2 class="size-4 text-emerald-600" />
 							<span class="text-xs font-medium text-emerald-700">Completed</span>
@@ -217,21 +225,27 @@
 							{progressStats.completedCount}
 						</div>
 					</div>
-					<div class="rounded-lg bg-blue-50 p-3 ring-1 ring-blue-100">
+					<div
+						class="rounded-lg bg-blue-50 p-3 ring-1 ring-blue-100 dark:bg-blue-900/30 dark:ring-blue-900/50"
+					>
 						<div class="flex items-center gap-2">
 							<Loader2 class="size-4 text-blue-600" />
 							<span class="text-xs font-medium text-blue-700">On Track</span>
 						</div>
 						<div class="mt-1 text-xl font-bold text-blue-700">{progressStats.onTrackCount}</div>
 					</div>
-					<div class="rounded-lg bg-amber-50 p-3 ring-1 ring-amber-100">
+					<div
+						class="rounded-lg bg-amber-50 p-3 ring-1 ring-amber-100 dark:bg-amber-900/30 dark:ring-amber-900/50"
+					>
 						<div class="flex items-center gap-2">
 							<Clock class="size-4 text-amber-600" />
 							<span class="text-xs font-medium text-amber-700">Delayed</span>
 						</div>
 						<div class="mt-1 text-xl font-bold text-amber-700">{progressStats.delayedCount}</div>
 					</div>
-					<div class="rounded-lg bg-slate-50 p-3 ring-1 ring-slate-200">
+					<div
+						class="rounded-lg bg-slate-50 p-3 ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-slate-700"
+					>
 						<div class="flex items-center gap-2">
 							<Clock class="size-4 text-slate-600" />
 							<span class="text-xs font-medium text-slate-700">Not Started</span>
@@ -271,17 +285,17 @@
 			<Card.Content class="p-4">
 				<div class="flex items-center justify-between">
 					<div>
-						<p class="text-sm text-slate-500">Employment Generated</p>
-						<p class="text-2xl font-bold text-slate-900">
+						<p class="text-sm text-slate-500 dark:text-slate-400">Employment Generated</p>
+						<p class="text-2xl font-bold text-slate-900 dark:text-slate-100">
 							{formatNumber(stats.employmentGenerated.total)}
 						</p>
-						<p class="text-xs text-slate-500">
+						<p class="text-xs text-slate-500 dark:text-slate-400">
 							{formatNumber(stats.employmentGenerated.male)} male, {formatNumber(
 								stats.employmentGenerated.female
 							)} female
 						</p>
 					</div>
-					<div class="rounded-lg bg-purple-50 p-2">
+					<div class="rounded-lg bg-purple-50 p-2 dark:bg-purple-900/30">
 						<Users class="size-5 text-purple-600" />
 					</div>
 				</div>
@@ -292,12 +306,12 @@
 			<Card.Content class="p-4">
 				<div class="flex items-center justify-between">
 					<div>
-						<p class="text-sm text-slate-500">Avg. Budget per Project</p>
-						<p class="text-2xl font-bold text-slate-900">
+						<p class="text-sm text-slate-500 dark:text-slate-400">Avg. Budget per Project</p>
+						<p class="text-2xl font-bold text-slate-900 dark:text-slate-100">
 							{formatCurrency(stats.averageBudgetPerProject)}
 						</p>
 					</div>
-					<div class="rounded-lg bg-cyan-50 p-2">
+					<div class="rounded-lg bg-cyan-50 p-2 dark:bg-cyan-900/30">
 						<Banknote class="size-5 text-cyan-600" />
 					</div>
 				</div>
@@ -308,12 +322,12 @@
 			<Card.Content class="p-4">
 				<div class="flex items-center justify-between">
 					<div>
-						<p class="text-sm text-slate-500">Active Projects</p>
-						<p class="text-2xl font-bold text-slate-900">
+						<p class="text-sm text-slate-500 dark:text-slate-400">Active Projects</p>
+						<p class="text-2xl font-bold text-slate-900 dark:text-slate-100">
 							{statusDist.find((s) => s.status === 'in-progress')?.count ?? 0}
 						</p>
 					</div>
-					<div class="rounded-lg bg-amber-50 p-2">
+					<div class="rounded-lg bg-amber-50 p-2 dark:bg-amber-900/30">
 						<Loader2 class="size-5 text-amber-600" />
 					</div>
 				</div>

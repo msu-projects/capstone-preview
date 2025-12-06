@@ -44,9 +44,14 @@
 
 	// Get colors based on trend and whether it's good
 	const colors = $derived.by(() => {
-		if (isGood === null) return { text: 'text-slate-500', bg: 'bg-slate-100' };
-		if (isGood) return { text: 'text-emerald-600', bg: 'bg-emerald-50' };
-		return { text: 'text-red-600', bg: 'bg-red-50' };
+		if (isGood === null)
+			return { text: 'text-slate-500 dark:text-slate-400', bg: 'bg-slate-100 dark:bg-slate-800' };
+		if (isGood)
+			return {
+				text: 'text-emerald-600 dark:text-emerald-400',
+				bg: 'bg-emerald-50 dark:bg-emerald-900/30'
+			};
+		return { text: 'text-red-600 dark:text-red-400', bg: 'bg-red-50 dark:bg-red-900/30' };
 	});
 </script>
 

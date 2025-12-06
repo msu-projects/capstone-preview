@@ -42,23 +42,25 @@
 	<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
 		<!-- Total Population -->
 		<Card.Root
-			class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50"
+			class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50 dark:bg-slate-800/80 dark:ring-slate-700/50 dark:hover:ring-slate-600/50"
 		>
 			<div
-				class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-blue-50 opacity-50"
+				class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-blue-50 opacity-50 dark:bg-blue-900/30"
 			></div>
 			<div
-				class="absolute inset-0 bg-blue-50 opacity-0 transition-opacity group-hover:opacity-30"
+				class="absolute inset-0 bg-blue-50 opacity-0 transition-opacity group-hover:opacity-30 dark:bg-blue-900/30"
 			></div>
 			<Card.Content class="relative p-4 sm:p-5">
 				<div class="flex items-center gap-3 sm:gap-4">
-					<div class="rounded-xl bg-blue-50 p-2.5 ring-1 ring-black/5 sm:p-3">
-						<Users class="size-5 text-blue-700 sm:size-6" />
+					<div class="rounded-xl bg-blue-50 p-2.5 ring-1 ring-black/5 sm:p-3 dark:bg-blue-900/30">
+						<Users class="size-5 text-blue-700 sm:size-6 dark:text-blue-400" />
 					</div>
 					<div class="min-w-0 flex-1">
-						<p class="truncate text-xs font-medium text-slate-500 sm:text-sm">Total Population</p>
+						<p class="truncate text-xs font-medium text-slate-500 sm:text-sm dark:text-slate-400">
+							Total Population
+						</p>
 						<p
-							class="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl"
+							class="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl dark:text-slate-100"
 						>
 							{formatNumber(demographics.totalPopulation)}
 						</p>
@@ -69,23 +71,27 @@
 
 		<!-- Households -->
 		<Card.Root
-			class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50"
+			class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50 dark:bg-slate-800/80 dark:ring-slate-700/50 dark:hover:ring-slate-600/50"
 		>
 			<div
-				class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-emerald-50 opacity-50"
+				class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-emerald-50 opacity-50 dark:bg-emerald-900/30"
 			></div>
 			<div
-				class="absolute inset-0 bg-emerald-50 opacity-0 transition-opacity group-hover:opacity-30"
+				class="absolute inset-0 bg-emerald-50 opacity-0 transition-opacity group-hover:opacity-30 dark:bg-emerald-900/30"
 			></div>
 			<Card.Content class="relative p-4 sm:p-5">
 				<div class="flex items-center gap-3 sm:gap-4">
-					<div class="rounded-xl bg-emerald-50 p-2.5 ring-1 ring-black/5 sm:p-3">
-						<Home class="size-5 text-emerald-700 sm:size-6" />
+					<div
+						class="rounded-xl bg-emerald-50 p-2.5 ring-1 ring-black/5 sm:p-3 dark:bg-emerald-900/30"
+					>
+						<Home class="size-5 text-emerald-700 sm:size-6 dark:text-emerald-400" />
 					</div>
 					<div class="min-w-0 flex-1">
-						<p class="truncate text-xs font-medium text-slate-500 sm:text-sm">Total Households</p>
+						<p class="truncate text-xs font-medium text-slate-500 sm:text-sm dark:text-slate-400">
+							Total Households
+						</p>
 						<p
-							class="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl"
+							class="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl dark:text-slate-100"
 						>
 							{formatNumber(demographics.totalHouseholds)}
 						</p>
@@ -96,25 +102,27 @@
 
 		<!-- Avg Household Size -->
 		<Card.Root
-			class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50"
+			class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50 dark:bg-slate-800/80 dark:ring-slate-700/50 dark:hover:ring-slate-600/50"
 		>
 			<div
-				class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-purple-50 opacity-50"
+				class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-purple-50 opacity-50 dark:bg-purple-900/30"
 			></div>
 			<div
-				class="absolute inset-0 bg-purple-50 opacity-0 transition-opacity group-hover:opacity-30"
+				class="absolute inset-0 bg-purple-50 opacity-0 transition-opacity group-hover:opacity-30 dark:bg-purple-900/30"
 			></div>
 			<Card.Content class="relative p-4 sm:p-5">
 				<div class="flex items-center gap-3 sm:gap-4">
-					<div class="rounded-xl bg-purple-50 p-2.5 ring-1 ring-black/5 sm:p-3">
-						<PersonStanding class="size-5 text-purple-700 sm:size-6" />
+					<div
+						class="rounded-xl bg-purple-50 p-2.5 ring-1 ring-black/5 sm:p-3 dark:bg-purple-900/30"
+					>
+						<PersonStanding class="size-5 text-purple-700 sm:size-6 dark:text-purple-400" />
 					</div>
 					<div class="min-w-0 flex-1">
-						<p class="truncate text-xs font-medium text-slate-500 sm:text-sm">
+						<p class="truncate text-xs font-medium text-slate-500 sm:text-sm dark:text-slate-400">
 							Avg. Household Size
 						</p>
 						<p
-							class="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl"
+							class="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl dark:text-slate-100"
 						>
 							{demographics.averageHouseholdSize.toFixed(1)}
 						</p>
@@ -125,25 +133,25 @@
 
 		<!-- Working Age Population -->
 		<Card.Root
-			class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50"
+			class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50 dark:bg-slate-800/80 dark:ring-slate-700/50 dark:hover:ring-slate-600/50"
 		>
 			<div
-				class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-amber-50 opacity-50"
+				class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-amber-50 opacity-50 dark:bg-amber-900/30"
 			></div>
 			<div
-				class="absolute inset-0 bg-amber-50 opacity-0 transition-opacity group-hover:opacity-30"
+				class="absolute inset-0 bg-amber-50 opacity-0 transition-opacity group-hover:opacity-30 dark:bg-amber-900/30"
 			></div>
 			<Card.Content class="relative p-4 sm:p-5">
 				<div class="flex items-center gap-3 sm:gap-4">
-					<div class="rounded-xl bg-amber-50 p-2.5 ring-1 ring-black/5 sm:p-3">
-						<Briefcase class="size-5 text-amber-700 sm:size-6" />
+					<div class="rounded-xl bg-amber-50 p-2.5 ring-1 ring-black/5 sm:p-3 dark:bg-amber-900/30">
+						<Briefcase class="size-5 text-amber-700 sm:size-6 dark:text-amber-400" />
 					</div>
 					<div class="min-w-0 flex-1">
-						<p class="truncate text-xs font-medium text-slate-500 sm:text-sm">
+						<p class="truncate text-xs font-medium text-slate-500 sm:text-sm dark:text-slate-400">
 							Working Age (15-64)
 						</p>
 						<p
-							class="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl"
+							class="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl dark:text-slate-100"
 						>
 							{demographics.age15to64Percentage.toFixed(0)}%
 						</p>
@@ -156,10 +164,10 @@
 	<!-- Charts Row -->
 	<div class="grid gap-6 lg:grid-cols-2">
 		<!-- Gender Distribution -->
-		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50">
+		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50 dark:ring-slate-700/50">
 			<Card.Header>
 				<Card.Title class="flex items-center gap-2 text-base">
-					<Activity class="size-5 text-slate-500" />
+					<Activity class="size-5 text-slate-500 dark:text-slate-400" />
 					Gender Distribution
 				</Card.Title>
 			</Card.Header>
@@ -174,10 +182,10 @@
 		</Card.Root>
 
 		<!-- Age Distribution -->
-		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50">
+		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50 dark:ring-slate-700/50">
 			<Card.Header>
 				<Card.Title class="flex items-center gap-2 text-base">
-					<Baby class="size-5 text-slate-500" />
+					<Baby class="size-5 text-slate-500 dark:text-slate-400" />
 					Age Distribution
 				</Card.Title>
 			</Card.Header>
@@ -192,10 +200,10 @@
 		</Card.Root>
 
 		<!-- Dependency Ratio -->
-		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50">
+		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50 dark:ring-slate-700/50">
 			<Card.Header>
 				<Card.Title class="flex items-center gap-2 text-base">
-					<Activity class="size-5 text-slate-500" />
+					<Activity class="size-5 text-slate-500 dark:text-slate-400" />
 					Dependency Ratio
 				</Card.Title>
 				<Card.Description>
@@ -204,7 +212,7 @@
 			</Card.Header>
 			<Card.Content class="space-y-6">
 				<div class="text-center">
-					<div class="text-4xl font-bold text-slate-900">
+					<div class="text-4xl font-bold text-slate-900 dark:text-slate-100">
 						{demographics.dependencyRatio.toFixed(1)}%
 					</div>
 					<Badge
@@ -213,27 +221,29 @@
 					>
 						{dependencyInterpretation.status} Dependency
 					</Badge>
-					<p class="mt-2 text-sm text-slate-500">{dependencyInterpretation.description}</p>
+					<p class="mt-2 text-sm text-slate-500 dark:text-slate-400">
+						{dependencyInterpretation.description}
+					</p>
 				</div>
 
 				<div class="space-y-3">
 					<div class="space-y-1">
 						<div class="flex justify-between text-sm">
-							<span class="text-slate-600">Children (0-14)</span>
+							<span class="text-slate-600 dark:text-slate-400">Children (0-14)</span>
 							<span class="font-medium">{demographics.age0to14Percentage.toFixed(1)}%</span>
 						</div>
 						<Progress value={demographics.age0to14Percentage} class="h-2" />
 					</div>
 					<div class="space-y-1">
 						<div class="flex justify-between text-sm">
-							<span class="text-slate-600">Working Age (15-64)</span>
+							<span class="text-slate-600 dark:text-slate-400">Working Age (15-64)</span>
 							<span class="font-medium">{demographics.age15to64Percentage.toFixed(1)}%</span>
 						</div>
 						<Progress value={demographics.age15to64Percentage} class="h-2" />
 					</div>
 					<div class="space-y-1">
 						<div class="flex justify-between text-sm">
-							<span class="text-slate-600">Seniors (65+)</span>
+							<span class="text-slate-600 dark:text-slate-400">Seniors (65+)</span>
 							<span class="font-medium">{demographics.age65abovePercentage.toFixed(1)}%</span>
 						</div>
 						<Progress value={demographics.age65abovePercentage} class="h-2" />

@@ -147,8 +147,10 @@
 				<div class="space-y-4">
 					<!-- User Info -->
 					<div class="flex items-center gap-3">
-						<div class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
-							<User class="h-6 w-6 text-slate-600" />
+						<div
+							class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800"
+						>
+							<User class="h-6 w-6 text-slate-600 dark:text-slate-400" />
 						</div>
 						<div>
 							<p class="font-semibold">{log.user_name}</p>

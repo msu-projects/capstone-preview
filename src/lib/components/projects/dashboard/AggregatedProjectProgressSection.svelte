@@ -113,16 +113,18 @@
 	<!-- Progress Summary Cards -->
 	<div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
 		{#each progressMetrics as metric}
-			<Card.Root class="border-0 py-0 shadow-sm ring-1 ring-slate-200/50">
+			<Card.Root class="border-0 py-0 shadow-sm ring-1 ring-slate-200/50 dark:ring-slate-700/50">
 				<Card.Content class="p-4">
 					<div class="flex items-start gap-3">
 						<div class="rounded-lg {metric.bgColor} p-2 ring-1 ring-black/5">
 							<metric.icon class="size-5 {metric.textColor}" />
 						</div>
 						<div class="min-w-0 flex-1">
-							<p class="text-xs font-medium text-slate-500">{metric.label}</p>
-							<p class="mt-0.5 text-xl font-bold tracking-tight text-slate-900">{metric.value}</p>
-							<p class="mt-0.5 text-xs text-slate-400">{metric.description}</p>
+							<p class="text-xs font-medium text-slate-500 dark:text-slate-400">{metric.label}</p>
+							<p class="mt-0.5 text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+								{metric.value}
+							</p>
+							<p class="mt-0.5 text-xs text-slate-400 dark:text-slate-500">{metric.description}</p>
 						</div>
 					</div>
 				</Card.Content>
@@ -132,7 +134,7 @@
 
 	<div class="grid gap-6 lg:grid-cols-2">
 		<!-- Progress Distribution Chart -->
-		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50">
+		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50 dark:ring-slate-700/50">
 			<Card.Header>
 				<Card.Title class="flex items-center gap-2 text-base">
 					<Gauge class="size-5 text-slate-500" />
@@ -146,7 +148,9 @@
 						<DonutChart data={progressChartData} height={300} />
 					</div>
 				{:else}
-					<div class="flex h-[200px] items-center justify-center text-sm text-slate-500">
+					<div
+						class="flex h-[200px] items-center justify-center text-sm text-slate-500 dark:text-slate-400"
+					>
 						No progress data available
 					</div>
 				{/if}
@@ -154,7 +158,7 @@
 		</Card.Root>
 
 		<!-- Category Progress -->
-		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50">
+		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50 dark:ring-slate-700/50">
 			<Card.Header>
 				<Card.Title class="flex items-center gap-2 text-base">
 					<Target class="size-5 text-slate-500" />
@@ -167,10 +171,14 @@
 					<div class="space-y-1.5">
 						<div class="flex items-center justify-between text-sm">
 							<div class="flex items-center gap-2">
-								<span class="font-medium text-slate-700">{category.categoryName}</span>
+								<span class="font-medium text-slate-700 dark:text-slate-300"
+									>{category.categoryName}</span
+								>
 								<Badge variant="outline" class="text-xs">{category.count}</Badge>
 							</div>
-							<span class="font-semibold text-slate-900">{category.avgProgress.toFixed(1)}%</span>
+							<span class="font-semibold text-slate-900 dark:text-slate-100"
+								>{category.avgProgress.toFixed(1)}%</span
+							>
 						</div>
 						<Progress value={category.avgProgress} class="h-2" />
 					</div>
@@ -181,7 +189,7 @@
 
 	<div class="grid gap-6 lg:grid-cols-2">
 		<!-- Top Performing Projects -->
-		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50">
+		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50 dark:ring-slate-700/50">
 			<Card.Header>
 				<Card.Title class="flex items-center gap-2 text-base">
 					<TrendingUp class="size-5 text-emerald-500" />
@@ -251,7 +259,7 @@
 		</Card.Root>
 
 		<!-- Underperforming Projects -->
-		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50">
+		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50 dark:ring-slate-700/50">
 			<Card.Header>
 				<Card.Title class="flex items-center gap-2 text-base">
 					<TrendingDown class="size-5 text-amber-500" />

@@ -4,6 +4,7 @@
 	import * as Avatar from '$lib/components/ui/avatar';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import * as Sidebar from '$lib/components/ui/sidebar';
+	import { ThemeToggle } from '$lib/components/ui/theme-toggle';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import {
 		CloudUpload,
@@ -184,6 +185,11 @@
 								</div>
 							</div>
 						</DropdownMenu.Label>
+						<DropdownMenu.Separator />
+						<div class="flex items-center justify-between px-2 py-1.5">
+							<span class="text-sm">Theme</span>
+							<ThemeToggle />
+						</div>
 						<DropdownMenu.Separator />
 						<DropdownMenu.Item onclick={handleLogout}>
 							<LogOut class="size-4" />

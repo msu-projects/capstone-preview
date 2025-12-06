@@ -2,6 +2,7 @@
 	import { page } from '$app/state';
 	import logo from '$lib/assets/logo.png';
 	import { Button } from '$lib/components/ui/button';
+	import { ThemeToggle } from '$lib/components/ui/theme-toggle';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { FolderKanban, Home, LayoutDashboard, LogIn, Menu, Users, X } from '@lucide/svelte';
 
@@ -60,6 +61,7 @@
 
 		<!-- Desktop Actions -->
 		<div class="hidden items-center gap-2 md:flex">
+			<ThemeToggle />
 			{#if authStore.isAuthenticated}
 				<Button href="/admin" variant="default" size="sm">
 					<LayoutDashboard class="mr-2 size-4" />
@@ -106,7 +108,10 @@
 						{link.label}
 					</a>
 				{/each}
-				<div class="my-2 border-t"></div>
+				<div class="my-2 flex items-center justify-between border-t pt-2">
+					<span class="text-sm text-muted-foreground">Theme</span>
+					<ThemeToggle />
+				</div>
 				{#if authStore.isAuthenticated}
 					<Button
 						href="/admin"

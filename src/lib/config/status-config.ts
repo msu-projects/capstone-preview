@@ -11,6 +11,8 @@ export interface StatusConfig {
 	color: string;
 	bgColor: string;
 	textColor: string;
+	darkBgColor: string;
+	darkTextColor: string;
 }
 
 export const PROJECT_STATUS_CONFIG: Record<ProjectStatus, StatusConfig> = {
@@ -19,28 +21,36 @@ export const PROJECT_STATUS_CONFIG: Record<ProjectStatus, StatusConfig> = {
 		badgeVariant: 'secondary',
 		color: 'hsl(var(--muted-foreground))',
 		bgColor: 'bg-slate-100',
-		textColor: 'text-slate-700'
+		textColor: 'text-slate-700',
+		darkBgColor: 'dark:bg-slate-800',
+		darkTextColor: 'dark:text-slate-300'
 	},
 	'in-progress': {
 		label: 'In Progress',
 		badgeVariant: 'outline',
 		color: 'hsl(48, 96%, 53%)',
 		bgColor: 'bg-amber-100',
-		textColor: 'text-amber-700'
+		textColor: 'text-amber-700',
+		darkBgColor: 'dark:bg-amber-900/30',
+		darkTextColor: 'dark:text-amber-400'
 	},
 	completed: {
 		label: 'Completed',
 		badgeVariant: 'default',
 		color: 'hsl(142, 76%, 36%)',
 		bgColor: 'bg-emerald-100',
-		textColor: 'text-emerald-700'
+		textColor: 'text-emerald-700',
+		darkBgColor: 'dark:bg-emerald-900/30',
+		darkTextColor: 'dark:text-emerald-400'
 	},
 	suspended: {
 		label: 'Suspended',
 		badgeVariant: 'destructive',
 		color: 'hsl(0, 72%, 51%)',
 		bgColor: 'bg-red-100',
-		textColor: 'text-red-700'
+		textColor: 'text-red-700',
+		darkBgColor: 'dark:bg-red-900/30',
+		darkTextColor: 'dark:text-red-400'
 	}
 };
 
@@ -75,17 +85,19 @@ export function getStatusColor(status: ProjectStatus): string {
 }
 
 /**
- * Gets the background color class for a project status
+ * Gets the background color class for a project status (includes dark mode)
  */
 export function getStatusBgColor(status: ProjectStatus): string {
-	return getStatusConfig(status).bgColor;
+	const config = getStatusConfig(status);
+	return `${config.bgColor} ${config.darkBgColor}`;
 }
 
 /**
- * Gets the text color class for a project status
+ * Gets the text color class for a project status (includes dark mode)
  */
 export function getStatusTextColor(status: ProjectStatus): string {
-	return getStatusConfig(status).textColor;
+	const config = getStatusConfig(status);
+	return `${config.textColor} ${config.darkTextColor}`;
 }
 
 /**

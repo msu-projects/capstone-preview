@@ -159,57 +159,61 @@
 <div class="space-y-6">
 	<!-- Map Header Stats -->
 	<div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
-		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50">
+		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50 dark:ring-slate-700/50">
 			<Card.Content class="p-4">
 				<div class="flex items-center justify-between">
 					<div>
-						<p class="text-sm text-slate-500">Total Projects</p>
-						<p class="text-2xl font-bold text-slate-900">{projects.length}</p>
+						<p class="text-sm text-slate-500 dark:text-slate-400">Total Projects</p>
+						<p class="text-2xl font-bold text-slate-900 dark:text-slate-100">{projects.length}</p>
 					</div>
-					<div class="rounded-lg bg-blue-50 p-2">
+					<div class="rounded-lg bg-blue-50 p-2 dark:bg-blue-900/30">
 						<MapPin class="size-5 text-blue-600" />
 					</div>
 				</div>
 			</Card.Content>
 		</Card.Root>
 
-		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50">
+		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50 dark:ring-slate-700/50">
 			<Card.Content class="p-4">
 				<div class="flex items-center justify-between">
 					<div>
-						<p class="text-sm text-slate-500">With Location</p>
-						<p class="text-2xl font-bold text-slate-900">{projectsWithLocation}</p>
+						<p class="text-sm text-slate-500 dark:text-slate-400">With Location</p>
+						<p class="text-2xl font-bold text-slate-900 dark:text-slate-100">
+							{projectsWithLocation}
+						</p>
 					</div>
-					<div class="rounded-lg bg-emerald-50 p-2">
+					<div class="rounded-lg bg-emerald-50 p-2 dark:bg-emerald-900/30">
 						<Navigation class="size-5 text-emerald-600" />
 					</div>
 				</div>
 			</Card.Content>
 		</Card.Root>
 
-		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50">
+		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50 dark:ring-slate-700/50">
 			<Card.Content class="p-4">
 				<div class="flex items-center justify-between">
 					<div>
-						<p class="text-sm text-slate-500">Municipalities</p>
-						<p class="text-2xl font-bold text-slate-900">{geoDist.totalMunicipalities}</p>
+						<p class="text-sm text-slate-500 dark:text-slate-400">Municipalities</p>
+						<p class="text-2xl font-bold text-slate-900 dark:text-slate-100">
+							{geoDist.totalMunicipalities}
+						</p>
 					</div>
-					<div class="rounded-lg bg-amber-50 p-2">
+					<div class="rounded-lg bg-amber-50 p-2 dark:bg-amber-900/30">
 						<MapIcon class="size-5 text-amber-600" />
 					</div>
 				</div>
 			</Card.Content>
 		</Card.Root>
 
-		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50">
+		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50 dark:ring-slate-700/50">
 			<Card.Content class="p-4">
 				<div class="flex items-center gap-3">
-					<div class="rounded-lg bg-purple-50 p-2">
+					<div class="rounded-lg bg-purple-50 p-2 dark:bg-purple-900/30">
 						<MapIcon class="size-5 text-purple-600" />
 					</div>
 					<div>
-						<p class="text-sm text-slate-500">Viewing</p>
-						<p class="font-semibold text-slate-900">{filterLabel}</p>
+						<p class="text-sm text-slate-500 dark:text-slate-400">Viewing</p>
+						<p class="font-semibold text-slate-900 dark:text-slate-100">{filterLabel}</p>
 					</div>
 				</div>
 			</Card.Content>
@@ -217,8 +221,10 @@
 	</div>
 
 	<!-- Map Container -->
-	<Card.Root class="gap-0 overflow-hidden border-0 py-0 shadow-sm ring-1 ring-slate-200/50">
-		<Card.Header class="border-b bg-slate-50/50 pt-6">
+	<Card.Root
+		class="gap-0 overflow-hidden border-0 py-0 shadow-sm ring-1 ring-slate-200/50 dark:ring-slate-700/50"
+	>
+		<Card.Header class="border-b bg-slate-50/50 pt-6 dark:bg-slate-800/50">
 			<div class="flex items-center justify-between">
 				<div>
 					<Card.Title class="flex items-center gap-2 text-base">
@@ -243,7 +249,7 @@
 
 	<!-- Municipality Summary Table -->
 	{#if geoDist.byMunicipality.length > 0}
-		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50">
+		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50 dark:ring-slate-700/50">
 			<Card.Header>
 				<Card.Title class="flex items-center gap-2 text-base">
 					<MapPin class="size-5 text-slate-500" />
@@ -256,21 +262,31 @@
 					<table class="w-full text-sm">
 						<thead>
 							<tr class="border-b text-left">
-								<th class="pb-3 font-medium text-slate-500">Municipality</th>
-								<th class="pb-3 text-right font-medium text-slate-500">Projects</th>
-								<th class="pb-3 text-right font-medium text-slate-500">Budget</th>
-								<th class="pb-3 text-right font-medium text-slate-500">Beneficiaries</th>
+								<th class="pb-3 font-medium text-slate-500 dark:text-slate-400">Municipality</th>
+								<th class="pb-3 text-right font-medium text-slate-500 dark:text-slate-400"
+									>Projects</th
+								>
+								<th class="pb-3 text-right font-medium text-slate-500 dark:text-slate-400"
+									>Budget</th
+								>
+								<th class="pb-3 text-right font-medium text-slate-500 dark:text-slate-400"
+									>Beneficiaries</th
+								>
 							</tr>
 						</thead>
 						<tbody>
 							{#each geoDist.byMunicipality as muni}
-								<tr class="border-b border-slate-100 last:border-0">
-									<td class="py-3 font-medium text-slate-900">{muni.municipality}</td>
-									<td class="py-3 text-right text-slate-600">{muni.projectCount}</td>
-									<td class="py-3 text-right font-medium text-slate-900">
+								<tr class="border-b border-slate-100 last:border-0 dark:border-slate-700">
+									<td class="py-3 font-medium text-slate-900 dark:text-slate-100"
+										>{muni.municipality}</td
+									>
+									<td class="py-3 text-right text-slate-600 dark:text-slate-400"
+										>{muni.projectCount}</td
+									>
+									<td class="py-3 text-right font-medium text-slate-900 dark:text-slate-100">
 										{formatCurrency(muni.totalBudget)}
 									</td>
-									<td class="py-3 text-right text-slate-600">
+									<td class="py-3 text-right text-slate-600 dark:text-slate-400">
 										{formatNumber(muni.beneficiaries)}
 									</td>
 								</tr>
@@ -283,17 +299,21 @@
 	{/if}
 
 	<!-- Map Legend / Help -->
-	<Card.Root class="border-0 bg-slate-50 py-0 shadow-sm ring-1 ring-slate-200/50">
+	<Card.Root
+		class="border-0 bg-slate-50 py-0 shadow-sm ring-1 ring-slate-200/50 dark:bg-slate-800 dark:ring-slate-700/50"
+	>
 		<Card.Content class="p-4">
 			<div class="flex flex-wrap items-center gap-4 text-sm">
 				<div class="flex items-center gap-2">
 					<MapPin class="size-3 text-primary" />
-					<span class="text-slate-600">Project Location</span>
+					<span class="text-slate-600 dark:text-slate-400">Project Location</span>
 				</div>
 				<div class="text-slate-400">•</div>
-				<span class="text-slate-600">Click on a marker to view project details</span>
+				<span class="text-slate-600 dark:text-slate-400"
+					>Click on a marker to view project details</span
+				>
 				<div class="text-slate-400">•</div>
-				<span class="text-slate-600">Use mouse wheel to zoom in/out</span>
+				<span class="text-slate-600 dark:text-slate-400">Use mouse wheel to zoom in/out</span>
 			</div>
 		</Card.Content>
 	</Card.Root>
