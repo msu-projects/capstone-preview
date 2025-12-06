@@ -1175,9 +1175,36 @@ export function generateProjects(
 }
 
 // ===== STORAGE KEYS =====
+export const STORAGE_VERSION = 1; // Increment when types change to clear outdated data
+export const STORAGE_VERSION_KEY = 'sccdp_storage_version';
 export const MOCK_DATA_INITIALIZED_KEY = 'sccdp_mock_data_initialized';
 export const MOCK_SITIOS_KEY = 'sccdp_sitios';
 export const MOCK_PROJECTS_KEY = 'sccdp_projects';
+
+// ===== STORAGE VERSION CHECK =====
+
+function isStorageOutdated(): boolean {
+	if (typeof window === 'undefined') return false;
+	const storedVersion = localStorage.getItem(STORAGE_VERSION_KEY);
+	return storedVersion !== String(STORAGE_VERSION);
+}
+
+function clearAllStorage(): void {
+	if (typeof window === 'undefined') return;
+	const keysToRemove: string[] = [];
+	for (let i = 0; i < localStorage.length; i++) {
+		const key = localStorage.key(i);
+		if (key?.startsWith('sccdp_')) {
+			keysToRemove.push(key);
+		}
+	}
+	keysToRemove.forEach((key) => localStorage.removeItem(key));
+}
+
+function setStorageVersion(): void {
+	if (typeof window === 'undefined') return;
+	localStorage.setItem(STORAGE_VERSION_KEY, String(STORAGE_VERSION));
+}
 
 // ===== INITIALIZATION CHECK =====
 
@@ -1199,6 +1226,11 @@ export function initializeMockDataIfNeeded(): { sitios: Sitio[]; projects: Proje
 		return { sitios, projects };
 	}
 
+	// Check if storage is outdated - if so, clear everything
+	if (isStorageOutdated()) {
+		clearAllStorage();
+	}
+
 	// Check if already initialized
 	if (isMockDataInitialized()) {
 		// Load from localStorage
@@ -1212,15 +1244,13 @@ export function initializeMockDataIfNeeded(): { sitios: Sitio[]; projects: Proje
 	}
 
 	// Generate and save mock data
-	console.log('Generating mock data for first time...');
 	const sitios = generateSitios(50);
 	const projects = generateProjects(sitios, 20);
 
 	localStorage.setItem(MOCK_SITIOS_KEY, JSON.stringify(sitios));
 	localStorage.setItem(MOCK_PROJECTS_KEY, JSON.stringify(projects));
 	markMockDataInitialized();
-
-	console.log(`Generated ${sitios.length} sitios and ${projects.length} projects`);
+	setStorageVersion();
 
 	return { sitios, projects };
 }
