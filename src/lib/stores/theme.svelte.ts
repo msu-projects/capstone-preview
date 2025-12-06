@@ -47,7 +47,7 @@ function initializeTheme(): void {
 
 	// Load saved theme from localStorage
 	const savedTheme = localStorage.getItem(THEME_STORAGE_KEY) as Theme | null;
-	theme = savedTheme || 'system';
+	theme = savedTheme || 'light';
 
 	// Set up system theme listener
 	mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');

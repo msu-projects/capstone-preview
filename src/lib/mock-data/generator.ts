@@ -5,7 +5,7 @@ import {
 	predefinedPPAs
 } from '$lib/config/issue-ppa-mappings';
 import { MUNICIPALITIES_DATA } from '$lib/config/location-data';
-import { categories, projectTypes } from '$lib/config/project-categories';
+import { categories, getProjectTypeById, projectTypes } from '$lib/config/project-categories';
 import {
 	getNeedLevelFromScore,
 	type BudgetComponent,
@@ -589,230 +589,49 @@ const CATCH_UP_PLANS = [
 	'Coordinate with LGU for streamlined permit processing'
 ];
 
-// Performance indicator templates by category
-const PERFORMANCE_INDICATORS_BY_CATEGORY: Record<
-	CategoryKey,
-	Array<{
-		type: string;
-		name: string;
-		unit: string;
-		baseValue: number;
-		scaleFactor: 'budget' | 'beneficiaries' | 'fixed';
-	}>
-> = {
-	infrastructure: [
-		{
-			type: 'output',
-			name: 'Length of Road Constructed',
-			unit: 'kilometers',
-			baseValue: 1,
-			scaleFactor: 'budget'
-		},
-		{
-			type: 'output',
-			name: 'Buildings Constructed',
-			unit: 'units',
-			baseValue: 1,
-			scaleFactor: 'fixed'
-		},
-		{
-			type: 'output',
-			name: 'Floor Area Completed',
-			unit: 'sq. meters',
-			baseValue: 100,
-			scaleFactor: 'budget'
-		},
-		{
-			type: 'outcome',
-			name: 'Households Served',
-			unit: 'households',
-			baseValue: 50,
-			scaleFactor: 'beneficiaries'
-		}
-	],
-	agriculture: [
-		{
-			type: 'output',
-			name: 'Seedlings Distributed',
-			unit: 'seedlings',
-			baseValue: 1000,
-			scaleFactor: 'budget'
-		},
-		{
-			type: 'output',
-			name: 'Farm Equipment Provided',
-			unit: 'units',
-			baseValue: 10,
-			scaleFactor: 'budget'
-		},
-		{
-			type: 'output',
-			name: 'Farmers Trained',
-			unit: 'farmers',
-			baseValue: 30,
-			scaleFactor: 'beneficiaries'
-		},
-		{
-			type: 'outcome',
-			name: 'Hectares Covered',
-			unit: 'hectares',
-			baseValue: 50,
-			scaleFactor: 'budget'
-		}
-	],
-	education: [
-		{
-			type: 'output',
-			name: 'Students Provided Supplies',
-			unit: 'students',
-			baseValue: 100,
-			scaleFactor: 'beneficiaries'
-		},
-		{
-			type: 'output',
-			name: 'Classrooms Equipped',
-			unit: 'classrooms',
-			baseValue: 5,
-			scaleFactor: 'budget'
-		},
-		{
-			type: 'output',
-			name: 'Teachers Trained',
-			unit: 'teachers',
-			baseValue: 20,
-			scaleFactor: 'beneficiaries'
-		},
-		{
-			type: 'outcome',
-			name: 'Schools Benefited',
-			unit: 'schools',
-			baseValue: 3,
-			scaleFactor: 'fixed'
-		}
-	],
-	health: [
-		{
-			type: 'output',
-			name: 'Patients Served',
-			unit: 'patients',
-			baseValue: 200,
-			scaleFactor: 'beneficiaries'
-		},
-		{
-			type: 'output',
-			name: 'Medical Equipment Provided',
-			unit: 'units',
-			baseValue: 10,
-			scaleFactor: 'budget'
-		},
-		{
-			type: 'output',
-			name: 'Health Workers Trained',
-			unit: 'health workers',
-			baseValue: 15,
-			scaleFactor: 'beneficiaries'
-		},
-		{
-			type: 'outcome',
-			name: 'Barangays Covered',
-			unit: 'barangays',
-			baseValue: 5,
-			scaleFactor: 'fixed'
-		}
-	],
-	livelihood: [
-		{
-			type: 'output',
-			name: 'Beneficiaries Trained',
-			unit: 'beneficiaries',
-			baseValue: 50,
-			scaleFactor: 'beneficiaries'
-		},
-		{
-			type: 'output',
-			name: 'Starter Kits Distributed',
-			unit: 'kits',
-			baseValue: 30,
-			scaleFactor: 'budget'
-		},
-		{
-			type: 'output',
-			name: 'Cooperatives Organized',
-			unit: 'cooperatives',
-			baseValue: 2,
-			scaleFactor: 'fixed'
-		},
-		{
-			type: 'outcome',
-			name: 'Jobs Generated',
-			unit: 'jobs',
-			baseValue: 25,
-			scaleFactor: 'beneficiaries'
-		}
-	],
-	environment: [
-		{
-			type: 'output',
-			name: 'Seedlings Planted',
-			unit: 'seedlings',
-			baseValue: 5000,
-			scaleFactor: 'budget'
-		},
-		{
-			type: 'output',
-			name: 'Hectares Reforested',
-			unit: 'hectares',
-			baseValue: 10,
-			scaleFactor: 'budget'
-		},
-		{
-			type: 'output',
-			name: 'Volunteers Mobilized',
-			unit: 'volunteers',
-			baseValue: 100,
-			scaleFactor: 'beneficiaries'
-		},
-		{
-			type: 'outcome',
-			name: 'Communities Covered',
-			unit: 'communities',
-			baseValue: 3,
-			scaleFactor: 'fixed'
-		}
-	]
-};
-
+/**
+ * Generate performance targets based on project type's default_indicators
+ * Uses the actual indicators defined in project-categories.ts for consistency
+ */
 function generatePerformanceTargets(
 	projectId: number,
-	categoryKey: CategoryKey,
+	projectTypeId: number | undefined,
 	beneficiaries: number,
 	budget: number,
 	rng: SeededRandom
 ): PerformanceTarget[] {
-	const indicators = PERFORMANCE_INDICATORS_BY_CATEGORY[categoryKey];
-	const numTargets = rng.nextInt(2, 4);
-	const selectedIndicators = rng.shuffle(indicators).slice(0, numTargets);
+	// Get project type and its default indicators
+	const projectType = projectTypeId ? getProjectTypeById(projectTypeId) : undefined;
+	const defaultIndicators = projectType?.default_indicators || [];
 
-	return selectedIndicators.map((indicator, index) => {
+	// If no indicators defined, return empty array
+	if (defaultIndicators.length === 0) {
+		return [];
+	}
+
+	return defaultIndicators.map((indicator, index) => {
 		let targetValue: number;
 
-		switch (indicator.scaleFactor) {
-			case 'budget':
-				// Scale based on budget (per million pesos)
-				targetValue = Math.round(
-					indicator.baseValue * (budget / 1000000) * (0.8 + rng.next() * 0.4)
-				);
-				break;
-			case 'beneficiaries':
-				// Scale based on beneficiaries count
-				targetValue = Math.round(
-					indicator.baseValue * (beneficiaries / 100) * (0.8 + rng.next() * 0.4)
-				);
-				break;
-			case 'fixed':
-				// Fixed value with slight variation
-				targetValue = Math.round(indicator.baseValue * (0.8 + rng.next() * 0.4));
-				break;
+		// Determine scale factor based on unit type
+		const unit = indicator.unit.toLowerCase();
+		if (
+			unit.includes('php') ||
+			unit.includes('peso') ||
+			unit.includes('kilometer') ||
+			unit.includes('hectare') ||
+			unit.includes('meter') ||
+			unit.includes('ton')
+		) {
+			// Scale based on budget (per million pesos)
+			const baseValue = getBaseValueForIndicator(indicator.id, budget, beneficiaries);
+			targetValue = Math.round(baseValue * (budget / 1000000) * (0.8 + rng.next() * 0.4));
+		} else if (unit.includes('percentage') || unit.includes('rate') || unit.includes('stages')) {
+			// Percentage-based indicators (fixed scale)
+			targetValue = Math.round(70 + rng.next() * 25); // 70-95%
+		} else {
+			// Count-based indicators (people, items, sessions, etc.) - scale by beneficiaries
+			const baseValue = getBaseValueForIndicator(indicator.id, budget, beneficiaries);
+			targetValue = Math.round(baseValue * (beneficiaries / 100) * (0.8 + rng.next() * 0.4));
 		}
 
 		// Ensure minimum value of 1
@@ -821,7 +640,7 @@ function generatePerformanceTargets(
 		return {
 			id: projectId * 100 + index,
 			project_id: projectId,
-			indicator_type: indicator.type,
+			indicator_type: indicator.id,
 			indicator_name: indicator.name,
 			target_value: targetValue,
 			unit_of_measure: indicator.unit
@@ -829,113 +648,98 @@ function generatePerformanceTargets(
 	});
 }
 
-// Category-specific achieved outputs templates
-const ACHIEVED_OUTPUTS_BY_CATEGORY: Record<
-	CategoryKey,
-	Array<{ key: string; label: string; baseValue: number; isAccumulative: boolean }>
-> = {
-	infrastructure: [
-		{ key: 'meters_constructed', label: 'Meters Constructed', baseValue: 50, isAccumulative: true },
-		{
-			key: 'materials_delivered',
-			label: 'Materials Delivered (%)',
-			baseValue: 15,
-			isAccumulative: true
-		},
-		{ key: 'workers_deployed', label: 'Workers Deployed', baseValue: 8, isAccumulative: false },
-		{
-			key: 'equipment_mobilized',
-			label: 'Equipment Mobilized',
-			baseValue: 3,
-			isAccumulative: false
-		}
-	],
-	agriculture: [
-		{
-			key: 'seedlings_distributed',
-			label: 'Seedlings Distributed',
-			baseValue: 200,
-			isAccumulative: true
-		},
-		{ key: 'farmers_trained', label: 'Farmers Trained', baseValue: 10, isAccumulative: true },
-		{ key: 'hectares_covered', label: 'Hectares Covered', baseValue: 5, isAccumulative: true },
-		{
-			key: 'farm_visits_conducted',
-			label: 'Farm Visits Conducted',
-			baseValue: 8,
-			isAccumulative: true
-		}
-	],
-	education: [
-		{ key: 'students_served', label: 'Students Served', baseValue: 30, isAccumulative: true },
-		{
-			key: 'learning_materials_distributed',
-			label: 'Learning Materials Distributed',
-			baseValue: 50,
-			isAccumulative: true
-		},
-		{ key: 'training_sessions', label: 'Training Sessions', baseValue: 2, isAccumulative: true },
-		{ key: 'classrooms_improved', label: 'Classrooms Improved', baseValue: 1, isAccumulative: true }
-	],
-	health: [
-		{ key: 'patients_served', label: 'Patients Served', baseValue: 40, isAccumulative: true },
-		{
-			key: 'medical_supplies_distributed',
-			label: 'Medical Supplies Distributed',
-			baseValue: 100,
-			isAccumulative: true
-		},
-		{
-			key: 'health_sessions_conducted',
-			label: 'Health Sessions Conducted',
-			baseValue: 3,
-			isAccumulative: true
-		},
-		{
-			key: 'vaccinations_administered',
-			label: 'Vaccinations Administered',
-			baseValue: 25,
-			isAccumulative: true
-		}
-	],
-	livelihood: [
-		{
-			key: 'beneficiaries_trained',
-			label: 'Beneficiaries Trained',
-			baseValue: 15,
-			isAccumulative: true
-		},
-		{
-			key: 'starter_kits_distributed',
-			label: 'Starter Kits Distributed',
-			baseValue: 8,
-			isAccumulative: true
-		},
-		{
-			key: 'skills_sessions',
-			label: 'Skills Training Sessions',
-			baseValue: 2,
-			isAccumulative: true
-		},
-		{
-			key: 'enterprises_assisted',
-			label: 'Enterprises Assisted',
-			baseValue: 3,
-			isAccumulative: true
-		}
-	],
-	environment: [
-		{ key: 'seedlings_planted', label: 'Seedlings Planted', baseValue: 500, isAccumulative: true },
-		{ key: 'hectares_covered', label: 'Hectares Covered', baseValue: 2, isAccumulative: true },
-		{
-			key: 'volunteers_mobilized',
-			label: 'Volunteers Mobilized',
-			baseValue: 20,
-			isAccumulative: false
-		},
-		{ key: 'cleanup_activities', label: 'Cleanup Activities', baseValue: 2, isAccumulative: true }
-	]
-};
+/**
+ * Get a reasonable base value for different indicator types
+ */
+function getBaseValueForIndicator(
+	indicatorId: string,
+	budget: number,
+	beneficiaries: number
+): number {
+	// Base values for common indicator types
+	const baseValues: Record<string, number> = {
+		// Infrastructure
+		classrooms_built: 2,
+		square_meters: 100,
+		facilities_built: 1,
+		cubicles: 4,
+		health_stations: 1,
+		floor_area: 80,
+		road_length: 1,
+		road_width: 6,
+		water_systems: 1,
+		households_served: 50,
+		distribution_lines: 500,
+		centers_built: 1,
+		bridges_built: 1,
+		bridge_length: 20,
+		lights_installed: 10,
+		coverage_area: 2,
+
+		// Agriculture
+		seedlings_distributed: 1000,
+		hectares_covered: 10,
+		farmers_benefited: 30,
+		training_sessions: 5,
+		equipment_units: 10,
+		irrigation_systems: 1,
+		hectares_irrigated: 15,
+		livestock_heads: 20,
+		hectares_planted: 10,
+		centers_established: 1,
+		farmers_trained: 30,
+		storage_capacity: 50,
+
+		// Education
+		students_fed: 100,
+		feeding_days: 120,
+		meals_served: 12000,
+		materials_distributed: 100,
+		students_benefited: 100,
+		teachers_trained: 20,
+		labs_installed: 1,
+		computers_provided: 20,
+		learners_enrolled: 50,
+		scholars: 25,
+		total_grants: 250000,
+
+		// Health
+		consultations: 200,
+		patients_served: 150,
+		mission_days: 5,
+		vaccines_administered: 200,
+		children_immunized: 150,
+		children_fed: 80,
+		service_trips: 10,
+		medicine_packs: 100,
+		beneficiaries: 100,
+		workers_trained: 15,
+
+		// Livelihood
+		trainees: 50,
+		training_hours: 40,
+		enterprises_supported: 10,
+		total_capital_support: 500000,
+		cooperatives_formed: 2,
+		members: 50,
+		equipment_sets: 20,
+		market_linkages: 5,
+		producers_linked: 30,
+
+		// Environment
+		trees_planted: 5000,
+		hectares_reforested: 10,
+		facilities_installed: 2,
+		hectares_rehabilitated: 5,
+		mangroves_planted: 2000,
+		watersheds_managed: 1,
+		hectares_protected: 50,
+		water_sources_developed: 2,
+		households_benefited: 50
+	};
+
+	return baseValues[indicatorId] || 10; // Default to 10 if not found
+}
 
 // Common issues encountered by category
 const ISSUES_BY_CATEGORY: Record<CategoryKey, string[]> = {
@@ -1006,28 +810,30 @@ function calculateSCurveProgress(
 	return Math.max(0, Math.min(100, Math.round(baseProgress + variance)));
 }
 
+/**
+ * Generate monthly progress data using performance targets for achieved outputs
+ * All indicators are treated as accumulative (cumulative over time)
+ */
 function generateMonthlyProgress(
 	projectId: number,
 	totalBudget: number,
 	startDate: Date,
 	months: number,
 	rng: SeededRandom,
-	categoryKey: CategoryKey = 'infrastructure'
+	categoryKey: CategoryKey,
+	performanceTargets: PerformanceTarget[]
 ): MonthlyProgress[] {
 	const progress: MonthlyProgress[] = [];
 	let cumulativeBeneficiaries = 0;
 	let cumulativeBudget = 0;
 
-	// Get category-specific outputs and issues
-	const outputTemplates = ACHIEVED_OUTPUTS_BY_CATEGORY[categoryKey];
+	// Get category-specific issues for realistic reporting
 	const categoryIssues = ISSUES_BY_CATEGORY[categoryKey];
 
-	// Track cumulative values for accumulative outputs
+	// Track cumulative values for all performance indicators (all accumulative)
 	const cumulativeOutputs: Record<string, number> = {};
-	outputTemplates.forEach((template) => {
-		if (template.isAccumulative) {
-			cumulativeOutputs[template.key] = 0;
-		}
+	performanceTargets.forEach((target) => {
+		cumulativeOutputs[target.indicator_type] = 0;
 	});
 
 	// Project health factor (some projects perform better than others)
@@ -1057,20 +863,20 @@ function generateMonthlyProgress(
 		const monthlyBeneficiaryBase = Math.round((progressPercent / 100) * rng.nextInt(20, 60));
 		cumulativeBeneficiaries += monthlyBeneficiaryBase;
 
-		// Generate category-specific achieved outputs
+		// Generate achieved outputs based on performance targets
+		// All indicators are accumulative - values grow toward target_value with progress
 		const achievedOutputs: Record<string, number> = {};
-		outputTemplates.forEach((template) => {
-			if (template.isAccumulative) {
-				// Accumulative outputs grow with progress
-				const targetValue = Math.round(
-					template.baseValue * (progressPercent / 100) * (0.8 + rng.next() * 0.4)
-				);
-				cumulativeOutputs[template.key] = Math.max(cumulativeOutputs[template.key], targetValue);
-				achievedOutputs[template.key] = cumulativeOutputs[template.key];
-			} else {
-				// Non-accumulative outputs vary each month
-				achievedOutputs[template.key] = Math.round(template.baseValue * (0.6 + rng.next() * 0.8));
-			}
+		performanceTargets.forEach((target) => {
+			// Calculate achieved value based on progress percentage toward target
+			const targetValue = Math.round(
+				target.target_value * (progressPercent / 100) * (0.85 + rng.next() * 0.3)
+			);
+			// Ensure cumulative value never decreases
+			cumulativeOutputs[target.indicator_type] = Math.max(
+				cumulativeOutputs[target.indicator_type],
+				targetValue
+			);
+			achievedOutputs[target.indicator_type] = cumulativeOutputs[target.indicator_type];
 		});
 
 		// Calculate expected progress based on linear timeline
@@ -1378,6 +1184,15 @@ export function generateProjects(
 		// Catch-up plan for projects with issues
 		const catch_up_plan = hasIssues ? rng.pick(CATCH_UP_PLANS) : undefined;
 
+		// Generate performance targets first so they can be used for monthly progress
+		const performanceTargets = generatePerformanceTargets(
+			i,
+			projectType?.id,
+			totalBeneficiaries,
+			budget,
+			rng
+		);
+
 		const project: Project = {
 			id: i,
 			title: `${title} - ${selectedSitios[0].municipality}`,
@@ -1397,16 +1212,18 @@ export function generateProjects(
 			project_sitios: projectSitios,
 			monthly_progress:
 				monthsElapsed > 0
-					? generateMonthlyProgress(i, budget, startDate, monthsElapsed, rng, categoryKey)
+					? generateMonthlyProgress(
+							i,
+							budget,
+							startDate,
+							monthsElapsed,
+							rng,
+							categoryKey,
+							performanceTargets
+						)
 					: [],
 			monthly_targets: generateMonthlyTargets(budget, startDate, durationMonths),
-			performance_targets: generatePerformanceTargets(
-				i,
-				categoryKey,
-				totalBeneficiaries,
-				budget,
-				rng
-			),
+			performance_targets: performanceTargets,
 			funding_sources: generateFundingSources(i, budget, rng),
 			budget_components: generateBudgetComponents(i, budget, categoryKey, rng),
 			employment_generated: {
