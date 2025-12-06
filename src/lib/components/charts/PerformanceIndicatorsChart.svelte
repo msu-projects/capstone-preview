@@ -31,24 +31,23 @@
 		})
 	);
 
-	// Calculate cumulative progress for each performance target over time
-	function getCumulativeProgressForTarget(target: PerformanceTarget): number[] {
+	// Get progress for each performance target over time (data is already cumulative)
+	function getProgressForTarget(target: PerformanceTarget): number[] {
 		const normalizedType = target.indicator_type?.toLowerCase().replace(/\s+/g, '_');
 		const normalizedName = target.indicator_name?.toLowerCase().replace(/\s+/g, '_');
 
-		let cumulative = 0;
 		return sortedProgress.map((progress) => {
+			let value = 0;
 			if (progress.achieved_outputs) {
-				const value =
+				value =
 					progress.achieved_outputs[normalizedType] ||
 					progress.achieved_outputs[normalizedName] ||
 					progress.achieved_outputs[target.indicator_type] ||
 					progress.achieved_outputs[target.indicator_name] ||
 					0;
-				cumulative += value;
 			}
 			// Return percentage of target achieved
-			return Math.min((cumulative / target.target_value) * 100, 100);
+			return Math.min((value / target.target_value) * 100, 100);
 		});
 	}
 
@@ -56,7 +55,7 @@
 	const chartSeries = $derived(
 		performanceTargets.map((target, i) => ({
 			name: target.indicator_name,
-			data: getCumulativeProgressForTarget(target),
+			data: getProgressForTarget(target),
 			color: defaultColors[i % defaultColors.length]
 		}))
 	);

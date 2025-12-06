@@ -443,8 +443,8 @@ export function transformToMonthlyReports(
 }
 
 /**
- * Aggregate achieved_outputs across all monthly progress entries
- * Returns a Record summing up all output values by indicator key
+ * Get latest achieved_outputs from monthly progress entries
+ * Since achieved_outputs is cumulative, we return the most recent month's values
  */
 export function aggregateAchievedOutputs(
 	monthlyProgress: MonthlyProgress[] | undefined
@@ -453,17 +453,26 @@ export function aggregateAchievedOutputs(
 		return {};
 	}
 
-	const aggregated: Record<string, number> = {};
+	// Sort by month_year descending and get the latest entry with achieved_outputs
+	const sortedProgress = [...monthlyProgress].sort((a, b) =>
+		b.month_year.localeCompare(a.month_year)
+	);
 
-	for (const progress of monthlyProgress) {
-		if (progress.achieved_outputs) {
-			for (const [key, value] of Object.entries(progress.achieved_outputs)) {
-				aggregated[key] = (aggregated[key] || 0) + (Number(value) || 0);
-			}
-		}
+	const latestWithOutputs = sortedProgress.find(
+		(p) => p.achieved_outputs && Object.keys(p.achieved_outputs).length > 0
+	);
+
+	if (!latestWithOutputs?.achieved_outputs) {
+		return {};
 	}
 
-	return aggregated;
+	// Return the latest cumulative values
+	const result: Record<string, number> = {};
+	for (const [key, value] of Object.entries(latestWithOutputs.achieved_outputs)) {
+		result[key] = Number(value) || 0;
+	}
+
+	return result;
 }
 
 /**
