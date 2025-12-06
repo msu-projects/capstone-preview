@@ -111,17 +111,10 @@
 						onclick={() => goto(section.href)}
 					>
 						<Card.Header class="pb-2">
-							<div class="flex items-start justify-between">
-								<div
-									class="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary"
-								>
-									<section.icon class="size-5" />
-								</div>
-								{#if section.hasOverride()}
-									<Badge variant="outline" class="text-amber-600 dark:text-amber-400"
-										>Customized</Badge
-									>
-								{/if}
+							<div
+								class="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary"
+							>
+								<section.icon class="size-5" />
 							</div>
 							<Card.Title class="text-lg">{section.title}</Card.Title>
 							<Card.Description>{section.description}</Card.Description>
