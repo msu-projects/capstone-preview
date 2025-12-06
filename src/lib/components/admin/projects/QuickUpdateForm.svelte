@@ -58,7 +58,8 @@
 		// Photo Documentation
 		photoDocumentation: PhotoDocumentation[];
 		// Performance Indicators
-		achievedOutputs: Record<string, number>;
+		cumulativeAchievedOutputs: Record<string, number>; // Cumulative from previous months (read-only)
+		monthlyAchievedOutputs: Record<string, number>; // This month only (editable)
 		performanceTargets: PerformanceTarget[];
 		// Callback
 		onSwitchToFull: () => void;
@@ -83,7 +84,8 @@
 		householdsReached = $bindable(),
 		plannedPercentage = $bindable(),
 		photoDocumentation = $bindable(),
-		achievedOutputs = $bindable(),
+		cumulativeAchievedOutputs = $bindable(),
+		monthlyAchievedOutputs = $bindable(),
 		performanceTargets,
 		onSwitchToFull
 	}: Props = $props();
@@ -131,6 +133,16 @@
 	let slippageMetrics = $derived(
 		calculateProgressSlippage(Number(plannedPercentage || 0), physicalActual)
 	);
+
+	// Derived computed values - Performance Indicators
+	// Calculate updated cumulative (previous cumulative + this month's values)
+	let updatedAchievedOutputs = $derived.by(() => {
+		const updated: Record<string, number> = { ...cumulativeAchievedOutputs };
+		Object.entries(monthlyAchievedOutputs).forEach(([key, value]) => {
+			updated[key] = (updated[key] || 0) + (Number(value) || 0);
+		});
+		return updated;
+	});
 
 	// Get status label for display
 	const getStatusLabel = (s: ProjectStatus) => {
@@ -715,7 +727,9 @@
 			<Card.Content class="space-y-4">
 				<div class="grid gap-4 md:grid-cols-2">
 					{#each performanceTargets as target, index (target.id ?? `target-${index}`)}
-						{@const achieved = achievedOutputs[target.indicator_type] || 0}
+						{@const cumulative = cumulativeAchievedOutputs[target.indicator_type] || 0}
+						{@const monthly = monthlyAchievedOutputs[target.indicator_type] || 0}
+						{@const achieved = updatedAchievedOutputs[target.indicator_type] || 0}
 						{@const progressPct =
 							target.target_value > 0 ? (achieved / target.target_value) * 100 : 0}
 						{@const progressStatus =
@@ -753,29 +767,57 @@
 										</span>
 									</div>
 								</div>
-								<!-- Achieved (Editable) -->
+								<!-- Total Achieved (Read-only, cumulative) -->
 								<div class="space-y-1">
-									<span class="text-xs text-muted-foreground">Achieved</span>
+									<span class="flex items-center gap-1 text-xs text-muted-foreground">
+										Total Achieved
+										<Info class="size-3 text-muted-foreground" />
+									</span>
 									<div class="relative">
-										<NumberInput
-											id="indicator-{target.indicator_type}"
-											min={0}
-											value={achievedOutputs[target.indicator_type] || 0}
-											onvaluechange={(val) => {
-												achievedOutputs = {
-													...achievedOutputs,
-													[target.indicator_type]: val
-												};
-											}}
-											class="pr-12 text-sm"
-											placeholder="0"
-										/>
+										<Input type="text" value={achieved} disabled class="pr-12 text-sm opacity-75" />
 										<span
 											class="pointer-events-none absolute top-2.5 right-3 text-xs text-muted-foreground"
 										>
 											{target.unit_of_measure}
 										</span>
 									</div>
+									{#if monthly > 0}
+										<p class="text-xs text-muted-foreground">
+											Previous: {cumulative} + This month: {monthly} = {achieved}
+										</p>
+									{:else if cumulative > 0}
+										<p class="text-xs text-muted-foreground">Cumulative from previous months</p>
+									{/if}
+								</div>
+							</div>
+							<!-- This Month's Achievement (Editable) -->
+							<div class="space-y-1">
+								<span class="flex items-center gap-2 text-xs text-muted-foreground">
+									<Badge variant="default" class="gap-1 text-xs">
+										<Calendar class="size-3" />
+										{currentMonthFormatted}
+									</Badge>
+									Achieved This Month
+								</span>
+								<div class="relative">
+									<NumberInput
+										id="indicator-{target.indicator_type}"
+										min={0}
+										value={monthlyAchievedOutputs[target.indicator_type] || 0}
+										onvaluechange={(val) => {
+											monthlyAchievedOutputs = {
+												...monthlyAchievedOutputs,
+												[target.indicator_type]: val
+											};
+										}}
+										class="pr-12 text-sm"
+										placeholder="0"
+									/>
+									<span
+										class="pointer-events-none absolute top-2.5 right-3 text-xs text-muted-foreground"
+									>
+										{target.unit_of_measure}
+									</span>
 								</div>
 							</div>
 							<!-- Progress bar -->

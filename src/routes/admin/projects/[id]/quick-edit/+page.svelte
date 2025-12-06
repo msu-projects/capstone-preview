@@ -201,7 +201,8 @@
 						bind:householdsReached={quickUpdateData.householdsReached}
 						bind:plannedPercentage={quickUpdateData.plannedPercentage}
 						bind:photoDocumentation={quickUpdateData.photoDocumentation}
-						bind:achievedOutputs={quickUpdateData.achievedOutputs}
+						bind:cumulativeAchievedOutputs={quickUpdateData.cumulativeAchievedOutputs}
+						bind:monthlyAchievedOutputs={quickUpdateData.monthlyAchievedOutputs}
 						performanceTargets={quickUpdateData.performanceTargets}
 						onSwitchToFull={switchToFullEdit}
 					/>

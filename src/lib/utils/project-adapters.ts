@@ -42,7 +42,8 @@ export interface QuickUpdateFormData {
 	// Photo Documentation
 	photoDocumentation: PhotoDocumentation[];
 	// Performance Indicators
-	achievedOutputs: Record<string, number>; // { 'indicator_id': 50 } - numbers for type safety
+	cumulativeAchievedOutputs: Record<string, number>; // Cumulative from previous months (read-only, for display)
+	monthlyAchievedOutputs: Record<string, number>; // This month's achievements only (editable)
 	performanceTargets: PerformanceTarget[]; // Read-only reference for display
 }
 
@@ -88,6 +89,25 @@ export function projectToQuickUpdate(project: Project): QuickUpdateFormData {
 	// Get completion percentage from latest monthly progress
 	const completionPct = getCompletionPercentage(project);
 
+	// Get cumulative achieved outputs from the LAST month's record (before current month)
+	// Since achieved_outputs is stored cumulatively, we just need the most recent previous month's values
+	const previousMonthsProgress = [...(project.monthly_progress || [])]
+		.filter((mp: MonthlyProgress) => mp.month_year < currentMonth)
+		.sort((a, b) => b.month_year.localeCompare(a.month_year));
+	const lastMonthProgress = previousMonthsProgress[0];
+
+	const cumulativeAchievedOutputs: Record<string, number> = Object.fromEntries(
+		Object.entries(lastMonthProgress?.achieved_outputs || {}).map(([k, v]) => [k, Number(v) || 0])
+	);
+
+	// Get THIS month's achieved outputs only (or 0 for new month)
+	const monthlyAchievedOutputs: Record<string, number> = Object.fromEntries(
+		Object.entries(currentMonthProgress?.achieved_outputs || {}).map(([k, v]) => [
+			k,
+			Number(v) || 0
+		])
+	);
+
 	return {
 		// Progress & Status
 		status: project.status,
@@ -118,13 +138,9 @@ export function projectToQuickUpdate(project: Project): QuickUpdateFormData {
 		householdsReached: '0', // This could be enhanced to pull from sitio data
 		// Photo Documentation - current month's photos, or empty for new month
 		photoDocumentation: currentMonthProgress?.photo_documentation || [],
-		// Performance Indicators - use latest achieved outputs as starting point
-		achievedOutputs: Object.fromEntries(
-			Object.entries(latestMonthlyProgress?.achieved_outputs || {}).map(([k, v]) => [
-				k,
-				Number(v) || 0
-			])
-		),
+		// Performance Indicators - cumulative from previous months + this month's editable values
+		cumulativeAchievedOutputs,
+		monthlyAchievedOutputs,
 		performanceTargets: project.performance_targets || []
 	};
 }
@@ -145,6 +161,12 @@ export function applyQuickUpdateToProject(
 
 	const monthlyAmount = Number(formData.monthlyDisbursement || 0);
 
+	// Compute final cumulative achieved outputs (cumulative + this month's values)
+	const finalAchievedOutputs: Record<string, number> = { ...formData.cumulativeAchievedOutputs };
+	Object.entries(formData.monthlyAchievedOutputs).forEach(([key, value]) => {
+		finalAchievedOutputs[key] = (finalAchievedOutputs[key] || 0) + (Number(value) || 0);
+	});
+
 	// Update or create monthly_progress for current month
 	let updatedMonthlyProgress: MonthlyProgress[] = project.monthly_progress || [];
 	const existingProgressIndex = updatedMonthlyProgress.findIndex(
@@ -164,7 +186,7 @@ export function applyQuickUpdateToProject(
 						recommendations: formData.recommendations,
 						catch_up_plan: formData.catchUpPlan,
 						photo_documentation: formData.photoDocumentation,
-						achieved_outputs: { ...formData.achievedOutputs },
+						achieved_outputs: { ...finalAchievedOutputs },
 						status: slippage > 10 ? 'delayed' : slippage < -5 ? 'ahead' : ('on-track' as const),
 						updated_at: new Date().toISOString()
 					}
@@ -178,7 +200,7 @@ export function applyQuickUpdateToProject(
 			month_year: currentMonth,
 			physical_progress_percentage: actualPct,
 			budget_utilized: monthlyAmount,
-			achieved_outputs: { ...formData.achievedOutputs },
+			achieved_outputs: { ...finalAchievedOutputs },
 			beneficiaries_reached: Number(formData.currentBeneficiaries || 0),
 			issues: formData.issues,
 			recommendations: formData.recommendations,
