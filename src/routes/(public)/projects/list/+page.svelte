@@ -22,6 +22,7 @@
 	let searchQuery = $state('');
 	let statusFilter = $state<string>('');
 	let categoryFilter = $state<CategoryKey | ''>('');
+	let sortBy = $state<string>('name');
 	let currentPage = $state(1);
 	const itemsPerPage = 12;
 
@@ -35,7 +36,7 @@
 
 	// Filter projects
 	const filteredProjects = $derived.by(() => {
-		return projects.filter((project) => {
+		let filtered = projects.filter((project) => {
 			const matchesSearch =
 				!searchQuery ||
 				project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -51,6 +52,32 @@
 
 			return matchesSearch && matchesStatus && matchesCategory;
 		});
+
+		// Sort the filtered results
+		return filtered.sort((a, b) => {
+			switch (sortBy) {
+				case 'name':
+					return a.title.localeCompare(b.title);
+				case 'budget-high':
+					return b.total_budget - a.total_budget;
+				case 'budget-low':
+					return a.total_budget - b.total_budget;
+				case 'beneficiaries-high':
+					return b.beneficiaries - a.beneficiaries;
+				case 'beneficiaries-low':
+					return a.beneficiaries - b.beneficiaries;
+				case 'progress-high':
+					return getCompletionPercentage(b) - getCompletionPercentage(a);
+				case 'progress-low':
+					return getCompletionPercentage(a) - getCompletionPercentage(b);
+				case 'date-newest':
+					return new Date(b.start_date).getTime() - new Date(a.start_date).getTime();
+				case 'date-oldest':
+					return new Date(a.start_date).getTime() - new Date(b.start_date).getTime();
+				default:
+					return 0;
+			}
+		});
 	});
 
 	// Paginate
@@ -65,6 +92,12 @@
 		searchQuery = '';
 		statusFilter = '';
 		categoryFilter = '';
+		sortBy = 'name';
+		currentPage = 1;
+	}
+
+	function handleSortChange(value: string | undefined) {
+		sortBy = value || 'name';
 		currentPage = 1;
 	}
 </script>
@@ -102,7 +135,7 @@
 			<Card.Content class="">
 				<div class="flex flex-wrap gap-4">
 					<!-- Search -->
-					<div class="min-w-[300px] flex-1">
+					<div class="min-w-20 flex-1">
 						<div class="relative">
 							<Search
 								class="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
@@ -145,6 +178,44 @@
 										>{category.name}</Select.Item
 									>
 								{/each}
+							</Select.Content>
+						</Select.Root>
+					</div>
+
+					<!-- Sort Filter -->
+					<div class="min-w-60">
+						<Select.Root type="single" value={sortBy} onValueChange={handleSortChange}>
+							<Select.Trigger class="w-full">
+								{#if sortBy === 'name'}
+									Sort: Name (A-Z)
+								{:else if sortBy === 'budget-high'}
+									Sort: Budget (High-Low)
+								{:else if sortBy === 'budget-low'}
+									Sort: Budget (Low-High)
+								{:else if sortBy === 'beneficiaries-high'}
+									Sort: Beneficiaries (High-Low)
+								{:else if sortBy === 'beneficiaries-low'}
+									Sort: Beneficiaries (Low-High)
+								{:else if sortBy === 'progress-high'}
+									Sort: Progress (High-Low)
+								{:else if sortBy === 'progress-low'}
+									Sort: Progress (Low-High)
+								{:else if sortBy === 'date-newest'}
+									Sort: Date (Newest)
+								{:else if sortBy === 'date-oldest'}
+									Sort: Date (Oldest)
+								{/if}
+							</Select.Trigger>
+							<Select.Content>
+								<Select.Item value="name">Name (A-Z)</Select.Item>
+								<Select.Item value="budget-high">Budget (High-Low)</Select.Item>
+								<Select.Item value="budget-low">Budget (Low-High)</Select.Item>
+								<Select.Item value="beneficiaries-high">Beneficiaries (High-Low)</Select.Item>
+								<Select.Item value="beneficiaries-low">Beneficiaries (Low-High)</Select.Item>
+								<Select.Item value="progress-high">Progress (High-Low)</Select.Item>
+								<Select.Item value="progress-low">Progress (Low-High)</Select.Item>
+								<Select.Item value="date-newest">Date (Newest)</Select.Item>
+								<Select.Item value="date-oldest">Date (Oldest)</Select.Item>
 							</Select.Content>
 						</Select.Root>
 					</div>

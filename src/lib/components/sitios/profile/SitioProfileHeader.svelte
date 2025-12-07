@@ -34,22 +34,22 @@
 		{
 			critical: {
 				label: 'Critical Need',
-				bgClass: 'bg-red-100 dark:bg-red-900/30',
+				bgClass: 'bg-red-100/60 dark:bg-red-900/30',
 				textClass: 'text-red-700 dark:text-red-400'
 			},
 			high: {
 				label: 'High Need',
-				bgClass: 'bg-orange-100 dark:bg-orange-900/30',
+				bgClass: 'bg-orange-100/60 dark:bg-orange-900/30',
 				textClass: 'text-orange-700 dark:text-orange-400'
 			},
 			medium: {
 				label: 'Medium Need',
-				bgClass: 'bg-yellow-100 dark:bg-yellow-900/30',
+				bgClass: 'bg-yellow-100/60 dark:bg-yellow-900/30',
 				textClass: 'text-yellow-700 dark:text-yellow-400'
 			},
 			low: {
 				label: 'Low Need',
-				bgClass: 'bg-green-100 dark:bg-green-900/30',
+				bgClass: 'bg-green-100/60 dark:bg-green-900/30',
 				textClass: 'text-green-700 dark:text-green-400'
 			}
 		};
