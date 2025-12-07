@@ -88,10 +88,10 @@
 
 			// Add popup
 			marker.bindPopup(`
-				<div class="p-2">
-					<h4 class="font-semibold text-sm text-slate-900 mb-1">${sitio.sitio_name}</h4>
+				<div class="">
+					<a class="font-semibold text-sm text-slate-900 mb-1" href="/sitios/${sitio.sitio_id}">${sitio.sitio_name}</a>
 					<p class="text-xs text-slate-600">${sitio.barangay}, ${sitio.municipality}</p>
-					<div class="mt-2 pt-2 border-t border-slate-200">
+					<div class="mt-1 pt-1 border-t border-slate-200">
 						<p class="text-xs text-slate-500">Target Beneficiaries</p>
 						<p class="text-sm font-medium text-slate-900">${sitio.beneficiaries_target.toLocaleString()}</p>
 					</div>
