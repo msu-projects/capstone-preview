@@ -110,7 +110,7 @@
 				{/each}
 				<div class="my-2 flex items-center justify-between border-t pt-2">
 					<span class="text-sm text-muted-foreground">Theme</span>
-					<ThemeToggle />
+					<ThemeToggle variant="inline" />
 				</div>
 				{#if authStore.isAuthenticated}
 					<Button
