@@ -6,10 +6,11 @@
 	import { Input } from '$lib/components/ui/input';
 	import * as Select from '$lib/components/ui/select';
 	import { Skeleton } from '$lib/components/ui/skeleton';
-	import type { Sitio } from '$lib/types';
+	import type { NeedLevel, Sitio } from '$lib/types';
+	import { getNeedLevelFromScore } from '$lib/types';
 	import { formatNumber } from '$lib/utils/formatters';
 	import { loadSitios } from '$lib/utils/storage';
-	import { ArrowLeft, ArrowRight, Home, MapPin, Search, Users, Zap } from '@lucide/svelte';
+	import { ArrowLeft, ArrowRight, Gauge, Home, MapPin, Search, Users, Zap } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 
 	let sitios = $state<Sitio[]>([]);
@@ -17,6 +18,7 @@
 	let searchTerm = $state('');
 	let selectedMunicipality = $state<string>('all');
 	let selectedBarangay = $state<string>('all');
+	let sortBy = $state<string>('name');
 	let currentPage = $state(1);
 	const itemsPerPage = 12;
 
@@ -41,7 +43,7 @@
 
 	// Filter sitios
 	const filteredSitios = $derived.by(() => {
-		return sitios.filter((s) => {
+		let filtered = sitios.filter((s) => {
 			// Municipality filter
 			if (selectedMunicipality !== 'all' && s.municipality !== selectedMunicipality) {
 				return false;
@@ -64,6 +66,28 @@
 
 			return true;
 		});
+
+		// Sort the filtered results
+		return filtered.sort((a, b) => {
+			switch (sortBy) {
+				case 'name':
+					return a.name.localeCompare(b.name);
+				case 'population-high':
+					return b.population - a.population;
+				case 'population-low':
+					return a.population - b.population;
+				case 'households-high':
+					return b.households - a.households;
+				case 'households-low':
+					return a.households - b.households;
+				case 'need-high':
+					return (b.need_score ?? 5) - (a.need_score ?? 5);
+				case 'need-low':
+					return (a.need_score ?? 5) - (b.need_score ?? 5);
+				default:
+					return 0;
+			}
+		});
 	});
 
 	// Paginate
@@ -78,6 +102,43 @@
 		return (sitio.utilities.households_with_electricity / sitio.households) * 100;
 	}
 
+	// Get need level configuration
+	const needLevelConfig: Record<
+		NeedLevel,
+		{ label: string; bgClass: string; textClass: string; borderClass: string }
+	> = {
+		critical: {
+			label: 'Critical',
+			bgClass: 'bg-red-50 dark:bg-red-950/30',
+			textClass: 'text-red-700 dark:text-red-400',
+			borderClass: 'border-red-200 dark:border-red-800'
+		},
+		high: {
+			label: 'High',
+			bgClass: 'bg-orange-50 dark:bg-orange-950/30',
+			textClass: 'text-orange-700 dark:text-orange-400',
+			borderClass: 'border-orange-200 dark:border-orange-800'
+		},
+		medium: {
+			label: 'Medium',
+			bgClass: 'bg-yellow-50 dark:bg-yellow-950/30',
+			textClass: 'text-yellow-700 dark:text-yellow-400',
+			borderClass: 'border-yellow-200 dark:border-yellow-800'
+		},
+		low: {
+			label: 'Low',
+			bgClass: 'bg-green-50 dark:bg-green-950/30',
+			textClass: 'text-green-700 dark:text-green-400',
+			borderClass: 'border-green-200 dark:border-green-800'
+		}
+	};
+
+	function getNeedConfig(sitio: Sitio) {
+		const needScore = sitio.need_score ?? 5;
+		const needLevel = sitio.need_level ?? getNeedLevelFromScore(needScore);
+		return { needScore, needLevel, config: needLevelConfig[needLevel] };
+	}
+
 	// Handle filter changes
 	function handleMunicipalityChange(value: string | undefined) {
 		selectedMunicipality = value || 'all';
@@ -87,6 +148,11 @@
 
 	function handleBarangayChange(value: string | undefined) {
 		selectedBarangay = value || 'all';
+		currentPage = 1;
+	}
+
+	function handleSortChange(value: string | undefined) {
+		sortBy = value || 'name';
 		currentPage = 1;
 	}
 </script>
@@ -167,6 +233,36 @@
 						{/each}
 					</Select.Content>
 				</Select.Root>
+
+				<!-- Sort Filter -->
+				<Select.Root type="single" value={sortBy} onValueChange={handleSortChange}>
+					<Select.Trigger class="w-full sm:w-[200px]">
+						{#if sortBy === 'name'}
+							Sort: Name (A-Z)
+						{:else if sortBy === 'population-high'}
+							Sort: Population (High-Low)
+						{:else if sortBy === 'population-low'}
+							Sort: Population (Low-High)
+						{:else if sortBy === 'households-high'}
+							Sort: Households (High-Low)
+						{:else if sortBy === 'households-low'}
+							Sort: Households (Low-High)
+						{:else if sortBy === 'need-high'}
+							Sort: Need Score (High-Low)
+						{:else if sortBy === 'need-low'}
+							Sort: Need Score (Low-High)
+						{/if}
+					</Select.Trigger>
+					<Select.Content>
+						<Select.Item value="name">Name (A-Z)</Select.Item>
+						<Select.Item value="need-high">Need Score (High-Low)</Select.Item>
+						<Select.Item value="need-low">Need Score (Low-High)</Select.Item>
+						<Select.Item value="population-high">Population (High-Low)</Select.Item>
+						<Select.Item value="population-low">Population (Low-High)</Select.Item>
+						<Select.Item value="households-high">Households (High-Low)</Select.Item>
+						<Select.Item value="households-low">Households (Low-High)</Select.Item>
+					</Select.Content>
+				</Select.Root>
 			</div>
 
 			<div class="text-sm text-muted-foreground">
@@ -215,6 +311,7 @@
 							searchTerm = '';
 							selectedMunicipality = 'all';
 							selectedBarangay = 'all';
+							sortBy = 'name';
 						}}
 					>
 						Clear Filters
@@ -226,13 +323,14 @@
 			<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 				{#each paginatedSitios as sitio}
 					{@const electricityCoverage = getElectricityCoverage(sitio)}
+					{@const { needScore, needLevel, config: needConfig } = getNeedConfig(sitio)}
 					<Card.Root class="group relative overflow-hidden transition-all hover:shadow-lg">
 						<div
 							class="absolute top-0 left-0 h-1 w-full bg-linear-to-r from-blue-500 to-indigo-500"
 						></div>
 						<Card.Content class="">
-							<div class="mb-3 flex items-start justify-between">
-								<div>
+							<div class="mb-3 flex items-start justify-between gap-2">
+								<div class="flex-1">
 									<h3
 										class="font-semibold text-slate-900 transition-colors group-hover:text-blue-600"
 									>
@@ -242,9 +340,19 @@
 										{sitio.barangay}, {sitio.municipality}
 									</p>
 								</div>
-								{#if sitio.coding}
-									<Badge variant="outline" class="font-mono text-xs">{sitio.coding}</Badge>
-								{/if}
+								<div class="flex shrink-0 flex-col items-end gap-1">
+									{#if sitio.coding}
+										<Badge variant="outline" class="font-mono text-xs">{sitio.coding}</Badge>
+									{/if}
+									<!-- Need Score Badge -->
+									<Badge
+										variant="outline"
+										class="gap-1 border-2 {needConfig.bgClass} {needConfig.textClass} {needConfig.borderClass}"
+									>
+										<Gauge class="size-3" />
+										<span class="font-bold">{needScore}</span>
+									</Badge>
+								</div>
 							</div>
 
 							<div class="grid grid-cols-3 gap-2 text-center">

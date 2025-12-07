@@ -99,7 +99,7 @@
 	<div class="container mx-auto flex-1 space-y-6 px-4 py-6">
 		<!-- Filters -->
 		<Card.Root class="border-0 shadow-sm">
-			<Card.Content class="pt-6">
+			<Card.Content class="">
 				<div class="flex flex-wrap gap-4">
 					<!-- Search -->
 					<div class="min-w-[300px] flex-1">

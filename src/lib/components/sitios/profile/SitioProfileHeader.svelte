@@ -92,26 +92,75 @@
 							Code: {sitio.coding}
 						</Badge>
 					{/if}
-					<!-- Need Score Badge -->
-					<Badge variant="secondary" class="gap-1.5 {needConfig.bgClass} {needConfig.textClass}">
-						<Gauge class="size-3" />
-						{needScore}/10 - {needConfig.label}
-					</Badge>
 				</div>
 
-				<!-- Title -->
-				<div>
-					<h1
-						class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl lg:text-5xl dark:text-slate-100"
+				<!-- Title & Need Score -->
+				<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
+					<!-- Title -->
+					<div class="flex-1">
+						<h1
+							class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl lg:text-5xl dark:text-slate-100"
+						>
+							{sitio.name}
+						</h1>
+						<p class="mt-2 max-w-2xl text-lg text-slate-600 dark:text-slate-400">
+							Community profile for {sitio.name}, Barangay {sitio.barangay}, {sitio.municipality}.
+							{#if sitio.province}
+								{sitio.province} Province.
+							{/if}
+						</p>
+					</div>
+
+					<!-- Prominent Need Score Card -->
+					<div
+						class="shrink-0 rounded-2xl border-2 {needConfig.bgClass} {needConfig.textClass} border-current/20 p-4 shadow-lg ring-2 ring-current/10"
 					>
-						{sitio.name}
-					</h1>
-					<p class="mt-2 max-w-2xl text-lg text-slate-600 dark:text-slate-400">
-						Community profile for {sitio.name}, Barangay {sitio.barangay}, {sitio.municipality}.
-						{#if sitio.province}
-							{sitio.province} Province.
-						{/if}
-					</p>
+						<div class="flex items-center gap-4">
+							<!-- Circular Score Indicator -->
+							<div class="relative flex size-20 items-center justify-center">
+								<!-- Background Circle -->
+								<svg class="absolute inset-0 size-20 -rotate-90" viewBox="0 0 80 80">
+									<circle
+										cx="40"
+										cy="40"
+										r="32"
+										stroke="currentColor"
+										stroke-width="6"
+										fill="none"
+										class="opacity-20"
+									/>
+									<!-- Progress Circle -->
+									<circle
+										cx="40"
+										cy="40"
+										r="32"
+										stroke="currentColor"
+										stroke-width="6"
+										fill="none"
+										stroke-linecap="round"
+										class="transition-all duration-700"
+										style="stroke-dasharray: {(needScore / 10) * 201}px 201px;"
+									/>
+								</svg>
+								<!-- Score Text -->
+								<div class="relative text-center">
+									<div class="text-2xl leading-none font-bold">{needScore}</div>
+									<div class="text-xs font-medium opacity-80">/10</div>
+								</div>
+							</div>
+
+							<!-- Need Level Text -->
+							<div class="space-y-1">
+								<div class="flex items-center gap-1.5">
+									<Gauge class="size-4" />
+									<span class="text-xs font-semibold tracking-wide uppercase opacity-80"
+										>Need Score</span
+									>
+								</div>
+								<div class="text-lg leading-tight font-bold">{needConfig.label}</div>
+							</div>
+						</div>
+					</div>
 				</div>
 
 				<!-- Quick Info -->
