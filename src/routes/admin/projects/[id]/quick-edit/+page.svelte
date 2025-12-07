@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import AdminHeader from '$lib/components/admin/AdminHeader.svelte';
 	import QuickUpdateForm from '$lib/components/admin/projects/QuickUpdateForm.svelte';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
@@ -6,6 +7,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import { refreshProjects } from '$lib/mock-data';
+	import { authStore } from '$lib/stores/auth.svelte';
 	import {
 		applyQuickUpdateToProject,
 		getQuickUpdateWarnings,
@@ -45,6 +47,15 @@
 	let existingUpdateDialogOpen = $state(!!existingMonthlyUpdate);
 
 	onMount(() => {
+		// Check permissions
+		if (!authStore.canPerform('projects', 'write')) {
+			toast.error('Access Denied', {
+				description: 'You do not have permission to edit projects.'
+			});
+			goto(`/admin/projects/${data.id}`);
+			return;
+		}
+
 		if (!!existingMonthlyUpdate) {
 			quickUpdateData.budgetDisbursed = String(
 				Number(quickUpdateData.budgetDisbursed) - Number(quickUpdateData.monthlyDisbursement)

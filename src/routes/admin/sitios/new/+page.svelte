@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import AdminHeader from '$lib/components/admin/AdminHeader.svelte';
 	import BasicInfoTab from '$lib/components/admin/sitios/BasicInfoTab.svelte';
 	import CommunityServicesTab from '$lib/components/admin/sitios/CommunityServicesTab.svelte';
@@ -11,6 +12,7 @@
 	import * as Card from '$lib/components/ui/card';
 	import { FormStepper, type Step } from '$lib/components/ui/form-stepper';
 	import { localOfficialPositionOptions } from '$lib/config/sitio-options';
+	import { authStore } from '$lib/stores/auth.svelte';
 	import type { Sitio, SitioIssue, SitioPPA } from '$lib/types';
 	import { getNeedLevelFromScore } from '$lib/types';
 	import { logAuditAction } from '$lib/utils/audit';
@@ -28,7 +30,18 @@
 		Users,
 		X
 	} from '@lucide/svelte';
+	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
+
+	// Check permissions on mount
+	onMount(() => {
+		if (!authStore.canPerform('sitios', 'write')) {
+			toast.error('Access Denied', {
+				description: 'You do not have permission to create sitios.'
+			});
+			goto('/admin/sitios');
+		}
+	});
 
 	let isSaving = $state(false);
 	let activeStep = $state('basic');

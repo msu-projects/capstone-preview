@@ -9,6 +9,7 @@
 	import * as Card from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
 	import * as Select from '$lib/components/ui/select';
+	import { authStore } from '$lib/stores/auth.svelte';
 	import type { Sitio } from '$lib/types';
 	import { downloadSitioProfilePDF } from '$lib/utils/pdf-generator';
 	import { deleteSitio, loadSitios } from '$lib/utils/storage';
@@ -275,14 +276,16 @@
 				<BarChart3 class="size-4 sm:mr-2" />
 				<span class="hidden sm:inline">View Dashboard</span>
 			</Button>
-			<Button variant="outline" onclick={() => goto('/admin/import')} size="sm">
-				<Upload class="size-4 sm:mr-2" />
-				<span class="hidden sm:inline">Import Data</span>
-			</Button>
-			<Button onclick={() => goto('/admin/sitios/new')} size="sm">
-				<Plus class="size-4 sm:mr-2" />
-				<span class="hidden sm:inline">Add Sitio</span>
-			</Button>
+			{#if authStore.canPerform('sitios', 'write')}
+				<Button variant="outline" onclick={() => goto('/admin/import')} size="sm">
+					<Upload class="size-4 sm:mr-2" />
+					<span class="hidden sm:inline">Import Data</span>
+				</Button>
+				<Button onclick={() => goto('/admin/sitios/new')} size="sm">
+					<Plus class="size-4 sm:mr-2" />
+					<span class="hidden sm:inline">Add Sitio</span>
+				</Button>
+			{/if}
 		{/snippet}
 	</AdminHeader>
 

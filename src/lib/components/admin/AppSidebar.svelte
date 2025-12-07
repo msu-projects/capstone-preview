@@ -53,7 +53,7 @@
 			items: [
 				{ title: 'Users', url: '/admin/users', icon: Users, requiresSuperadmin: true },
 				{ title: 'Configuration', url: '/admin/config', icon: Settings2, requiresSuperadmin: true },
-				{ title: 'Audit Logs', url: '/admin/audit', icon: FileText, requiresAdmin: true },
+				{ title: 'Audit Logs', url: '/admin/audit', icon: FileText },
 				{ title: 'View Public Portal', url: '/', icon: ExternalLink }
 			]
 		}

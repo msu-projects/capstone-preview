@@ -14,6 +14,7 @@
 	import * as Select from '$lib/components/ui/select';
 	import * as Tabs from '$lib/components/ui/tabs';
 	import { categories } from '$lib/config/project-categories';
+	import { authStore } from '$lib/stores/auth.svelte';
 	import type { Project, Sitio } from '$lib/types';
 	import toTitleCase from '$lib/utils/common';
 	import { downloadProjectMonitoringPDF } from '$lib/utils/pdf-generator';
@@ -233,10 +234,12 @@
 				<Download class="size-4 sm:mr-2" />
 				<span class="hidden sm:inline">Export</span>
 			</Button>
-			<Button onclick={() => goto('/admin/projects/new')} size="sm">
-				<Plus class="size-4 sm:mr-2" />
-				<span class="hidden sm:inline">New Project</span>
-			</Button>
+			{#if authStore.canPerform('projects', 'write')}
+				<Button onclick={() => goto('/admin/projects/new')} size="sm">
+					<Plus class="size-4 sm:mr-2" />
+					<span class="hidden sm:inline">New Project</span>
+				</Button>
+			{/if}
 		{/snippet}
 	</AdminHeader>
 

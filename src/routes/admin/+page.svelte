@@ -10,6 +10,7 @@
 	import * as Card from '$lib/components/ui/card';
 	import { Skeleton } from '$lib/components/ui/skeleton';
 	import { chartData, projects, stats } from '$lib/mock-data';
+	import { authStore } from '$lib/stores/auth.svelte';
 	import { loadAuditLogs } from '$lib/utils/audit';
 	import { downloadProjectMonitoringPDF } from '$lib/utils/pdf-generator';
 	import { ArrowRight, ChartColumn, Download, ExternalLink, Plus } from '@lucide/svelte';
@@ -71,10 +72,12 @@
 				<Download class="size-4 sm:mr-2" />
 				<span class="hidden sm:inline">Export Report</span>
 			</Button>
-			<Button size="sm" href="/admin/projects/new">
-				<Plus class="size-4 sm:mr-2" />
-				<span class="hidden sm:inline">New Project</span>
-			</Button>
+			{#if authStore.canPerform('projects', 'write')}
+				<Button size="sm" href="/admin/projects/new">
+					<Plus class="size-4 sm:mr-2" />
+					<span class="hidden sm:inline">New Project</span>
+				</Button>
+			{/if}
 		{/snippet}
 	</AdminHeader>
 

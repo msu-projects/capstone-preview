@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import AdminHeader from '$lib/components/admin/AdminHeader.svelte';
 	import BudgetResourcesTab from '$lib/components/admin/projects/BudgetResourcesTab.svelte';
 	import CategoryProjectSelectionTab from '$lib/components/admin/projects/CategoryProjectSelectionTab.svelte';
@@ -11,6 +12,7 @@
 	import { FormSection } from '$lib/components/ui/form-section';
 	import { FormStepper, type Step } from '$lib/components/ui/form-stepper';
 	import { getProjectTypeById } from '$lib/config/project-categories';
+	import { authStore } from '$lib/stores/auth.svelte';
 	import type {
 		BudgetComponent,
 		CategoryKey,
@@ -35,7 +37,18 @@
 		Target,
 		X
 	} from '@lucide/svelte';
+	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
+
+	// Check permissions on mount
+	onMount(() => {
+		if (!authStore.canPerform('projects', 'write')) {
+			toast.error('Access Denied', {
+				description: 'You do not have permission to create projects.'
+			});
+			goto('/admin/projects');
+		}
+	});
 
 	// Form state
 	let isSaving = $state(false);

@@ -15,6 +15,7 @@
 	import * as Card from '$lib/components/ui/card';
 	import * as Select from '$lib/components/ui/select';
 	import * as Tabs from '$lib/components/ui/tabs';
+	import { authStore } from '$lib/stores/auth.svelte';
 	import type { Project, Sitio } from '$lib/types';
 	import toTitleCase from '$lib/utils/common';
 	import { loadProjects, loadSitios } from '$lib/utils/storage';
@@ -186,14 +187,16 @@
 				<List class="size-4 sm:mr-2" />
 				<span class="hidden sm:inline">Manage Sitios</span>
 			</Button>
-			<Button variant="outline" onclick={() => goto('/admin/import')} size="sm">
-				<Upload class="size-4 sm:mr-2" />
-				<span class="hidden sm:inline">Import Data</span>
-			</Button>
-			<Button onclick={() => goto('/admin/sitios/new')} size="sm">
-				<Plus class="size-4 sm:mr-2" />
-				<span class="hidden sm:inline">Add Sitio</span>
-			</Button>
+			{#if authStore.canPerform('sitios', 'write')}
+				<Button variant="outline" onclick={() => goto('/admin/import')} size="sm">
+					<Upload class="size-4 sm:mr-2" />
+					<span class="hidden sm:inline">Import Data</span>
+				</Button>
+				<Button onclick={() => goto('/admin/sitios/new')} size="sm">
+					<Plus class="size-4 sm:mr-2" />
+					<span class="hidden sm:inline">Add Sitio</span>
+				</Button>
+			{/if}
 		{/snippet}
 	</AdminHeader>
 

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import AdminHeader from '$lib/components/admin/AdminHeader.svelte';
 	import BasicInfoTab from '$lib/components/admin/sitios/BasicInfoTab.svelte';
@@ -12,6 +13,7 @@
 	import * as Card from '$lib/components/ui/card';
 	import { FormStepper, type Step } from '$lib/components/ui/form-stepper';
 	import { IsMobile } from '$lib/hooks/is-mobile.svelte';
+	import { authStore } from '$lib/stores/auth.svelte';
 	import type { Sitio, SitioIssue, SitioPPA } from '$lib/types';
 	import { getNeedLevelFromScore } from '$lib/types';
 	import { validateDemographics } from '$lib/utils/demographic-validation';
@@ -159,22 +161,21 @@
 
 	// Load sitio data on mount
 	onMount(() => {
-		const id = $page.params.id;
-		if (!id) {
-			sitioNotFound = true;
-			isLoading = false;
-			toast.error('Invalid sitio ID');
+		// Check permissions
+		if (!authStore.canPerform('sitios', 'write')) {
+			toast.error('Access Denied', {
+				description: 'You do not have permission to edit sitios.'
+			});
+			goto('/admin/sitios');
 			return;
 		}
-		sitioId = parseInt(id);
 
+		sitioId = parseInt($page.params.id || '0', 10);
 		if (isNaN(sitioId)) {
 			sitioNotFound = true;
 			isLoading = false;
-			toast.error('Invalid sitio ID');
 			return;
 		}
-
 		const sitio = getSitioById(sitioId);
 
 		if (!sitio) {

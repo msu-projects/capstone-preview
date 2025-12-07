@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import AdminHeader from '$lib/components/admin/AdminHeader.svelte';
 	import BudgetResourcesTab from '$lib/components/admin/projects/BudgetResourcesTab.svelte';
 	import CategoryProjectSelectionTab from '$lib/components/admin/projects/CategoryProjectSelectionTab.svelte';
@@ -13,6 +14,7 @@
 	import { FormStepper, type Step } from '$lib/components/ui/form-stepper';
 	import { getProjectTypeById } from '$lib/config/project-categories';
 	import { refreshProjects } from '$lib/mock-data';
+	import { authStore } from '$lib/stores/auth.svelte';
 	import type {
 		BudgetComponent,
 		CategoryKey,
@@ -40,10 +42,20 @@
 		X,
 		Zap
 	} from '@lucide/svelte';
-	import { untrack } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 	import { toast } from 'svelte-sonner';
 
 	const { data } = $props();
+
+	// Check permissions on mount
+	onMount(() => {
+		if (!authStore.canPerform('projects', 'write')) {
+			toast.error('Access Denied', {
+				description: 'You do not have permission to edit projects.'
+			});
+			goto(`/admin/projects/${data.id}`);
+		}
+	});
 
 	// Load projects from storage (includes both mock data and localStorage projects)
 	const allProjects = refreshProjects();

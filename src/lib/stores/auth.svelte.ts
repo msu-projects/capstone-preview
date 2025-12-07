@@ -11,6 +11,7 @@ let currentUser = $state<User | null>(null);
 const isAuthenticated = $derived(currentUser !== null);
 const isSuperadmin = $derived(currentUser?.role === 'superadmin');
 const isAdmin = $derived(currentUser?.role === 'admin' || currentUser?.role === 'superadmin');
+const isViewer = $derived(currentUser?.role === 'viewer');
 
 // Initialize from session storage on module load
 function initializeFromSession(): void {
@@ -129,6 +130,9 @@ export const authStore = {
 	},
 	get isAdmin() {
 		return isAdmin;
+	},
+	get isViewer() {
+		return isViewer;
 	},
 	initialize: initializeFromSession,
 	login,

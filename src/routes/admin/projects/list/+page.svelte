@@ -7,6 +7,7 @@
 	import ProjectsTable from '$lib/components/admin/projects/ProjectsTable.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { categories } from '$lib/config/project-categories';
+	import { authStore } from '$lib/stores/auth.svelte';
 	import type { Project } from '$lib/types';
 	import { downloadProjectMonitoringPDF, downloadSingleProjectPDF } from '$lib/utils/pdf-generator';
 	import { getCategoryName, getCompletionPercentage } from '$lib/utils/project-calculations';
@@ -229,10 +230,12 @@
 				<Download class="size-4 sm:mr-2" />
 				<span class="hidden sm:inline">Export</span>
 			</Button>
-			<Button size="sm" href="/admin/projects/new">
-				<Plus class="size-4 sm:mr-2" />
-				<span class="hidden sm:inline">New Project</span>
-			</Button>
+			{#if authStore.canPerform('projects', 'write')}
+				<Button size="sm" href="/admin/projects/new">
+					<Plus class="size-4 sm:mr-2" />
+					<span class="hidden sm:inline">New Project</span>
+				</Button>
+			{/if}
 		{/snippet}
 	</AdminHeader>
 
