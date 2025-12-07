@@ -55,20 +55,11 @@
 	let isLoading = $state(true);
 
 	// Filter state synced with URL
-	let selectedMunicipality = $state(data.municipality);
-	let selectedCategory = $state(data.category);
-	let selectedStatus = $state(data.status);
-	let selectedYear = $state(data.year);
-	let activeTab = $state(data.tab);
-
-	// Sync state when data changes (e.g., browser back/forward)
-	$effect(() => {
-		selectedMunicipality = data.municipality;
-		selectedCategory = data.category;
-		selectedStatus = data.status;
-		selectedYear = data.year;
-		activeTab = data.tab;
-	});
+	let selectedMunicipality = $derived(data.municipality);
+	let selectedCategory = $derived(data.category);
+	let selectedStatus = $derived(data.status);
+	let selectedYear = $derived(data.year);
+	let activeTab = $derived(data.tab);
 
 	onMount(() => {
 		projects = loadProjects();
