@@ -22,13 +22,9 @@ enum project_status {
   suspended [note: 'Project is temporarily suspended']
 }
 
-enum category_key {
-  infrastructure
-  agriculture
-  education
-  health
-  livelihood
-  environment
+enum official_type {
+  local [note: 'Local barangay/sitio official']
+  rst [note: 'Resident Support Team official']
 }
 
 enum user_role {
@@ -77,23 +73,13 @@ enum storage_type {
 // LOCATION HIERARCHY
 // ============================================
 
-Table provinces {
-  id integer [pk, increment]
-  name varchar(100) [unique, not null]
-  psgc_code varchar(10) [unique, note: 'Philippine Standard Geographic Code']
-  
-  Note: 'Province reference table'
-}
 
 Table municipalities {
   id integer [pk, increment]
-  province_id integer [not null, ref: > provinces.id]
   name varchar(100) [not null]
-  psgc_code varchar(10) [unique, note: 'Philippine Standard Geographic Code']
+  //psgc_code varchar(10) [unique, note: 'Philippine Standard Geographic Code']
   
   indexes {
-    province_id [name: 'idx_municipalities_province']
-    (province_id, name) [unique, name: 'idx_municipalities_unique_name']
   }
   
   Note: 'Municipality/City reference table'
@@ -103,7 +89,7 @@ Table barangays {
   id integer [pk, increment]
   municipality_id integer [not null, ref: > municipalities.id]
   name varchar(100) [not null]
-  psgc_code varchar(10) [unique, note: 'Philippine Standard Geographic Code']
+  //psgc_code varchar(10) [unique, note: 'Philippine Standard Geographic Code']
   
   indexes {
     municipality_id [name: 'idx_barangays_municipality']
@@ -121,8 +107,8 @@ Table sitios {
   id integer [pk, increment]
   name varchar(255) [not null]
   barangay_id integer [not null, ref: > barangays.id]
-  coordinates_lat decimal(10,8) [not null]
-  coordinates_lng decimal(11,8) [not null]
+  coordinates_lat decimal [not null]
+  coordinates_lng decimal [not null]
   coding varchar(50) [note: 'Sitio code identifier']
   
   created_at timestamp [not null, default: `now()`]
@@ -140,55 +126,316 @@ Table sitios {
 Table sitio_data {
   id integer [pk, increment]
   sitio_id integer [not null, ref: > sitios.id]
-  year integer [not null, note: 'Year this data was recorded']
-  is_current boolean [not null, default: false, note: 'Whether this is the current/active data for the sitio']
+  year_recorded integer [not null, note: 'Year this data was recorded']
+  //is_current boolean [not null, default: false, note: 'Whether this is the current/active data for the sitio']
   recorded_at timestamp [not null, default: `now()`]
   
   // Core metrics
   population integer [not null, default: 0]
   households integer [not null, default: 0]
   
-  // JSONB columns for embedded profiling data
-  demographics jsonb [not null, note: '{ male, female, total, age_0_14, age_15_64, age_65_above }']
-  social_services jsonb [note: '{ registered_voters, philhealth_beneficiaries, fourps_beneficiaries }']
-  economic_condition jsonb [note: '{ employments: [{type, count}], income_brackets: [{bracket, households}] }']
-  agriculture jsonb [note: '{ farmers_count, farmer_associations, farm_area_hectares, top_crops[] }']
-  water_sanitation jsonb [note: '{ water_systems_count, water_sources[], households_without_toilet, toilet_facility_types[], waste_segregation_practice }']
-  livestock_poultry jsonb [note: '{ pigs, cows, carabaos, horses, goats, chickens, ducks }']
-  food_security jsonb [note: '{ households_with_backyard_garden, common_garden_commodities[] }']
-  housing jsonb [note: '{ quality_types: [{type, count}], ownership_types: [{type, count}] }']
-  domestic_animals jsonb [note: '{ dogs, cats, dogs_vaccinated, cats_vaccinated }']
-  community_empowerment jsonb [note: '{ sectoral_organizations, info_dissemination_methods[], transportation_methods[] }']
-  utilities jsonb [note: '{ households_with_electricity, alternative_electricity_sources[] }']
+  // Need assessment
+  need_score decimal [note: 'Admin-assigned need score 1-10']
   
-  indexes {
-    sitio_id [name: 'idx_sitio_data_sitio']
-    year [name: 'idx_sitio_data_year']
-    is_current [name: 'idx_sitio_data_current']
-    (sitio_id, year) [unique, name: 'idx_sitio_data_unique']
-  }
+  // Demographics (flattened)
+  male integer [not null, default: 0]
+  female integer [not null, default: 0]
+  age_0_14 integer [not null, default: 0]
+  age_15_64 integer [not null, default: 0]
+  age_65_above integer [not null, default: 0]
+  
+  // Social services (flattened)
+  registered_voters integer [default: 0]
+  philhealth_beneficiaries integer [default: 0]
+  fourps_beneficiaries integer [default: 0]
+  
+  // Agriculture (flattened - arrays normalized to separate tables)
+  farmers_count integer [default: 0]
+  farmer_associations integer [default: 0]
+  farm_area_hectares decimal [default: 0]
+  
+  // Water and sanitation (flattened - arrays normalized)
+  water_systems_count integer [default: 0]
+  households_without_toilet integer [default: 0]
+  waste_segregation_practice boolean
+  
+  // Food security (flattened - arrays normalized)
+  households_with_backyard_garden integer [default: 0]
+  
+  // Domestic animals (flattened)
+  dogs integer [default: 0]
+  cats integer [default: 0]
+  dogs_vaccinated integer [default: 0]
+  cats_vaccinated integer [default: 0]
+  
+  // Community empowerment (flattened - arrays normalized)
+  sectoral_organizations integer [default: 0]
+  
+  // Utilities (flattened - arrays normalized)
+  households_with_electricity integer [default: 0]
   
   Note: 'Sitio profiling data with year-over-year tracking. is_current=true indicates the active data for the sitio.'
 }
+
+// ============================================
+// ISSUES AND CONCERNS / PROPOSED PPA (Normalized)
+// ============================================
+
+Table sitio_data_issues_concerns {
+  id integer [pk, increment]
+  sitio_data_id integer [not null, ref: > sitio_data.id]
+  name varchar(255) [not null]
+  category varchar(100) [not null]
+  is_custom boolean [not null, default: false]
+  
+  indexes {
+    sitio_data_id [name: 'idx_sitio_issues_concerns_data']
+    category [name: 'idx_sitio_issues_concerns_category']
+  }
+  
+  Note: 'Issues and concerns identified in the sitio'
+}
+
+Table sitio_data_proposed_ppas {
+  id integer [pk, increment]
+  sitio_data_id integer [not null, ref: > sitio_data.id]
+  name varchar(255) [not null]
+  category varchar(100) [not null]
+  is_custom boolean [not null, default: false]
+  project_type_id integer [ref: > project_types.id, note: 'Link to project type if applicable']
+  
+  indexes {
+    sitio_data_id [name: 'idx_sitio_proposed_ppas_data']
+    category [name: 'idx_sitio_proposed_ppas_category']
+    project_type_id [name: 'idx_sitio_proposed_ppas_project_type']
+  }
+  
+  Note: 'Proposed Programs, Projects, and Activities for the sitio'
+}
+
+Table sitio_data_issue_ppa_links {
+  id integer [pk, increment]
+  issue_id integer [not null, ref: > sitio_data_issues_concerns.id]
+  ppa_id integer [not null, ref: > sitio_data_proposed_ppas.id]
+  
+  indexes {
+    issue_id [name: 'idx_issue_ppa_links_issue']
+    ppa_id [name: 'idx_issue_ppa_links_ppa']
+    (issue_id, ppa_id) [unique, name: 'idx_issue_ppa_links_unique']
+  }
+  
+  Note: 'Many-to-many linking between issues/concerns and proposed PPAs'
+}
+
+// ============================================
+// SITIO DATA NORMALIZED ARRAYS
+// ============================================
+
+Table sitio_data_employments {
+  id integer [pk, increment]
+  sitio_data_id integer [not null, ref: > sitio_data.id]
+  type varchar(100) [not null]
+  count integer [not null, default: 0]
+  
+  indexes {
+    sitio_data_id [name: 'idx_sitio_employments_data']
+  }
+  
+  Note: 'Employment types and counts for sitio data'
+}
+
+Table sitio_data_income_brackets {
+  id integer [pk, increment]
+  sitio_data_id integer [not null, ref: > sitio_data.id]
+  bracket varchar(100) [not null]
+  households integer [not null, default: 0]
+  
+  indexes {
+    sitio_data_id [name: 'idx_sitio_income_brackets_data']
+  }
+  
+  Note: 'Income bracket distribution for sitio data'
+}
+
+Table sitio_data_top_crops {
+  id integer [pk, increment]
+  sitio_data_id integer [not null, ref: > sitio_data.id]
+  crop_name varchar(100) [not null]
+  
+  indexes {
+    sitio_data_id [name: 'idx_sitio_top_crops_data']
+  }
+  
+  Note: 'Top crops grown in sitio'
+}
+
+Table sitio_data_water_sources {
+  id integer [pk, increment]
+  sitio_data_id integer [not null, ref: > sitio_data.id]
+  source varchar(100) [not null]
+  status varchar(50) [not null]
+  
+  indexes {
+    sitio_data_id [name: 'idx_sitio_water_sources_data']
+  }
+  
+  Note: 'Water sources and their status for sitio'
+}
+
+Table sitio_data_toilet_types {
+  id integer [pk, increment]
+  sitio_data_id integer [not null, ref: > sitio_data.id]
+  type varchar(100) [not null]
+  
+  indexes {
+    sitio_data_id [name: 'idx_sitio_toilet_types_data']
+  }
+  
+  Note: 'Toilet facility types in sitio'
+}
+
+Table sitio_data_livestock {
+  id integer [pk, increment]
+  sitio_data_id integer [not null, ref: > sitio_data.id]
+  animal_type varchar(100) [not null]
+  
+  indexes {
+    sitio_data_id [name: 'idx_sitio_livestock_data']
+  }
+  
+  Note: 'Livestock and poultry types in sitio'
+}
+
+Table sitio_data_garden_commodities {
+  id integer [pk, increment]
+  sitio_data_id integer [not null, ref: > sitio_data.id]
+  commodity varchar(100) [not null]
+  
+  indexes {
+    sitio_data_id [name: 'idx_sitio_garden_commodities_data']
+  }
+  
+  Note: 'Common garden commodities grown in sitio'
+}
+
+Table sitio_data_housing_quality {
+  id integer [pk, increment]
+  sitio_data_id integer [not null, ref: > sitio_data.id]
+  type varchar(100) [not null]
+  count integer [not null, default: 0]
+  
+  indexes {
+    sitio_data_id [name: 'idx_sitio_housing_quality_data']
+  }
+  
+  Note: 'Housing quality types and counts'
+}
+
+Table sitio_data_housing_ownership {
+  id integer [pk, increment]
+  sitio_data_id integer [not null, ref: > sitio_data.id]
+  type varchar(100) [not null]
+  count integer [not null, default: 0]
+  
+  indexes {
+    sitio_data_id [name: 'idx_sitio_housing_ownership_data']
+  }
+  
+  Note: 'Housing ownership types and counts'
+}
+
+Table sitio_data_info_methods {
+  id integer [pk, increment]
+  sitio_data_id integer [not null, ref: > sitio_data.id]
+  method varchar(100) [not null]
+  
+  indexes {
+    sitio_data_id [name: 'idx_sitio_info_methods_data']
+  }
+  
+  Note: 'Information dissemination methods used in sitio'
+}
+
+Table sitio_data_transport_methods {
+  id integer [pk, increment]
+  sitio_data_id integer [not null, ref: > sitio_data.id]
+  method varchar(100) [not null]
+  
+  indexes {
+    sitio_data_id [name: 'idx_sitio_transport_methods_data']
+  }
+  
+  Note: 'Transportation methods used in sitio'
+}
+
+Table sitio_data_electricity_sources {
+  id integer [pk, increment]
+  sitio_data_id integer [not null, ref: > sitio_data.id]
+  source varchar(100) [not null]
+  
+  indexes {
+    sitio_data_id [name: 'idx_sitio_electricity_sources_data']
+  }
+  
+  Note: 'Alternative electricity sources in sitio'
+}
+
+Table sitio_data_ethnicities {
+  id integer [pk, increment]
+  sitio_data_id integer [not null, ref: > sitio_data.id]
+  ethnicity varchar(100) [not null]
+  
+  indexes {
+    sitio_data_id [name: 'idx_sitio_ethnicities_data']
+  }
+  
+  Note: 'Ethnic groups represented in sitio'
+}
+
+Table sitio_data_religions {
+  id integer [pk, increment]
+  sitio_data_id integer [not null, ref: > sitio_data.id]
+  religion varchar(100) [not null]
+  
+  indexes {
+    sitio_data_id [name: 'idx_sitio_religions_data']
+  }
+  
+  Note: 'Religious affiliations in sitio'
+}
+
+Table sitio_data_officials {
+  id integer [pk, increment]
+  sitio_data_id integer [not null, ref: > sitio_data.id]
+  name varchar(255) [not null]
+  position varchar(100) [not null]
+  official_type official_type [not null]
+  
+  indexes {
+    sitio_data_id [name: 'idx_sitio_officials_data']
+  }
+  
+  Note: 'Local and RST officials for sitio'
+}
+
+// ============================================
+// CORE ENTITIES (continued)
+// ============================================
 
 Table projects {
   id integer [pk, increment]
   title varchar(500) [not null]
   description text
-  category_key category_key [not null, note: 'FK to categories.key']
+  category_key varchar(50) [not null, note: 'FK to categories.key']
   project_type_id integer [ref: > project_types.id]
   status project_status [not null, default: 'planning']
   start_date date [not null]
   contract_duration varchar(50) [note: 'e.g., "180 CD" for calendar days']
-  total_budget decimal(15,2) [not null, default: 0]
-  contract_cost decimal(15,2) [not null, default: 0]
+  total_budget decimal [not null, default: 0]
+  contract_cost decimal [not null, default: 0]
   beneficiaries integer [not null, default: 0]
   project_year integer [not null]
-  
-  // Status tracking
-  issues text [note: 'Issues encountered']
-  recommendations text [note: 'Recommended actions']
-  catch_up_plan text
+
   
   implementing_agency varchar(100)
   
@@ -236,7 +483,7 @@ Table users {
 
 Table categories {
   id integer [pk, increment]
-  key category_key [unique, not null]
+  key varchar(50) [unique, not null]
   name varchar(100) [not null]
   description text
   icon varchar(50) [note: 'Icon identifier for UI']
@@ -246,15 +493,34 @@ Table categories {
 
 Table project_types {
   id integer [pk, increment]
-  category_key category_key [not null, ref: > categories.key]
+  category_key varchar(50) [not null, ref: > categories.key]
   name varchar(255) [not null]
   description text
+  default_indicators jsonb [note: '[{ id, name, unit, description }]']
   
   indexes {
     category_key [name: 'idx_project_types_category']
   }
   
   Note: 'Specific project types within each category'
+}
+
+Table performance_targets {
+  id integer [pk, increment]
+  project_id integer [not null, ref: > projects.id]
+  indicator_type varchar(100) [not null, note: 'Type/category of indicator']
+  indicator_name varchar(255) [not null, note: 'Display name']
+  target_value decimal [not null]
+  unit_of_measure varchar(50) [not null]
+  
+  created_at timestamp [not null, default: `now()`]
+  updated_at timestamp
+  
+  indexes {
+    project_id [name: 'idx_performance_targets_project']
+  }
+  
+  Note: 'Performance indicator targets for projects'
 }
 
 // ============================================
@@ -300,8 +566,8 @@ Table monthly_targets {
   id integer [pk, increment]
   project_id integer [not null, ref: > projects.id]
   month_year varchar(7) [not null, note: 'Format: YYYY-MM']
-  planned_physical_progress decimal(5,2) [not null, default: 0, note: 'Planned cumulative physical progress %']
-  planned_budget decimal(15,2) [not null, default: 0, note: 'Planned budget release for the month']
+  planned_physical_progress decimal [not null, default: 0, note: 'Planned cumulative physical progress %']
+  planned_budget decimal [not null, default: 0, note: 'Planned budget release for the month']
   
   created_at timestamp [not null, default: `now()`]
   updated_at timestamp
@@ -318,10 +584,13 @@ Table monthly_progress {
   id integer [pk, increment]
   project_id integer [not null, ref: > projects.id]
   month_year varchar(7) [not null, note: 'Format: YYYY-MM']
-  physical_progress_percentage decimal(5,2) [not null, default: 0, note: 'Actual physical progress %']
-  budget_utilized decimal(15,2) [not null, default: 0, note: 'Actual budget utilized this month']
+  physical_progress_percentage decimal [not null, default: 0, note: 'Actual physical progress %']
+  budget_utilized decimal [not null, default: 0, note: 'Actual budget utilized this month']
   beneficiaries_reached integer [default: 0]
-  issues_encountered text
+  achieved_outputs jsonb [note: '{ indicator_key: achieved_value }']
+  issues text [note: 'Issues encountered']
+  recommendations text [note: 'Recommended actions']
+  catch_up_plan text [note: 'Plan to catch up if delayed']
   status progress_status [not null, default: 'on_track']
   
   created_at timestamp [not null, default: `now()`]
@@ -341,13 +610,7 @@ Table photo_documentation {
   monthly_progress_id integer [not null, ref: > monthly_progress.id]
   filename varchar(255) [not null]
   caption text
-  file_size integer [not null, note: 'Size in bytes']
-  mime_type varchar(50) [not null, note: 'e.g., image/jpeg']
-  width integer [not null]
-  height integer [not null]
   thumbnail_id varchar(21) [note: 'Reference to thumbnail']
-  storage_type storage_type [not null, default: 'indexeddb']
-  storage_ref varchar(500) [not null, note: 'IndexedDB key OR server URL']
   uploaded_at timestamp [not null, default: `now()`]
   
   indexes {
@@ -361,8 +624,7 @@ Table budget_components {
   id integer [pk, increment]
   project_id integer [not null, ref: > projects.id]
   component_name varchar(255) [not null]
-  amount decimal(15,2) [not null, default: 0]
-  percentage decimal(5,2) [default: 0]
+  amount decimal [not null, default: 0]
   
   indexes {
     project_id [name: 'idx_budget_components_project']
@@ -376,8 +638,7 @@ Table funding_sources {
   project_id integer [not null, ref: > projects.id]
   source_name varchar(255) [not null]
   source_type funding_source_type [not null]
-  amount decimal(15,2) [not null, default: 0]
-  percentage decimal(5,2) [default: 0]
+  amount decimal [not null, default: 0]
   
   indexes {
     project_id [name: 'idx_funding_sources_project']
@@ -385,33 +646,6 @@ Table funding_sources {
   }
   
   Note: 'Funding sources contributing to each project'
-}
-
-Table sitio_coordinators {
-  id integer [pk, increment]
-  project_id integer [not null, ref: > projects.id]
-  sitio_id integer [not null, ref: > sitios.id]
-  barangay_captain varchar(255)
-  sitio_leader varchar(255)
-  
-  indexes {
-    (project_id, sitio_id) [unique, name: 'idx_sitio_coordinators_unique']
-  }
-  
-  Note: 'Coordinator assignments for each project-sitio combination'
-}
-
-Table coordinator_contacts {
-  id integer [pk, increment]
-  sitio_coordinator_id integer [not null, ref: > sitio_coordinators.id]
-  contact_number varchar(20) [not null]
-  is_primary boolean [default: false]
-  
-  indexes {
-    sitio_coordinator_id [name: 'idx_coordinator_contacts_coordinator']
-  }
-  
-  Note: 'Contact numbers for sitio coordinators'
 }
 
 // ============================================
@@ -427,6 +661,7 @@ Table audit_logs {
   resource_id varchar(50) [note: 'ID of affected resource']
   resource_name varchar(255) [note: 'Name/title of affected resource']
   details text [note: 'Additional context or changes summary']
+  changes jsonb [note: '[{ field, oldValue, newValue }]']
   ip_address varchar(45)
   timestamp timestamp [not null, default: `now()`]
   
@@ -445,7 +680,6 @@ Table audit_logs {
 // ============================================
 
 TableGroup location_hierarchy [color: #f39c12] {
-  provinces
   municipalities
   barangays
 }
@@ -457,9 +691,28 @@ TableGroup core_entities [color: #3498db] {
   users
 }
 
+TableGroup sitio_profiling [color: #e67e22] {
+  sitio_data_employments
+  sitio_data_income_brackets
+  sitio_data_top_crops
+  sitio_data_water_sources
+  sitio_data_toilet_types
+  sitio_data_livestock
+  sitio_data_garden_commodities
+  sitio_data_housing_quality
+  sitio_data_housing_ownership
+  sitio_data_info_methods
+  sitio_data_transport_methods
+  sitio_data_electricity_sources
+  sitio_data_ethnicities
+  sitio_data_religions
+  sitio_data_officials
+}
+
 TableGroup reference_data [color: #9b59b6] {
   categories
   project_types
+  performance_targets
 }
 
 TableGroup project_financials [color: #1abc9c] {
@@ -472,9 +725,7 @@ TableGroup project_tracking [color: #2ecc71] {
   project_sitios
   monthly_targets
   monthly_progress
-  photo_documentation
-  sitio_coordinators
-  coordinator_contacts
+  photo_documentation  
 }
 
 TableGroup system [color: #e74c3c] {
