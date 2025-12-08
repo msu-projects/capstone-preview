@@ -27,6 +27,16 @@ export const SITIO_FIELD_DEFINITIONS = [
 		required: false
 	},
 
+	// Coordinates (optional)
+	{ field: 'coordinates.lat', label: 'Latitude', csvHeader: 'LAT', required: false },
+	{ field: 'coordinates.lng', label: 'Longitude', csvHeader: 'LNG', required: false },
+
+	// Need Score (1-10 scale)
+	{ field: 'need_score', label: 'Need Score', csvHeader: 'NEED_SCORE', required: false },
+
+	// Province
+	{ field: 'province', label: 'Province', csvHeader: 'PROVINCE', required: false },
+
 	// Demographics
 	{
 		field: 'demographics.male',
@@ -93,15 +103,33 @@ export const SITIO_FIELD_DEFINITIONS = [
 		required: false
 	},
 	{
+		field: 'economic_condition.employments.count',
+		label: 'Employment 1 Count',
+		csvHeader: 'EMPLOYMENT_1_COUNT',
+		required: false
+	},
+	{
 		field: 'economic_condition.employments',
 		label: 'Top Employment 2',
 		csvHeader: 'Top 3 Employment - 2nd',
 		required: false
 	},
 	{
+		field: 'economic_condition.employments.count',
+		label: 'Employment 2 Count',
+		csvHeader: 'EMPLOYMENT_2_COUNT',
+		required: false
+	},
+	{
 		field: 'economic_condition.employments',
 		label: 'Top Employment 3',
 		csvHeader: 'Top 3 Employment - 3rd',
+		required: false
+	},
+	{
+		field: 'economic_condition.employments.count',
+		label: 'Employment 3 Count',
+		csvHeader: 'EMPLOYMENT_3_COUNT',
 		required: false
 	},
 
@@ -113,15 +141,33 @@ export const SITIO_FIELD_DEFINITIONS = [
 		required: false
 	},
 	{
+		field: 'economic_condition.income_brackets.households',
+		label: 'Income Bracket 1 HH',
+		csvHeader: 'INCOME_1_HOUSEHOLDS',
+		required: false
+	},
+	{
 		field: 'economic_condition.income_brackets',
 		label: 'Top Income Bracket 2',
 		csvHeader: 'Top 3 Income Bracket - 2nd',
 		required: false
 	},
 	{
+		field: 'economic_condition.income_brackets.households',
+		label: 'Income Bracket 2 HH',
+		csvHeader: 'INCOME_2_HOUSEHOLDS',
+		required: false
+	},
+	{
 		field: 'economic_condition.income_brackets',
 		label: 'Top Income Bracket 3',
 		csvHeader: 'Top 3 Income Bracket - 3rd',
+		required: false
+	},
+	{
+		field: 'economic_condition.income_brackets.households',
+		label: 'Income Bracket 3 HH',
+		csvHeader: 'INCOME_3_HOUSEHOLDS',
 		required: false
 	},
 
@@ -183,9 +229,63 @@ export const SITIO_FIELD_DEFINITIONS = [
 		required: false
 	},
 	{
+		field: 'water_sanitation.water_sources.source',
+		label: 'Water Source 1',
+		csvHeader: 'WATER_SOURCE_1',
+		required: false
+	},
+	{
+		field: 'water_sanitation.water_sources.status',
+		label: 'Water Source 1 Status',
+		csvHeader: 'WATER_SOURCE_1_STATUS',
+		required: false
+	},
+	{
+		field: 'water_sanitation.water_sources.source',
+		label: 'Water Source 2',
+		csvHeader: 'WATER_SOURCE_2',
+		required: false
+	},
+	{
+		field: 'water_sanitation.water_sources.status',
+		label: 'Water Source 2 Status',
+		csvHeader: 'WATER_SOURCE_2_STATUS',
+		required: false
+	},
+	{
+		field: 'water_sanitation.water_sources.source',
+		label: 'Water Source 3',
+		csvHeader: 'WATER_SOURCE_3',
+		required: false
+	},
+	{
+		field: 'water_sanitation.water_sources.status',
+		label: 'Water Source 3 Status',
+		csvHeader: 'WATER_SOURCE_3_STATUS',
+		required: false
+	},
+	{
 		field: 'water_sanitation.households_without_toilet',
 		label: 'HH Without Toilet',
 		csvHeader: 'No. of HH without Toilet Facility',
+		required: false
+	},
+	{
+		field: 'water_sanitation.toilet_facility_types',
+		label: 'Toilet Type 1',
+		csvHeader: 'TOILET_TYPE_1',
+		required: false
+	},
+	{
+		field: 'water_sanitation.toilet_facility_types',
+		label: 'Toilet Type 2',
+		csvHeader: 'TOILET_TYPE_2',
+		required: false
+	},
+	{
+		field: 'water_sanitation.toilet_facility_types',
+		label: 'Toilet Type 3',
+		csvHeader: 'TOILET_TYPE_3',
 		required: false
 	},
 	{
@@ -290,6 +390,50 @@ export const SITIO_FIELD_DEFINITIONS = [
 		csvHeader: 'Housing - Quality of Housing',
 		required: false
 	},
+	{
+		field: 'housing.quality_types.count',
+		label: 'Quality Type Count',
+		csvHeader: 'QUALITY_TYPE_COUNT',
+		required: false
+	},
+
+	// Housing ownership
+	{
+		field: 'housing.ownership_types.type',
+		label: 'Ownership Type 1',
+		csvHeader: 'OWNERSHIP_TYPE_1',
+		required: false
+	},
+	{
+		field: 'housing.ownership_types.count',
+		label: 'Ownership Type 1 Count',
+		csvHeader: 'OWNERSHIP_TYPE_1_COUNT',
+		required: false
+	},
+	{
+		field: 'housing.ownership_types.type',
+		label: 'Ownership Type 2',
+		csvHeader: 'OWNERSHIP_TYPE_2',
+		required: false
+	},
+	{
+		field: 'housing.ownership_types.count',
+		label: 'Ownership Type 2 Count',
+		csvHeader: 'OWNERSHIP_TYPE_2_COUNT',
+		required: false
+	},
+	{
+		field: 'housing.ownership_types.type',
+		label: 'Ownership Type 3',
+		csvHeader: 'OWNERSHIP_TYPE_3',
+		required: false
+	},
+	{
+		field: 'housing.ownership_types.count',
+		label: 'Ownership Type 3 Count',
+		csvHeader: 'OWNERSHIP_TYPE_3_COUNT',
+		required: false
+	},
 
 	// Domestic animals
 	{ field: 'domestic_animals.dogs', label: 'Dogs', csvHeader: 'Dogs', required: false },
@@ -339,7 +483,17 @@ export const SITIO_FIELD_DEFINITIONS = [
 		label: 'Alternative Power',
 		csvHeader: 'Alternative Source of Electricity',
 		required: false
-	}
+	},
+
+	// Ethnicities (array)
+	{ field: 'ethnicities', label: 'Ethnicity 1', csvHeader: 'ETHNICITY_1', required: false },
+	{ field: 'ethnicities', label: 'Ethnicity 2', csvHeader: 'ETHNICITY_2', required: false },
+	{ field: 'ethnicities', label: 'Ethnicity 3', csvHeader: 'ETHNICITY_3', required: false },
+
+	// Religions (array)
+	{ field: 'religions', label: 'Religion 1', csvHeader: 'RELIGION_1', required: false },
+	{ field: 'religions', label: 'Religion 2', csvHeader: 'RELIGION_2', required: false },
+	{ field: 'religions', label: 'Religion 3', csvHeader: 'RELIGION_3', required: false }
 ];
 
 /**
@@ -458,6 +612,13 @@ export function transformRowToSitio(row: ImportedRow, mappings: ColumnMapping[])
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const sitio: any = createDefaultSitio();
 
+	// Temporary storage for paired data (water sources, ownership types, etc.)
+	const waterSourcesTemp: Array<{ source?: string; status?: string }> = [];
+	const ownershipTypesTemp: Array<{ type?: string; count?: number }> = [];
+	const employmentsTemp: Array<{ type?: string; count?: number }> = [];
+	const incomeBracketsTemp: Array<{ bracket?: string; households?: number }> = [];
+	const qualityTypesTemp: Array<{ type?: string; count?: number }> = [];
+
 	mappings.forEach((mapping) => {
 		if (!mapping.sitioField) return;
 
@@ -467,24 +628,101 @@ export function transformRowToSitio(row: ImportedRow, mappings: ColumnMapping[])
 		const fieldPath = mapping.sitioField.split('.');
 
 		// Define fields that need special array or object-array handling
-		const arrayFields = [
+		const simpleArrayFields = [
 			'top_crops',
 			'common_garden_commodities',
 			'info_dissemination_methods',
 			'transportation_methods',
 			'alternative_electricity_sources',
-			'livestock_poultry'
-		];
-		const objectArrayFields = [
-			'employments',
-			'income_brackets',
-			'quality_types',
-			'ownership_types'
+			'livestock_poultry',
+			'toilet_facility_types',
+			'ethnicities',
+			'religions'
 		];
 		const lastField = fieldPath[fieldPath.length - 1];
 
+		// Handle water sources (paired source + status)
+		if (fieldPath.includes('water_sources')) {
+			if (lastField === 'source') {
+				const match = mapping.csvHeader.match(/WATER_SOURCE_(\d+)/);
+				const index = match ? parseInt(match[1]) - 1 : waterSourcesTemp.length;
+				if (!waterSourcesTemp[index]) waterSourcesTemp[index] = {};
+				waterSourcesTemp[index].source = String(value).trim();
+			} else if (lastField === 'status') {
+				const match = mapping.csvHeader.match(/WATER_SOURCE_(\d+)_STATUS/);
+				const index = match ? parseInt(match[1]) - 1 : waterSourcesTemp.length - 1;
+				if (!waterSourcesTemp[index]) waterSourcesTemp[index] = {};
+				waterSourcesTemp[index].status = String(value).trim();
+			}
+			return;
+		}
+
+		// Handle housing ownership types (paired type + count)
+		if (fieldPath.includes('ownership_types')) {
+			if (lastField === 'type') {
+				const match = mapping.csvHeader.match(/OWNERSHIP_TYPE_(\d+)/);
+				const index = match ? parseInt(match[1]) - 1 : ownershipTypesTemp.length;
+				if (!ownershipTypesTemp[index]) ownershipTypesTemp[index] = {};
+				ownershipTypesTemp[index].type = String(value).trim();
+			} else if (lastField === 'count') {
+				const match = mapping.csvHeader.match(/OWNERSHIP_TYPE_(\d+)_COUNT/);
+				const index = match ? parseInt(match[1]) - 1 : ownershipTypesTemp.length - 1;
+				if (!ownershipTypesTemp[index]) ownershipTypesTemp[index] = {};
+				const numValue = Number(value);
+				ownershipTypesTemp[index].count = !isNaN(numValue) ? numValue : 0;
+			}
+			return;
+		}
+
+		// Handle employments with counts
+		if (fieldPath.includes('employments')) {
+			if (lastField === 'employments') {
+				const match = mapping.csvHeader.match(/Top 3 Employment - (\d+)/);
+				const index = match ? parseInt(match[1]) - 1 : employmentsTemp.length;
+				if (!employmentsTemp[index]) employmentsTemp[index] = {};
+				employmentsTemp[index].type = String(value).trim();
+			} else if (lastField === 'count') {
+				const match = mapping.csvHeader.match(/EMPLOYMENT_(\d+)_COUNT/);
+				const index = match ? parseInt(match[1]) - 1 : employmentsTemp.length - 1;
+				if (!employmentsTemp[index]) employmentsTemp[index] = {};
+				const numValue = Number(value);
+				employmentsTemp[index].count = !isNaN(numValue) ? numValue : 0;
+			}
+			return;
+		}
+
+		// Handle income brackets with households
+		if (fieldPath.includes('income_brackets')) {
+			if (lastField === 'income_brackets') {
+				const match = mapping.csvHeader.match(/Top 3 Income Bracket - (\d+)/);
+				const index = match ? parseInt(match[1]) - 1 : incomeBracketsTemp.length;
+				if (!incomeBracketsTemp[index]) incomeBracketsTemp[index] = {};
+				incomeBracketsTemp[index].bracket = String(value).trim();
+			} else if (lastField === 'households') {
+				const match = mapping.csvHeader.match(/INCOME_(\d+)_HOUSEHOLDS/);
+				const index = match ? parseInt(match[1]) - 1 : incomeBracketsTemp.length - 1;
+				if (!incomeBracketsTemp[index]) incomeBracketsTemp[index] = {};
+				const numValue = Number(value);
+				incomeBracketsTemp[index].households = !isNaN(numValue) ? numValue : 0;
+			}
+			return;
+		}
+
+		// Handle quality types with counts
+		if (fieldPath.includes('quality_types')) {
+			if (lastField === 'quality_types') {
+				if (!qualityTypesTemp[0]) qualityTypesTemp[0] = {};
+				qualityTypesTemp[0].type = String(value).trim();
+			} else if (lastField === 'count') {
+				if (!qualityTypesTemp[0]) qualityTypesTemp[0] = {};
+				const numValue = Number(value);
+				qualityTypesTemp[0].count = !isNaN(numValue) ? numValue : 0;
+			}
+			return;
+		}
+
 		// Handle simple string array fields
-		if (arrayFields.includes(lastField)) {
+		if (simpleArrayFields.includes(lastField)) {
 			// Navigate to parent object
 			let current = sitio;
 			for (let i = 0; i < fieldPath.length - 1; i++) {
@@ -500,40 +738,6 @@ export function transformRowToSitio(row: ImportedRow, mappings: ColumnMapping[])
 			const stringValue = String(value).trim();
 			if (stringValue && !current[arrayField].includes(stringValue)) {
 				current[arrayField].push(stringValue);
-			}
-		} else if (objectArrayFields.includes(lastField)) {
-			// Handle object array fields (employments, income_brackets, quality_types, ownership_types)
-			let current = sitio;
-			for (let i = 0; i < fieldPath.length - 1; i++) {
-				current = current[fieldPath[i]];
-			}
-
-			if (!Array.isArray(current[lastField])) {
-				current[lastField] = [];
-			}
-
-			const stringValue = String(value).trim();
-			if (stringValue) {
-				// Create appropriate object structure based on field type
-				if (lastField === 'employments') {
-					// Check if this employment type already exists
-					const existing = current[lastField].find((e: { type: string }) => e.type === stringValue);
-					if (!existing) {
-						current[lastField].push({ type: stringValue, count: 0 });
-					}
-				} else if (lastField === 'income_brackets') {
-					const existing = current[lastField].find(
-						(e: { bracket: string }) => e.bracket === stringValue
-					);
-					if (!existing) {
-						current[lastField].push({ bracket: stringValue, households: 0 });
-					}
-				} else if (lastField === 'quality_types' || lastField === 'ownership_types') {
-					const existing = current[lastField].find((e: { type: string }) => e.type === stringValue);
-					if (!existing) {
-						current[lastField].push({ type: stringValue, count: 0 });
-					}
-				}
 			}
 		} else {
 			// Regular field assignment
@@ -564,6 +768,42 @@ export function transformRowToSitio(row: ImportedRow, mappings: ColumnMapping[])
 			}
 		}
 	});
+
+	// Process paired data into proper arrays
+	if (waterSourcesTemp.length > 0) {
+		sitio.water_sanitation.water_sources = waterSourcesTemp
+			.filter((ws) => ws.source && ws.status)
+			.map((ws) => ({ source: ws.source!, status: ws.status! }));
+	}
+
+	if (ownershipTypesTemp.length > 0) {
+		sitio.housing.ownership_types = ownershipTypesTemp
+			.filter((ot) => ot.type)
+			.map((ot) => ({ type: ot.type!, count: ot.count || 0 }));
+	}
+
+	if (employmentsTemp.length > 0) {
+		sitio.economic_condition.employments = employmentsTemp
+			.filter((e) => e.type)
+			.map((e) => ({ type: e.type!, count: e.count || 0 }));
+	}
+
+	if (incomeBracketsTemp.length > 0) {
+		sitio.economic_condition.income_brackets = incomeBracketsTemp
+			.filter((ib) => ib.bracket)
+			.map((ib) => ({ bracket: ib.bracket!, households: ib.households || 0 }));
+	}
+
+	if (qualityTypesTemp.length > 0 && qualityTypesTemp[0].type) {
+		sitio.housing.quality_types = [
+			{ type: qualityTypesTemp[0].type, count: qualityTypesTemp[0].count || 0 }
+		];
+	}
+
+	// Calculate need_level from need_score
+	if (sitio.need_score !== undefined && sitio.need_score !== null) {
+		sitio.need_level = getNeedLevelFromScore(sitio.need_score);
+	}
 
 	// Calculate total demographics if not provided
 	if (!sitio.demographics.total && sitio.demographics.male && sitio.demographics.female) {

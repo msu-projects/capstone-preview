@@ -1,9 +1,14 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
+	import { Input } from '$lib/components/ui/input';
+	import { Label } from '$lib/components/ui/label';
 	import { Upload } from '@lucide/svelte';
 
-	let { onFileSelected } = $props<{ onFileSelected: (file: File) => void }>();
+	let { onFileSelected, year = $bindable(new Date().getFullYear()) } = $props<{
+		onFileSelected: (file: File) => void;
+		year?: number;
+	}>();
 
 	let isDragging = $state(false);
 	let fileInput: HTMLInputElement | undefined = $state();
@@ -70,55 +75,73 @@
 	<Card.Header>
 		<Card.Title>Upload Sitio Data File</Card.Title>
 		<Card.Description>
-			Upload a CSV or Excel file containing sitio data. The file should include columns for
-			municipality, barangay, sitio name, and other demographic information.
+			Upload a CSV or Excel file containing sitio data. Select the year for this data snapshot.
 		</Card.Description>
 	</Card.Header>
-	<Card.Content class="p-12">
-		<!-- svelte-ignore a11y_no_static_element_interactions -->
-		<div
-			class="rounded-lg border-2 border-dashed p-12 text-center transition-colors {isDragging
-				? 'border-primary bg-primary/5'
-				: ''}"
-			ondragover={handleDragOver}
-			ondragleave={handleDragLeave}
-			ondrop={handleDrop}
-		>
-			{#if selectedFile}
-				<div class="space-y-4">
-					<Upload class="mx-auto size-16 text-primary" />
-					<div>
-						<h3 class="text-lg font-semibold">{selectedFile.name}</h3>
-						<p class="text-sm text-muted-foreground">
-							{(selectedFile.size / 1024).toFixed(2)} KB
-						</p>
-					</div>
-					<div class="flex justify-center gap-2">
-						<Button onclick={clearFile} variant="outline">Choose Different File</Button>
-					</div>
-				</div>
-			{:else}
-				<Upload class="mx-auto mb-4 size-16 text-muted-foreground" />
-				<h3 class="mb-2 text-lg font-semibold">Drop your file here</h3>
-				<p class="mb-4 text-sm text-muted-foreground">
-					Supports CSV and Excel files (.csv, .xlsx, .xls) · Max 10MB
-				</p>
-				<Button onclick={() => fileInput?.click()} class="mx-auto">Select File</Button>
-			{/if}
-
-			<input
-				type="file"
-				accept=".csv,.xlsx,.xls"
-				bind:this={fileInput}
-				onchange={handleFileInput}
-				class="hidden"
+	<Card.Content class="space-y-6">
+		<!-- Year Selector -->
+		<div class="space-y-2">
+			<Label for="import-year">Data Year</Label>
+			<Input
+				id="import-year"
+				type="number"
+				bind:value={year}
+				min="2000"
+				max="2100"
+				class="w-full"
 			/>
+			<p class="text-xs text-muted-foreground">
+				This creates a yearly snapshot for tracking changes over time.
+			</p>
 		</div>
 
-		{#if error}
-			<div class="mt-4 rounded-lg bg-destructive/10 p-4 text-sm text-destructive">
-				{error}
+		<!-- File Upload Area -->
+		<div>
+			<!-- svelte-ignore a11y_no_static_element_interactions -->
+			<div
+				class="rounded-lg border-2 border-dashed p-12 text-center transition-colors {isDragging
+					? 'border-primary bg-primary/5'
+					: ''}"
+				ondragover={handleDragOver}
+				ondragleave={handleDragLeave}
+				ondrop={handleDrop}
+			>
+				{#if selectedFile}
+					<div class="space-y-4">
+						<Upload class="mx-auto size-16 text-primary" />
+						<div>
+							<h3 class="text-lg font-semibold">{selectedFile.name}</h3>
+							<p class="text-sm text-muted-foreground">
+								{(selectedFile.size / 1024).toFixed(2)} KB
+							</p>
+						</div>
+						<div class="flex justify-center gap-2">
+							<Button onclick={clearFile} variant="outline">Choose Different File</Button>
+						</div>
+					</div>
+				{:else}
+					<Upload class="mx-auto mb-4 size-16 text-muted-foreground" />
+					<h3 class="mb-2 text-lg font-semibold">Drop your file here</h3>
+					<p class="mb-4 text-sm text-muted-foreground">
+						Supports CSV and Excel files (.csv, .xlsx, .xls) · Max 10MB
+					</p>
+					<Button onclick={() => fileInput?.click()} class="mx-auto">Select File</Button>
+				{/if}
+
+				<input
+					type="file"
+					accept=".csv,.xlsx,.xls"
+					bind:this={fileInput}
+					onchange={handleFileInput}
+					class="hidden"
+				/>
 			</div>
-		{/if}
+
+			{#if error}
+				<div class="mt-4 rounded-lg bg-destructive/10 p-4 text-sm text-destructive">
+					{error}
+				</div>
+			{/if}
+		</div>
 	</Card.Content>
 </Card.Root>

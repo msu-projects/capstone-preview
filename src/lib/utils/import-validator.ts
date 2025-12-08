@@ -85,6 +85,17 @@ export function validateSitio(sitio: Partial<Sitio>, rowIndex: number): ImportVa
 		}
 	}
 
+	// Need score validation (warning only, not error)
+	if (sitio.need_score !== undefined && sitio.need_score !== null) {
+		if (typeof sitio.need_score !== 'number' || sitio.need_score < 1 || sitio.need_score > 10) {
+			errors.push({
+				row: rowIndex,
+				field: 'need_score',
+				message: 'Warning: Need score should be between 1 and 10'
+			});
+		}
+	}
+
 	// Demographics validation
 	if (sitio.demographics) {
 		// Check if male + female = total

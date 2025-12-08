@@ -9,6 +9,7 @@
 	import * as Card from '$lib/components/ui/card';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import type { ColumnMapping, DuplicateSitio, ImportedRow, Sitio } from '$lib/types';
+	import { createSnapshotFromSitio } from '$lib/types/sitio-yearly';
 	import { logAuditAction } from '$lib/utils/audit';
 	import {
 		autoMapColumns,
@@ -17,7 +18,12 @@
 	} from '$lib/utils/column-mapper';
 	import { parseFile } from '$lib/utils/import-parser';
 	import { findDuplicates, validateBatch } from '$lib/utils/import-validator';
-	import { getNextSitioId, loadSitios, saveSitios } from '$lib/utils/storage';
+	import {
+		getNextSitioId,
+		loadSitios,
+		saveOrUpdateYearlySnapshot,
+		saveSitios
+	} from '$lib/utils/storage';
 	import { CircleCheck, FileSearch, Map as MapIcon, Upload } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
@@ -42,6 +48,7 @@
 	let duplicates = $state<DuplicateSitio[]>([]);
 	let isProcessing = $state(false);
 	let importResult = $state<{ success: number; skipped: number; replaced: number } | null>(null);
+	let selectedYear = $state(new Date().getFullYear());
 
 	// Step handlers
 	async function handleFileUploaded(file: File) {
@@ -159,6 +166,27 @@
 			const saved = saveSitios(existingSitios);
 
 			if (saved) {
+				// Create yearly snapshots for imported sitios
+				let snapshotsCreated = 0;
+				existingSitios.forEach((sitio) => {
+					const key = `${sitio.municipality.toLowerCase().trim()}-${sitio.barangay.toLowerCase().trim()}-${sitio.name.toLowerCase().trim()}`;
+
+					// Check if this sitio was part of this import
+					const wasImported = validSitios.some((vs) => {
+						const vsKey = `${vs.municipality?.toLowerCase().trim()}-${vs.barangay?.toLowerCase().trim()}-${vs.name?.toLowerCase().trim()}`;
+						return vsKey === key;
+					});
+
+					if (wasImported) {
+						const snapshot = createSnapshotFromSitio(sitio, selectedYear);
+						if (saveOrUpdateYearlySnapshot(sitio.id, snapshot, sitio.name)) {
+							snapshotsCreated++;
+						}
+					}
+				});
+
+				console.log(`Created ${snapshotsCreated} yearly snapshots for year ${selectedYear}`);
+
 				importResult = {
 					success: added,
 					skipped,
@@ -172,7 +200,7 @@
 					'sitio',
 					undefined,
 					uploadedFile?.name,
-					`Imported ${added} sitios (${skipped} skipped, ${replaced} replaced) from ${uploadedFile?.name || 'file'}`
+					`Imported ${added} sitios (${skipped} skipped, ${replaced} replaced) from ${uploadedFile?.name || 'file'}. Created ${snapshotsCreated} snapshots for year ${selectedYear}.`
 				);
 			} else {
 				alert('Failed to save sitios to storage. Storage may be full.');
@@ -195,6 +223,7 @@
 		errors = [];
 		duplicates = [];
 		importResult = null;
+		selectedYear = new Date().getFullYear();
 	}
 
 	function goToSitiosList() {
@@ -286,7 +315,7 @@
 
 			<!-- Step Content -->
 			{#if step === 'upload'}
-				<FileUpload onFileSelected={handleFileUploaded} />
+				<FileUpload bind:year={selectedYear} onFileSelected={handleFileUploaded} />
 			{:else if step === 'map'}
 				<ColumnMapper
 					{mappings}
