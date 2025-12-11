@@ -157,6 +157,13 @@ export interface Sitio {
 	// Proposed PPAs (Programs, Projects, and Activities) (structured)
 	proposed_ppas?: SitioPPA[];
 
+	// Images and photos
+	images?: Array<{
+		id: string;
+		caption?: string;
+		uploaded_at: string;
+	}>;
+
 	// Metadata
 	created_at: string;
 	updated_at?: string;

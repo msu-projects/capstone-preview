@@ -17,12 +17,14 @@
 		FolderKanban,
 		Heart,
 		Home,
+		Image,
 		TrendingUp,
 		Users
 	} from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
 	import DemographicsSection from './sections/DemographicsSection.svelte';
 	import EconomySection from './sections/EconomySection.svelte';
+	import ImagesSection from './sections/ImagesSection.svelte';
 	import InfrastructureSection from './sections/InfrastructureSection.svelte';
 	import OverviewSection from './sections/OverviewSection.svelte';
 	import ProjectsSection from './sections/ProjectsSection.svelte';
@@ -108,6 +110,7 @@
 		{ id: 'economy', label: 'Economy & Livelihoods', icon: Briefcase },
 		{ id: 'infrastructure', label: 'Infrastructure', icon: Home },
 		{ id: 'services', label: 'Social Services', icon: Heart },
+		{ id: 'images', label: 'Photos', icon: Image },
 		{ id: 'trends', label: 'Trends', icon: TrendingUp },
 		{ id: 'projects', label: 'Projects', icon: FolderKanban }
 	];
@@ -196,10 +199,13 @@
 					<SocialServicesSection {sitio} previousSnapshot={previousYearSnapshot} />
 				</Tabs.Content>
 
+				<Tabs.Content value="images" class="animate-in duration-300 fade-in slide-in-from-bottom-2">
+					<ImagesSection {sitio} />
+				</Tabs.Content>
+
 				<Tabs.Content value="trends" class="animate-in duration-300 fade-in slide-in-from-bottom-2">
 					<YearlyTrendsSection snapshots={yearlySnapshots} currentYear={selectedYear} />
 				</Tabs.Content>
-
 				<Tabs.Content
 					value="projects"
 					class="animate-in duration-300 fade-in slide-in-from-bottom-2"

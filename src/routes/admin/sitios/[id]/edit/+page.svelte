@@ -8,6 +8,7 @@
 	import InfrastructureHousingTab from '$lib/components/admin/sitios/InfrastructureHousingTab.svelte';
 	import LivelihoodsEconomyTab from '$lib/components/admin/sitios/LivelihoodsEconomyTab.svelte';
 	import NeedsAssessmentTab from '$lib/components/admin/sitios/NeedsAssessmentTab.svelte';
+	import SitioImagesTab from '$lib/components/admin/sitios/SitioImagesTab.svelte';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
@@ -23,6 +24,7 @@
 		ArrowRight,
 		Building,
 		HandHelping,
+		Image,
 		Loader2,
 		MapPin,
 		Save,
@@ -159,6 +161,15 @@
 	// Proposed PPAs (Programs, Projects, and Activities) (structured)
 	let proposed_ppas = $state<SitioPPA[]>([]);
 
+	// Images
+	let images = $state<
+		Array<{
+			id: string;
+			caption?: string;
+			uploaded_at: string;
+		}>
+	>([]);
+
 	// Load sitio data on mount
 	onMount(() => {
 		// Check permissions
@@ -276,6 +287,7 @@
 		rst_officials = sitio.rst_officials || [];
 		issues_concerns = sitio.issues_concerns || [];
 		proposed_ppas = sitio.proposed_ppas || [];
+		images = sitio.images || [];
 
 		isLoading = false;
 	});
@@ -345,6 +357,13 @@
 			icon: Target,
 			isValid: isNeedsAssessmentValid,
 			hasError: !isNeedsAssessmentValid && activeStep !== 'needs-assessment'
+		},
+		{
+			id: 'images',
+			label: 'Photos & Images',
+			shortLabel: 'Images',
+			icon: Image,
+			isValid: true
 		}
 	]);
 
@@ -355,7 +374,8 @@
 		'livelihoods',
 		'infrastructure',
 		'community',
-		'needs-assessment'
+		'needs-assessment',
+		'images'
 	];
 	const currentStepIndex = $derived(stepOrder.indexOf(activeStep));
 	const canGoNext = $derived(currentStepIndex < stepOrder.length - 1);
@@ -436,7 +456,8 @@
 			local_officials,
 			rst_officials,
 			issues_concerns,
-			proposed_ppas
+			proposed_ppas,
+			images: images.length > 0 ? images : undefined
 		};
 
 		const success = updateSitio(sitioId, updatedSitio);
@@ -592,8 +613,9 @@
 						/>
 					{:else if activeStep === 'needs-assessment'}
 						<NeedsAssessmentTab bind:needScore bind:issues_concerns bind:proposed_ppas />
+					{:else if activeStep === 'images'}
+						<SitioImagesTab bind:images />
 					{/if}
-
 					<!-- Navigation Buttons -->
 					<Card.Root class="mt-6 p-0">
 						<Card.Content class="flex items-center justify-between p-4">
