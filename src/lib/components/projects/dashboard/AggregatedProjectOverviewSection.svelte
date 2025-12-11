@@ -112,17 +112,16 @@
 	<div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
 		{#each keyMetrics as metric}
 			<Card.Root
-				class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50 dark:bg-slate-800/80 dark:ring-slate-700/50 dark:hover:ring-slate-600/50"
+				class="border-0 shadow-sm ring-1 ring-slate-200/50 transition-shadow hover:shadow-md dark:ring-slate-700/50"
 			>
-				<div
-					class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full {metric.bgColor} opacity-50"
-				></div>
-				<div
-					class="absolute inset-0 {metric.bgColor} opacity-0 transition-opacity group-hover:opacity-30"
-				></div>
-				<Card.Content class="relative p-4 sm:p-5">
-					<div class="flex items-center gap-3 sm:gap-4">
-						<div class="rounded-xl {metric.bgColor} p-2.5 ring-1 ring-black/5 sm:p-3">
+				<Card.Content class="p-4 sm:p-5">
+					<div class="flex items-start gap-3 sm:gap-4">
+						<div
+							class="shrink-0 rounded-xl {metric.bgColor} p-2.5 ring-1 ring-black/5 sm:p-3 dark:{metric.bgColor.replace(
+								'50',
+								'900/30'
+							)}"
+						>
 							<metric.icon class="size-5 {metric.textColor} sm:size-6" />
 						</div>
 						<div class="min-w-0 flex-1">
@@ -130,7 +129,7 @@
 								{metric.label}
 							</p>
 							<p
-								class="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl dark:text-slate-100"
+								class="mt-1 truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl dark:text-slate-100"
 							>
 								{metric.value}
 							</p>
@@ -308,7 +307,9 @@
 					<div>
 						<p class="text-sm text-slate-500 dark:text-slate-400">Cost per Beneficiary</p>
 						<p class="text-2xl font-bold text-slate-900 dark:text-slate-100">
-							{stats.totalBeneficiaries > 0 ? formatCurrency(stats.totalContractCost / stats.totalBeneficiaries) : formatCurrency(0)}
+							{stats.totalBeneficiaries > 0
+								? formatCurrency(stats.totalContractCost / stats.totalBeneficiaries)
+								: formatCurrency(0)}
 						</p>
 					</div>
 					<div class="rounded-lg bg-cyan-50 p-2 dark:bg-cyan-900/30">

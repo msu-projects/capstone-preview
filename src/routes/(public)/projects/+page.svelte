@@ -249,78 +249,102 @@
 
 			<!-- Quick Stats -->
 			<div class="mx-auto mt-8 hidden max-w-6xl grid-cols-2 gap-4 sm:grid-cols-4">
-				<Card.Root class="relative overflow-hidden border-0 shadow-sm">
-					<div
-						class="absolute top-0 left-0 h-1 w-full bg-linear-to-r from-blue-500 to-blue-600"
-					></div>
-					<Card.Content class="pt-5 pb-4">
-						<div class="flex items-start justify-between">
-							<div class="space-y-1">
-								<p class="text-sm font-medium text-slate-500 dark:text-slate-400">
+				<Card.Root
+					class="border-0 shadow-sm ring-1 ring-slate-200/50 transition-shadow hover:shadow-md dark:ring-slate-700/50"
+				>
+					<Card.Content class="p-4 sm:p-5">
+						<div class="flex items-start gap-3 sm:gap-4">
+							<div
+								class="shrink-0 rounded-xl bg-blue-50 p-2.5 ring-1 ring-black/5 sm:p-3 dark:bg-blue-900/30"
+							>
+								<FolderKanban class="size-5 text-blue-600 sm:size-6" />
+							</div>
+							<div class="min-w-0 flex-1">
+								<p
+									class="truncate text-xs font-medium text-slate-500 sm:text-sm dark:text-slate-400"
+								>
 									{hasActiveFilters ? 'Filtered' : 'Total'} Projects
 								</p>
-								<p class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+								<p
+									class="mt-1 truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl dark:text-slate-100"
+								>
 									{filteredProjects.length}
 								</p>
 							</div>
-							<div class="rounded-xl bg-blue-100 p-2.5 dark:bg-blue-900/30">
-								<FolderKanban class="size-5 text-blue-600" />
-							</div>
 						</div>
 					</Card.Content>
 				</Card.Root>
-				<Card.Root class="relative overflow-hidden border-0 shadow-sm">
-					<div
-						class="absolute top-0 left-0 h-1 w-full bg-linear-to-r from-emerald-500 to-emerald-600"
-					></div>
-					<Card.Content class="pt-5 pb-4">
-						<div class="flex items-start justify-between">
-							<div class="space-y-1">
-								<p class="text-sm font-medium text-slate-500 dark:text-slate-400">Total Budget</p>
-								<p class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+				<Card.Root
+					class="border-0 shadow-sm ring-1 ring-slate-200/50 transition-shadow hover:shadow-md dark:ring-slate-700/50"
+				>
+					<Card.Content class="p-4 sm:p-5">
+						<div class="flex items-start gap-3 sm:gap-4">
+							<div
+								class="shrink-0 rounded-xl bg-emerald-50 p-2.5 ring-1 ring-black/5 sm:p-3 dark:bg-emerald-900/30"
+							>
+								<Banknote class="size-5 text-emerald-600 sm:size-6" />
+							</div>
+							<div class="min-w-0 flex-1">
+								<p
+									class="truncate text-xs font-medium text-slate-500 sm:text-sm dark:text-slate-400"
+								>
+									Total Budget
+								</p>
+								<p
+									class="mt-1 truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl dark:text-slate-100"
+								>
 									{formatCurrency(stats.totalBudget)}
 								</p>
 							</div>
-							<div class="rounded-xl bg-emerald-100 p-2.5 dark:bg-emerald-900/30">
-								<Banknote class="size-5 text-emerald-600" />
-							</div>
 						</div>
 					</Card.Content>
 				</Card.Root>
-				<Card.Root class="relative overflow-hidden border-0 shadow-sm">
-					<div
-						class="absolute top-0 left-0 h-1 w-full bg-linear-to-r from-indigo-500 to-indigo-600"
-					></div>
-					<Card.Content class="pt-5 pb-4">
-						<div class="flex items-start justify-between">
-							<div class="space-y-1">
-								<p class="text-sm font-medium text-slate-500 dark:text-slate-400">Beneficiaries</p>
-								<p class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+				<Card.Root
+					class="border-0 shadow-sm ring-1 ring-slate-200/50 transition-shadow hover:shadow-md dark:ring-slate-700/50"
+				>
+					<Card.Content class="p-4 sm:p-5">
+						<div class="flex items-start gap-3 sm:gap-4">
+							<div
+								class="shrink-0 rounded-xl bg-indigo-50 p-2.5 ring-1 ring-black/5 sm:p-3 dark:bg-indigo-900/30"
+							>
+								<Users class="size-5 text-indigo-600 sm:size-6" />
+							</div>
+							<div class="min-w-0 flex-1">
+								<p
+									class="truncate text-xs font-medium text-slate-500 sm:text-sm dark:text-slate-400"
+								>
+									Beneficiaries
+								</p>
+								<p
+									class="mt-1 truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl dark:text-slate-100"
+								>
 									{formatNumber(stats.totalBeneficiaries)}
 								</p>
 							</div>
-							<div class="rounded-xl bg-indigo-100 p-2.5 dark:bg-indigo-900/30">
-								<Users class="size-5 text-indigo-600" />
-							</div>
 						</div>
 					</Card.Content>
 				</Card.Root>
-				<Card.Root class="relative overflow-hidden border-0 shadow-sm">
-					<div
-						class="absolute top-0 left-0 h-1 w-full bg-linear-to-r from-amber-500 to-amber-600"
-					></div>
-					<Card.Content class="pt-5 pb-4">
-						<div class="flex items-start justify-between">
-							<div class="space-y-1">
-								<p class="text-sm font-medium text-slate-500 dark:text-slate-400">
+				<Card.Root
+					class="border-0 shadow-sm ring-1 ring-slate-200/50 transition-shadow hover:shadow-md dark:ring-slate-700/50"
+				>
+					<Card.Content class="p-4 sm:p-5">
+						<div class="flex items-start gap-3 sm:gap-4">
+							<div
+								class="shrink-0 rounded-xl bg-amber-50 p-2.5 ring-1 ring-black/5 sm:p-3 dark:bg-amber-900/30"
+							>
+								<TrendingUp class="size-5 text-amber-600 sm:size-6" />
+							</div>
+							<div class="min-w-0 flex-1">
+								<p
+									class="truncate text-xs font-medium text-slate-500 sm:text-sm dark:text-slate-400"
+								>
 									Active Projects
 								</p>
-								<p class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+								<p
+									class="mt-1 truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl dark:text-slate-100"
+								>
 									{activeProjectsCount}
 								</p>
-							</div>
-							<div class="rounded-xl bg-amber-100 p-2.5 dark:bg-amber-900/30">
-								<TrendingUp class="size-5 text-amber-600" />
 							</div>
 						</div>
 					</Card.Content>

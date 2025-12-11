@@ -3,7 +3,7 @@
 	import * as Card from '$lib/components/ui/card';
 	import type { Project } from '$lib/types';
 	import { formatCurrency, formatNumber } from '$lib/utils/formatters';
-	import { Banknote, Briefcase, PieChart, PiggyBank, TrendingUp, Users, Wallet } from '@lucide/svelte';
+	import { Briefcase, PiggyBank, Users, Wallet } from '@lucide/svelte';
 
 	interface Props {
 		project: Project;
@@ -15,7 +15,7 @@
 	const utilized = $derived(project.project_cost * 0.45);
 	const remaining = $derived(project.project_cost - utilized);
 	const utilizationRate = $derived((utilized / project.project_cost) * 100);
-	
+
 	// Employment data
 	const totalEmployment = $derived(
 		(project.employment_generated?.male || 0) + (project.employment_generated?.female || 0)
@@ -90,7 +90,9 @@
 				</div>
 				<div class="mt-4 text-xs text-slate-500 dark:text-slate-400">
 					{#if project.employment_generated}
-						{formatNumber(project.employment_generated.male)} M / {formatNumber(project.employment_generated.female)} F
+						{formatNumber(project.employment_generated.male)} M / {formatNumber(
+							project.employment_generated.female
+						)} F
 					{:else}
 						Jobs created
 					{/if}

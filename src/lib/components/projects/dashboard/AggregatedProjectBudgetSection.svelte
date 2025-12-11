@@ -3,7 +3,7 @@
 	import DonutChart from '$lib/components/charts/DonutChart.svelte';
 	import * as Card from '$lib/components/ui/card';
 	import type { Project } from '$lib/types';
-	import { formatCurrency, formatCurrencyCompact } from '$lib/utils/formatters';
+	import { formatCurrency, formatCurrencyCompact, formatNumber } from '$lib/utils/formatters';
 	import {
 		aggregateByCategory,
 		aggregateByStatus,
@@ -12,7 +12,6 @@
 		toStatusBudgetPieData
 	} from '$lib/utils/project-aggregation';
 	import { Banknote, Briefcase, PieChart, Users, Wallet } from '@lucide/svelte';
-	import { formatNumber } from '$lib/utils/formatters';
 
 	interface Props {
 		projects: Project[];
@@ -95,20 +94,31 @@
 	<!-- Budget Summary Cards -->
 	<div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
 		{#each budgetMetrics as metric}
-			<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50 dark:ring-slate-700/50">
+			<Card.Root
+				class="border-0 shadow-sm ring-1 ring-slate-200/50 transition-shadow hover:shadow-md dark:ring-slate-700/50"
+			>
 				<Card.Content class="p-4 sm:p-5">
-					<div class="flex items-start gap-4">
-						<div class="rounded-xl {metric.bgColor} p-3 ring-1 ring-black/5">
-							<metric.icon class="size-6 {metric.textColor}" />
+					<div class="flex items-start gap-3 sm:gap-4">
+						<div
+							class="shrink-0 rounded-xl {metric.bgColor} p-2.5 ring-1 ring-black/5 sm:p-3 dark:{metric.bgColor.replace(
+								'50',
+								'900/30'
+							)}"
+						>
+							<metric.icon class="size-5 {metric.textColor} sm:size-6" />
 						</div>
 						<div class="min-w-0 flex-1">
-							<p class="text-sm font-medium text-slate-500 dark:text-slate-400">{metric.label}</p>
+							<p class="truncate text-xs font-medium text-slate-500 sm:text-sm dark:text-slate-400">
+								{metric.label}
+							</p>
 							<p
-								class="mt-1 text-xl font-bold tracking-tight text-slate-900 lg:text-2xl dark:text-slate-100"
+								class="mt-1 truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl dark:text-slate-100"
 							>
 								{metric.formatValue(metric.value)}
 							</p>
-							<p class="mt-0.5 text-xs text-slate-400 dark:text-slate-500">{metric.description}</p>
+							<p class="mt-0.5 truncate text-xs text-slate-400 dark:text-slate-500">
+								{metric.description}
+							</p>
 						</div>
 					</div>
 				</Card.Content>
