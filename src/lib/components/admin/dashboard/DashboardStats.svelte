@@ -85,7 +85,7 @@
 	]);
 </script>
 
-<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 	{#if isLoading}
 		{#each Array(5) as _}
 			<Card.Card class="shadow-sm">
