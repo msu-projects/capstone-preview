@@ -169,7 +169,7 @@
 					<Banknote class="size-5 text-slate-500" />
 					Project Cost by Category
 				</Card.Title>
-				<Card.Description>Investment distribution across categories</Card.Description>
+				<Card.Description>Investment distribution across categories (₱)</Card.Description>
 			</Card.Header>
 			<Card.Content>
 				{#if categoryBudgetData.length > 0}

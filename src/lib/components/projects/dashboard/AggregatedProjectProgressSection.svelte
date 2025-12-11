@@ -209,7 +209,7 @@
 		</Card.Root>
 	</div>
 
-	<div class="grid gap-6 lg:grid-cols-2">
+	<div class="hidden gap-6 lg:grid-cols-2">
 		<!-- Top Performing Projects -->
 		<Card.Root class="border-0 shadow-sm ring-1 ring-slate-200/50 dark:ring-slate-700/50">
 			<Card.Header>
