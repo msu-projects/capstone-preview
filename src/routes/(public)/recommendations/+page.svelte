@@ -4,7 +4,9 @@
 </script>
 
 <!-- Breadcrumb -->
-<AppBreadcrumb items={[{ label: 'Recommendations' }]} />
+<AppBreadcrumb
+	items={[{ label: 'Sitios Dashboard', href: '/sitios' }, { label: 'Recommendations' }]}
+/>
 
 <div class="container mx-auto p-6">
 	<SitioRecommendations isAdminView={false} />
