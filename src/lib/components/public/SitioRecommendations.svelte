@@ -34,17 +34,20 @@
 
 	let { isAdminView = false }: Props = $props();
 
+	// Computed
+	const categories = getCategories();
+	const allProjectTypes = getProjectTypes();
+
 	// State
 	let selectedCategoryKey = $state<string>('');
+	let selectedCategory = $derived(
+		categories.find((v) => v.key === selectedCategoryKey)?.name || ''
+	);
 	let selectedProjectTypeId = $state<string>('');
 	let searchQuery = $state('');
 	let selectedMunicipality = $state('');
 	let selectedBarangay = $state('');
 	let sortByNeedScore = $state<'none' | 'desc' | 'asc'>('desc');
-
-	// Computed
-	const categories = getCategories();
-	const allProjectTypes = getProjectTypes();
 
 	const projectTypesForCategory = $derived(
 		selectedCategoryKey
@@ -253,8 +256,8 @@
 				<div class="space-y-2">
 					<Label for="category" class="text-sm font-medium">Category</Label>
 					<Select.Root type="single" bind:value={selectedCategoryKey}>
-						<Select.Trigger id="category">
-							<span>{selectedCategoryKey || 'Select category...'}</span>
+						<Select.Trigger id="category" class="w-full">
+							<span>{selectedCategory || 'Select category...'}</span>
 						</Select.Trigger>
 						<Select.Content>
 							<Select.Item value="">Select category...</Select.Item>
@@ -273,7 +276,7 @@
 						bind:value={selectedProjectTypeId}
 						disabled={!selectedCategoryKey}
 					>
-						<Select.Trigger id="project-type">
+						<Select.Trigger id="project-type" class="w-full">
 							<span>{selectedProjectType?.name || 'Select project type...'}</span>
 						</Select.Trigger>
 						<Select.Content>
@@ -324,7 +327,7 @@
 				<!-- Filters -->
 				<div class="flex flex-wrap items-end gap-3">
 					<!-- Search -->
-					<div class="min-w-[200px] flex-1 space-y-2">
+					<div class="min-w-[150px] flex-1 space-y-2">
 						<Label for="search" class="text-sm font-medium">Search</Label>
 						<div class="relative">
 							<Search
@@ -343,7 +346,7 @@
 					<div class="w-full space-y-2 sm:w-48">
 						<Label for="municipality" class="text-sm font-medium">Municipality</Label>
 						<Select.Root type="single" bind:value={selectedMunicipality}>
-							<Select.Trigger id="municipality">
+							<Select.Trigger id="municipality" class="w-full">
 								<span>{selectedMunicipality || 'All'}</span>
 							</Select.Trigger>
 							<Select.Content>
@@ -363,7 +366,7 @@
 							bind:value={selectedBarangay}
 							disabled={!selectedMunicipality}
 						>
-							<Select.Trigger id="barangay">
+							<Select.Trigger id="barangay" class="w-full">
 								<span>{selectedBarangay || 'All'}</span>
 							</Select.Trigger>
 							<Select.Content>
