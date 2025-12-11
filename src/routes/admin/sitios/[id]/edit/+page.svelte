@@ -75,8 +75,8 @@
 
 	// Tab 4: Economic
 	let economic_condition = $state<{
-		employments: Array<{ type: string; count: number }>;
-		income_brackets: Array<{ bracket: string; households: number }>;
+		employments: string[];
+		income_brackets: string[];
 	}>({
 		employments: [],
 		income_brackets: []
@@ -585,7 +585,6 @@
 							bind:households_with_backyard_garden={food_security.households_with_backyard_garden}
 							bind:common_garden_commodities={food_security.common_garden_commodities}
 							{households}
-							{population}
 						/>
 					{:else if activeStep === 'infrastructure'}
 						<InfrastructureHousingTab

@@ -18,19 +18,9 @@ const SocialServicesSchema = z.object({
 	fourps_beneficiaries: z.number().int().nonnegative()
 });
 
-const EmploymentSchema = z.object({
-	type: z.string(),
-	count: z.number().int().nonnegative()
-});
-
-const IncomeBracketSchema = z.object({
-	bracket: z.string(),
-	households: z.number().int().nonnegative()
-});
-
 const EconomicConditionSchema = z.object({
-	employments: z.array(EmploymentSchema),
-	income_brackets: z.array(IncomeBracketSchema)
+	employments: z.array(z.string()),
+	income_brackets: z.array(z.string())
 });
 
 const AgricultureSchema = z.object({
@@ -219,8 +209,12 @@ export function createSnapshotFromSitio(sitio: Sitio, year: number): SitioYearly
 		social_services: sitio.social_services ? { ...sitio.social_services } : undefined,
 		economic_condition: sitio.economic_condition
 			? {
-					employments: sitio.economic_condition.employments?.map((e) => ({ ...e })) || [],
-					income_brackets: sitio.economic_condition.income_brackets?.map((i) => ({ ...i })) || []
+					employments: sitio.economic_condition.employments
+						? [...sitio.economic_condition.employments]
+						: [],
+					income_brackets: sitio.economic_condition.income_brackets
+						? [...sitio.economic_condition.income_brackets]
+						: []
 				}
 			: undefined,
 		agriculture: sitio.agriculture
@@ -306,8 +300,12 @@ export function applySitioSnapshot(sitio: Sitio, snapshot: SitioYearlySnapshot):
 		social_services: snapshot.social_services ? { ...snapshot.social_services } : undefined,
 		economic_condition: snapshot.economic_condition
 			? {
-					employments: snapshot.economic_condition.employments?.map((e) => ({ ...e })) || [],
-					income_brackets: snapshot.economic_condition.income_brackets?.map((i) => ({ ...i })) || []
+					employments: snapshot.economic_condition.employments
+						? [...snapshot.economic_condition.employments]
+						: [],
+					income_brackets: snapshot.economic_condition.income_brackets
+						? [...snapshot.economic_condition.income_brackets]
+						: []
 				}
 			: undefined,
 		agriculture: snapshot.agriculture

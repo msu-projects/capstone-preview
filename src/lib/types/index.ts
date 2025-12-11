@@ -78,8 +78,8 @@ export interface Sitio {
 
 	// Economic condition
 	economic_condition?: {
-		employments: Array<{ type: string; count: number }>;
-		income_brackets: Array<{ bracket: string; households: number }>;
+		employments: string[];
+		income_brackets: string[];
 	};
 
 	// Agriculture

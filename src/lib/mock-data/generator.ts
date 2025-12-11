@@ -334,31 +334,10 @@ export function generateSitios(count: number = 50, seed: number = 42): Sitio[] {
 				fourps_beneficiaries: Math.round(households * (0.1 + rng.next() * 0.3))
 			},
 			economic_condition: {
-				employments: rng
-					.shuffle(EMPLOYMENT_TYPES)
+				employments: rng.shuffle(EMPLOYMENT_TYPES).slice(0, rng.nextInt(2, 4)),
+				income_brackets: rng
+					.shuffle(['<=100', '100-300', '300-500', '>=500'])
 					.slice(0, rng.nextInt(2, 4))
-					.map((type) => ({
-						type,
-						count: rng.nextInt(10, 80)
-					})),
-				income_brackets: [
-					{
-						bracket: 'Below ₱100',
-						households: Math.round(households * (0.2 + rng.next() * 0.2))
-					},
-					{
-						bracket: '₱100 - ₱300',
-						households: Math.round(households * (0.3 + rng.next() * 0.2))
-					},
-					{
-						bracket: '₱300 - ₱500',
-						households: Math.round(households * (0.15 + rng.next() * 0.15))
-					},
-					{
-						bracket: 'Above ₱500',
-						households: Math.round(households * (0.05 + rng.next() * 0.1))
-					}
-				]
 			},
 			agriculture: {
 				farmers_count: rng.nextInt(20, 100),
@@ -1333,18 +1312,8 @@ export function generateSitioYearlySnapshots(
 		// Economic condition (similar structure, varying counts)
 		const economic_condition = sitio.economic_condition
 			? {
-					employments: sitio.economic_condition.employments.map((emp) => ({
-						type: emp.type,
-						count: Math.round(
-							emp.count * (population / currentPopulation) * (0.9 + rng.next() * 0.2)
-						)
-					})),
-					income_brackets: sitio.economic_condition.income_brackets.map((bracket) => ({
-						bracket: bracket.bracket,
-						households: Math.round(
-							bracket.households * (households / currentHouseholds) * (0.9 + rng.next() * 0.2)
-						)
-					}))
+					employments: [...sitio.economic_condition.employments],
+					income_brackets: [...sitio.economic_condition.income_brackets]
 				}
 			: undefined;
 

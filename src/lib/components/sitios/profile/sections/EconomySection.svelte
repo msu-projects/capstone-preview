@@ -1,6 +1,4 @@
 <script lang="ts">
-	import HistogramChart from '$lib/components/charts/HistogramChart.svelte';
-	import TreemapChart from '$lib/components/charts/TreemapChart.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';
 	import type { Sitio } from '$lib/types';
@@ -15,92 +13,22 @@
 
 	const { sitio, previousSnapshot = null }: Props = $props();
 
-	// Employment types data for chart
-	const employmentData = $derived(
-		sitio.economic_condition?.employments
-			? sitio.economic_condition.employments
-					.sort((a, b) => b.count - a.count)
-					.slice(0, 6)
-					.map((e, i) => ({
-						label: e.type,
-						value: e.count,
-						color: [
-							'hsl(217, 91%, 60%)',
-							'hsl(142, 71%, 45%)',
-							'hsl(24, 95%, 53%)',
-							'hsl(262, 83%, 58%)',
-							'hsl(189, 85%, 45%)',
-							'hsl(340, 82%, 52%)'
-						][i % 6]
-					}))
-			: []
-	);
+	// Employment types data - just display as badges now
+	const employmentTypes = $derived(sitio.economic_condition?.employments || []);
 
-	// Income brackets data
-	const incomeData = $derived(
-		sitio.economic_condition?.income_brackets
-			? sitio.economic_condition.income_brackets.map((ib, i) => ({
-					label: formatIncomeBracket(ib.bracket),
-					value: ib.households,
-					color: [
-						'hsl(217, 91%, 60%)',
-						'hsl(142, 71%, 45%)',
-						'hsl(24, 95%, 53%)',
-						'hsl(262, 83%, 58%)'
-					][i % 4]
-				}))
-			: []
-	);
-
-	// Total employed
-	const totalEmployed = $derived(
-		sitio.economic_condition?.employments?.reduce((sum, e) => sum + e.count, 0) || 0
-	);
+	// Income brackets data - just display as badges
+	const incomeBrackets = $derived(sitio.economic_condition?.income_brackets || []);
 
 	// Top employment type
 	const topEmployment = $derived.by((): string => {
 		const emps = sitio.economic_condition?.employments;
 		if (!emps || emps.length === 0) return 'N/A';
-		const max = emps.reduce((a, b) => (b.count > a.count ? b : a));
-		return max.type ?? 'N/A';
+		return emps[0] || 'N/A';
 	});
 
 	// Livestock data - now just a string array
 	const hasLivestock = $derived(sitio.livestock_poultry && sitio.livestock_poultry.length > 0);
 	const livestockCount = $derived(sitio.livestock_poultry?.length || 0);
-
-	// Treemap data for employment types (better than bar chart for many categories)
-	const treemapEmploymentData = $derived(
-		sitio.economic_condition?.employments
-			? sitio.economic_condition.employments
-					.filter((e) => e.count > 0)
-					.sort((a, b) => b.count - a.count)
-					.map((e, i) => ({
-						label: e.type,
-						value: e.count,
-						color: [
-							'hsl(217, 91%, 60%)',
-							'hsl(142, 71%, 45%)',
-							'hsl(24, 95%, 53%)',
-							'hsl(262, 83%, 58%)',
-							'hsl(189, 85%, 45%)',
-							'hsl(340, 82%, 52%)',
-							'hsl(173, 80%, 40%)',
-							'hsl(199, 89%, 48%)'
-						][i % 8]
-					}))
-			: []
-	);
-
-	// Histogram data for income distribution
-	const incomeHistogramData = $derived(
-		sitio.economic_condition?.income_brackets
-			? sitio.economic_condition.income_brackets.map((ib) => ({
-					bracket: formatIncomeBracket(ib.bracket),
-					count: ib.households
-				}))
-			: []
-	);
 
 	function formatIncomeBracket(bracket: string): string {
 		switch (bracket) {
@@ -120,33 +48,7 @@
 
 <div class="space-y-6">
 	<!-- Key Economic Indicators -->
-	<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-		<Card.Root
-			class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50"
-		>
-			<div
-				class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-blue-50 opacity-50"
-			></div>
-			<div
-				class="absolute inset-0 bg-blue-50 opacity-0 transition-opacity group-hover:opacity-30"
-			></div>
-			<Card.Content class="relative p-4 sm:p-5">
-				<div class="flex items-center gap-3 sm:gap-4">
-					<div class="rounded-xl bg-blue-50 p-2.5 ring-1 ring-black/5 sm:p-3">
-						<Briefcase class="size-5 text-blue-700 sm:size-6" />
-					</div>
-					<div class="min-w-0 flex-1">
-						<p class="truncate text-xs font-medium text-slate-500 sm:text-sm">Total Employed</p>
-						<p
-							class="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl"
-						>
-							{formatNumber(totalEmployed)}
-						</p>
-					</div>
-				</div>
-			</Card.Content>
-		</Card.Root>
-
+	<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
 		<Card.Root
 			class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50"
 		>
@@ -226,9 +128,9 @@
 		</Card.Root>
 	</div>
 
-	<!-- Employment and Income Charts -->
+	<!-- Employment and Income Display -->
 	<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-		<!-- Employment Types - Treemap -->
+		<!-- Employment Types -->
 		<Card.Root class="gap-0 py-0 shadow-sm">
 			<Card.Header class="border-b bg-slate-50/50 py-6">
 				<div class="flex items-center justify-between">
@@ -236,20 +138,25 @@
 						<div class="rounded-lg bg-blue-100 p-1.5">
 							<Briefcase class="size-4 text-blue-600" />
 						</div>
-						<Card.Title class="text-lg">Livelihood Landscape</Card.Title>
+						<Card.Title class="text-lg">Employment Types</Card.Title>
 					</div>
-					{#if totalEmployed > 0}
+					{#if employmentTypes.length > 0}
 						<Badge variant="outline" class="bg-blue-50 text-blue-700">
-							{formatNumber(totalEmployed)} Employed
+							{employmentTypes.length}
+							{employmentTypes.length === 1 ? 'Type' : 'Types'}
 						</Badge>
 					{/if}
 				</div>
-				<Card.Description>Employment distribution by job type</Card.Description>
+				<Card.Description>Common types of employment in this sitio</Card.Description>
 			</Card.Header>
 			<Card.Content class="py-6">
-				{#if treemapEmploymentData.length > 0}
-					<div style="height: 300px;">
-						<TreemapChart data={treemapEmploymentData} height={300} />
+				{#if employmentTypes.length > 0}
+					<div class="flex flex-wrap gap-2">
+						{#each employmentTypes as type}
+							<Badge variant="secondary" class="px-3 py-1.5 text-sm">
+								{type}
+							</Badge>
+						{/each}
 					</div>
 				{:else}
 					<div class="flex flex-col items-center justify-center py-12 text-center">
@@ -260,43 +167,33 @@
 			</Card.Content>
 		</Card.Root>
 
-		<!-- Income Distribution - Histogram -->
+		<!-- Income Distribution -->
 		<Card.Root class="gap-0 py-0 shadow-sm">
 			<Card.Header class="border-b bg-slate-50/50 py-6">
-				<div class="flex items-center gap-2">
-					<div class="rounded-lg bg-emerald-100 p-1.5">
-						<Banknote class="size-4 text-emerald-600" />
+				<div class="flex items-center justify-between">
+					<div class="flex items-center gap-2">
+						<div class="rounded-lg bg-emerald-100 p-1.5">
+							<Banknote class="size-4 text-emerald-600" />
+						</div>
+						<Card.Title class="text-lg">Income Distribution</Card.Title>
 					</div>
-					<Card.Title class="text-lg">Income Distribution</Card.Title>
+					{#if incomeBrackets.length > 0}
+						<Badge variant="outline" class="bg-emerald-50 text-emerald-700">
+							{incomeBrackets.length}
+							{incomeBrackets.length === 1 ? 'Bracket' : 'Brackets'}
+						</Badge>
+					{/if}
 				</div>
-				<Card.Description>Household count by daily income bracket</Card.Description>
+				<Card.Description>Daily income brackets present in this sitio</Card.Description>
 			</Card.Header>
 			<Card.Content class="py-6">
-				{#if incomeHistogramData.length > 0}
-					<div style="height: 280px;">
-						<HistogramChart
-							data={incomeHistogramData}
-							height={280}
-							title="Households"
-							color="hsl(142, 71%, 45%)"
-							highlightFirstBar={true}
-							highlightColor="hsl(0, 84%, 60%)"
-						/>
-					</div>
-					<!-- Summary stats -->
-					<div class="mt-4 grid grid-cols-2 gap-3">
-						<div class="rounded-lg bg-red-50 p-3 text-center">
-							<div class="text-lg font-bold text-red-700">
-								{incomeHistogramData[0]?.count || 0}
-							</div>
-							<div class="text-xs text-red-600">Below ₱100/day (Poverty)</div>
-						</div>
-						<div class="rounded-lg bg-emerald-50 p-3 text-center">
-							<div class="text-lg font-bold text-emerald-700">
-								{incomeHistogramData.slice(1).reduce((sum, d) => sum + d.count, 0)}
-							</div>
-							<div class="text-xs text-emerald-600">Above ₱100/day</div>
-						</div>
+				{#if incomeBrackets.length > 0}
+					<div class="flex flex-wrap gap-2">
+						{#each incomeBrackets as bracket}
+							<Badge variant="outline" class="px-3 py-1.5 text-sm">
+								{formatIncomeBracket(bracket)}
+							</Badge>
+						{/each}
 					</div>
 				{:else}
 					<div class="flex flex-col items-center justify-center py-12 text-center">

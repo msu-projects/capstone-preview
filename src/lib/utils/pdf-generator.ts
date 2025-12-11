@@ -692,23 +692,9 @@ export function generateSitioProfilePDF(sitio: Sitio) {
 	// Employment Types
 	if (sitio.economic_condition?.employments && sitio.economic_condition.employments.length > 0) {
 		content.push(createSubsectionHeader('Employment Types'));
-		const employmentRows = sitio.economic_condition.employments.map((emp) => [
-			{ text: emp.type, style: 'tableCell' },
-			{ text: emp.count.toLocaleString(), style: 'tableCell' }
-		]);
 		content.push({
-			table: {
-				widths: ['*', 100],
-				body: [
-					[
-						{ text: 'Type', style: 'tableHeader' },
-						{ text: 'Count', style: 'tableHeader' }
-					],
-					...employmentRows
-				]
-			},
-			layout: 'lightHorizontalLines',
-			margin: [0, 5, 0, 10] as [number, number, number, number]
+			text: sitio.economic_condition.employments.join(', '),
+			style: 'paragraph'
 		});
 	}
 
@@ -717,24 +703,24 @@ export function generateSitioProfilePDF(sitio: Sitio) {
 		sitio.economic_condition?.income_brackets &&
 		sitio.economic_condition.income_brackets.length > 0
 	) {
-		content.push(createSubsectionHeader('Income Brackets (Monthly, in PHP thousands)'));
-		const incomeRows = sitio.economic_condition.income_brackets.map((inc) => [
-			{ text: inc.bracket, style: 'tableCell' },
-			{ text: inc.households.toLocaleString(), style: 'tableCell' }
-		]);
+		content.push(createSubsectionHeader('Income Brackets (Daily)'));
+		const formattedBrackets = sitio.economic_condition.income_brackets.map((bracket) => {
+			switch (bracket) {
+				case '<=100':
+					return 'Below ₱100/day';
+				case '100-300':
+					return '₱100-300/day';
+				case '300-500':
+					return '₱300-500/day';
+				case '>=500':
+					return '₱500+/day';
+				default:
+					return bracket;
+			}
+		});
 		content.push({
-			table: {
-				widths: ['*', 100],
-				body: [
-					[
-						{ text: 'Bracket', style: 'tableHeader' },
-						{ text: 'Households', style: 'tableHeader' }
-					],
-					...incomeRows
-				]
-			},
-			layout: 'lightHorizontalLines',
-			margin: [0, 5, 0, 10] as [number, number, number, number]
+			text: formattedBrackets.join(', '),
+			style: 'paragraph'
 		});
 	}
 

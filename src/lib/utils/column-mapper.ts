@@ -103,33 +103,15 @@ export const SITIO_FIELD_DEFINITIONS = [
 		required: false
 	},
 	{
-		field: 'economic_condition.employments.count',
-		label: 'Employment 1 Count',
-		csvHeader: 'EMPLOYMENT_1_COUNT',
-		required: false
-	},
-	{
 		field: 'economic_condition.employments',
 		label: 'Top Employment 2',
 		csvHeader: 'Top 3 Employment - 2nd',
 		required: false
 	},
 	{
-		field: 'economic_condition.employments.count',
-		label: 'Employment 2 Count',
-		csvHeader: 'EMPLOYMENT_2_COUNT',
-		required: false
-	},
-	{
 		field: 'economic_condition.employments',
 		label: 'Top Employment 3',
 		csvHeader: 'Top 3 Employment - 3rd',
-		required: false
-	},
-	{
-		field: 'economic_condition.employments.count',
-		label: 'Employment 3 Count',
-		csvHeader: 'EMPLOYMENT_3_COUNT',
 		required: false
 	},
 
@@ -141,33 +123,15 @@ export const SITIO_FIELD_DEFINITIONS = [
 		required: false
 	},
 	{
-		field: 'economic_condition.income_brackets.households',
-		label: 'Income Bracket 1 HH',
-		csvHeader: 'INCOME_1_HOUSEHOLDS',
-		required: false
-	},
-	{
 		field: 'economic_condition.income_brackets',
 		label: 'Top Income Bracket 2',
 		csvHeader: 'Top 3 Income Bracket - 2nd',
 		required: false
 	},
 	{
-		field: 'economic_condition.income_brackets.households',
-		label: 'Income Bracket 2 HH',
-		csvHeader: 'INCOME_2_HOUSEHOLDS',
-		required: false
-	},
-	{
 		field: 'economic_condition.income_brackets',
 		label: 'Top Income Bracket 3',
 		csvHeader: 'Top 3 Income Bracket - 3rd',
-		required: false
-	},
-	{
-		field: 'economic_condition.income_brackets.households',
-		label: 'Income Bracket 3 HH',
-		csvHeader: 'INCOME_3_HOUSEHOLDS',
 		required: false
 	},
 
@@ -615,8 +579,6 @@ export function transformRowToSitio(row: ImportedRow, mappings: ColumnMapping[])
 	// Temporary storage for paired data (water sources, ownership types, etc.)
 	const waterSourcesTemp: Array<{ source?: string; status?: string }> = [];
 	const ownershipTypesTemp: Array<{ type?: string; count?: number }> = [];
-	const employmentsTemp: Array<{ type?: string; count?: number }> = [];
-	const incomeBracketsTemp: Array<{ bracket?: string; households?: number }> = [];
 	const qualityTypesTemp: Array<{ type?: string; count?: number }> = [];
 
 	mappings.forEach((mapping) => {
@@ -670,40 +632,6 @@ export function transformRowToSitio(row: ImportedRow, mappings: ColumnMapping[])
 				if (!ownershipTypesTemp[index]) ownershipTypesTemp[index] = {};
 				const numValue = Number(value);
 				ownershipTypesTemp[index].count = !isNaN(numValue) ? numValue : 0;
-			}
-			return;
-		}
-
-		// Handle employments with counts
-		if (fieldPath.includes('employments')) {
-			if (lastField === 'employments') {
-				const match = mapping.csvHeader.match(/Top 3 Employment - (\d+)/);
-				const index = match ? parseInt(match[1]) - 1 : employmentsTemp.length;
-				if (!employmentsTemp[index]) employmentsTemp[index] = {};
-				employmentsTemp[index].type = String(value).trim();
-			} else if (lastField === 'count') {
-				const match = mapping.csvHeader.match(/EMPLOYMENT_(\d+)_COUNT/);
-				const index = match ? parseInt(match[1]) - 1 : employmentsTemp.length - 1;
-				if (!employmentsTemp[index]) employmentsTemp[index] = {};
-				const numValue = Number(value);
-				employmentsTemp[index].count = !isNaN(numValue) ? numValue : 0;
-			}
-			return;
-		}
-
-		// Handle income brackets with households
-		if (fieldPath.includes('income_brackets')) {
-			if (lastField === 'income_brackets') {
-				const match = mapping.csvHeader.match(/Top 3 Income Bracket - (\d+)/);
-				const index = match ? parseInt(match[1]) - 1 : incomeBracketsTemp.length;
-				if (!incomeBracketsTemp[index]) incomeBracketsTemp[index] = {};
-				incomeBracketsTemp[index].bracket = String(value).trim();
-			} else if (lastField === 'households') {
-				const match = mapping.csvHeader.match(/INCOME_(\d+)_HOUSEHOLDS/);
-				const index = match ? parseInt(match[1]) - 1 : incomeBracketsTemp.length - 1;
-				if (!incomeBracketsTemp[index]) incomeBracketsTemp[index] = {};
-				const numValue = Number(value);
-				incomeBracketsTemp[index].households = !isNaN(numValue) ? numValue : 0;
 			}
 			return;
 		}
@@ -780,18 +708,6 @@ export function transformRowToSitio(row: ImportedRow, mappings: ColumnMapping[])
 		sitio.housing.ownership_types = ownershipTypesTemp
 			.filter((ot) => ot.type)
 			.map((ot) => ({ type: ot.type!, count: ot.count || 0 }));
-	}
-
-	if (employmentsTemp.length > 0) {
-		sitio.economic_condition.employments = employmentsTemp
-			.filter((e) => e.type)
-			.map((e) => ({ type: e.type!, count: e.count || 0 }));
-	}
-
-	if (incomeBracketsTemp.length > 0) {
-		sitio.economic_condition.income_brackets = incomeBracketsTemp
-			.filter((ib) => ib.bracket)
-			.map((ib) => ({ bracket: ib.bracket!, households: ib.households || 0 }));
 	}
 
 	if (qualityTypesTemp.length > 0 && qualityTypesTemp[0].type) {

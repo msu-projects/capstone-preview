@@ -289,20 +289,17 @@ export function aggregateEconomy(sitios: Sitio[]): AggregatedEconomy {
 	const livestockFrequency = new Map<string, number>();
 
 	for (const sitio of sitios) {
-		// Employment types
+		// Employment types - count sitios that have each employment type
 		if (sitio.economic_condition?.employments) {
-			for (const emp of sitio.economic_condition.employments) {
-				employmentByType.set(emp.type, (employmentByType.get(emp.type) || 0) + emp.count);
+			for (const empType of sitio.economic_condition.employments) {
+				employmentByType.set(empType, (employmentByType.get(empType) || 0) + 1);
 			}
 		}
 
-		// Income brackets
+		// Income brackets - count sitios that have each bracket
 		if (sitio.economic_condition?.income_brackets) {
 			for (const bracket of sitio.economic_condition.income_brackets) {
-				incomeBrackets.set(
-					bracket.bracket,
-					(incomeBrackets.get(bracket.bracket) || 0) + bracket.households
-				);
+				incomeBrackets.set(bracket, (incomeBrackets.get(bracket) || 0) + 1);
 			}
 		}
 

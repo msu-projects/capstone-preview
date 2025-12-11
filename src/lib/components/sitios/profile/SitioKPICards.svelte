@@ -2,7 +2,7 @@
 	import * as Card from '$lib/components/ui/card';
 	import type { NeedLevel, Sitio } from '$lib/types';
 	import { getNeedLevelFromScore } from '$lib/types';
-	import { Briefcase, Gauge, Home, TrendingDown, TrendingUp, Users } from '@lucide/svelte';
+	import { Gauge, Home, TrendingDown, TrendingUp, Users } from '@lucide/svelte';
 
 	interface Props {
 		sitio: Sitio;
@@ -48,24 +48,6 @@
 
 	const currentNeedConfig = $derived(needLevelConfig[needLevel]);
 
-	// Calculate workforce participation
-	// % of population aged 18-60 currently employed
-	// Using age_15_64 as proxy for working-age population
-	const workforceParticipation = $derived.by(() => {
-		if (!sitio.economic_condition || sitio.demographics.age_15_64 <= 0) return 0;
-		const totalEmployed = sitio.economic_condition.employments.reduce((sum, e) => sum + e.count, 0);
-		return (totalEmployed / sitio.demographics.age_15_64) * 100;
-	});
-
-	// Workforce interpretation
-	const workforceLevel = $derived.by(() => {
-		if (workforceParticipation >= 60)
-			return { label: 'Strong', color: 'text-emerald-600', bg: 'bg-emerald-50' };
-		if (workforceParticipation >= 40)
-			return { label: 'Moderate', color: 'text-amber-600', bg: 'bg-amber-50' };
-		return { label: 'Low', color: 'text-red-600', bg: 'bg-red-50' };
-	});
-
 	const kpiData = $derived([
 		{
 			label: 'Total Population',
@@ -97,32 +79,11 @@
 			iconBg: currentNeedConfig.bg,
 			iconColor: currentNeedConfig.color,
 			trend: needScore >= 8 ? 'negative' : needScore >= 6 ? 'neutral' : 'positive'
-		},
-		{
-			label: 'Workforce Participation',
-			value: `${workforceParticipation.toFixed(1)}%`,
-			sublabel: workforceLevel.label + ' Employment',
-			icon: Briefcase,
-			color:
-				workforceParticipation >= 60
-					? 'from-emerald-500 to-emerald-600'
-					: workforceParticipation >= 40
-						? 'from-amber-500 to-amber-600'
-						: 'from-red-500 to-red-600',
-			bgColor: workforceLevel.bg,
-			iconBg: workforceLevel.bg,
-			iconColor: workforceLevel.color,
-			trend:
-				workforceParticipation >= 60
-					? 'positive'
-					: workforceParticipation >= 40
-						? 'neutral'
-						: 'negative'
 		}
 	]);
 </script>
 
-<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 {className}">
+<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 {className}">
 	{#each kpiData as kpi}
 		<Card.Root
 			class="relative overflow-hidden border-0 shadow-sm transition-shadow hover:shadow-md"
