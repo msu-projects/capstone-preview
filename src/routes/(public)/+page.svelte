@@ -242,36 +242,4 @@
 			</div>
 		</div>
 	</section>
-
-	<!-- CTA Section -->
-	<section class="py-16">
-		<div class="container mx-auto px-4">
-			<Card.Root class="bg-linear-to-r from-primary to-primary/80 py-0 text-white lg:py-6">
-				<Card.Content class="py-12 text-center">
-					<h2 class="mb-4 text-2xl font-bold md:text-3xl">
-						Ready to explore development progress?
-					</h2>
-					<p class="mx-auto mb-6 max-w-xl opacity-90">
-						View detailed project information, track implementation status, and see how government
-						initiatives are transforming communities.
-					</p>
-					<div class="flex flex-col justify-center gap-3 sm:flex-row">
-						<Button href="/projects" variant="secondary" size="lg" class="gap-2">
-							<FolderKanban class="size-5" />
-							Browse All Projects
-						</Button>
-						<Button
-							href="/sitios"
-							variant="outline"
-							size="lg"
-							class="gap-2 border-white/30 bg-white/10 text-white hover:bg-white/20"
-						>
-							<Users class="size-5" />
-							View Sitio Profiles
-						</Button>
-					</div>
-				</Card.Content>
-			</Card.Root>
-		</div>
-	</section>
 </div>
