@@ -97,9 +97,9 @@
 	<!-- Budget Summary Cards -->
 	<div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
 		{#each budgetMetrics as metric}
-			<a href="{metric.href ?? '/projects/list'}">
+			<a href={metric.href ?? '/projects/list'}>
 				<Card.Root
-					class="border-0 shadow-sm ring-1 ring-slate-200/50 transition-all hover:scale-[1.02] hover:shadow-md dark:ring-slate-700/50 cursor-pointer"
+					class="cursor-pointer border-0 shadow-sm ring-1 ring-slate-200/50 transition-all hover:scale-[1.02] hover:shadow-md dark:ring-slate-700/50"
 				>
 					<Card.Content class="p-4 sm:p-5">
 						<div class="flex items-start gap-3 sm:gap-4">
@@ -112,7 +112,9 @@
 								<metric.icon class="size-5 {metric.textColor} sm:size-6" />
 							</div>
 							<div class="min-w-0 flex-1">
-								<p class="truncate text-xs font-medium text-slate-500 sm:text-sm dark:text-slate-400">
+								<p
+									class="truncate text-xs font-medium text-slate-500 sm:text-sm dark:text-slate-400"
+								>
 									{metric.label}
 								</p>
 								<p
