@@ -568,14 +568,9 @@ const PROJECT_TITLES: Record<CategoryKey, string[]> = {
 	]
 };
 
+import { IMPLEMENTING_AGENCIES } from '$lib/config/agencies';
+
 const STATUSES: ProjectStatus[] = ['planning', 'in-progress', 'completed', 'suspended'];
-const AGENCIES = [
-	"Provincial Governor's Office",
-	'Provincial Engineering Office',
-	"Provincial Agriculturist's Office",
-	'Provincial Health Office',
-	'Provincial Social Welfare Office'
-];
 
 const CATCH_UP_PLANS = [
 	'Deploy additional workforce to accelerate construction',
@@ -1253,7 +1248,11 @@ export function generateProjects(
 				male: rng.nextInt(5, 30),
 				female: rng.nextInt(3, 20)
 			},
-			implementing_agency: rng.pick(AGENCIES),
+			implementing_agencies: (() => {
+				const numAgencies = rng.nextInt(1, 3);
+				const shuffled = rng.shuffle([...IMPLEMENTING_AGENCIES]);
+				return shuffled.slice(0, numAgencies);
+			})(),
 			created_at: startDate.toISOString(),
 			updated_at: generateUpdatedAt(status, rng).toISOString()
 		};

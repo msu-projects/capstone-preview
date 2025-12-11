@@ -1,9 +1,11 @@
 <script lang="ts">
+	import { ComboboxMultiSelect } from '$lib/components/ui/combobox';
 	import { FormSection } from '$lib/components/ui/form-section';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import * as Select from '$lib/components/ui/select';
 	import { Textarea } from '$lib/components/ui/textarea';
+	import { IMPLEMENTING_AGENCIES } from '$lib/config/agencies';
 	import { categories, getProjectTypesByCategory } from '$lib/config/project-categories';
 	import type { CategoryKey, ProjectType } from '$lib/types';
 	import { cn } from '$lib/utils';
@@ -23,13 +25,13 @@
 		description = $bindable(),
 		selectedCategory = $bindable<CategoryKey | ''>(''),
 		selectedProjectType = $bindable<number | undefined>(undefined),
-		implementingAgency = $bindable('')
+		implementingAgencies = $bindable([])
 	} = $props<{
 		title: string;
 		description: string;
 		selectedCategory: CategoryKey | '';
 		selectedProjectType: number | undefined;
-		implementingAgency: string;
+		implementingAgencies: string[];
 	}>();
 
 	const iconMap: Record<string, any> = {
@@ -197,8 +199,7 @@
 		title.trim() !== '' &&
 			description.trim() !== '' &&
 			selectedCategory !== '' &&
-			selectedProjectType !== undefined &&
-			implementingAgency.trim() !== ''
+			selectedProjectType !== undefined
 	);
 </script>
 
@@ -293,20 +294,23 @@
 			</p>
 		</div>
 
-		<!-- Implementing Agency -->
+		<!-- Implementing Agencies -->
 		<div class="space-y-2">
-			<Label for="implementing-agency" class="required flex items-center gap-2">
+			<Label for="implementing-agencies" class="flex items-center gap-2">
 				<Building2 class="size-4" />
-				Implementing Agency
+				Implementing Agencies
 			</Label>
-			<Input
-				id="implementing-agency"
-				bind:value={implementingAgency}
-				placeholder="e.g., Provincial Engineer's Office, DA - Region XII"
-				class={cn('w-full text-sm', implementingAgency.trim() && 'border-primary/30 bg-primary/5')}
+			<ComboboxMultiSelect
+				bind:values={implementingAgencies}
+				options={[...IMPLEMENTING_AGENCIES]}
+				placeholder="Search agencies..."
+				addLabel="Add Agency"
+				emptyMessage="No agencies added yet"
+				allowCustom={true}
+				variant="list"
 			/>
 			<p class="text-xs text-muted-foreground">
-				The government office or agency primarily responsible for implementing this project.
+				Select one or more government offices or agencies responsible for implementing this project.
 			</p>
 		</div>
 	</div>

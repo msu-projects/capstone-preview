@@ -18,6 +18,8 @@
 		emptyMessage?: string;
 		/** Allow custom entries not in the options list */
 		allowCustom?: boolean;
+		/** Display variant: 'tags' (default) or 'list' */
+		variant?: 'tags' | 'list';
 		/** Custom render for each tag (optional) */
 		tagContent?: Snippet<[{ value: string; remove: () => void }]>;
 		/** Additional class for the container */
@@ -31,6 +33,7 @@
 		addLabel = 'Add',
 		emptyMessage = 'No items added yet',
 		allowCustom = true,
+		variant = 'tags',
 		tagContent,
 		class: className = ''
 	}: Props = $props();
@@ -69,35 +72,70 @@
 </script>
 
 <div class={className}>
-	<div class="flex flex-wrap gap-2">
-		<!-- Selected items as tags -->
-		{#if values.length === 0}
-			<div
-				class="flex w-full items-center justify-center rounded-lg border border-dashed bg-muted/20 px-4 py-6 text-sm text-muted-foreground"
-			>
-				<p>{emptyMessage}</p>
-			</div>
-		{:else}
-			{#each values as value (value)}
-				{#if tagContent}
-					{@render tagContent({ value, remove: () => removeValue(value) })}
-				{:else}
-					<div
-						class="group flex items-center gap-1.5 rounded-full border bg-muted/50 py-1 pr-1 pl-3 text-sm transition-all hover:bg-muted"
-					>
-						<span>{value}</span>
-						<button
-							type="button"
-							onclick={() => removeValue(value)}
-							class="flex size-5 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+	{#if variant === 'list'}
+		<!-- List variant - vertical list with alternating background -->
+		<div class="space-y-2">
+			{#if values.length === 0}
+				<div
+					class="flex w-full items-center justify-center rounded-lg border border-dashed bg-muted/20 px-4 py-6 text-sm text-muted-foreground"
+				>
+					<p>{emptyMessage}</p>
+				</div>
+			{:else}
+				<div class="rounded-lg border">
+					{#each values as value, index (value)}
+						<div
+							class="group flex items-center justify-between gap-2 px-4 py-3 text-sm transition-colors hover:bg-muted/50 {index !==
+							values.length - 1
+								? 'border-b'
+								: ''}"
 						>
-							<X class="size-3" />
-						</button>
-					</div>
-				{/if}
-			{/each}
-		{/if}
-	</div>
+							<span class="flex-1">{value}</span>
+							<button
+								type="button"
+								onclick={() => removeValue(value)}
+								class="flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+								aria-label="Remove {value}"
+							>
+								<X class="size-4" />
+							</button>
+						</div>
+					{/each}
+				</div>
+			{/if}
+		</div>
+	{:else}
+		<!-- Tags variant (default) - horizontal wrapped tags -->
+		<div class="flex flex-wrap gap-2">
+			{#if values.length === 0}
+				<div
+					class="flex w-full items-center justify-center rounded-lg border border-dashed bg-muted/20 px-4 py-6 text-sm text-muted-foreground"
+				>
+					<p>{emptyMessage}</p>
+				</div>
+			{:else}
+				{#each values as value (value)}
+					{#if tagContent}
+						{@render tagContent({ value, remove: () => removeValue(value) })}
+					{:else}
+						<div
+							class="group flex items-center gap-1.5 rounded-full border bg-muted/50 py-1 pr-1 pl-3 text-sm transition-all hover:bg-muted"
+						>
+							<span>{value}</span>
+							<button
+								type="button"
+								onclick={() => removeValue(value)}
+								class="flex size-5 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+								aria-label="Remove {value}"
+							>
+								<X class="size-3" />
+							</button>
+						</div>
+					{/if}
+				{/each}
+			{/if}
+		</div>
+	{/if}
 
 	<Popover.Root bind:open>
 		<Popover.Trigger class="mt-3">

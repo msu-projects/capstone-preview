@@ -354,7 +354,7 @@ export interface Project {
 		male: number;
 		female: number;
 	};
-	implementing_agency?: string;
+	implementing_agencies?: string[];
 	created_at: string;
 	updated_at: string;
 }

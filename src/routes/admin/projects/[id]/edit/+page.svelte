@@ -93,7 +93,7 @@
 	let description = $state(existingProject?.description ?? '');
 	let selectedCategory = $state<CategoryKey | ''>(getCategoryKey(existingProject));
 	let selectedProjectType = $state<number | undefined>(existingProject?.project_type_id);
-	let implementingAgency = $state(existingProject?.implementing_agency ?? '');
+	let implementingAgencies = $state<string[]>(existingProject?.implementing_agencies ?? []);
 
 	// Tab 2: Location & Beneficiaries
 	let projectSitios = $state<Omit<ProjectSitio, 'project_id'>[]>(
@@ -200,8 +200,7 @@
 		title.trim() !== '' &&
 			description.trim() !== '' &&
 			selectedCategory !== '' &&
-			selectedProjectType !== undefined &&
-			implementingAgency.trim() !== ''
+			selectedProjectType !== undefined
 	);
 
 	const isTab2Valid = $derived(projectSitios.length > 0);
@@ -372,7 +371,7 @@
 					male: Number(employmentMale) || 0,
 					female: Number(employmentFemale) || 0
 				},
-				implementing_agency: implementingAgency,
+				implementing_agencies: implementingAgencies.length > 0 ? implementingAgencies : undefined,
 				updated_at: new Date().toISOString()
 			};
 
@@ -469,7 +468,7 @@
 						bind:description
 						bind:selectedCategory
 						bind:selectedProjectType
-						bind:implementingAgency
+						bind:implementingAgencies
 					/>
 				{:else if activeStep === 'location'}
 					<LocationBeneficiariesTab

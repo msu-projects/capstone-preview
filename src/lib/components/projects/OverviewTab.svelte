@@ -188,20 +188,28 @@
 					</div>
 				</Card.Header>
 				<Card.Content class="space-y-4 pt-0">
-					<!-- Implementing Agency -->
-					<div>
-						<div class="mb-2 text-xs font-semibold tracking-wider text-slate-400 uppercase">
-							Implementing Agency
+					<!-- Implementing Agencies -->
+					{#if project.implementing_agencies && project.implementing_agencies.length > 0}
+						<div>
+							<div class="mb-2 text-xs font-semibold tracking-wider text-slate-400 uppercase">
+								Implementing Agencies
+							</div>
+							<div
+								class="rounded-lg border border-slate-100 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800"
+							>
+								<ul class="space-y-2">
+									{#each project.implementing_agencies as agency}
+										<li class="flex items-start gap-2">
+											<Building2 class="mt-0.5 size-4 shrink-0 text-slate-400" />
+											<span class="text-sm font-medium text-slate-700 dark:text-slate-300">
+												{agency}
+											</span>
+										</li>
+									{/each}
+								</ul>
+							</div>
 						</div>
-						<div
-							class="flex items-center gap-3 rounded-lg border border-slate-100 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800"
-						>
-							<Building2 class="size-5 text-slate-400" />
-							<span class="text-sm font-medium text-slate-700 dark:text-slate-300">
-								{project.implementing_agency || 'Not specified'}
-							</span>
-						</div>
-					</div>
+					{/if}
 
 					<!-- Employment Generated -->
 					<div>
