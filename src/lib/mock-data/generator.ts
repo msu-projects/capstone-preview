@@ -1243,7 +1243,235 @@ export function generateProjects(
 		projects.push(project);
 	}
 
+	// Add a specific delayed project with monthly updates for demonstration
+	const delayedProject = generateDelayedProjectWithMonthlyUpdates(
+		sitios,
+		count + 1,
+		seed + 1000,
+		2025
+	);
+	if (delayedProject) {
+		projects.push(delayedProject);
+	}
+
 	return projects;
+}
+
+/**
+ * Generate a specific delayed infrastructure project with detailed monthly updates
+ * This demonstrates a project that fell behind schedule and shows catch-up efforts
+ */
+function generateDelayedProjectWithMonthlyUpdates(
+	sitios: Sitio[],
+	projectId: number,
+	seed: number,
+	year: number
+): Project | null {
+	if (sitios.length === 0) return null;
+
+	const rng = new SeededRandom(seed);
+
+	// Pick infrastructure category and a road project
+	const categoryKey: CategoryKey = 'infrastructure';
+	const title = 'Farm-to-Market Road Concreting';
+	const projectType = projectTypes.find((pt) => pt.category_key === categoryKey);
+
+	// Large budget infrastructure project
+	const budget = 3500000; // 3.5M PHP
+	const contractCost = 3200000; // 3.2M PHP contract
+
+	// Started in January 2025, 8-month duration
+	const startDate = new Date(year, 0, 15); // Jan 15, 2025
+	const durationMonths = 8;
+	const contractDuration = `${durationMonths * 30} CD`;
+
+	// Assign 2 sitios
+	const numSitios = 2;
+	const selectedSitios = rng.shuffle(sitios).slice(0, numSitios);
+
+	const projectSitios: ProjectSitio[] = selectedSitios.map((sitio) => ({
+		project_id: projectId,
+		sitio_id: sitio.id,
+		sitio_name: sitio.name,
+		municipality: sitio.municipality,
+		barangay: sitio.barangay,
+		beneficiaries_target: rng.nextInt(150, 250),
+		focal_person: `Kgwd. ${rng.pick(['Juan', 'Maria', 'Pedro'])} ${rng.pick(['Santos', 'Reyes', 'Cruz'])}`,
+		focal_contact: `09${rng.nextInt(10, 99)}-${rng.nextInt(100, 999)}-${rng.nextInt(1000, 9999)}`
+	}));
+
+	const totalBeneficiaries = projectSitios.reduce((sum, ps) => sum + ps.beneficiaries_target, 0);
+
+	// Generate performance targets
+	const performanceTargets = generatePerformanceTargets(
+		projectId,
+		projectType?.id,
+		totalBeneficiaries,
+		budget,
+		rng
+	);
+
+	// Generate detailed monthly progress showing delay pattern
+	const monthlyProgress = generateDelayedMonthlyProgress(
+		projectId,
+		budget,
+		startDate,
+		6, // 6 months elapsed (Jan to June)
+		performanceTargets,
+		rng
+	);
+
+	const project: Project = {
+		id: projectId,
+		title: `${title} - ${selectedSitios[0].municipality}`,
+		description: `Construction of 2.5 km farm-to-market road connecting ${selectedSitios.map((s) => s.name).join(' and ')} in ${selectedSitios[0].municipality}. Project aims to improve agricultural product transport and market access for local farmers.`,
+		category_key: categoryKey,
+		project_type_id: projectType?.id,
+		status: 'delayed',
+		start_date: startDate.toISOString().split('T')[0],
+		contract_duration: contractDuration,
+		project_cost: contractCost,
+		beneficiaries: totalBeneficiaries,
+		project_year: year,
+		project_sitios: projectSitios,
+		monthly_progress: monthlyProgress,
+		monthly_targets: generateMonthlyTargets(budget, startDate, durationMonths),
+		performance_targets: performanceTargets,
+		funding_sources: generateFundingSources(projectId, budget, rng),
+		budget_components: generateBudgetComponents(projectId, budget, categoryKey, rng),
+		employment_generated: {
+			male: 25,
+			female: 12
+		},
+		implementing_agencies: ['DSWD', 'DPWH'],
+		created_at: startDate.toISOString(),
+		updated_at: new Date(year, 5, 28).toISOString() // Last update in June
+	};
+
+	return project;
+}
+
+/**
+ * Generate monthly progress for a delayed project showing:
+ * - Initial slow progress
+ * - Issues causing delays
+ * - Catch-up plans
+ * - Recovery efforts
+ */
+function generateDelayedMonthlyProgress(
+	projectId: number,
+	totalBudget: number,
+	startDate: Date,
+	monthsElapsed: number,
+	performanceTargets: PerformanceTarget[],
+	rng: SeededRandom
+): MonthlyProgress[] {
+	const progress: MonthlyProgress[] = [];
+	
+	// Track cumulative outputs
+	const cumulativeOutputs: Record<string, number> = {};
+	performanceTargets.forEach((target) => {
+		cumulativeOutputs[target.indicator_type] = 0;
+	});
+	
+	// Define the delay scenario
+	const delayScenario = [
+		{
+			// Month 1 (Jan): Good start
+			progressPercent: 15,
+			status: 'ongoing' as ProjectStatus,
+			issues: undefined,
+			recommendations: undefined,
+			catch_up_plan: undefined
+		},
+		{
+			// Month 2 (Feb): Starting to fall behind
+			progressPercent: 25,
+			status: 'ongoing' as ProjectStatus,
+			issues: 'Minor delays in material delivery due to heavy rains affecting transport.',
+			recommendations: 'Coordinate with suppliers for advance stockpiling of materials.',
+			catch_up_plan: undefined
+		},
+		{
+			// Month 3 (Mar): Significant delay
+			progressPercent: 32,
+			status: 'delayed' as ProjectStatus,
+			issues: 'Significant delays: (1) Prolonged heavy rains halted excavation works for 2 weeks, (2) Cement shortage due to supplier issues, (3) Two pieces of equipment under repair.',
+			recommendations: 'Submit request for time extension; coordinate with alternative suppliers; deploy rental equipment.',
+			catch_up_plan: 'Deploy additional workforce to accelerate construction once weather improves; extend working hours to 12-hour shifts; engage additional contractors for parallel work.'
+		},
+		{
+			// Month 4 (Apr): Recovery starts
+			progressPercent: 45,
+			status: 'delayed' as ProjectStatus,
+			issues: 'Weather improved but still recovering from previous delays. One section experiencing unstable soil requiring additional geotextile reinforcement.',
+			recommendations: 'Continue extended work hours; procure additional geotextile materials; conduct soil stabilization works.',
+			catch_up_plan: 'Maintain double-shifting for construction crews; prioritize critical path activities; weekend operations to recover lost time.'
+		},
+		{
+			// Month 5 (May): Good recovery
+			progressPercent: 62,
+			status: 'ongoing' as ProjectStatus,
+			issues: 'Project recovering well. Minor adjustments in alignment to avoid underground utilities discovered during excavation.',
+			recommendations: 'Coordinate with utility companies for proper relocation; update as-built plans.',
+			catch_up_plan: 'Continue accelerated schedule; conduct weekend operations for utility relocation works.'
+		},
+		{
+			// Month 6 (June): Still catching up
+			progressPercent: 75,
+			status: 'delayed' as ProjectStatus,
+			issues: 'Progress improving but still behind original timeline. Current focus on concrete pouring for base course. Need to complete 25% in remaining 2 months.',
+			recommendations: 'Request budget augmentation for overtime pay; fast-track remaining procurement items.',
+			catch_up_plan: 'Implement triple-shift concrete pouring schedule; mobilize provincial equipment pool for support; conduct daily progress monitoring meetings.'
+		}
+	];
+
+	for (let i = 0; i < monthsElapsed; i++) {
+		const date = new Date(startDate);
+		date.setMonth(date.getMonth() + i);
+		const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+
+		const scenario = delayScenario[i];
+		const progressPercent = scenario.progressPercent;
+		
+		// Calculate cumulative budget based on progress
+		const cumulativeBudget = Math.floor((totalBudget * progressPercent) / 100);
+
+		// Calculate beneficiaries reached (proportional to progress)
+		const cumulativeBeneficiaries = 0; // No beneficiaries until completion
+
+		// Generate achieved outputs based on progress and performance targets
+		const achievedOutputs: Record<string, number> = {};
+		performanceTargets.forEach((target) => {
+			const targetValue = Math.round(
+				target.target_value * (progressPercent / 100) * (0.85 + rng.next() * 0.3)
+			);
+			cumulativeOutputs[target.indicator_type] = Math.max(
+				cumulativeOutputs[target.indicator_type],
+				targetValue
+			);
+			achievedOutputs[target.indicator_type] = cumulativeOutputs[target.indicator_type];
+		});
+
+		progress.push({
+			id: projectId * 100 + i,
+			project_id: projectId,
+			month_year: monthYear,
+			physical_progress_percentage: progressPercent,
+			budget_utilized: cumulativeBudget,
+			achieved_outputs: achievedOutputs,
+			beneficiaries_reached: cumulativeBeneficiaries,
+			issues: scenario.issues,
+			recommendations: scenario.recommendations,
+			catch_up_plan: scenario.catch_up_plan,
+			photo_documentation: [],
+			status: scenario.status,
+			created_at: date.toISOString(),
+			updated_at: date.toISOString()
+		});
+	}
+
+	return progress;
 }
 
 // ===== YEARLY SNAPSHOT GENERATOR =====
