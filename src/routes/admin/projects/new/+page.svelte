@@ -73,7 +73,7 @@
 	let performanceTargets = $state<Omit<PerformanceTarget, 'id' | 'project_id'>[]>([]);
 	let targetStartDate = $state<DateValue | undefined>(today(getLocalTimeZone()));
 	let durationInCalendarDays = $state('');
-	let totalBudget = $state('');
+	let projectCost = $state('');
 	let employmentMale = $state('');
 	let employmentFemale = $state('');
 
@@ -98,7 +98,7 @@
 		targetStartDate !== undefined &&
 			durationInCalendarDays !== '' &&
 			Number(durationInCalendarDays) > 0 &&
-			totalBudget !== ''
+			projectCost !== ''
 	);
 
 	const isTab4Valid = $derived(fundingSources.length > 0 && budgetComponents.length > 0);
@@ -245,8 +245,7 @@
 				status,
 				start_date: startDateValue,
 				contract_duration: durationInCalendarDays ? `${durationInCalendarDays} CD` : '',
-				total_budget: Number(totalBudget),
-				contract_cost: Number(totalBudget), // Same as budget for new projects
+				project_cost: Number(projectCost),
 				beneficiaries: totalBeneficiaries,
 				project_year: currentYear,
 				// New enhanced fields
@@ -365,12 +364,12 @@
 						bind:performanceTargets
 						bind:targetStartDate
 						bind:durationInCalendarDays
-						bind:totalBudget
+						bind:projectCost
 						bind:employmentMale
 						bind:employmentFemale
 					/>
 				{:else if activeStep === 'budget'}
-					<BudgetResourcesTab {totalBudget} bind:fundingSources bind:budgetComponents />
+					<BudgetResourcesTab {projectCost} bind:fundingSources bind:budgetComponents />
 				{:else if activeStep === 'monthly'}
 					<FormSection
 						title="Monthly Planning"
@@ -387,7 +386,6 @@
 						<MonthlyTargetsForm
 							startDate={targetStartDate?.toString() || ''}
 							{endDate}
-							totalBudget={Number(totalBudget)}
 							onUpdate={(data) => {
 								monthlyTargets = data.monthlyTargets;
 							}}

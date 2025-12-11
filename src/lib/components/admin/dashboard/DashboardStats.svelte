@@ -5,7 +5,6 @@
 	import { formatNumber } from '$lib/utils/formatters';
 	import {
 		Activity,
-		Banknote,
 		CircleCheckBig,
 		MapPin,
 		TrendingUp,
@@ -82,16 +81,6 @@
 			iconClass: 'text-purple-600',
 			iconBgClass: 'bg-purple-500/10',
 			href: '/admin/sitios'
-		},
-		{
-			title: 'Total Budget',
-			value: formatCompactCurrency(stats.total_budget),
-			subtitle: 'Allocated funds',
-			subtitleClass: 'text-muted-foreground',
-			icon: Banknote,
-			iconClass: 'text-emerald-600',
-			iconBgClass: 'bg-emerald-500/10',
-			href: '/admin/projects?tab=budget'
 		}
 	]);
 </script>

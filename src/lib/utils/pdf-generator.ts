@@ -76,9 +76,9 @@ export function generateProjectMonitoringPDF(projects: Project[], quarter: strin
 				],
 				margin: [2, 4, 2, 4] as [number, number, number, number]
 			},
-			// Total Budget
+			// Project Cost
 			{
-				text: project.total_budget.toLocaleString('en-PH', {
+				text: project.project_cost.toLocaleString('en-PH', {
 					style: 'currency',
 					currency: 'PHP',
 					minimumFractionDigits: 2
@@ -87,9 +87,9 @@ export function generateProjectMonitoringPDF(projects: Project[], quarter: strin
 				fontSize: 8,
 				margin: [2, 4, 2, 4] as [number, number, number, number]
 			},
-			// Contract Cost
+			// Project Cost
 			{
-				text: project.contract_cost.toLocaleString('en-PH', {
+				text: project.project_cost.toLocaleString('en-PH', {
 					style: 'currency',
 					currency: 'PHP',
 					minimumFractionDigits: 2

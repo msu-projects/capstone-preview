@@ -250,7 +250,7 @@
 									<Banknote class="size-4 text-muted-foreground" />
 									<div>
 										<p class="text-xs text-muted-foreground">Budget</p>
-										<p class="text-sm font-medium">{formatCurrency(project.total_budget)}</p>
+										<p class="text-sm font-medium">{formatCurrency(project.project_cost)}</p>
 									</div>
 								</div>
 								<div class="flex items-center gap-2 rounded-md bg-muted/50 px-3 py-2">
@@ -384,7 +384,7 @@
 									<!-- Budget -->
 									<Table.TableCell>
 										<div class="text-sm font-medium">
-											{formatCurrency(project.total_budget)}
+											{formatCurrency(project.project_cost)}
 										</div>
 									</Table.TableCell>
 

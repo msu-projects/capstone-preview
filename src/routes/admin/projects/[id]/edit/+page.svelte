@@ -125,7 +125,7 @@
 	let durationInCalendarDays = $state(
 		existingProject?.contract_duration ? existingProject.contract_duration.replace(/\D/g, '') : ''
 	);
-	let totalBudget = $state(existingProject?.total_budget?.toString() ?? '');
+	let projectCost = $state(existingProject?.project_cost?.toString() ?? '');
 	let employmentMale = $state(existingProject?.employment_generated?.male?.toString() ?? '');
 	let employmentFemale = $state(existingProject?.employment_generated?.female?.toString() ?? ''); // Tab 4: Accountability & Partners
 
@@ -190,8 +190,7 @@
 	let monthlyTargets = $state<MonthlyTarget[]>(
 		existingProject?.monthly_targets?.map((mt: MonthlyTarget) => ({
 			month_year: mt.month_year,
-			planned_physical_progress: mt.planned_physical_progress,
-			planned_budget: mt.planned_budget
+			planned_physical_progress: mt.planned_physical_progress
 		})) ?? []
 	);
 
@@ -206,7 +205,7 @@
 	const isTab2Valid = $derived(projectSitios.length > 0);
 
 	const isTab3Valid = $derived(
-		targetStartDate !== undefined && durationInCalendarDays !== '' && totalBudget !== ''
+		targetStartDate !== undefined && durationInCalendarDays !== '' && projectCost !== ''
 	);
 
 	const isTab4Valid = $derived(fundingSources.length > 0 && budgetComponents.length > 0);
@@ -341,7 +340,7 @@
 				status,
 				start_date: startDateValue,
 				contract_duration: durationInCalendarDays ? `${durationInCalendarDays} CD` : '',
-				total_budget: Number(totalBudget),
+				project_cost: Number(projectCost),
 				beneficiaries: totalBeneficiaries,
 				// Tab 2
 				project_sitios: projectSitios.map((ps) => ({
@@ -482,12 +481,12 @@
 						bind:performanceTargets
 						bind:targetStartDate
 						bind:durationInCalendarDays
-						bind:totalBudget
+						bind:projectCost
 						bind:employmentMale
 						bind:employmentFemale
 					/>
 				{:else if activeStep === 'budget'}
-					<BudgetResourcesTab {totalBudget} bind:fundingSources bind:budgetComponents />
+					<BudgetResourcesTab {projectCost} bind:fundingSources bind:budgetComponents />
 				{:else if activeStep === 'monthly'}
 					<FormSection
 						title="Monthly Planning"
@@ -504,7 +503,6 @@
 						<MonthlyTargetsForm
 							startDate={targetStartDate?.toString() || ''}
 							{endDate}
-							totalBudget={Number(totalBudget)}
 							onUpdate={(data) => {
 								monthlyTargets = data.monthlyTargets;
 							}}

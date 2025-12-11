@@ -28,7 +28,7 @@
 	const { sitio, relatedProjects, isAdminView = false }: Props = $props();
 
 	// Project statistics
-	const totalBudget = $derived(relatedProjects.reduce((sum, p) => sum + p.total_budget, 0));
+	const totalBudget = $derived(relatedProjects.reduce((sum, p) => sum + p.project_cost, 0));
 	const activeProjects = $derived(relatedProjects.filter((p) => p.status === 'in-progress'));
 	const completedProjects = $derived(relatedProjects.filter((p) => p.status === 'completed'));
 	const planningProjects = $derived(relatedProjects.filter((p) => p.status === 'planning'));
@@ -270,7 +270,7 @@
 								<!-- Progress & Budget -->
 								<div class="flex flex-col gap-2 sm:items-end sm:text-right">
 									<div class="text-lg font-bold text-slate-900">
-										{formatCurrency(project.total_budget)}
+										{formatCurrency(project.project_cost)}
 									</div>
 									<div class="flex items-center gap-2">
 										<div class="h-2 w-24 overflow-hidden rounded-full bg-slate-200">

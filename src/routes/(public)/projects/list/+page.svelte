@@ -59,9 +59,9 @@
 				case 'name':
 					return a.title.localeCompare(b.title);
 				case 'budget-high':
-					return b.total_budget - a.total_budget;
+					return b.project_cost - a.project_cost;
 				case 'budget-low':
-					return a.total_budget - b.total_budget;
+					return a.project_cost - b.project_cost;
 				case 'beneficiaries-high':
 					return b.beneficiaries - a.beneficiaries;
 				case 'beneficiaries-low':
@@ -317,7 +317,7 @@
 								</div>
 								<div class="flex justify-between">
 									<span class="text-muted-foreground">Budget</span>
-									<span class="font-medium">{formatCurrency(project.total_budget)}</span>
+									<span class="font-medium">{formatCurrency(project.project_cost)}</span>
 								</div>
 								<div class="flex justify-between">
 									<span class="text-muted-foreground">Beneficiaries</span>

@@ -258,7 +258,7 @@ export function addProject(project: Project): boolean {
 			'project',
 			project.id,
 			project.title,
-			`Created project: ${getCategoryName(project.category_key)} - Budget: ₱${project.total_budget.toLocaleString()}`
+			`Created project: ${getCategoryName(project.category_key)} - Budget: ₱${project.project_cost.toLocaleString()}`
 		);
 	}
 	return success;

@@ -6,8 +6,8 @@
 		month_year: string;
 		plan_physical: number;
 		actual_physical: number | null;
-		plan_financial: number;
-		actual_financial: number | null;
+		plan_financial?: number;
+		actual_financial?: number | null;
 	}
 
 	interface Props {
@@ -31,7 +31,7 @@
 
 	// Calculate scales
 	const maxFinancial = $derived(
-		Math.max(...sortedData.map((d) => Math.max(d.plan_financial, d.actual_financial ?? 0)), 1)
+		Math.max(...sortedData.map((d) => Math.max(d.plan_financial ?? 0, d.actual_financial ?? 0)), 1)
 	);
 
 	// X scale - evenly distribute points
@@ -94,7 +94,7 @@
 		generatePath(
 			[
 				{ x: xScale(0), y: yScaleFinancial(0) }, // Start from zero
-				...sortedData.map((d, i) => ({ x: xScale(i), y: yScaleFinancial(d.plan_financial) }))
+				...sortedData.map((d, i) => ({ x: xScale(i), y: yScaleFinancial(d.plan_financial ?? 0) }))
 			],
 			false
 		)
@@ -105,7 +105,7 @@
 			{ x: xScale(0), y: yScaleFinancial(0) }, // Start from zero
 			...sortedData.map((d, i) => ({
 				x: xScale(i),
-				y: d.actual_financial !== null ? yScaleFinancial(d.actual_financial) : null
+				y: d.actual_financial !== null ? yScaleFinancial(d.actual_financial ?? 0) : null
 			}))
 		])
 	);
@@ -330,7 +330,7 @@
 						{#if point.actual_financial !== null}
 							<circle
 								cx={xScale(i)}
-								cy={yScaleFinancial(point.actual_financial)}
+								cy={yScaleFinancial(point.actual_financial ?? 0)}
 								r={hoveredIndex === i ? 6 : 4}
 								fill="#10b981"
 								class="transition-all duration-150"
@@ -340,7 +340,7 @@
 						<!-- Planned Financial point -->
 						<circle
 							cx={xScale(i)}
-							cy={yScaleFinancial(point.plan_financial)}
+							cy={yScaleFinancial(point.plan_financial ?? 0)}
 							r={hoveredIndex === i ? 5 : 3}
 							fill="white"
 							stroke="#10b981"
@@ -394,7 +394,9 @@
 								Financial
 							</span>
 							<span class="font-medium">
-								{point.actual_financial !== null ? formatCurrency(point.actual_financial) : '-'}
+								{point.actual_financial !== null && point.actual_financial !== undefined
+									? formatCurrency(point.actual_financial)
+									: '-'}
 							</span>
 						</div>
 					{/if}

@@ -974,8 +974,7 @@ function generateMonthlyTargets(
 
 		targets.push({
 			month_year: monthYear,
-			planned_physical_progress: plannedProgress,
-			planned_budget: cumulativePlannedBudget
+			planned_physical_progress: plannedProgress
 		});
 	}
 
@@ -1202,8 +1201,7 @@ export function generateProjects(
 			status,
 			start_date: startDate.toISOString().split('T')[0],
 			contract_duration: contractDuration,
-			total_budget: budget,
-			contract_cost: contractCost,
+			project_cost: contractCost,
 			beneficiaries: totalBeneficiaries,
 			project_year: year,
 			project_sitios: projectSitios,

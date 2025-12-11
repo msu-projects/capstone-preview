@@ -7,7 +7,6 @@
 	import { Progress } from '$lib/components/ui/progress';
 	import { IsMobile } from '$lib/hooks/is-mobile.svelte';
 	import type { MonthlyProgress, MonthlyReport, PerformanceTarget } from '$lib/types';
-	import { formatCurrency } from '$lib/utils/formatters';
 	import { aggregateAchievedOutputs } from '$lib/utils/project-adapters';
 	import {
 		Activity,
@@ -143,7 +142,7 @@
 			</Collapsible.Trigger>
 			<Collapsible.Content>
 				<Card.Content class="pt-0">
-					<ProgressLineChart data={monthlyMonitoring} height={280} showFinancial={true} />
+					<ProgressLineChart data={monthlyMonitoring} height={280} showFinancial={false} />
 				</Card.Content>
 			</Collapsible.Content>
 		</Card.Root>
@@ -323,19 +322,6 @@
 													<span class="font-normal text-slate-400 dark:text-slate-500">
 														/ {report.plan_physical}%</span
 													>
-												</div>
-											</div>
-											<div
-												class="rounded-lg border border-slate-100 bg-slate-50 px-3 py-1.5 dark:border-slate-700 dark:bg-slate-800"
-											>
-												<span
-													class="block text-xs tracking-wider text-slate-500 uppercase dark:text-slate-400"
-													>Financial</span
-												>
-												<div class="font-semibold text-slate-800 dark:text-slate-200">
-													{report.actual_financial !== null
-														? formatCurrency(report.actual_financial)
-														: 'TBD'}
 												</div>
 											</div>
 

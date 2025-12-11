@@ -266,8 +266,6 @@ export interface MonthlyReport {
 	month_year: string; // Original format: 'YYYY-MM' for sorting
 	plan_physical: number;
 	actual_physical: number | null;
-	plan_financial: number;
-	actual_financial: number | null;
 	status: string; // 'On Track' | 'Delayed' | 'Ahead of Schedule' | 'Not Started'
 	remarks: string;
 	photos: PhotoDocumentation[];
@@ -309,7 +307,6 @@ export interface MonthlyProgress {
 export interface MonthlyTarget {
 	month_year: string; // Format: 'YYYY-MM'
 	planned_physical_progress: number; // Planned physical progress percentage
-	planned_budget: number; // Planned budget release for the month
 }
 
 export interface BudgetComponent {
@@ -338,8 +335,7 @@ export interface Project {
 	status: ProjectStatus;
 	start_date: string;
 	contract_duration: string; // e.g., "180 CD" (calendar days)
-	total_budget: number;
-	contract_cost: number;
+	project_cost: number;
 	beneficiaries: number;
 	project_year: number;
 
@@ -441,7 +437,6 @@ export interface Stats {
 	planning_projects: number;
 	suspended_projects: number;
 	total_beneficiaries: number;
-	total_budget: number;
 	average_completion?: number;
 	municipalities?: number;
 }

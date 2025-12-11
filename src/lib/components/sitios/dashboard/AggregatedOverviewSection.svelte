@@ -38,7 +38,7 @@
 	const { sitios, projects = [], filterLabel = 'All Sitios' }: Props = $props();
 
 	// Project aggregations
-	const totalBudget = $derived(projects.reduce((sum, p) => sum + p.total_budget, 0));
+	const totalBudget = $derived(projects.reduce((sum, p) => sum + p.project_cost, 0));
 	const activeProjects = $derived(projects.filter((p) => p.status === 'in-progress').length);
 	const completedProjects = $derived(projects.filter((p) => p.status === 'completed').length);
 	const planningProjects = $derived(projects.filter((p) => p.status === 'planning').length);

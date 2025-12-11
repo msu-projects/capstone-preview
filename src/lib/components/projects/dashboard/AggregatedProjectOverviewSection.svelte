@@ -57,8 +57,8 @@
 			textColor: 'text-blue-700'
 		},
 		{
-			label: 'Total Budget',
-			value: formatCurrency(stats.totalBudget),
+			label: 'Project Cost',
+			value: formatCurrency(stats.totalContractCost),
 			icon: Banknote,
 			color: 'bg-emerald-500',
 			bgColor: 'bg-emerald-50',
@@ -306,9 +306,9 @@
 			<Card.Content class="p-4">
 				<div class="flex items-center justify-between">
 					<div>
-						<p class="text-sm text-slate-500 dark:text-slate-400">Avg. Budget per Project</p>
+						<p class="text-sm text-slate-500 dark:text-slate-400">Cost per Beneficiary</p>
 						<p class="text-2xl font-bold text-slate-900 dark:text-slate-100">
-							{formatCurrency(stats.averageBudgetPerProject)}
+							{stats.totalBeneficiaries > 0 ? formatCurrency(stats.totalContractCost / stats.totalBeneficiaries) : formatCurrency(0)}
 						</p>
 					</div>
 					<div class="rounded-lg bg-cyan-50 p-2 dark:bg-cyan-900/30">

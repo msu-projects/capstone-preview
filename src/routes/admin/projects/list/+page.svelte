@@ -127,7 +127,7 @@
 					comparison = a.title.localeCompare(b.title);
 					break;
 				case 'budget':
-					comparison = a.total_budget - b.total_budget;
+					comparison = a.project_cost - b.project_cost;
 					break;
 				case 'progress':
 					const progressA = getCompletionPercentage(a);

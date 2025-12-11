@@ -82,8 +82,8 @@ export interface YearDistribution {
 export function aggregateProjectStats(projects: Project[]): AggregatedProjectStats {
 	const totals = projects.reduce(
 		(acc, project) => {
-			acc.budget += project.total_budget;
-			acc.contractCost += project.contract_cost;
+			acc.budget += project.project_cost;
+			acc.contractCost += project.project_cost;
 			acc.beneficiaries += project.beneficiaries;
 			acc.progress += getCompletionPercentage(project);
 
@@ -134,7 +134,7 @@ export function aggregateByStatus(projects: Project[]): StatusDistribution[] {
 	for (const project of projects) {
 		const current = statusMap.get(project.status)!;
 		current.count += 1;
-		current.budget += project.total_budget;
+		current.budget += project.project_cost;
 	}
 
 	const total = projects.length;
@@ -168,7 +168,7 @@ export function aggregateByCategory(projects: Project[]): CategoryDistribution[]
 		const current = categoryMap.get(project.category_key);
 		if (current) {
 			current.count += 1;
-			current.budget += project.total_budget;
+			current.budget += project.project_cost;
 			current.beneficiaries += project.beneficiaries;
 		}
 	}
@@ -209,7 +209,7 @@ export function aggregateByMunicipality(projects: Project[]): GeographicProjectD
 				// Only count project once per municipality
 				if (!current.projectIds.has(project.id)) {
 					current.projectIds.add(project.id);
-					current.budget += project.total_budget;
+					current.budget += project.project_cost;
 					current.beneficiaries += sitio.beneficiaries_target;
 				}
 
@@ -298,7 +298,7 @@ export function aggregateByYear(projects: Project[]): YearDistribution[] {
 	for (const project of projects) {
 		const current = yearMap.get(project.project_year) || { count: 0, budget: 0 };
 		current.count += 1;
-		current.budget += project.total_budget;
+		current.budget += project.project_cost;
 		yearMap.set(project.project_year, current);
 	}
 

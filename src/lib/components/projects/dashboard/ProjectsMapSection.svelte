@@ -116,7 +116,7 @@
 							</div>
 							<div class="flex justify-between text-xs">
 								<span class="text-slate-500">Budget</span>
-								<span class="font-medium text-slate-700">₱${project.total_budget.toLocaleString()}</span>
+								<span class="font-medium text-slate-700">₱${project.project_cost.toLocaleString()}</span>
 							</div>
 							<div class="flex justify-between text-xs">
 								<span class="text-slate-500">Beneficiaries</span>

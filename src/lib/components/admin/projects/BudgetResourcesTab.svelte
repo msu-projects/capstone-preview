@@ -12,11 +12,11 @@
 	import { Banknote, Calendar, PieChart, Plus, Trash2 } from '@lucide/svelte';
 
 	let {
-		totalBudget = '',
+		projectCost = '',
 		fundingSources = $bindable<Omit<FundingSource, 'id' | 'project_id'>[]>([]),
 		budgetComponents = $bindable<Omit<BudgetComponent, 'id' | 'project_id'>[]>([])
 	} = $props<{
-		totalBudget: string;
+		projectCost: string;
 		fundingSources: Omit<FundingSource, 'id' | 'project_id'>[];
 		budgetComponents: Omit<BudgetComponent, 'id' | 'project_id'>[];
 	}>();
@@ -32,7 +32,7 @@
 	let newComponentName = $state('');
 	let newComponentAmount = $state('');
 
-	const totalBudgetAmount = $derived(Number(totalBudget) || 0);
+	const totalBudgetAmount = $derived(Number(projectCost) || 0);
 
 	const totalFundingSources = $derived(
 		fundingSources.reduce((sum: number, fs: FundingSource) => sum + fs.amount, 0)

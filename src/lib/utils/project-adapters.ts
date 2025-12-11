@@ -84,7 +84,7 @@ export function projectToQuickUpdate(project: Project): QuickUpdateFormData {
 	const monthlyDisbursement = currentMonthProgress?.budget_utilized || 0;
 
 	// Get target disbursement for this month from monthly_targets
-	const targetDisbursementThisMonth = monthlyTarget?.planned_budget || 0;
+	const targetDisbursementThisMonth = 0; // planned_budget removed || 0;
 
 	// Get completion percentage from latest monthly progress
 	const completionPct = getCompletionPercentage(project);
@@ -122,7 +122,7 @@ export function projectToQuickUpdate(project: Project): QuickUpdateFormData {
 		maleEmployment: project.employment_generated?.male || 0,
 		femaleEmployment: project.employment_generated?.female || 0,
 		// Financial
-		totalBudget: project.total_budget || 0,
+		totalBudget: project.project_cost || 0,
 		budgetDisbursed: cumulativeDisbursed.toString(), // Cumulative total
 		monthlyDisbursement: monthlyDisbursement.toString(), // This month only
 		targetDisbursementThisMonth: targetDisbursementThisMonth, // Planned for this month
@@ -443,8 +443,6 @@ export function transformToMonthlyReports(
 			month_year: progress.month_year,
 			plan_physical: target?.planned_physical_progress ?? 0,
 			actual_physical: progress.physical_progress_percentage,
-			plan_financial: target?.planned_budget ?? 0,
-			actual_financial: progress.budget_utilized,
 			status: mapProgressStatus(progress.status),
 			remarks: progress.issues || '',
 			photos: progress.photo_documentation || [],

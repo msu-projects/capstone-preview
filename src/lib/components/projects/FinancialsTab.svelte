@@ -2,8 +2,8 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';
 	import type { Project } from '$lib/types';
-	import { formatCurrency } from '$lib/utils/formatters';
-	import { Banknote, PieChart, PiggyBank, TrendingUp, Wallet } from '@lucide/svelte';
+	import { formatCurrency, formatNumber } from '$lib/utils/formatters';
+	import { Banknote, Briefcase, PieChart, PiggyBank, TrendingUp, Users, Wallet } from '@lucide/svelte';
 
 	interface Props {
 		project: Project;
@@ -12,70 +12,65 @@
 	const { project }: Props = $props();
 
 	// Calculate financial metrics
-	const utilized = $derived(project.total_budget * 0.45);
-	const remaining = $derived(project.total_budget - utilized);
-	const utilizationRate = $derived((utilized / project.total_budget) * 100);
+	const utilized = $derived(project.project_cost * 0.45);
+	const remaining = $derived(project.project_cost - utilized);
+	const utilizationRate = $derived((utilized / project.project_cost) * 100);
+	
+	// Employment data
+	const totalEmployment = $derived(
+		(project.employment_generated?.male || 0) + (project.employment_generated?.female || 0)
+	);
 </script>
 
 <!-- Financials Tab -->
 <div class="space-y-6">
 	<!-- Key Metrics Row -->
 	<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-		<!-- Total Budget -->
-		<Card.Root class="border-l-4 border-l-blue-600 bg-white py-0 dark:bg-slate-800">
+		<!-- Project Cost -->
+		<Card.Root class="border-l-4 border-l-emerald-600 bg-white py-0 dark:bg-slate-800">
 			<Card.Content class="p-5">
 				<div class="flex items-start justify-between">
 					<div>
 						<p
 							class="text-xs font-medium tracking-wider text-slate-500 uppercase dark:text-slate-400"
 						>
-							Total Allocation
+							Project Cost
 						</p>
 						<h3 class="mt-1 text-2xl font-bold text-slate-900 dark:text-slate-100">
-							{formatCurrency(project.total_budget)}
-						</h3>
-					</div>
-					<div class="rounded-lg bg-blue-50 p-2 text-blue-600 dark:bg-blue-900/30">
-						<Banknote class="size-5" />
-					</div>
-				</div>
-				<div class="mt-4 text-xs text-slate-500 dark:text-slate-400">100% Funded</div>
-			</Card.Content>
-		</Card.Root>
-
-		<!-- Utilized -->
-		<Card.Root class="border-l-4 border-l-emerald-500 bg-white py-0 dark:bg-slate-800">
-			<Card.Content class="p-5">
-				<div class="flex items-start justify-between">
-					<div>
-						<p
-							class="text-xs font-medium tracking-wider text-slate-500 uppercase dark:text-slate-400"
-						>
-							Utilized Budget
-						</p>
-						<h3 class="mt-1 text-2xl font-bold text-slate-900 dark:text-slate-100">
-							{formatCurrency(utilized)}
+							{formatCurrency(project.project_cost)}
 						</h3>
 					</div>
 					<div class="rounded-lg bg-emerald-50 p-2 text-emerald-600 dark:bg-emerald-900/30">
-						<TrendingUp class="size-5" />
+						<Wallet class="size-5" />
 					</div>
 				</div>
-				<div class="mt-4">
-					<div class="mb-1 flex justify-between text-xs">
-						<span class="text-slate-500 dark:text-slate-400">Utilization Rate</span>
-						<span class="font-medium text-emerald-700 dark:text-emerald-400">
-							{utilizationRate.toFixed(1)}%
-						</span>
-					</div>
-					<div class="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-700">
-						<div class="h-1.5 rounded-full bg-emerald-500" style="width: {utilizationRate}%"></div>
-					</div>
-				</div>
+				<div class="mt-4 text-xs text-slate-500 dark:text-slate-400">Total project value</div>
 			</Card.Content>
 		</Card.Root>
 
-		<!-- Remaining -->
+		<!-- Beneficiaries -->
+		<Card.Root class="border-l-4 border-l-blue-500 bg-white py-0 dark:bg-slate-800">
+			<Card.Content class="p-5">
+				<div class="flex items-start justify-between">
+					<div>
+						<p
+							class="text-xs font-medium tracking-wider text-slate-500 uppercase dark:text-slate-400"
+						>
+							Beneficiaries
+						</p>
+						<h3 class="mt-1 text-2xl font-bold text-slate-900 dark:text-slate-100">
+							{formatNumber(project.beneficiaries)}
+						</h3>
+					</div>
+					<div class="rounded-lg bg-blue-50 p-2 text-blue-600 dark:bg-blue-900/30">
+						<Users class="size-5" />
+					</div>
+				</div>
+				<div class="mt-4 text-xs text-slate-500 dark:text-slate-400">People served</div>
+			</Card.Content>
+		</Card.Root>
+
+		<!-- Employment Generated -->
 		<Card.Root class="border-l-4 border-l-amber-500 bg-white py-0 dark:bg-slate-800">
 			<Card.Content class="p-5">
 				<div class="flex items-start justify-between">
@@ -83,18 +78,22 @@
 						<p
 							class="text-xs font-medium tracking-wider text-slate-500 uppercase dark:text-slate-400"
 						>
-							Remaining Balance
+							Employment Generated
 						</p>
 						<h3 class="mt-1 text-2xl font-bold text-slate-900 dark:text-slate-100">
-							{formatCurrency(remaining)}
+							{formatNumber(totalEmployment)}
 						</h3>
 					</div>
 					<div class="rounded-lg bg-amber-50 p-2 text-amber-600 dark:bg-amber-900/30">
-						<PieChart class="size-5" />
+						<Briefcase class="size-5" />
 					</div>
 				</div>
 				<div class="mt-4 text-xs text-slate-500 dark:text-slate-400">
-					Available for disbursement
+					{#if project.employment_generated}
+						{formatNumber(project.employment_generated.male)} M / {formatNumber(project.employment_generated.female)} F
+					{:else}
+						Jobs created
+					{/if}
 				</div>
 			</Card.Content>
 		</Card.Root>

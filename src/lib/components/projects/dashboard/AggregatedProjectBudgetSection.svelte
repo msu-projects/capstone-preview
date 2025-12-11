@@ -11,7 +11,8 @@
 		toCategoryBarData,
 		toStatusBudgetPieData
 	} from '$lib/utils/project-aggregation';
-	import { Banknote, PieChart, TrendingUp, Wallet } from '@lucide/svelte';
+	import { Banknote, Briefcase, PieChart, Users, Wallet } from '@lucide/svelte';
+	import { formatNumber } from '$lib/utils/formatters';
 
 	interface Props {
 		projects: Project[];
@@ -32,28 +33,31 @@
 	// Budget metrics
 	const budgetMetrics = $derived([
 		{
-			label: 'Total Budget',
-			value: stats.totalBudget,
-			description: 'Combined project budgets',
-			icon: Banknote,
-			bgColor: 'bg-blue-50',
-			textColor: 'text-blue-700'
-		},
-		{
-			label: 'Contract Cost',
+			label: 'Project Cost',
 			value: stats.totalContractCost,
-			description: 'Total contract value',
+			description: 'Total project value',
 			icon: Wallet,
 			bgColor: 'bg-emerald-50',
-			textColor: 'text-emerald-700'
+			textColor: 'text-emerald-700',
+			formatValue: (val: number) => formatCurrency(val)
 		},
 		{
-			label: 'Average Budget',
-			value: stats.averageBudgetPerProject,
-			description: 'Per project average',
-			icon: TrendingUp,
+			label: 'Total Beneficiaries',
+			value: stats.totalBeneficiaries,
+			description: 'People served',
+			icon: Users,
+			bgColor: 'bg-blue-50',
+			textColor: 'text-blue-700',
+			formatValue: (val: number) => formatNumber(val)
+		},
+		{
+			label: 'Total Employment',
+			value: stats.employmentGenerated.total,
+			description: 'Jobs generated',
+			icon: Briefcase,
 			bgColor: 'bg-amber-50',
-			textColor: 'text-amber-700'
+			textColor: 'text-amber-700',
+			formatValue: (val: number) => formatNumber(val)
 		}
 	]);
 
@@ -69,7 +73,7 @@
 						: s.status.charAt(0).toUpperCase() + s.status.slice(1),
 				budget: s.budget,
 				count: s.count,
-				percentage: stats.totalBudget > 0 ? (s.budget / stats.totalBudget) * 100 : 0
+				percentage: stats.totalContractCost > 0 ? (s.budget / stats.totalContractCost) * 100 : 0
 			}))
 	);
 
@@ -82,7 +86,7 @@
 				category: c.categoryName,
 				budget: c.budget,
 				count: c.count,
-				percentage: stats.totalBudget > 0 ? (c.budget / stats.totalBudget) * 100 : 0
+				percentage: stats.totalContractCost > 0 ? (c.budget / stats.totalContractCost) * 100 : 0
 			}))
 	);
 </script>
@@ -102,7 +106,7 @@
 							<p
 								class="mt-1 text-xl font-bold tracking-tight text-slate-900 lg:text-2xl dark:text-slate-100"
 							>
-								{formatCurrency(metric.value)}
+								{metric.formatValue(metric.value)}
 							</p>
 							<p class="mt-0.5 text-xs text-slate-400 dark:text-slate-500">{metric.description}</p>
 						</div>

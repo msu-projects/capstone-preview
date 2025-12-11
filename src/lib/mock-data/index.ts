@@ -177,7 +177,6 @@ export const stats: Stats = {
 	planning_projects: projects.filter((p) => p.status === 'planning').length,
 	suspended_projects: projects.filter((p) => p.status === 'suspended').length,
 	total_beneficiaries: projects.reduce((sum, p) => sum + p.beneficiaries, 0),
-	total_budget: projects.reduce((sum, p) => sum + p.total_budget, 0),
 	average_completion: Math.round(
 		projects.reduce((sum, p) => sum + getCompletionPercentage(p), 0) / projects.length
 	),

@@ -2,26 +2,23 @@
 	import * as Alert from '$lib/components/ui/alert';
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';
-	import { CurrencyInput } from '$lib/components/ui/currency-input';
 	import { Input } from '$lib/components/ui/input';
 	import type { MonthlyTarget } from '$lib/types';
 	import {
 		formatMonth,
 		generateCumulativePercentageTemplate,
 		generateMonthRange,
-		generateMonthlyTemplate,
 		validateCumulativePercentage
 	} from '$lib/utils/monthly-planning';
-	import { Banknote, Calendar, CircleAlert, CircleCheck, TrendingUp } from '@lucide/svelte';
+	import { Calendar, CircleAlert, CircleCheck, TrendingUp } from '@lucide/svelte';
 
 	interface Props {
 		startDate: string;
 		endDate: string;
-		totalBudget: number;
 		onUpdate: (data: { monthlyTargets: MonthlyTarget[] }) => void;
 	}
 
-	let { startDate, endDate, totalBudget, onUpdate }: Props = $props();
+	let { startDate, endDate, onUpdate }: Props = $props();
 
 	// Generate month range
 	const months = $derived(generateMonthRange(startDate, endDate));
@@ -34,14 +31,10 @@
 		if (months.length > 0) {
 			// Auto-generate cumulative percentage template for physical progress
 			const progressTemplate = generateCumulativePercentageTemplate(months, 'even');
-			// Auto-generate budget template
-			const budgetTemplate =
-				totalBudget > 0 ? generateMonthlyTemplate(totalBudget, months, 'even') : {};
 
 			monthlyTargets = months.map((month) => ({
 				month_year: month,
-				planned_physical_progress: progressTemplate[month] || 0,
-				planned_budget: budgetTemplate[month] || 0
+				planned_physical_progress: progressTemplate[month] || 0
 			}));
 		}
 	});
@@ -89,28 +82,10 @@
 	}
 
 	/**
-	 * Get validation status for budget
-	 */
-	function getBudgetValidationStatus() {
-		const total = monthlyTargets.reduce((sum, item) => sum + item.planned_budget, 0);
-		const difference = total - totalBudget;
-		if (difference !== 0) {
-			return {
-				isValid: false,
-				message: `Total: ₱${total.toLocaleString()} (${difference > 0 ? '+' : ''}₱${Math.abs(difference).toLocaleString()})`,
-				variant: 'destructive' as const
-			};
-		}
-		return { isValid: true, message: 'Valid', variant: 'secondary' as const };
-	}
-
-	/**
 	 * Check if all validations pass
 	 */
 	const allValid = $derived.by(() => {
-		const physicalValid = getPhysicalProgressValidationStatus().isValid;
-		const budgetValid = getBudgetValidationStatus().isValid;
-		return physicalValid && budgetValid;
+		return getPhysicalProgressValidationStatus().isValid;
 	});
 </script>
 
@@ -120,7 +95,7 @@
 		<div>
 			<h3 class="text-lg font-semibold">Monthly Targets & Planning</h3>
 			<p class="mt-1 text-sm text-muted-foreground">
-				Set cumulative planned physical progress % and monthly budget release targets
+				Set cumulative planned physical progress % targets for each month
 			</p>
 			{#if months.length > 0}
 				<div class="mt-2 flex items-center gap-4 text-sm">
@@ -237,75 +212,6 @@
 									: 'text-destructive'}
 							>
 								{finalTarget.planned_physical_progress}%
-							</div>
-						</div>
-					{/if}
-				</div>
-			</Card.Content>
-		</Card.Root>
-	</div>
-
-	<!-- Budget Release Schedule -->
-	<div class="space-y-4">
-		<h4 class="flex items-center gap-2 text-sm font-semibold">
-			<Banknote class="size-4" />
-			Budget Release Schedule
-		</h4>
-
-		<Card.Root>
-			{@const budgetValidation = getBudgetValidationStatus()}
-			<Card.Header class="pb-3">
-				<div class="flex items-start justify-between">
-					<div class="flex-1">
-						<Card.Title class="text-sm">Monthly Budget Releases</Card.Title>
-						<div class="mt-1 flex items-center gap-2">
-							<span class="text-xs text-muted-foreground">
-								Total Budget: ₱{totalBudget.toLocaleString()}
-							</span>
-							<Badge variant={budgetValidation.variant} class="text-xs">
-								{budgetValidation.message}
-							</Badge>
-						</div>
-					</div>
-				</div>
-			</Card.Header>
-
-			<Card.Content>
-				<div class="space-y-4">
-					<!-- Header Row -->
-					<div
-						class="grid grid-cols-2 gap-2 border-b pb-2 text-xs font-semibold text-muted-foreground"
-					>
-						<div>Month</div>
-						<div>Planned Release</div>
-					</div>
-
-					<!-- Data Rows -->
-					{#each monthlyTargets as target, index (target.month_year)}
-						<div class="grid grid-cols-2 items-center gap-2">
-							<div class="text-xs font-medium">{formatMonth(target.month_year)}</div>
-							<div>
-								<CurrencyInput
-									id={`budget-${target.month_year}`}
-									bind:value={monthlyTargets[index].planned_budget}
-									class="h-8 text-sm"
-									placeholder="₱ 0"
-									min={0}
-								/>
-							</div>
-						</div>
-					{/each}
-
-					<!-- Summary Row -->
-					{#if monthlyTargets.length > 0}
-						{@const totalReleased = monthlyTargets.reduce(
-							(sum, item) => sum + item.planned_budget,
-							0
-						)}
-						<div class="grid grid-cols-2 gap-2 border-t pt-2 text-sm font-semibold">
-							<div>Total Planned</div>
-							<div class={totalReleased === totalBudget ? 'text-green-600' : 'text-destructive'}>
-								₱{totalReleased.toLocaleString()}
 							</div>
 						</div>
 					{/if}

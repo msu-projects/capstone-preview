@@ -31,7 +31,7 @@
 		performanceTargets = $bindable([]),
 		targetStartDate = $bindable<DateValue | undefined>(undefined),
 		durationInCalendarDays = $bindable(''),
-		totalBudget = $bindable(''),
+		projectCost = $bindable(''),
 		employmentMale = $bindable(''),
 		employmentFemale = $bindable('')
 	} = $props<{
@@ -39,7 +39,7 @@
 		performanceTargets: Omit<PerformanceTarget, 'id' | 'project_id'>[];
 		targetStartDate: DateValue | undefined;
 		durationInCalendarDays: string;
-		totalBudget: string;
+		projectCost: string;
 		employmentMale: string;
 		employmentFemale: string;
 	}>();
@@ -236,7 +236,7 @@
 		targetStartDate !== undefined &&
 			durationInCalendarDays !== '' &&
 			Number(durationInCalendarDays) > 0 &&
-			totalBudget !== ''
+			projectCost !== ''
 	);
 </script>
 
@@ -482,13 +482,13 @@
 						</div>
 					</div>
 
-					<!-- Budget Allocation -->
+					<!-- Project Cost -->
 					<div class="space-y-2">
-						<Label for="total-budget" class="required flex items-center gap-2">
+						<Label for="project-cost" class="required flex items-center gap-2">
 							<Banknote class="size-4" />
-							Total Budget Allocation
+							Project Cost
 						</Label>
-						<CurrencyInput id="total-budget" bind:value={totalBudget} placeholder="₱ 0" min={0} />
+						<CurrencyInput id="project-cost" bind:value={projectCost} placeholder="₱ 0" min={0} />
 					</div>
 
 					<!-- Employment Generation -->

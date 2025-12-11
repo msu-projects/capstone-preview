@@ -37,10 +37,10 @@
 		class="flex flex-col items-start gap-1 rounded-lg border border-slate-200 bg-slate-50 px-6 py-4 md:min-w-[200px] md:items-end dark:border-slate-700 dark:bg-slate-800"
 	>
 		<span class="text-xs font-semibold tracking-wider text-slate-500 uppercase dark:text-slate-400"
-			>Total Budget</span
+			>Project Cost</span
 		>
 		<span class="text-2xl font-bold text-slate-900 dark:text-slate-100"
-			>{formatCurrency(project.total_budget)}</span
+			>{formatCurrency(project.project_cost)}</span
 		>
 	</div>
 </div>

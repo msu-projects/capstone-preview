@@ -3,16 +3,7 @@
 	import { PhotoGallery } from '$lib/components/ui/photo-gallery';
 	import { Progress } from '$lib/components/ui/progress';
 	import type { MonthlyProgress, MonthlyReport, PerformanceTarget } from '$lib/types';
-	import { formatCurrency } from '$lib/utils/formatters';
-	import {
-		Activity,
-		AlertTriangle,
-		Banknote,
-		Camera,
-		Lightbulb,
-		ListChecks,
-		Target
-	} from '@lucide/svelte';
+	import { Activity, AlertTriangle, Camera, Lightbulb, ListChecks, Target } from '@lucide/svelte';
 
 	interface Props {
 		open: boolean;
@@ -134,41 +125,6 @@
 								<div
 									class="h-1.5 rounded-full bg-blue-600"
 									style="width: {selectedReport.actual_physical || 0}%"
-								></div>
-							</div>
-						</div>
-					</div>
-
-					<div
-						class="min-w-0 rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800"
-					>
-						<h4
-							class="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-200"
-						>
-							<Banknote class="size-4 shrink-0 text-emerald-600" /> Financial Releases
-						</h4>
-						<div class="space-y-3">
-							<div class="flex items-center justify-between gap-2 text-sm">
-								<span class="shrink-0 text-slate-500 dark:text-slate-400">Planned</span>
-								<span class="truncate font-medium"
-									>{formatCurrency(selectedReport.plan_financial)}</span
-								>
-							</div>
-							<div class="flex items-center justify-between gap-2 text-sm">
-								<span class="shrink-0 text-slate-500 dark:text-slate-400">Actual</span>
-								<span class="truncate font-bold text-slate-900 dark:text-slate-100"
-									>{selectedReport.actual_financial
-										? formatCurrency(selectedReport.actual_financial)
-										: '-'}</span
-								>
-							</div>
-							<div class="mt-2 h-1.5 w-full rounded-full bg-slate-200 dark:bg-slate-700">
-								<div
-									class="h-1.5 rounded-full bg-emerald-500"
-									style="width: {selectedReport.actual_financial && selectedReport.plan_financial
-										? Math.min(selectedReport.actual_financial / selectedReport.plan_financial, 1) *
-											100
-										: 0}%"
 								></div>
 							</div>
 						</div>
