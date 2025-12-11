@@ -206,31 +206,52 @@
 
 <div class="space-y-6">
 	<!-- Header -->
-	<div class="flex items-center gap-3">
-		<div class="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-			<Lightbulb class="h-6 w-6 text-primary" />
-		</div>
-		<div>
-			<h1 class="text-3xl font-bold tracking-tight">Sitio Recommendations</h1>
-			<p class="text-muted-foreground">
-				Discover recommended sitios for specific project types based on community needs
-			</p>
+	<div
+		class="relative overflow-hidden rounded-xl bg-linear-to-br from-blue-50 via-white to-indigo-50/30 p-6 dark:from-blue-950/30 dark:via-slate-900 dark:to-indigo-950/20"
+	>
+		<div
+			class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMwMDAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50"
+		></div>
+		<div class="relative flex items-center gap-4">
+			<div
+				class="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/30"
+			>
+				<Lightbulb class="h-7 w-7 text-white" />
+			</div>
+			<div class="flex-1">
+				<h1
+					class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-100"
+				>
+					Sitio Recommendations
+				</h1>
+				<p class="mt-1 text-slate-600 dark:text-slate-400">
+					Discover recommended sitios for specific project types based on community needs
+				</p>
+			</div>
 		</div>
 	</div>
 
 	<!-- Project Type Selection -->
-	<Card.Root>
-		<Card.Header>
-			<Card.Title>Select Project Type</Card.Title>
-			<Card.Description>
-				Choose a project category and type to see recommended sitios based on their proposed PPAs
-			</Card.Description>
+	<Card.Root class="shadow-sm">
+		<Card.Header class="bg-slate-50/50 dark:bg-slate-900/50">
+			<div class="flex items-start gap-3">
+				<div class="rounded-lg bg-blue-100 p-2 dark:bg-blue-900/30">
+					<Sparkles class="size-5 text-blue-600 dark:text-blue-400" />
+				</div>
+				<div>
+					<Card.Title>Select Project Type</Card.Title>
+					<Card.Description>
+						Choose a project category and type to see recommended sitios based on their proposed
+						PPAs
+					</Card.Description>
+				</div>
+			</div>
 		</Card.Header>
-		<Card.Content class="space-y-4">
+		<Card.Content class="space-y-4 pt-6">
 			<div class="grid gap-4 md:grid-cols-2">
 				<!-- Category Select -->
 				<div class="space-y-2">
-					<Label for="category">Category</Label>
+					<Label for="category" class="text-sm font-medium">Category</Label>
 					<Select.Root type="single" bind:value={selectedCategoryKey}>
 						<Select.Trigger id="category">
 							<span>{selectedCategoryKey || 'Select category...'}</span>
@@ -246,7 +267,7 @@
 
 				<!-- Project Type Select -->
 				<div class="space-y-2">
-					<Label for="project-type">Project Type</Label>
+					<Label for="project-type" class="text-sm font-medium">Project Type</Label>
 					<Select.Root
 						type="single"
 						bind:value={selectedProjectTypeId}
@@ -269,12 +290,21 @@
 
 	<!-- Results Section -->
 	{#if selectedProjectType}
-		<Card.Root>
-			<Card.Header>
-				<div class="flex items-center justify-between">
-					<div>
-						<Card.Title>Recommended Sitios</Card.Title>
-						<Card.Description>
+		<Card.Root class="shadow-sm">
+			<Card.Header class="bg-slate-50/50 dark:bg-slate-900/50">
+				<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+					<div class="flex-1">
+						<div class="flex items-center gap-2">
+							<Card.Title>Recommended Sitios</Card.Title>
+							{#if matchedSitiosCount > 0}
+								<Badge variant="default" class="gap-1">
+									<Sparkles class="size-3" />
+									{matchedSitiosCount}
+									{matchedSitiosCount === 1 ? 'match' : 'matches'}
+								</Badge>
+							{/if}
+						</div>
+						<Card.Description class="mt-1">
 							{#if matchedSitiosCount > 0}
 								{matchedSitiosCount}
 								{matchedSitiosCount === 1 ? 'sitio has' : 'sitios have'} matching PPAs for {selectedProjectType.name}
@@ -283,18 +313,19 @@
 							{/if}
 						</Card.Description>
 					</div>
-					<Badge variant="secondary" class="h-7">
+					<Badge variant="secondary" class="h-7 gap-1">
+						<MapPin class="size-3" />
 						{filteredSitios.length}
 						{filteredSitios.length === 1 ? 'sitio' : 'sitios'}
 					</Badge>
 				</div>
 			</Card.Header>
-			<Card.Content class="space-y-4">
+			<Card.Content class="space-y-4 pt-6">
 				<!-- Filters -->
-				<div class="flex flex-col gap-3 sm:flex-row sm:items-end">
+				<div class="flex flex-wrap items-end gap-3">
 					<!-- Search -->
-					<div class="flex-1 space-y-2">
-						<Label for="search" class="sr-only">Search</Label>
+					<div class="min-w-[200px] flex-1 space-y-2">
+						<Label for="search" class="text-sm font-medium">Search</Label>
 						<div class="relative">
 							<Search
 								class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"
@@ -310,10 +341,10 @@
 
 					<!-- Municipality -->
 					<div class="w-full space-y-2 sm:w-48">
-						<Label for="municipality" class="sr-only">Municipality</Label>
+						<Label for="municipality" class="text-sm font-medium">Municipality</Label>
 						<Select.Root type="single" bind:value={selectedMunicipality}>
 							<Select.Trigger id="municipality">
-								<span class="text-xs">{selectedMunicipality || 'Municipality'}</span>
+								<span>{selectedMunicipality || 'All'}</span>
 							</Select.Trigger>
 							<Select.Content>
 								<Select.Item value="">All Municipalities</Select.Item>
@@ -326,14 +357,14 @@
 
 					<!-- Barangay -->
 					<div class="w-full space-y-2 sm:w-48">
-						<Label for="barangay" class="sr-only">Barangay</Label>
+						<Label for="barangay" class="text-sm font-medium">Barangay</Label>
 						<Select.Root
 							type="single"
 							bind:value={selectedBarangay}
 							disabled={!selectedMunicipality}
 						>
 							<Select.Trigger id="barangay">
-								<span class="text-xs">{selectedBarangay || 'Barangay'}</span>
+								<span>{selectedBarangay || 'All'}</span>
 							</Select.Trigger>
 							<Select.Content>
 								<Select.Item value="">All Barangays</Select.Item>
@@ -345,30 +376,41 @@
 					</div>
 
 					<!-- Sort by Need Score -->
-					<Button
-						variant="outline"
-						size="sm"
-						onclick={toggleNeedScoreSort}
-						class="w-full sm:w-auto"
-					>
-						{#if sortByNeedScore === 'desc'}
-							<ArrowDownWideNarrow class="mr-2 h-4 w-4" />
-							Need: High
-						{:else if sortByNeedScore === 'asc'}
-							<ArrowUpNarrowWide class="mr-2 h-4 w-4" />
-							Need: Low
-						{:else}
-							<Gauge class="mr-2 h-4 w-4" />
-							Need Score
-						{/if}
-					</Button>
+					<div class="space-y-2">
+						<Label class="text-sm font-medium">Sort Order</Label>
+						<Button
+							variant="outline"
+							size="default"
+							onclick={toggleNeedScoreSort}
+							class="w-full sm:w-auto"
+						>
+							{#if sortByNeedScore === 'desc'}
+								<ArrowDownWideNarrow class="mr-2 h-4 w-4" />
+								Need: High→Low
+							{:else if sortByNeedScore === 'asc'}
+								<ArrowUpNarrowWide class="mr-2 h-4 w-4" />
+								Need: Low→High
+							{:else}
+								<Gauge class="mr-2 h-4 w-4" />
+								Default Order
+							{/if}
+						</Button>
+					</div>
 
 					<!-- Clear Filters -->
 					{#if searchQuery || selectedMunicipality || selectedBarangay || sortByNeedScore !== 'desc'}
-						<Button variant="ghost" size="sm" onclick={clearFilters} class="w-full sm:w-auto">
-							<X class="mr-2 h-4 w-4" />
-							Clear
-						</Button>
+						<div class="space-y-2">
+							<Label class="invisible text-sm font-medium">Clear</Label>
+							<Button
+								variant="ghost"
+								size="default"
+								onclick={clearFilters}
+								class="w-full sm:w-auto"
+							>
+								<X class="mr-2 h-4 w-4" />
+								Clear Filters
+							</Button>
+						</div>
 					{/if}
 				</div>
 

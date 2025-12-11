@@ -4,24 +4,14 @@
 	import { Button } from '$lib/components/ui/button';
 	import { ThemeToggle } from '$lib/components/ui/theme-toggle';
 	import { authStore } from '$lib/stores/auth.svelte';
-	import {
-		FolderKanban,
-		Home,
-		LayoutDashboard,
-		Lightbulb,
-		LogIn,
-		Menu,
-		Users,
-		X
-	} from '@lucide/svelte';
+	import { FolderKanban, Home, LayoutDashboard, LogIn, Menu, Users, X } from '@lucide/svelte';
 
 	let mobileMenuOpen = $state(false);
 
 	const navLinks = [
 		{ href: '/', label: 'Home', icon: Home },
 		{ href: '/projects', label: 'Projects', icon: FolderKanban },
-		{ href: '/sitios', label: 'Sitios', icon: Users },
-		{ href: '/recommendations', label: 'Recommendations', icon: Lightbulb }
+		{ href: '/sitios', label: 'Sitios', icon: Users }
 	];
 
 	function isActive(href: string): boolean {

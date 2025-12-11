@@ -17,15 +17,13 @@
 	import * as Tabs from '$lib/components/ui/tabs';
 	import type { Project, Sitio } from '$lib/types';
 	import toTitleCase from '$lib/utils/common';
-	import { formatNumber } from '$lib/utils/formatters';
 	import { loadProjects, loadSitios } from '$lib/utils/storage';
 	import {
 		Briefcase,
 		Building2,
 		FileText,
 		Heart,
-		Home,
-		Landmark,
+		Lightbulb,
 		List,
 		Map,
 		MapPin,
@@ -48,6 +46,7 @@
 	let sitios = $state<Sitio[]>([]);
 	let projects = $state<Project[]>([]);
 	let isLoading = $state(true);
+	let recommendationsOpen = $state(false);
 
 	// Filter state synced with URL
 	let selectedMunicipality = $state(data.municipality);
@@ -210,84 +209,23 @@
 					Aggregated community data across South Cotabato. Filter by municipality or barangay to
 					explore specific areas.
 				</p>
-			</div>
 
-			<!-- Quick Stats -->
-			<div class="mx-auto mt-8 hidden max-w-4xl grid-cols-2 gap-4 sm:grid-cols-4">
-				<Card.Root class="relative overflow-hidden border-0 shadow-sm">
-					<div
-						class="absolute top-0 left-0 h-1 w-full bg-linear-to-r from-blue-500 to-blue-600"
-					></div>
-					<Card.Content class="pt-5 pb-4">
-						<div class="flex items-start justify-between">
-							<div class="space-y-1">
-								<p class="text-sm font-medium text-slate-500 dark:text-slate-400">
-									{hasActiveFilters ? 'Filtered Sitios' : 'Total Sitios'}
-								</p>
-								<p class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-									{filteredSitios.length}
-								</p>
-							</div>
-							<div class="rounded-xl bg-blue-100 p-2.5 dark:bg-blue-900/30">
-								<MapPin class="size-5 text-blue-600" />
-							</div>
-						</div>
-					</Card.Content>
-				</Card.Root>
-				<Card.Root class="relative overflow-hidden border-0 shadow-sm">
-					<div
-						class="absolute top-0 left-0 h-1 w-full bg-linear-to-r from-indigo-500 to-indigo-600"
-					></div>
-					<Card.Content class="pt-5 pb-4">
-						<div class="flex items-start justify-between">
-							<div class="space-y-1">
-								<p class="text-sm font-medium text-slate-500 dark:text-slate-400">Population</p>
-								<p class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-									{formatNumber(totalPopulation)}
-								</p>
-							</div>
-							<div class="rounded-xl bg-indigo-100 p-2.5 dark:bg-indigo-900/30">
-								<Users class="size-5 text-indigo-600" />
-							</div>
-						</div>
-					</Card.Content>
-				</Card.Root>
-				<Card.Root class="relative overflow-hidden border-0 shadow-sm">
-					<div
-						class="absolute top-0 left-0 h-1 w-full bg-linear-to-r from-emerald-500 to-emerald-600"
-					></div>
-					<Card.Content class="pt-5 pb-4">
-						<div class="flex items-start justify-between">
-							<div class="space-y-1">
-								<p class="text-sm font-medium text-slate-500 dark:text-slate-400">Households</p>
-								<p class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-									{formatNumber(totalHouseholds)}
-								</p>
-							</div>
-							<div class="rounded-xl bg-emerald-100 p-2.5 dark:bg-emerald-900/30">
-								<Home class="size-5 text-emerald-600" />
-							</div>
-						</div>
-					</Card.Content>
-				</Card.Root>
-				<Card.Root class="relative overflow-hidden border-0 shadow-sm">
-					<div
-						class="absolute top-0 left-0 h-1 w-full bg-linear-to-r from-amber-500 to-amber-600"
-					></div>
-					<Card.Content class="pt-5 pb-4">
-						<div class="flex items-start justify-between">
-							<div class="space-y-1">
-								<p class="text-sm font-medium text-slate-500 dark:text-slate-400">Municipalities</p>
-								<p class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-									{uniqueMunicipalities.length}
-								</p>
-							</div>
-							<div class="rounded-xl bg-amber-100 p-2.5 dark:bg-amber-900/30">
-								<Landmark class="size-5 text-amber-600" />
-							</div>
-						</div>
-					</Card.Content>
-				</Card.Root>
+				<div class="mt-5 flex flex-col items-center justify-center gap-3">
+					<Button variant="default" size="default" href="/sitios/list" class="gap-2">
+						<List class="size-4" />
+						View Sitio List
+					</Button>
+
+					<Button
+						variant="outline"
+						size="default"
+						href="/recommendations"
+						class="gap-2 border-blue-200 bg-blue-50/50 hover:bg-blue-100/50 dark:border-blue-800 dark:bg-blue-900/20 dark:hover:bg-blue-900/30"
+					>
+						<Lightbulb class="size-4" />
+						Find Recommended Sitios for Projects
+					</Button>
+				</div>
 			</div>
 		</div>
 	</section>
@@ -344,12 +282,6 @@
 						{filterLabel}
 					</Badge>
 				{/if}
-
-				<!-- View Sitio List Button -->
-				<Button href="/sitios/list" variant="outline" size="sm" class="gap-1.5">
-					<List class="size-4" />
-					View Sitio List
-				</Button>
 			</div>
 		</div>
 

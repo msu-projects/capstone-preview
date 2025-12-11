@@ -239,6 +239,12 @@
 					Aggregated development project data across South Cotabato. Filter by year, municipality,
 					or category to explore specific projects.
 				</p>
+
+				<!-- View Project List Button -->
+				<Button href="/projects/list" variant="default" size="sm" class="mt-5 gap-1.5">
+					<List class="size-4" />
+					View Project List
+				</Button>
 			</div>
 
 			<!-- Quick Stats -->
@@ -406,12 +412,6 @@
 						{filterLabel}
 					</Badge>
 				{/if}
-
-				<!-- View Project List Button -->
-				<Button href="/projects/list" variant="outline" size="sm" class="gap-1.5">
-					<List class="size-4" />
-					View Project List
-				</Button>
 			</div>
 		</div>
 
