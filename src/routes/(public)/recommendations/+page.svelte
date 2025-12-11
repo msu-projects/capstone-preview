@@ -3,6 +3,10 @@
 	import SitioRecommendations from '$lib/components/public/SitioRecommendations.svelte';
 </script>
 
+<svelte:head>
+	<title>Sitio Recommendations - South Cotabato Data Bank</title>
+</svelte:head>
+
 <!-- Breadcrumb -->
 <AppBreadcrumb
 	items={[{ label: 'Sitios Dashboard', href: '/sitios' }, { label: 'Recommendations' }]}

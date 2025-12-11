@@ -3,6 +3,10 @@
 	import SitioRecommendations from '$lib/components/public/SitioRecommendations.svelte';
 </script>
 
+<svelte:head>
+	<title>Sitio Recommendations - Admin</title>
+</svelte:head>
+
 <!-- Breadcrumb -->
 <AppBreadcrumb
 	items={[{ label: 'Sitios Dashboard', href: '/admin/sitios' }, { label: 'Recommendations' }]}
