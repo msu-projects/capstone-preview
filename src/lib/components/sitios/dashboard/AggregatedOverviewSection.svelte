@@ -39,10 +39,10 @@
 
 	// Project aggregations
 	const totalBudget = $derived(projects.reduce((sum, p) => sum + p.project_cost, 0));
-	const activeProjects = $derived(projects.filter((p) => p.status === 'in-progress').length);
+	const activeProjects = $derived(projects.filter((p) => p.status === 'ongoing').length);
 	const completedProjects = $derived(projects.filter((p) => p.status === 'completed').length);
-	const planningProjects = $derived(projects.filter((p) => p.status === 'planning').length);
-	const suspendedProjects = $derived(projects.filter((p) => p.status === 'suspended').length);
+	const preparationProjects = $derived(projects.filter((p) => p.status === 'preparation').length);
+	const delayedProjects = $derived(projects.filter((p) => p.status === 'delayed').length);
 
 	// Compute aggregations
 	const demographics = $derived(aggregateDemographics(sitios));
@@ -324,22 +324,17 @@
 						class="rounded-xl bg-blue-50 p-4 text-center ring-1 ring-blue-100 dark:bg-blue-900/30 dark:ring-blue-800"
 					>
 						<div class="text-3xl font-bold text-blue-700 dark:text-blue-400">
-							{planningProjects}
-						</div>
-						<div class="mt-1 text-xs font-medium text-blue-600 dark:text-blue-500">Planning</div>
+						{preparationProjects}
 					</div>
-					<div
-						class="rounded-xl bg-slate-50 p-4 text-center ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-slate-700"
-					>
-						<div class="text-3xl font-bold text-slate-700 dark:text-slate-300">
-							{suspendedProjects}
-						</div>
-						<div class="mt-1 text-xs font-medium text-slate-600 dark:text-slate-400">Suspended</div>
-					</div>
+					<div class="mt-1 text-xs font-medium text-blue-600 dark:text-blue-500">Preparation</div>
 				</div>
-
-				<div class="mt-6 border-t pt-4 dark:border-slate-700">
-					<div class="flex items-center justify-between">
+				<div
+					class="rounded-xl bg-orange-50 p-4 text-center ring-1 ring-orange-200 dark:bg-orange-800 dark:ring-orange-700"
+				>
+					<div class="text-3xl font-bold text-orange-700 dark:text-orange-300">
+						{delayedProjects}
+					</div>
+					<div class="mt-1 text-xs font-medium text-orange-600 dark:text-orange-400">Delayed</div>
 						<span class="text-sm text-slate-600 dark:text-slate-400">Total Investment</span>
 						<span class="text-lg font-bold text-slate-900 dark:text-slate-100"
 							>{formatCurrency(totalBudget)}</span

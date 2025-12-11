@@ -226,15 +226,13 @@
 			const startDateValue = targetStartDate?.toString() || '';
 			const today = new Date();
 			const projectStartDate = new Date(startDateValue);
-			let status: ProjectStatus = 'planning';
+		let status: ProjectStatus = 'preparation';
 
-			if (projectStartDate <= today) {
-				status = 'in-progress';
-			}
+		if (projectStartDate <= today) {
+			status = 'ongoing';		}
 
-			// Get current year for project_year
-			const currentYear = new Date().getFullYear();
-
+		// Get current year for project_year
+		const currentYear = new Date().getFullYear();
 			// Create the Project object
 			const newProject: Project = {
 				id: nextId,

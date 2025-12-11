@@ -41,8 +41,8 @@ export interface NeedLevelConfig {
 // ===== DEFAULT PROJECT STATUS CONFIGURATION =====
 
 const DEFAULT_PROJECT_STATUS_CONFIG: Record<ProjectStatus, StatusConfig> = {
-	planning: {
-		label: 'Planning',
+	preparation: {
+		label: 'Preparation',
 		badgeVariant: 'secondary',
 		color: 'hsl(var(--muted-foreground))',
 		bgColor: 'bg-slate-100',
@@ -50,8 +50,8 @@ const DEFAULT_PROJECT_STATUS_CONFIG: Record<ProjectStatus, StatusConfig> = {
 		darkBgColor: 'dark:bg-slate-800',
 		darkTextColor: 'dark:text-slate-300'
 	},
-	'in-progress': {
-		label: 'In Progress',
+	ongoing: {
+		label: 'On Going',
 		badgeVariant: 'outline',
 		color: 'hsl(48, 96%, 53%)',
 		bgColor: 'bg-amber-100',
@@ -68,8 +68,17 @@ const DEFAULT_PROJECT_STATUS_CONFIG: Record<ProjectStatus, StatusConfig> = {
 		darkBgColor: 'dark:bg-emerald-900/30',
 		darkTextColor: 'dark:text-emerald-400'
 	},
-	suspended: {
-		label: 'Suspended',
+	delayed: {
+		label: 'Delayed',
+		badgeVariant: 'destructive',
+		color: 'hsl(25, 95%, 53%)',
+		bgColor: 'bg-orange-100',
+		textColor: 'text-orange-700',
+		darkBgColor: 'dark:bg-orange-900/30',
+		darkTextColor: 'dark:text-orange-400'
+	},
+	'non-completion': {
+		label: 'Non-completion',
 		badgeVariant: 'destructive',
 		color: 'hsl(0, 72%, 51%)',
 		bgColor: 'bg-red-100',
@@ -151,7 +160,7 @@ export function getNeedLevelConfigAll(): Record<NeedLevel, NeedLevelConfig> {
  */
 export function getStatusConfig(status: ProjectStatus): StatusConfig {
 	const config = getProjectStatusConfigAll();
-	return config[status] ?? DEFAULT_PROJECT_STATUS_CONFIG.planning;
+	return config[status] ?? DEFAULT_PROJECT_STATUS_CONFIG.preparation;
 }
 
 /**
@@ -197,10 +206,11 @@ export function getStatusTextColor(status: ProjectStatus): string {
  * Array of all project statuses for iteration
  */
 export const ALL_PROJECT_STATUSES: ProjectStatus[] = [
-	'planning',
-	'in-progress',
+	'preparation',
+	'ongoing',
 	'completed',
-	'suspended'
+	'delayed',
+	'non-completion'
 ];
 
 // ===== NEED LEVEL FUNCTIONS =====

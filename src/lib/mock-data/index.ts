@@ -172,10 +172,11 @@ export const activities: Activity[] = [
 export const stats: Stats = {
 	total_sitios: sitios.length,
 	total_projects: projects.length,
-	active_projects: projects.filter((p) => p.status === 'in-progress').length,
+	active_projects: projects.filter((p) => p.status === 'ongoing').length,
 	completed_projects: projects.filter((p) => p.status === 'completed').length,
-	planning_projects: projects.filter((p) => p.status === 'planning').length,
-	suspended_projects: projects.filter((p) => p.status === 'suspended').length,
+	preparation_projects: projects.filter((p) => p.status === 'preparation').length,
+	delayed_projects: projects.filter((p) => p.status === 'delayed').length,
+	non_completion_projects: projects.filter((p) => p.status === 'non-completion').length,
 	total_beneficiaries: projects.reduce((sum, p) => sum + p.beneficiaries, 0),
 	average_completion: Math.round(
 		projects.reduce((sum, p) => sum + getCompletionPercentage(p), 0) / projects.length
@@ -191,10 +192,11 @@ export const chartData = {
 		count: projects.filter((p) => p.category_key === cat).length
 	})) as ChartDataItem[],
 	projectsByStatus: [
-		{ status: 'Planning', count: stats.planning_projects },
-		{ status: 'In Progress', count: stats.active_projects },
+		{ status: 'Preparation', count: stats.preparation_projects },
+		{ status: 'On Going', count: stats.active_projects },
 		{ status: 'Completed', count: stats.completed_projects },
-		{ status: 'Suspended', count: stats.suspended_projects }
+		{ status: 'Delayed', count: stats.delayed_projects },
+		{ status: 'Non-completion', count: stats.non_completion_projects }
 	] as ChartDataItem[],
 	projectsByMunicipality: (() => {
 		const allMunicipalities = projects.flatMap(

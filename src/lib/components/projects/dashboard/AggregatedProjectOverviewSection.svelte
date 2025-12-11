@@ -85,8 +85,8 @@
 	// Status summary for quick view
 	const statusSummary = $derived([
 		{
-			label: 'In Progress',
-			value: statusDist.find((s) => s.status === 'in-progress')?.count ?? 0,
+			label: 'On Going',
+			value: statusDist.find((s) => s.status === 'ongoing')?.count ?? 0,
 			color: 'amber'
 		},
 		{
@@ -95,13 +95,18 @@
 			color: 'emerald'
 		},
 		{
-			label: 'Planning',
-			value: statusDist.find((s) => s.status === 'planning')?.count ?? 0,
+			label: 'Preparation',
+			value: statusDist.find((s) => s.status === 'preparation')?.count ?? 0,
 			color: 'blue'
 		},
 		{
-			label: 'Suspended',
-			value: statusDist.find((s) => s.status === 'suspended')?.count ?? 0,
+			label: 'Delayed',
+			value: statusDist.find((s) => s.status === 'delayed')?.count ?? 0,
+			color: 'orange'
+		},
+		{
+			label: 'Non-completion',
+			value: statusDist.find((s) => s.status === 'non-completion')?.count ?? 0,
 			color: 'red'
 		}
 	]);
@@ -325,7 +330,7 @@
 					<div>
 						<p class="text-sm text-slate-500 dark:text-slate-400">Active Projects</p>
 						<p class="text-2xl font-bold text-slate-900 dark:text-slate-100">
-							{statusDist.find((s) => s.status === 'in-progress')?.count ?? 0}
+							{statusDist.find((s) => s.status === 'ongoing')?.count ?? 0}
 						</p>
 					</div>
 					<div class="rounded-lg bg-amber-50 p-2 dark:bg-amber-900/30">

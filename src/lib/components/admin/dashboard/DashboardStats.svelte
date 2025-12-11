@@ -60,7 +60,7 @@
 			icon: Activity,
 			iconClass: 'text-yellow-600',
 			iconBgClass: 'bg-yellow-500/10',
-			href: '/admin/projects?status=in-progress'
+			href: '/admin/projects?status=ongoing'
 		},
 		{
 			title: 'Completed Projects',

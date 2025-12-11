@@ -147,14 +147,16 @@
 	// Get status label for display
 	const getStatusLabel = (s: ProjectStatus) => {
 		switch (s) {
-			case 'planning':
-				return 'Planning';
-			case 'in-progress':
-				return 'In Progress';
+			case 'preparation':
+				return 'Preparation';
+			case 'ongoing':
+				return 'On Going';
 			case 'completed':
 				return 'Completed';
-			case 'suspended':
-				return 'Suspended';
+			case 'delayed':
+				return 'Delayed';
+			case 'non-completion':
+				return 'Non-completion';
 			default:
 				return 'Select status';
 		}
@@ -430,10 +432,11 @@
 							{getStatusLabel(status)}
 						</Select.Trigger>
 						<Select.Content>
-							<Select.Item value="planning" label="Planning">Planning</Select.Item>
-							<Select.Item value="in-progress" label="In Progress">In Progress</Select.Item>
-							<Select.Item value="completed" label="Completed">Completed</Select.Item>
-							<Select.Item value="suspended" label="Suspended">Suspended</Select.Item>
+						<Select.Item value="preparation" label="Preparation">Preparation</Select.Item>
+						<Select.Item value="ongoing" label="On Going">On Going</Select.Item>
+						<Select.Item value="completed" label="Completed">Completed</Select.Item>
+						<Select.Item value="delayed" label="Delayed">Delayed</Select.Item>
+						<Select.Item value="non-completion" label="Non-completion">Non-completion</Select.Item>
 						</Select.Content>
 					</Select.Root>
 				</div>

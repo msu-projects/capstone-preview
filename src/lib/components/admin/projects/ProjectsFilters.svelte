@@ -70,10 +70,11 @@
 					</Select.Trigger>
 					<Select.Content>
 						<Select.Item value="" label="All Status">All Status</Select.Item>
-						<Select.Item value="planning" label="Planning">Planning</Select.Item>
-						<Select.Item value="in-progress" label="In Progress">In Progress</Select.Item>
+						<Select.Item value="preparation" label="Preparation">Preparation</Select.Item>
+						<Select.Item value="ongoing" label="On Going">On Going</Select.Item>
 						<Select.Item value="completed" label="Completed">Completed</Select.Item>
-						<Select.Item value="suspended" label="Suspended">Suspended</Select.Item>
+						<Select.Item value="delayed" label="Delayed">Delayed</Select.Item>
+						<Select.Item value="non-completion" label="Non-completion">Non-completion</Select.Item>
 					</Select.Content>
 				</Select.Root>
 

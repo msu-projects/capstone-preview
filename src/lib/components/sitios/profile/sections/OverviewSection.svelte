@@ -152,7 +152,7 @@
 	);
 
 	const totalBudget = $derived(relatedProjects.reduce((sum, p) => sum + p.project_cost, 0));
-	const activeProjects = $derived(relatedProjects.filter((p) => p.status === 'in-progress').length);
+	const activeProjects = $derived(relatedProjects.filter((p) => p.status === 'ongoing').length);
 	const completedProjects = $derived(
 		relatedProjects.filter((p) => p.status === 'completed').length
 	);

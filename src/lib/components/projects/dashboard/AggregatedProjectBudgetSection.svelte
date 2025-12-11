@@ -67,7 +67,7 @@
 			.map((s) => ({
 				status: s.status,
 				label:
-					s.status === 'in-progress'
+					s.status === 'ongoing'
 						? 'In Progress'
 						: s.status.charAt(0).toUpperCase() + s.status.slice(1),
 				budget: s.budget,

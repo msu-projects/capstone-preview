@@ -85,7 +85,7 @@
 	const topPerforming = $derived(projectsByProgress.filter((p) => p.progress >= 75).slice(0, 5));
 	const underperforming = $derived(
 		projectsByProgress
-			.filter((p) => p.progress < 50 && p.project.status === 'in-progress')
+			.filter((p) => p.progress < 50 && p.project.status === 'ongoing')
 			.reverse()
 			.slice(0, 5)
 	);
@@ -259,8 +259,8 @@
 									variant={item.project.status === 'completed' ? 'default' : 'secondary'}
 									class="shrink-0"
 								>
-									{item.project.status === 'in-progress'
-										? 'In Progress'
+								{item.project.status === 'ongoing'
+									? 'On Going'
 										: toTitleCase(item.project.status)}
 								</Badge>
 							</div>

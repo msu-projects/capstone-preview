@@ -16,7 +16,8 @@
 		FolderKanban,
 		Pause,
 		TrendingUp,
-		Users
+		Users,
+		XCircle
 	} from '@lucide/svelte';
 
 	interface Props {
@@ -29,10 +30,11 @@
 
 	// Project statistics
 	const totalBudget = $derived(relatedProjects.reduce((sum, p) => sum + p.project_cost, 0));
-	const activeProjects = $derived(relatedProjects.filter((p) => p.status === 'in-progress'));
+	const activeProjects = $derived(relatedProjects.filter((p) => p.status === 'ongoing'));
 	const completedProjects = $derived(relatedProjects.filter((p) => p.status === 'completed'));
-	const planningProjects = $derived(relatedProjects.filter((p) => p.status === 'planning'));
-	const suspendedProjects = $derived(relatedProjects.filter((p) => p.status === 'suspended'));
+	const preparationProjects = $derived(relatedProjects.filter((p) => p.status === 'preparation'));
+	const delayedProjects = $derived(relatedProjects.filter((p) => p.status === 'delayed'));
+	const nonCompletionProjects = $derived(relatedProjects.filter((p) => p.status === 'non-completion'));
 
 	// Total beneficiaries targeted for this sitio
 	const totalBeneficiaries = $derived(
@@ -52,14 +54,16 @@
 
 	function getStatusIcon(status: string) {
 		switch (status) {
-			case 'in-progress':
+			case 'ongoing':
 				return TrendingUp;
 			case 'completed':
 				return CheckCircle;
-			case 'planning':
+			case 'preparation':
 				return Clock;
-			case 'suspended':
+			case 'delayed':
 				return Pause;
+			case 'non-completion':
+				return XCircle;
 			default:
 				return FolderKanban;
 		}
@@ -189,7 +193,7 @@
 				<div class="rounded-xl bg-emerald-50 p-4 text-center ring-1 ring-emerald-100">
 					<TrendingUp class="mx-auto size-6 text-emerald-600" />
 					<div class="mt-2 text-2xl font-bold text-emerald-700">{activeProjects.length}</div>
-					<div class="text-xs font-medium text-emerald-600">In Progress</div>
+					<div class="text-xs font-medium text-emerald-600">On Going</div>
 				</div>
 				<div class="rounded-xl bg-blue-50 p-4 text-center ring-1 ring-blue-100">
 					<CheckCircle class="mx-auto size-6 text-blue-600" />
@@ -198,13 +202,13 @@
 				</div>
 				<div class="rounded-xl bg-slate-50 p-4 text-center ring-1 ring-slate-200">
 					<Clock class="mx-auto size-6 text-slate-600" />
-					<div class="mt-2 text-2xl font-bold text-slate-700">{planningProjects.length}</div>
-					<div class="text-xs font-medium text-slate-600">Planning</div>
+					<div class="mt-2 text-2xl font-bold text-slate-700">{preparationProjects.length}</div>
+					<div class="text-xs font-medium text-slate-600">Preparation</div>
 				</div>
-				<div class="rounded-xl bg-red-50 p-4 text-center ring-1 ring-red-100">
-					<Pause class="mx-auto size-6 text-red-600" />
-					<div class="mt-2 text-2xl font-bold text-red-700">{suspendedProjects.length}</div>
-					<div class="text-xs font-medium text-red-600">Suspended</div>
+				<div class="rounded-xl bg-orange-50 p-4 text-center ring-1 ring-orange-100">
+					<Pause class="mx-auto size-6 text-orange-600" />
+					<div class="mt-2 text-2xl font-bold text-orange-700">{delayedProjects.length}</div>
+					<div class="text-xs font-medium text-orange-600">Delayed</div>
 				</div>
 			</div>
 

@@ -126,7 +126,7 @@ export function aggregateByStatus(projects: Project[]): StatusDistribution[] {
 	const statusMap = new Map<ProjectStatus, { count: number; budget: number }>();
 
 	// Initialize all statuses
-	const allStatuses: ProjectStatus[] = ['planning', 'in-progress', 'completed', 'suspended'];
+	const allStatuses: ProjectStatus[] = ['preparation', 'ongoing', 'completed', 'delayed', 'non-completion'];
 	for (const status of allStatuses) {
 		statusMap.set(status, { count: 0, budget: 0 });
 	}
@@ -250,7 +250,7 @@ export function aggregateProgress(projects: Project[]): ProgressAggregation {
 
 		if (project.status === 'completed' || progress >= 100) {
 			completed++;
-		} else if (progress === 0 && project.status === 'planning') {
+			} else if (progress === 0 && project.status === 'preparation') {
 			notStarted++;
 		} else if (project.monthly_progress && project.monthly_progress.length > 0) {
 			// Check latest status from monthly progress
@@ -267,15 +267,15 @@ export function aggregateProgress(projects: Project[]): ProgressAggregation {
 			}
 		} else {
 			// Default to on-track if in progress without detailed data
-			if (project.status === 'in-progress') {
-				onTrack++;
-			} else if (project.status === 'suspended') {
+				if (project.status === 'ongoing') {
+					onTrack++;
+				} else if (project.status === 'delayed') {
 				delayed++;
 			}
 		}
 	}
 
-	const activeProjects = projects.filter((p) => p.status === 'in-progress').length;
+	const activeProjects = projects.filter((p) => p.status === 'ongoing').length;
 
 	return {
 		averageCompletion: projects.length > 0 ? totalProgress / projects.length : 0,
@@ -338,17 +338,19 @@ export function getUniqueMunicipalities(projects: Project[]): string[] {
 // ============================================================================
 
 const STATUS_COLORS: Record<ProjectStatus, string> = {
-	planning: 'hsl(217, 91%, 60%)', // Blue
-	'in-progress': 'hsl(45, 93%, 47%)', // Amber
+	preparation: 'hsl(217, 91%, 60%)', // Blue
+	ongoing: 'hsl(45, 93%, 47%)', // Amber
 	completed: 'hsl(142, 71%, 45%)', // Green
-	suspended: 'hsl(0, 84%, 60%)' // Red
+	delayed: 'hsl(25, 95%, 53%)', // Orange
+	'non-completion': 'hsl(0, 84%, 60%)' // Red
 };
 
 const STATUS_LABELS: Record<ProjectStatus, string> = {
-	planning: 'Planning',
-	'in-progress': 'In Progress',
+	preparation: 'Preparation',
+	ongoing: 'On Going',
 	completed: 'Completed',
-	suspended: 'Suspended'
+	delayed: 'Delayed',
+	'non-completion': 'Non-completion'
 };
 
 const CATEGORY_COLORS: Record<CategoryKey, string> = {

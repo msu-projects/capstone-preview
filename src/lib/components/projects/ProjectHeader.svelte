@@ -16,13 +16,13 @@
 	<div class="flex-1 space-y-3">
 		<div class="flex flex-wrap items-center gap-2">
 			<Badge
-				variant={project.status === 'in-progress' ? 'default' : 'secondary'}
-				class={project.status === 'in-progress'
+				variant={project.status === 'ongoing' ? 'default' : 'secondary'}
+				class={project.status === 'ongoing'
 					? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100/80'
 					: ''}
 			>
-				{project.status === 'in-progress'
-					? 'Ongoing'
+				{project.status === 'ongoing'
+					? 'On Going'
 					: project.status.charAt(0).toUpperCase() + project.status.slice(1)}
 			</Badge>
 			<Badge variant="outline" class="bg-blue-50 text-blue-700">

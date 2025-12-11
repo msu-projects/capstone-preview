@@ -139,7 +139,7 @@
 	const stats = $derived(aggregateProjectStats(filteredProjects));
 	const statusDist = $derived(aggregateByStatus(filteredProjects));
 	const activeProjectsCount = $derived(
-		statusDist.find((s) => s.status === 'in-progress')?.count ?? 0
+		statusDist.find((s) => s.status === 'ongoing')?.count ?? 0
 	);
 
 	// Update URL when filters or tab change
@@ -412,10 +412,11 @@
 					</Select.Trigger>
 					<Select.Content>
 						<Select.Item value="all">All Status</Select.Item>
-						<Select.Item value="planning">Planning</Select.Item>
-						<Select.Item value="in-progress">In Progress</Select.Item>
+						<Select.Item value="preparation">Preparation</Select.Item>
+						<Select.Item value="ongoing">On Going</Select.Item>
 						<Select.Item value="completed">Completed</Select.Item>
-						<Select.Item value="suspended">Suspended</Select.Item>
+						<Select.Item value="delayed">Delayed</Select.Item>
+						<Select.Item value="non-completion">Non-completion</Select.Item>
 					</Select.Content>
 				</Select.Root>
 

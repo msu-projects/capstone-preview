@@ -549,7 +549,7 @@ const PROJECT_TITLES: Record<CategoryKey, string[]> = {
 
 import { IMPLEMENTING_AGENCIES } from '$lib/config/agencies';
 
-const STATUSES: ProjectStatus[] = ['planning', 'in-progress', 'completed', 'suspended'];
+const STATUSES: ProjectStatus[] = ['preparation', 'ongoing', 'completed', 'delayed', 'non-completion'];
 
 const CATCH_UP_PLANS = [
 	'Deploy additional workforce to accelerate construction',
@@ -1173,9 +1173,9 @@ export function generateProjects(
 
 		const totalBeneficiaries = projectSitios.reduce((sum, ps) => sum + ps.beneficiaries_target, 0);
 
-		// Generate progress data only for in-progress or completed projects
+		// Generate progress data only for ongoing or completed projects
 		const monthsElapsed =
-			status === 'completed' ? durationMonths : status === 'in-progress' ? rng.nextInt(1, 6) : 0;
+			status === 'completed' ? durationMonths : status === 'ongoing' ? rng.nextInt(1, 6) : 0;
 
 		// Contract duration in calendar days
 		const contractDuration = `${durationMonths * 30} CD`;

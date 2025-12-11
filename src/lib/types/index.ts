@@ -1,4 +1,4 @@
-export type ProjectStatus = 'planning' | 'in-progress' | 'completed' | 'suspended';
+export type ProjectStatus = 'preparation' | 'ongoing' | 'completed' | 'delayed' | 'non-completion';
 export type CategoryKey = string;
 
 // ===== NEED LEVEL TYPE =====
@@ -434,8 +434,9 @@ export interface Stats {
 	total_projects?: number;
 	active_projects: number;
 	completed_projects: number;
-	planning_projects: number;
-	suspended_projects: number;
+	preparation_projects: number;
+	delayed_projects: number;
+	non_completion_projects: number;
 	total_beneficiaries: number;
 	average_completion?: number;
 	municipalities?: number;
