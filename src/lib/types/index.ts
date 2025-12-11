@@ -299,7 +299,7 @@ export interface MonthlyProgress {
 	catch_up_plan?: string;
 
 	photo_documentation?: PhotoDocumentation[];
-	status: 'on-track' | 'delayed' | 'ahead';
+	status: ProjectStatus;
 	created_at: string;
 	updated_at: string;
 }

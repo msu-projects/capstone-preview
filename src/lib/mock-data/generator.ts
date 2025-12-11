@@ -901,13 +901,13 @@ function generateMonthlyProgress(
 		const progressVariance = progressPercent - expectedProgress;
 
 		// Determine status based on variance
-		let status: 'on-track' | 'delayed' | 'ahead';
+		let status: ProjectStatus;
 		if (progressVariance >= 8) {
-			status = 'ahead';
+			status = 'ongoing'; // Ahead of schedule but still ongoing
 		} else if (progressVariance <= -12) {
 			status = 'delayed';
 		} else {
-			status = 'on-track';
+			status = 'ongoing'; // On-track
 		}
 
 		// Issues are more likely when delayed or at certain project phases
@@ -934,8 +934,8 @@ function generateMonthlyProgress(
 			} else {
 				issues = baseIssue;
 			}
-		} else if (status === 'ahead' && rng.next() > 0.7) {
-			issues = 'No significant issues. Project progressing ahead of schedule.';
+		} else if (status === 'ongoing' && rng.next() > 0.7) {
+			issues = 'No significant issues. Project progressing well.';
 		}
 
 		progress.push({

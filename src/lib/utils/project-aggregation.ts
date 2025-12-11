@@ -266,8 +266,10 @@ export function aggregateProgress(projects: Project[]): ProgressAggregation {
 
 			if (latestProgress.status === 'delayed') {
 				delayed++;
-			} else if (latestProgress.status === 'ahead') {
-				ahead++;
+			} else if (latestProgress.status === 'ongoing') {
+				// Consider ongoing projects as on-track by default
+				// More sophisticated progress variance checking could be added here
+				onTrack++;
 			} else {
 				onTrack++;
 			}

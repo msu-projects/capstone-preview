@@ -3,6 +3,7 @@
 	import { PhotoGallery } from '$lib/components/ui/photo-gallery';
 	import { Progress } from '$lib/components/ui/progress';
 	import type { MonthlyProgress, MonthlyReport, PerformanceTarget } from '$lib/types';
+	import toTitleCase from '$lib/utils/common';
 	import { Activity, AlertTriangle, Camera, Lightbulb, ListChecks, Target } from '@lucide/svelte';
 
 	interface Props {
@@ -59,11 +60,15 @@
 
 	function getStatusColor(status: string): string {
 		switch (status) {
-			case 'On Track':
+			case 'preparation':
+				return 'bg-slate-400';
+			case 'ongoing':
+				return 'bg-amber-500';
+			case 'completed':
 				return 'bg-emerald-500';
-			case 'Ahead of Schedule':
-				return 'bg-blue-500';
-			case 'Delayed':
+			case 'delayed':
+				return 'bg-orange-500';
+			case 'non-completion':
 				return 'bg-rose-500';
 			default:
 				return 'bg-slate-300';
@@ -90,7 +95,7 @@
 					<div class="flex items-center gap-3">
 						<div class="size-3 rounded-full {getStatusColor(selectedReport.status)}"></div>
 						<span class="font-semibold text-slate-900 dark:text-slate-100"
-							>{selectedReport.status}</span
+							>{toTitleCase(selectedReport.status)}</span
 						>
 						{#if selectedReport.remarks}
 							<span class="text-sm text-slate-500 dark:text-slate-400"

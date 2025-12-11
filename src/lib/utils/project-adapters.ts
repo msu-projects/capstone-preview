@@ -187,7 +187,7 @@ export function applyQuickUpdateToProject(
 						catch_up_plan: formData.catchUpPlan,
 						photo_documentation: formData.photoDocumentation,
 						achieved_outputs: { ...finalAchievedOutputs },
-						status: slippage > 10 ? 'delayed' : slippage < -5 ? 'ahead' : ('on-track' as const),
+						status: formData.status,
 						updated_at: new Date().toISOString()
 					}
 				: mp
@@ -206,7 +206,7 @@ export function applyQuickUpdateToProject(
 			recommendations: formData.recommendations,
 			catch_up_plan: formData.catchUpPlan,
 			photo_documentation: formData.photoDocumentation,
-			status: slippage > 10 ? 'delayed' : slippage < -5 ? 'ahead' : ('on-track' as const),
+			status: formData.status,
 			created_at: new Date().toISOString(),
 			updated_at: new Date().toISOString()
 		});
@@ -399,22 +399,6 @@ export function formatMonthYear(monthYear: string): string {
 }
 
 /**
- * Map MonthlyProgress status to display status
- */
-export function mapProgressStatus(status: MonthlyProgress['status']): string {
-	switch (status) {
-		case 'on-track':
-			return 'On Track';
-		case 'delayed':
-			return 'Delayed';
-		case 'ahead':
-			return 'Ahead of Schedule';
-		default:
-			return 'Unknown';
-	}
-}
-
-/**
  * Transform MonthlyProgress[] + MonthlyTarget[] into MonthlyReport[] for display
  * Sorted by month_year descending (newest first)
  */
@@ -443,7 +427,7 @@ export function transformToMonthlyReports(
 			month_year: progress.month_year,
 			plan_physical: target?.planned_physical_progress ?? 0,
 			actual_physical: progress.physical_progress_percentage,
-			status: mapProgressStatus(progress.status),
+			status: progress.status,
 			remarks: progress.issues || '',
 			photos: progress.photo_documentation || [],
 			// Enhanced fields

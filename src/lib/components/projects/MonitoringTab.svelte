@@ -7,6 +7,7 @@
 	import { Progress } from '$lib/components/ui/progress';
 	import { IsMobile } from '$lib/hooks/is-mobile.svelte';
 	import type { MonthlyProgress, MonthlyReport, PerformanceTarget } from '$lib/types';
+	import toTitleCase from '$lib/utils/common';
 	import { aggregateAchievedOutputs } from '$lib/utils/project-adapters';
 	import {
 		Activity,
@@ -91,11 +92,15 @@
 
 	function getStatusColor(status: string): string {
 		switch (status) {
-			case 'On Track':
+			case 'preparation':
+				return 'bg-slate-400';
+			case 'ongoing':
+				return 'bg-amber-500';
+			case 'completed':
 				return 'bg-emerald-500';
-			case 'Ahead of Schedule':
-				return 'bg-blue-500';
-			case 'Delayed':
+			case 'delayed':
+				return 'bg-orange-500';
+			case 'non-completion':
 				return 'bg-rose-500';
 			default:
 				return 'bg-slate-300';
@@ -106,11 +111,15 @@
 		status: string
 	): 'default' | 'destructive' | 'outline' | 'secondary' {
 		switch (status) {
-			case 'On Track':
-				return 'default';
-			case 'Ahead of Schedule':
+			case 'preparation':
+				return 'secondary';
+			case 'ongoing':
 				return 'outline';
-			case 'Delayed':
+			case 'completed':
+				return 'default';
+			case 'delayed':
+				return 'destructive';
+			case 'non-completion':
 				return 'destructive';
 			default:
 				return 'secondary';
@@ -281,9 +290,8 @@
 					<div class="group relative">
 						<!-- Timeline Dot -->
 						<div
-							class="absolute top-6 -left-6 z-10 size-4 -translate-x-1/2 rounded-full border-4 border-white shadow-sm {getStatusColor(
-								report.status
-							)} sm:-left-10"
+							class="absolute top-6 -left-6 z-10 size-4 -translate-x-1/2 rounded-full border-4 border-white shadow-sm
+							{getStatusColor(report.status)} sm:-left-10"
 						></div>
 
 						<!-- Content Card -->
@@ -298,7 +306,9 @@
 											<h4 class="text-lg font-bold text-slate-900 dark:text-slate-100">
 												{report.month}
 											</h4>
-											<Badge variant={getStatusBadgeVariant(report.status)}>{report.status}</Badge>
+											<Badge variant={getStatusBadgeVariant(report.status)}
+												>{toTitleCase(report.status)}</Badge
+											>
 										</div>
 										{#if report.remarks}
 											<p

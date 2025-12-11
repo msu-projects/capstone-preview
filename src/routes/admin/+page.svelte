@@ -36,13 +36,15 @@
 		label: item.status as string,
 		value: item.count,
 		color:
-			item.status === 'Planning'
+			item.status === 'Preparation'
 				? 'hsl(217, 64%, 44%)'
-				: item.status === 'In Progress'
+				: item.status === 'On Going'
 					? 'hsl(48, 96%, 53%)'
 					: item.status === 'Completed'
 						? 'hsl(142, 71%, 45%)'
-						: 'hsl(0, 84%, 60%)'
+						: item.status === 'Delayed'
+							? 'hsl(25, 95%, 53%)'
+							: 'hsl(0, 84%, 60%)' // Non-completion
 	}));
 
 	// Monthly progress line chart data

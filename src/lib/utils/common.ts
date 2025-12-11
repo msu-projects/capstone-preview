@@ -77,6 +77,7 @@ export function toTitleCase(input: string, opts?: TitleCaseOptions): string {
 	return tokens
 		.map((token, idx) => {
 			// separators: spaces, hyphens, underscores -> return as-is
+			if (token === '-') return ' ';
 			if (/^\s+$/.test(token) || token === '-' || token === '_') return token;
 
 			const lower = token.toLowerCase();
