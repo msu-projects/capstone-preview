@@ -11,6 +11,7 @@
 		FileText,
 		Folder,
 		LayoutDashboard,
+		Lightbulb,
 		LogOut,
 		MapPin,
 		Settings2,
@@ -45,7 +46,8 @@
 			title: 'Data Management',
 			items: [
 				{ title: 'Sitios', url: '/admin/sitios', icon: MapPin },
-				{ title: 'Projects', url: '/admin/projects', icon: Folder }
+				{ title: 'Projects', url: '/admin/projects', icon: Folder },
+				{ title: 'Sitio Recommendations', url: '/admin/recommendations', icon: Lightbulb }
 			]
 		},
 		{
@@ -74,8 +76,13 @@
 	}
 
 	function isActive(url: string): boolean {
-		// For sitios, projects, and config, use startsWith to match sub-routes
-		if (url === '/admin/sitios' || url === '/admin/projects' || url === '/admin/config') {
+		// For sitios, projects, recommendations, and config, use startsWith to match sub-routes
+		if (
+			url === '/admin/sitios' ||
+			url === '/admin/projects' ||
+			url === '/admin/recommendations' ||
+			url === '/admin/config'
+		) {
 			return page.url.pathname.startsWith(url);
 		}
 		return page.url.pathname === url;

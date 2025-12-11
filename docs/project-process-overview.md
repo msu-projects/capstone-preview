@@ -39,6 +39,7 @@ The system enables transparency by providing public access to community profiles
 7. [Project Data Entities](#7-project-data-entities)
 8. [Project Workflows](#8-project-workflows)
    - [8.6 Sitio Recommendation](#86-sitio-recommendation)
+   - [8.7 Sitio Recommendations Page](#87-sitio-recommendations-page)
 9. [Data Flow](#9-data-flow)
 10. [Project Categories](#10-project-categories)
 11. [Status Tracking](#11-status-tracking)
@@ -910,6 +911,147 @@ Each sitio in the selection list shows:
 - Match badge with sparkle icon indicates PPA alignment
 - Hover shows full list of matched PPA names via tooltip
 
+### 8.7 Sitio Recommendations Page
+
+#### 8.7.1 Overview
+
+The Sitio Recommendations Page is a publicly accessible tool that allows users to discover and analyze recommended sitios for potential projects without creating an actual project. It uses the same recommendation logic as the integrated sitio selection (section 8.6) but in a dedicated analysis and planning context.
+
+**Availability:**
+
+- **Public Access:** `/recommendations` - Available to all users for project planning and analysis
+- **Admin Access:** `/admin/recommendations` - Same functionality, integrated into admin portal navigation
+
+**Interaction:**
+
+Clicking on a sitio (either in the table row or on the sitio name) navigates to the sitio's profile page for detailed information.
+
+**Key Differences from Section 8.6:**
+
+| Aspect      | In-Form Recommendation (8.6)                                   | Standalone Page (8.7)                                     |
+| ----------- | -------------------------------------------------------------- | --------------------------------------------------------- |
+| **Purpose** | Select sitios for assignment to a project being created/edited | Analyze and discover potential sitios for future planning |
+| **Context** | Part of project creation/edit workflow                         | Standalone page accessible anytime                        |
+| **Access**  | Admin only                                                     | Public + Admin                                            |
+| **Action**  | Clicking a sitio adds it to the project                        | Navigate to sitio profile                                 |
+| **Display** | Popover/modal with selection interface                         | Full-page table/card layout                               |
+| **Export**  | N/A                                                            | Potential future feature for CSV/PDF export               |
+
+#### 8.7.2 Page Features
+
+**Project Type Selection:**
+
+- Category dropdown (Infrastructure, Agriculture, Education, Health, Livelihood, Environment)
+- Project type dropdown (cascading based on selected category)
+- Selection triggers automatic sitio recommendation calculation
+
+**Recommendation Display:**
+
+- Count of sitios with matching PPAs displayed prominently
+- Total filtered sitios count badge
+- Two-tier sorting: matched sitios first, then by need score
+- Match indicator (sparkle badge) for sitios with PPA alignment
+- Color-coded need level badges (Critical, High, Medium, Low)
+
+**Filter Controls:**
+
+- Search by sitio name, barangay, or municipality
+- Municipality dropdown filter
+- Barangay dropdown filter (dependent on municipality)
+- Need score sort toggle (descending/ascending/none)
+- Clear filters button
+
+**Information Displayed per Sitio:**
+
+- Sitio name with match badge (if applicable)
+- Need level badge with score
+- Location (barangay, municipality)
+- Population count
+- Household count
+- Matched PPA names (hover tooltip on desktop, inline on mobile)
+- Matched keywords for each PPA
+
+**Responsive Design:**
+
+- Desktop: Full table layout with all columns
+- Mobile: Card-based layout with collapsible details
+
+#### 8.7.3 Workflow
+
+```
+Start
+  │
+  ▼
+Navigate to Admin > Sitio Recommendations
+  │
+  ▼
+Select Category
+  │
+  ▼
+Select Project Type
+  │
+  ▼
+System calculates PPA matches for all sitios
+  │
+  ├──▶ Match PPAs against project type keywords
+  └──▶ Display matched sitios first (sorted by need score)
+  │
+  ▼
+Apply Filters (optional)
+  │
+  ├──▶ Search by name/location
+  ├──▶ Filter by municipality/barangay
+  └──▶ Toggle need score sort order
+  │
+  ▼
+Review Recommendations
+  │
+  ├──▶ View matched PPA details
+  ├──▶ Compare sitio statistics
+  └──▶ Identify high-priority communities
+  │
+  ▼
+Use insights for project planning
+  │
+  ▼
+End
+```
+
+#### 8.7.4 Use Cases
+
+| Use Case                      | Description                                                                                                        |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| **Project Planning**          | Before creating a project, administrators can explore which sitios have expressed needs for specific interventions |
+| **Budget Allocation**         | Identify high-need communities with matching PPAs to prioritize funding                                            |
+| **Stakeholder Presentations** | Generate insights about community needs for reporting to decision-makers                                           |
+| **Gap Analysis**              | Compare multiple project types to identify underserved communities                                                 |
+| **Impact Assessment**         | Review historical recommendations to see which sitios have been served                                             |
+
+#### 8.7.5 Technical Implementation
+
+**Reused Components:**
+
+- PPA matching logic from `LocationBeneficiariesTab.svelte`
+- Keyword mappings from `issue-ppa-mappings.ts`
+- Need level utilities from `status-config.ts`
+- UI components: Badge, Card, Select, Input, Table, Popover
+
+**Data Flow:**
+
+```
+Project Type Selection
+  ↓
+Extract Keywords from predefinedPPAs
+  ↓
+Match Keywords against Sitio.proposed_ppas
+  ↓
+Two-Tier Sorting (Matched First, Need Score Second)
+  ↓
+Apply User Filters
+  ↓
+Display Results
+```
+
 ---
 
 ## 9. Data Flow
@@ -1336,20 +1478,21 @@ The following features are planned for future development phases:
 
 ## 21. Version History
 
-| Version | Date             | Author | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| ------- | ---------------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1.0     | December 2, 2025 | -      | Initial document creation                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| 1.1     | December 2, 2025 | -      | Added: Executive Summary, Table of Contents, Suspension/Reactivation Process, Catch-Up Plan Process, Validation Rules, Integration Points, Glossary, Version History. Expanded Access Control with role-specific permissions.                                                                                                                                                                                                                                         |
-| 2.0     | December 2, 2025 | -      | Major restructure: Added comprehensive Sitio Data Module documentation (Part I) covering all sitio data categories including demographics, social services, economic condition, agriculture, water & sanitation, livestock, food security, housing, domestic animals, community empowerment, and utilities. Reorganized document into three parts: Sitio Data Module, Project Management Module, and System-Wide sections. Updated glossary with sitio-related terms. |
-| 2.1     | December 2, 2025 | -      | Added: Edit Project and Delete Project workflows (8.2, 8.3). Added Audit Trail section with tracked actions for authentication, sitios, projects, and users. Updated progress status with ±5% tolerance. Added public data restrictions note. Removed Priority from Project Sitios. Updated lifecycle diagram. Added Future Development Notes section. Enhanced glossary with Progress Update, Monthly Target, Tolerance terms. Fixed Variance definition.            |
-| 2.2     | December 2, 2025 | -      | Updated Audit Trail section to align with implementation: Added change tracking with field-level old/new values (AuditFieldChange). Reorganized action types and resource types. Added detailed documentation for change tracking with JSON example.                                                                                                                                                                                                                  |
-| 2.3     | December 2, 2025 | -      | Added: Sitio CRUD workflows (4.4), Image & Attachment Handling section (10.2), Employment Targets as required fields (17.2), Project Edit Rules clarifying start date behavior (17.2.1). Added footnote to Access Control table clarifying public view restrictions.                                                                                                                                                                                                  |
-| 2.4     | December 2, 2025 | -      | Consolidated Sitio Data Categories from 11 to 5 broader categories: Demographics & Social Services, Economic & Livelihood, Infrastructure & Utilities, Health & Safety, Community & Governance. Updated entity relationship diagram and all related workflows.                                                                                                                                                                                                        |
-| 2.5     | December 3, 2025 | -      | Finalized 5-category consolidation: Merged Ethnicity & Religion into Demographics & Social Services. Merged Local Officials and Primary Priorities into Community & Governance. Updated entity diagram, section structure, and Sitio Profile View references.                                                                                                                                                                                                         |
-| 2.6     | December 3, 2025 | -      | Added: Sitio Recommendation feature (8.6) for intelligent sitio assignment during project creation/edit. Includes PPA-based fuzzy matching, secondary need indicators, filter options (municipality, barangay, income slider, exclude existing projects), and recommendation display specifications. Added Sitio Recommendation term to glossary.                                                                                                                     |
-| 2.7     | December 3, 2025 | -      | Added: Sitio Need Score system (4.5) with composite scoring across 5 categories (Infrastructure, Economic, Social Service, Community, Population). Added need level badges, trend indicators, filters, and sorting. Added Need Score types to Phase 0. Added Post-Project Sitio Updates (4.6) for optional data refresh prompts after project completion.                                                                                                             |
+| Version | Date              | Author | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| ------- | ----------------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1.0     | December 2, 2025  | -      | Initial document creation                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| 1.1     | December 2, 2025  | -      | Added: Executive Summary, Table of Contents, Suspension/Reactivation Process, Catch-Up Plan Process, Validation Rules, Integration Points, Glossary, Version History. Expanded Access Control with role-specific permissions.                                                                                                                                                                                                                                         |
+| 2.0     | December 2, 2025  | -      | Major restructure: Added comprehensive Sitio Data Module documentation (Part I) covering all sitio data categories including demographics, social services, economic condition, agriculture, water & sanitation, livestock, food security, housing, domestic animals, community empowerment, and utilities. Reorganized document into three parts: Sitio Data Module, Project Management Module, and System-Wide sections. Updated glossary with sitio-related terms. |
+| 2.1     | December 2, 2025  | -      | Added: Edit Project and Delete Project workflows (8.2, 8.3). Added Audit Trail section with tracked actions for authentication, sitios, projects, and users. Updated progress status with ±5% tolerance. Added public data restrictions note. Removed Priority from Project Sitios. Updated lifecycle diagram. Added Future Development Notes section. Enhanced glossary with Progress Update, Monthly Target, Tolerance terms. Fixed Variance definition.            |
+| 2.2     | December 2, 2025  | -      | Updated Audit Trail section to align with implementation: Added change tracking with field-level old/new values (AuditFieldChange). Reorganized action types and resource types. Added detailed documentation for change tracking with JSON example.                                                                                                                                                                                                                  |
+| 2.3     | December 2, 2025  | -      | Added: Sitio CRUD workflows (4.4), Image & Attachment Handling section (10.2), Employment Targets as required fields (17.2), Project Edit Rules clarifying start date behavior (17.2.1). Added footnote to Access Control table clarifying public view restrictions.                                                                                                                                                                                                  |
+| 2.4     | December 2, 2025  | -      | Consolidated Sitio Data Categories from 11 to 5 broader categories: Demographics & Social Services, Economic & Livelihood, Infrastructure & Utilities, Health & Safety, Community & Governance. Updated entity relationship diagram and all related workflows.                                                                                                                                                                                                        |
+| 2.5     | December 3, 2025  | -      | Finalized 5-category consolidation: Merged Ethnicity & Religion into Demographics & Social Services. Merged Local Officials and Primary Priorities into Community & Governance. Updated entity diagram, section structure, and Sitio Profile View references.                                                                                                                                                                                                         |
+| 2.6     | December 3, 2025  | -      | Added: Sitio Recommendation feature (8.6) for intelligent sitio assignment during project creation/edit. Includes PPA-based fuzzy matching, secondary need indicators, filter options (municipality, barangay, income slider, exclude existing projects), and recommendation display specifications. Added Sitio Recommendation term to glossary.                                                                                                                     |
+| 2.7     | December 3, 2025  | -      | Added: Sitio Need Score system (4.5) with composite scoring across 5 categories (Infrastructure, Economic, Social Service, Community, Population). Added need level badges, trend indicators, filters, and sorting. Added Need Score types to Phase 0. Added Post-Project Sitio Updates (4.6) for optional data refresh prompts after project completion.                                                                                                             |
+| 2.8     | December 11, 2025 | -      | Added: Sitio Recommendations Page (8.7) as a standalone administrative tool for analyzing recommended sitios without creating projects. Includes dedicated workflow, use cases, comparison table with integrated recommendation feature (8.6), and technical implementation details. Added navigation to admin sidebar.                                                                                                                                               |
 
 ---
 
-_Document Version: 2.7_  
-_Last Updated: December 3, 2025_
+_Document Version: 2.8_  
+_Last Updated: December 11, 2025_
