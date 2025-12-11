@@ -44,7 +44,8 @@
 			description: 'Across all projects',
 			icon: Gauge,
 			bgColor: 'bg-blue-50',
-			textColor: 'text-blue-700'
+			textColor: 'text-blue-700',
+			href: '/projects/list?sort=progress-high'
 		},
 		{
 			label: 'Completed Projects',
@@ -52,7 +53,8 @@
 			description: `${((progressStats.completedCount / (projects.length || 1)) * 100).toFixed(0)}% of total`,
 			icon: CheckCircle2,
 			bgColor: 'bg-emerald-50',
-			textColor: 'text-emerald-700'
+			textColor: 'text-emerald-700',
+			href: '/projects/list?status=completed'
 		},
 		{
 			label: 'Projects On Track',
@@ -60,7 +62,8 @@
 			description: 'Within schedule',
 			icon: TrendingUp,
 			bgColor: 'bg-cyan-50',
-			textColor: 'text-cyan-700'
+			textColor: 'text-cyan-700',
+			href: '/projects/list?status=ongoing'
 		},
 		{
 			label: 'Delayed Projects',
@@ -68,7 +71,8 @@
 			description: 'Behind schedule',
 			icon: AlertTriangle,
 			bgColor: 'bg-red-50',
-			textColor: 'text-red-700'
+			textColor: 'text-red-700',
+			href: '/projects/list?status=delayed'
 		}
 	]);
 
@@ -114,35 +118,37 @@
 	<!-- Progress Summary Cards -->
 	<div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
 		{#each progressMetrics as metric}
-			<Card.Root
-				class="border-0 shadow-sm ring-1 ring-slate-200/50 transition-shadow hover:shadow-md dark:ring-slate-700/50"
-			>
-				<Card.Content class="p-4 sm:p-5">
-					<div class="flex items-start gap-3 sm:gap-4">
-						<div
-							class="shrink-0 rounded-xl {metric.bgColor} p-2.5 ring-1 ring-black/5 sm:p-3 dark:{metric.bgColor.replace(
-								'50',
-								'900/30'
-							)}"
-						>
-							<metric.icon class="size-5 {metric.textColor} sm:size-6" />
-						</div>
-						<div class="min-w-0 flex-1">
-							<p class="truncate text-xs font-medium text-slate-500 sm:text-sm dark:text-slate-400">
-								{metric.label}
-							</p>
-							<p
-								class="mt-1 truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl dark:text-slate-100"
+			<a href="{metric.href ?? '/projects/list'}">
+				<Card.Root
+					class="border-0 shadow-sm ring-1 ring-slate-200/50 transition-all hover:scale-[1.02] hover:shadow-md dark:ring-slate-700/50 cursor-pointer"
+				>
+					<Card.Content class="p-4 sm:p-5">
+						<div class="flex items-start gap-3 sm:gap-4">
+							<div
+								class="shrink-0 rounded-xl {metric.bgColor} p-2.5 ring-1 ring-black/5 sm:p-3 dark:{metric.bgColor.replace(
+									'50',
+									'900/30'
+								)}"
 							>
-								{metric.value}
-							</p>
-							<p class="mt-0.5 truncate text-xs text-slate-400 dark:text-slate-500">
-								{metric.description}
-							</p>
+								<metric.icon class="size-5 {metric.textColor} sm:size-6" />
+							</div>
+							<div class="min-w-0 flex-1">
+								<p class="truncate text-xs font-medium text-slate-500 sm:text-sm dark:text-slate-400">
+									{metric.label}
+								</p>
+								<p
+									class="mt-1 truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl dark:text-slate-100"
+								>
+									{metric.value}
+								</p>
+								<p class="mt-0.5 truncate text-xs text-slate-400 dark:text-slate-500">
+									{metric.description}
+								</p>
+							</div>
 						</div>
-					</div>
-				</Card.Content>
-			</Card.Root>
+					</Card.Content>
+				</Card.Root>
+			</a>
 		{/each}
 	</div>
 
