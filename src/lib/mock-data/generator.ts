@@ -1367,13 +1367,13 @@ function generateDelayedMonthlyProgress(
 	rng: SeededRandom
 ): MonthlyProgress[] {
 	const progress: MonthlyProgress[] = [];
-	
+
 	// Track cumulative outputs
 	const cumulativeOutputs: Record<string, number> = {};
 	performanceTargets.forEach((target) => {
 		cumulativeOutputs[target.indicator_type] = 0;
 	});
-	
+
 	// Define the delay scenario
 	const delayScenario = [
 		{
@@ -1396,33 +1396,45 @@ function generateDelayedMonthlyProgress(
 			// Month 3 (Mar): Significant delay
 			progressPercent: 32,
 			status: 'delayed' as ProjectStatus,
-			issues: 'Significant delays: (1) Prolonged heavy rains halted excavation works for 2 weeks, (2) Cement shortage due to supplier issues, (3) Two pieces of equipment under repair.',
-			recommendations: 'Submit request for time extension; coordinate with alternative suppliers; deploy rental equipment.',
-			catch_up_plan: 'Deploy additional workforce to accelerate construction once weather improves; extend working hours to 12-hour shifts; engage additional contractors for parallel work.'
+			issues:
+				'Significant delays: (1) Prolonged heavy rains halted excavation works for 2 weeks, (2) Cement shortage due to supplier issues, (3) Two pieces of equipment under repair.',
+			recommendations:
+				'Submit request for time extension; coordinate with alternative suppliers; deploy rental equipment.',
+			catch_up_plan:
+				'Deploy additional workforce to accelerate construction once weather improves; extend working hours to 12-hour shifts; engage additional contractors for parallel work.'
 		},
 		{
 			// Month 4 (Apr): Recovery starts
 			progressPercent: 45,
 			status: 'delayed' as ProjectStatus,
-			issues: 'Weather improved but still recovering from previous delays. One section experiencing unstable soil requiring additional geotextile reinforcement.',
-			recommendations: 'Continue extended work hours; procure additional geotextile materials; conduct soil stabilization works.',
-			catch_up_plan: 'Maintain double-shifting for construction crews; prioritize critical path activities; weekend operations to recover lost time.'
+			issues:
+				'Weather improved but still recovering from previous delays. One section experiencing unstable soil requiring additional geotextile reinforcement.',
+			recommendations:
+				'Continue extended work hours; procure additional geotextile materials; conduct soil stabilization works.',
+			catch_up_plan:
+				'Maintain double-shifting for construction crews; prioritize critical path activities; weekend operations to recover lost time.'
 		},
 		{
 			// Month 5 (May): Good recovery
 			progressPercent: 62,
 			status: 'ongoing' as ProjectStatus,
-			issues: 'Project recovering well. Minor adjustments in alignment to avoid underground utilities discovered during excavation.',
-			recommendations: 'Coordinate with utility companies for proper relocation; update as-built plans.',
-			catch_up_plan: 'Continue accelerated schedule; conduct weekend operations for utility relocation works.'
+			issues:
+				'Project recovering well. Minor adjustments in alignment to avoid underground utilities discovered during excavation.',
+			recommendations:
+				'Coordinate with utility companies for proper relocation; update as-built plans.',
+			catch_up_plan:
+				'Continue accelerated schedule; conduct weekend operations for utility relocation works.'
 		},
 		{
 			// Month 6 (June): Still catching up
 			progressPercent: 75,
 			status: 'delayed' as ProjectStatus,
-			issues: 'Progress improving but still behind original timeline. Current focus on concrete pouring for base course. Need to complete 25% in remaining 2 months.',
-			recommendations: 'Request budget augmentation for overtime pay; fast-track remaining procurement items.',
-			catch_up_plan: 'Implement triple-shift concrete pouring schedule; mobilize provincial equipment pool for support; conduct daily progress monitoring meetings.'
+			issues:
+				'Progress improving but still behind original timeline. Current focus on concrete pouring for base course. Need to complete 25% in remaining 2 months.',
+			recommendations:
+				'Request budget augmentation for overtime pay; fast-track remaining procurement items.',
+			catch_up_plan:
+				'Implement triple-shift concrete pouring schedule; mobilize provincial equipment pool for support; conduct daily progress monitoring meetings.'
 		}
 	];
 
@@ -1433,7 +1445,7 @@ function generateDelayedMonthlyProgress(
 
 		const scenario = delayScenario[i];
 		const progressPercent = scenario.progressPercent;
-		
+
 		// Calculate cumulative budget based on progress
 		const cumulativeBudget = Math.floor((totalBudget * progressPercent) / 100);
 
