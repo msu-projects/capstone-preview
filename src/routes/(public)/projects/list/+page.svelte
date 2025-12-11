@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 	import AppBreadcrumb from '$lib/components/AppBreadcrumb.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
@@ -18,17 +20,44 @@
 	let projects = $state<Project[]>([]);
 	let isLoading = $state(true);
 
-	// State
-	let searchQuery = $state('');
-	let statusFilter = $state<string>('');
-	let categoryFilter = $state<CategoryKey | ''>('');
-	let sortBy = $state<string>('name');
-	let currentPage = $state(1);
+	// State - initialize from URL query params
+	let searchQuery = $state($page.url.searchParams.get('search') || '');
+	let statusFilter = $state<string>($page.url.searchParams.get('status') || '');
+	let categoryFilter = $state<CategoryKey | ''>(
+		($page.url.searchParams.get('category') as CategoryKey) || ''
+	);
+	let sortBy = $state<string>($page.url.searchParams.get('sort') || 'name');
+	let currentPage = $state(Number($page.url.searchParams.get('page')) || 1);
 	const itemsPerPage = 12;
 
 	onMount(() => {
 		projects = loadProjects();
 		isLoading = false;
+	});
+
+	// Update URL when filters change
+	function updateUrl() {
+		const params = new URLSearchParams();
+		if (searchQuery) params.set('search', searchQuery);
+		if (statusFilter) params.set('status', statusFilter);
+		if (categoryFilter) params.set('category', categoryFilter);
+		if (sortBy !== 'name') params.set('sort', sortBy);
+		if (currentPage > 1) params.set('page', currentPage.toString());
+
+		const newUrl = params.toString() ? `?${params.toString()}` : '/projects/list';
+		goto(newUrl, { replaceState: true, noScroll: true });
+	}
+
+	// Sync URL whenever filters change
+	$effect(() => {
+		// Track dependencies
+		searchQuery;
+		statusFilter;
+		categoryFilter;
+		sortBy;
+		currentPage;
+		// Update URL
+		updateUrl();
 	});
 
 	// Get unique categories from config
@@ -157,10 +186,13 @@
 							</Select.Trigger>
 							<Select.Content>
 								<Select.Item value="" label="All Status">All Status</Select.Item>
-								<Select.Item value="planning" label="Planning">Planning</Select.Item>
-								<Select.Item value="in-progress" label="In Progress">In Progress</Select.Item>
+								<Select.Item value="preparation" label="Preparation">Preparation</Select.Item>
+								<Select.Item value="ongoing" label="On Going">On Going</Select.Item>
 								<Select.Item value="completed" label="Completed">Completed</Select.Item>
-								<Select.Item value="suspended" label="Suspended">Suspended</Select.Item>
+								<Select.Item value="delayed" label="Delayed">Delayed</Select.Item>
+								<Select.Item value="non-completion" label="Non-completion"
+									>Non-completion</Select.Item
+								>
 							</Select.Content>
 						</Select.Root>
 					</div>
