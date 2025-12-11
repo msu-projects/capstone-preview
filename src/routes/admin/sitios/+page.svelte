@@ -24,6 +24,7 @@
 		Building2,
 		FileText,
 		Heart,
+		Lightbulb,
 		List,
 		Map,
 		MapPin,
@@ -244,14 +245,20 @@
 				{/if}
 			</div>
 
-			<div class="flex items-center gap-3">
-				<!-- Current filter label -->
-				{#if hasActiveFilters}
-					<Badge variant="secondary" class="gap-1.5">
-						<MapPin class="size-3" />
-						{toTitleCase(filterLabel)}
-					</Badge>
-				{/if}
+			<div class="flex flex-col gap-3 sm:flex-row">
+				<div class="flex items-center gap-3">
+					<!-- Current filter label -->
+					{#if hasActiveFilters}
+						<Badge variant="secondary" class="gap-1.5">
+							<MapPin class="size-3" />
+							{toTitleCase(filterLabel)}
+						</Badge>
+					{/if}
+				</div>
+				<Button href="/admin/recommendations">
+					<Lightbulb />
+					<span>Sitio Recommendations</span>
+				</Button>
 			</div>
 		</div>
 

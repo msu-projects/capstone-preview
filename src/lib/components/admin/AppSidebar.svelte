@@ -11,7 +11,6 @@
 		FileText,
 		Folder,
 		LayoutDashboard,
-		Lightbulb,
 		LogOut,
 		MapPin,
 		Settings2,
@@ -46,8 +45,7 @@
 			title: 'Data Management',
 			items: [
 				{ title: 'Sitios', url: '/admin/sitios', icon: MapPin },
-				{ title: 'Projects', url: '/admin/projects', icon: Folder },
-				{ title: 'Sitio Recommendations', url: '/admin/recommendations', icon: Lightbulb }
+				{ title: 'Projects', url: '/admin/projects', icon: Folder }
 			]
 		},
 		{
