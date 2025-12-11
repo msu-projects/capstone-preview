@@ -318,9 +318,9 @@
 			</Card.Root>
 		</a>
 
-		<a href="/projects/list?sort=budget-high">
+		<a href="/projects/list?sort=budget-high" class="h-full">
 			<Card.Root
-				class="cursor-pointer border-0 shadow-sm ring-1 ring-slate-200/50 transition-all hover:scale-[1.02] hover:shadow-md"
+				class="h-full cursor-pointer border-0 shadow-sm ring-1 ring-slate-200/50 transition-all hover:scale-[1.02] hover:shadow-md"
 			>
 				<Card.Content class="p-4">
 					<div class="flex items-center justify-between">
@@ -340,9 +340,9 @@
 			</Card.Root>
 		</a>
 
-		<a href="/projects/list?status=ongoing">
+		<a href="/projects/list?status=ongoing" class="h-full">
 			<Card.Root
-				class="cursor-pointer border-0 shadow-sm ring-1 ring-slate-200/50 transition-all hover:scale-[1.02] hover:shadow-md"
+				class="h-full cursor-pointer border-0 shadow-sm ring-1 ring-slate-200/50 transition-all hover:scale-[1.02] hover:shadow-md"
 			>
 				<Card.Content class="p-4">
 					<div class="flex items-center justify-between">
