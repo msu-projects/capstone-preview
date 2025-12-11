@@ -1,11 +1,13 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 	import BarChart from '$lib/components/charts/BarChart.svelte';
 	import DonutChart from '$lib/components/charts/DonutChart.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';
 	import { Progress } from '$lib/components/ui/progress';
 	import type { Project, Sitio } from '$lib/types';
-	import { formatCurrency, formatNumber } from '$lib/utils/formatters';
+	import { formatNumber } from '$lib/utils/formatters';
 	import {
 		aggregateDemographics,
 		aggregateInfrastructure,
@@ -114,14 +116,29 @@
 
 	// Need level distribution chart data
 	const needLevelChartData = $derived(toNeedLevelDonutData(needScores));
+
+	// Handle KPI card clicks
+	function handleMetricClick(label: string) {
+		console.log(`Clicked on metric: ${label}`);
+		// TODO: Add specific navigation or action based on metric type
+	}
+
+	// Handle project status card clicks
+	function handleProjectStatusClick(status: string, count: number) {
+		if (count === 0) return; // Don't navigate if no projects
+		const isAdminRoute = $page.url.pathname.startsWith('/admin');
+		const projectsPath = isAdminRoute ? '/admin/projects/list' : '/projects/list';
+		goto(`${projectsPath}?status=${status}`);
+	}
 </script>
 
 <div class="space-y-6">
 	<!-- Key Metrics Grid -->
 	<div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
 		{#each keyMetrics as metric}
-			<Card.Root
-				class="group relative overflow-hidden border-0 bg-white/80 shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:shadow-md hover:ring-slate-300/50 dark:bg-slate-800/80 dark:ring-slate-700/50 dark:hover:ring-slate-600/50"
+			<button
+				onclick={() => handleMetricClick(metric.label)}
+				class="group relative cursor-pointer overflow-hidden rounded-lg border-0 bg-white/80 text-left shadow-sm ring-1 ring-slate-200/50 backdrop-blur-sm transition-all hover:scale-[1.02] hover:shadow-md hover:ring-slate-300/50 active:scale-[0.98] dark:bg-slate-800/80 dark:ring-slate-700/50 dark:hover:ring-slate-600/50"
 			>
 				<div
 					class="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full {metric.bgColor} opacity-50"
@@ -129,7 +146,7 @@
 				<div
 					class="absolute inset-0 {metric.bgColor} opacity-0 transition-opacity group-hover:opacity-30"
 				></div>
-				<Card.Content class="relative p-4 sm:p-5">
+				<div class="relative p-4 sm:p-5">
 					<div class="flex items-center gap-3 sm:gap-4">
 						<div class="rounded-xl {metric.bgColor} p-2.5 ring-1 ring-black/5 sm:p-3">
 							<metric.icon class="size-5 {metric.textColor} sm:size-6" />
@@ -145,8 +162,8 @@
 							</p>
 						</div>
 					</div>
-				</Card.Content>
-			</Card.Root>
+				</div>
+			</button>
 		{/each}
 	</div>
 
@@ -300,8 +317,10 @@
 			</Card.Header>
 			<Card.Content class="py-6">
 				<div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
-					<div
-						class="rounded-xl bg-amber-50 p-4 text-center ring-1 ring-amber-100 dark:bg-amber-900/30 dark:ring-amber-800"
+					<button
+						onclick={() => handleProjectStatusClick('ongoing', activeProjects)}
+						disabled={activeProjects === 0}
+						class="cursor-pointer rounded-xl bg-amber-50 p-4 text-center ring-1 ring-amber-100 transition-all hover:scale-[1.02] hover:shadow-md active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-none dark:bg-amber-900/30 dark:ring-amber-800"
 					>
 						<div class="text-3xl font-bold text-amber-700 dark:text-amber-400">
 							{activeProjects}
@@ -309,9 +328,11 @@
 						<div class="mt-1 text-xs font-medium text-amber-600 dark:text-amber-500">
 							In Progress
 						</div>
-					</div>
-					<div
-						class="rounded-xl bg-emerald-50 p-4 text-center ring-1 ring-emerald-100 dark:bg-emerald-900/30 dark:ring-emerald-800"
+					</button>
+					<button
+						onclick={() => handleProjectStatusClick('completed', completedProjects)}
+						disabled={completedProjects === 0}
+						class="cursor-pointer rounded-xl bg-emerald-50 p-4 text-center ring-1 ring-emerald-100 transition-all hover:scale-[1.02] hover:shadow-md active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-none dark:bg-emerald-900/30 dark:ring-emerald-800"
 					>
 						<div class="text-3xl font-bold text-emerald-700 dark:text-emerald-400">
 							{completedProjects}
@@ -319,27 +340,27 @@
 						<div class="mt-1 text-xs font-medium text-emerald-600 dark:text-emerald-500">
 							Completed
 						</div>
-					</div>
-					<div
-						class="rounded-xl bg-blue-50 p-4 text-center ring-1 ring-blue-100 dark:bg-blue-900/30 dark:ring-blue-800"
+					</button>
+					<button
+						onclick={() => handleProjectStatusClick('preparation', preparationProjects)}
+						disabled={preparationProjects === 0}
+						class="cursor-pointer rounded-xl bg-blue-50 p-4 text-center ring-1 ring-blue-100 transition-all hover:scale-[1.02] hover:shadow-md active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-none dark:bg-blue-900/30 dark:ring-blue-800"
 					>
 						<div class="text-3xl font-bold text-blue-700 dark:text-blue-400">
 							{preparationProjects}
 						</div>
 						<div class="mt-1 text-xs font-medium text-blue-600 dark:text-blue-500">Preparation</div>
-					</div>
-					<div
-						class="rounded-xl bg-orange-50 p-4 text-center ring-1 ring-orange-200 dark:bg-orange-800 dark:ring-orange-700"
+					</button>
+					<button
+						onclick={() => handleProjectStatusClick('delayed', delayedProjects)}
+						disabled={delayedProjects === 0}
+						class="cursor-pointer rounded-xl bg-orange-50 p-4 text-center ring-1 ring-orange-200 transition-all hover:scale-[1.02] hover:shadow-md active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-none dark:bg-orange-800 dark:ring-orange-700"
 					>
 						<div class="text-3xl font-bold text-orange-700 dark:text-orange-300">
 							{delayedProjects}
 						</div>
 						<div class="mt-1 text-xs font-medium text-orange-600 dark:text-orange-400">Delayed</div>
-						<span class="text-sm text-slate-600 dark:text-slate-400">Total Investment</span>
-						<span class="text-lg font-bold text-slate-900 dark:text-slate-100"
-							>{formatCurrency(totalBudget)}</span
-						>
-					</div>
+					</button>
 				</div>
 			</Card.Content>
 		</Card.Root>
