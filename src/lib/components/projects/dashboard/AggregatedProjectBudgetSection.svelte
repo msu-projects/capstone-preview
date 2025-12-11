@@ -43,7 +43,7 @@
 		{
 			label: 'Total Beneficiaries',
 			value: stats.totalBeneficiaries,
-			description: 'People served',
+			description: 'Households served',
 			icon: Users,
 			bgColor: 'bg-blue-50',
 			textColor: 'text-blue-700',
@@ -132,7 +132,7 @@
 			<Card.Header>
 				<Card.Title class="flex items-center gap-2 text-base">
 					<PieChart class="size-5 text-slate-500" />
-					Budget by Status
+					Project Cost by Status
 				</Card.Title>
 				<Card.Description>Distribution of funds across project statuses</Card.Description>
 			</Card.Header>
@@ -160,7 +160,7 @@
 			<Card.Header>
 				<Card.Title class="flex items-center gap-2 text-base">
 					<Banknote class="size-5 text-slate-500" />
-					Budget by Category
+					Project Cost by Category
 				</Card.Title>
 				<Card.Description>Investment distribution across categories</Card.Description>
 			</Card.Header>

@@ -45,65 +45,97 @@
 <div class="space-y-6">
 	<!-- Key Information Grid -->
 	<div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-		<Card.Root class="py-0 shadow-sm">
-			<Card.Content class="p-4">
-				<div class="flex items-center gap-3">
-					<div class="rounded-lg bg-blue-50 p-2 dark:bg-blue-900/30">
-						<CalendarDays class="size-5 text-blue-600" />
-					</div>
+		<Card.Root class="border-l-4 border-l-blue-600 bg-white py-0 dark:bg-slate-800">
+			<Card.Content class="p-5">
+				<div class="flex items-start justify-between">
 					<div>
-						<div class="text-xs font-medium text-slate-500 dark:text-slate-400">Project Year</div>
-						<div class="text-xl font-bold text-slate-900 dark:text-slate-100">
+						<p
+							class="text-xs font-medium tracking-wider text-slate-500 uppercase dark:text-slate-400"
+						>
+							Project Year
+						</p>
+						<h3 class="mt-1 text-2xl font-bold text-slate-900 dark:text-slate-100">
 							{project.project_year}
-						</div>
+						</h3>
+					</div>
+					<div class="rounded-lg bg-blue-50 p-2 text-blue-600 dark:bg-blue-900/30">
+						<CalendarDays class="size-5" />
 					</div>
 				</div>
+				<div class="mt-4 text-xs text-slate-500 dark:text-slate-400">Fiscal year</div>
 			</Card.Content>
 		</Card.Root>
 
-		<Card.Root class="py-0 shadow-sm">
-			<Card.Content class="p-4">
-				<div class="flex items-center gap-3">
-					<div class="rounded-lg bg-emerald-50 p-2 dark:bg-emerald-900/30">
-						<Users class="size-5 text-emerald-600" />
-					</div>
+		<Card.Root class="border-l-4 border-l-emerald-600 bg-white py-0 dark:bg-slate-800">
+			<Card.Content class="p-5">
+				<div class="flex items-start justify-between">
 					<div>
-						<div class="text-xs font-medium text-slate-500 dark:text-slate-400">Beneficiaries</div>
-						<div class="text-xl font-bold text-slate-900 dark:text-slate-100">
+						<p
+							class="text-xs font-medium tracking-wider text-slate-500 uppercase dark:text-slate-400"
+						>
+							Beneficiaries
+						</p>
+						<h3 class="mt-1 text-2xl font-bold text-slate-900 dark:text-slate-100">
 							{formatNumber(project.beneficiaries)}
-						</div>
+						</h3>
+					</div>
+					<div class="rounded-lg bg-emerald-50 p-2 text-emerald-600 dark:bg-emerald-900/30">
+						<Users class="size-5" />
 					</div>
 				</div>
+				<div class="mt-4 text-xs text-slate-500 dark:text-slate-400">Households served</div>
 			</Card.Content>
 		</Card.Root>
 
-		<Card.Root class="py-0 shadow-sm">
-			<Card.Content class="p-4">
-				<div class="flex items-center gap-3">
-					<div class="rounded-lg bg-amber-50 p-2 dark:bg-amber-900/30">
-						<MapPin class="size-5 text-amber-600" />
-					</div>
+		<Card.Root class="border-l-4 border-l-amber-600 bg-white py-0 dark:bg-slate-800">
+			<Card.Content class="p-5">
+				<div class="flex items-start justify-between">
 					<div>
-						<div class="text-xs font-medium text-slate-500 dark:text-slate-400">Sitios Covered</div>
-						<div class="text-xl font-bold text-slate-900 dark:text-slate-100">{totalSitios}</div>
+						<p
+							class="text-xs font-medium tracking-wider text-slate-500 uppercase dark:text-slate-400"
+						>
+							Sitios Covered
+						</p>
+						<h3 class="mt-1 text-2xl font-bold text-slate-900 dark:text-slate-100">
+							{totalSitios}
+						</h3>
+					</div>
+					<div class="rounded-lg bg-amber-50 p-2 text-amber-600 dark:bg-amber-900/30">
+						<MapPin class="size-5" />
 					</div>
 				</div>
+				<div class="mt-4 text-xs text-slate-500 dark:text-slate-400">Total locations</div>
 			</Card.Content>
 		</Card.Root>
 
-		<Card.Root class="py-0 shadow-sm">
-			<Card.Content class="p-4">
-				<div class="flex items-center gap-3">
-					<div class="rounded-lg bg-purple-50 p-2 dark:bg-purple-900/30">
-						<Briefcase class="size-5 text-purple-600" />
-					</div>
+		<Card.Root class="border-l-4 border-l-purple-600 bg-white py-0 dark:bg-slate-800">
+			<Card.Content class="p-5">
+				<div class="flex items-start justify-between">
 					<div>
-						<div class="text-xs font-medium text-slate-500 dark:text-slate-400">Total Jobs</div>
-						<div class="text-xl font-bold text-slate-900 dark:text-slate-100">
-							{(project.employment_generated?.male || 0) +
-								(project.employment_generated?.female || 0)}
-						</div>
+						<p
+							class="text-xs font-medium tracking-wider text-slate-500 uppercase dark:text-slate-400"
+						>
+							Employment Generated
+						</p>
+						<h3 class="mt-1 text-2xl font-bold text-slate-900 dark:text-slate-100">
+							{formatNumber(
+								(project.employment_generated?.male || 0) +
+									(project.employment_generated?.female || 0)
+							)}
+						</h3>
 					</div>
+					<div class="rounded-lg bg-purple-50 p-2 text-purple-600 dark:bg-purple-900/30">
+						<Briefcase class="size-5" />
+					</div>
+				</div>
+				<div class="mt-4 text-xs text-slate-500 dark:text-slate-400">
+					{#if project.employment_generated}
+						{formatNumber(project.employment_generated.male)} M / {formatNumber(
+							project.employment_generated.female
+						)} F
+					{:else}
+						Jobs created
+					{/if}
 				</div>
 			</Card.Content>
 		</Card.Root>

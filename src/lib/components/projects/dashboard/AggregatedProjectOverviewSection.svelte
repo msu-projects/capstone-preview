@@ -65,7 +65,7 @@
 			textColor: 'text-emerald-700'
 		},
 		{
-			label: 'Beneficiaries',
+			label: 'Household Beneficiaries',
 			value: formatNumber(stats.totalBeneficiaries),
 			icon: Users,
 			color: 'bg-indigo-500',
@@ -172,7 +172,7 @@
 					<Building2 class="size-5 text-slate-500" />
 					Projects by Category
 				</Card.Title>
-				<Card.Description>Distribution across project categories</Card.Description>
+				<Card.Description>No. of projects across categories</Card.Description>
 			</Card.Header>
 			<Card.Content>
 				{#if categoryChartData.length > 0}
