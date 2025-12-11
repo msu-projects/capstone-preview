@@ -432,11 +432,12 @@
 							{getStatusLabel(status)}
 						</Select.Trigger>
 						<Select.Content>
-						<Select.Item value="preparation" label="Preparation">Preparation</Select.Item>
-						<Select.Item value="ongoing" label="On Going">On Going</Select.Item>
-						<Select.Item value="completed" label="Completed">Completed</Select.Item>
-						<Select.Item value="delayed" label="Delayed">Delayed</Select.Item>
-						<Select.Item value="non-completion" label="Non-completion">Non-completion</Select.Item>
+							<Select.Item value="preparation" label="Preparation">Preparation</Select.Item>
+							<Select.Item value="ongoing" label="On Going">On Going</Select.Item>
+							<Select.Item value="completed" label="Completed">Completed</Select.Item>
+							<Select.Item value="delayed" label="Delayed">Delayed</Select.Item>
+							<Select.Item value="non-completion" label="Non-completion">Non-completion</Select.Item
+							>
 						</Select.Content>
 					</Select.Root>
 				</div>

@@ -549,7 +549,13 @@ const PROJECT_TITLES: Record<CategoryKey, string[]> = {
 
 import { IMPLEMENTING_AGENCIES } from '$lib/config/agencies';
 
-const STATUSES: ProjectStatus[] = ['preparation', 'ongoing', 'completed', 'delayed', 'non-completion'];
+const STATUSES: ProjectStatus[] = [
+	'preparation',
+	'ongoing',
+	'completed',
+	'delayed',
+	'non-completion'
+];
 
 const CATCH_UP_PLANS = [
 	'Deploy additional workforce to accelerate construction',

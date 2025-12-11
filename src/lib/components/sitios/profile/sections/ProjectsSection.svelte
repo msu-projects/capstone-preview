@@ -34,7 +34,9 @@
 	const completedProjects = $derived(relatedProjects.filter((p) => p.status === 'completed'));
 	const preparationProjects = $derived(relatedProjects.filter((p) => p.status === 'preparation'));
 	const delayedProjects = $derived(relatedProjects.filter((p) => p.status === 'delayed'));
-	const nonCompletionProjects = $derived(relatedProjects.filter((p) => p.status === 'non-completion'));
+	const nonCompletionProjects = $derived(
+		relatedProjects.filter((p) => p.status === 'non-completion')
+	);
 
 	// Total beneficiaries targeted for this sitio
 	const totalBeneficiaries = $derived(

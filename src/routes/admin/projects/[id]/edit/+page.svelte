@@ -323,12 +323,12 @@
 			const startDateValue = targetStartDate?.toString() || existingProject?.start_date || '';
 			const today = new Date();
 			const projectStartDate = new Date(startDateValue);
-		let status: ProjectStatus = existingProject?.status || 'preparation';
+			let status: ProjectStatus = existingProject?.status || 'preparation';
 
-		// Auto-update status based on dates if still in preparation
-		if (status === 'preparation' && projectStartDate <= today) {
-			status = 'ongoing';
-		}
+			// Auto-update status based on dates if still in preparation
+			if (status === 'preparation' && projectStartDate <= today) {
+				status = 'ongoing';
+			}
 
 			// Create the updated Project object
 			const updatedProjectData: Partial<Project> = {

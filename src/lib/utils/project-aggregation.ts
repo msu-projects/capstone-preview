@@ -126,7 +126,13 @@ export function aggregateByStatus(projects: Project[]): StatusDistribution[] {
 	const statusMap = new Map<ProjectStatus, { count: number; budget: number }>();
 
 	// Initialize all statuses
-	const allStatuses: ProjectStatus[] = ['preparation', 'ongoing', 'completed', 'delayed', 'non-completion'];
+	const allStatuses: ProjectStatus[] = [
+		'preparation',
+		'ongoing',
+		'completed',
+		'delayed',
+		'non-completion'
+	];
 	for (const status of allStatuses) {
 		statusMap.set(status, { count: 0, budget: 0 });
 	}
@@ -250,7 +256,7 @@ export function aggregateProgress(projects: Project[]): ProgressAggregation {
 
 		if (project.status === 'completed' || progress >= 100) {
 			completed++;
-			} else if (progress === 0 && project.status === 'preparation') {
+		} else if (progress === 0 && project.status === 'preparation') {
 			notStarted++;
 		} else if (project.monthly_progress && project.monthly_progress.length > 0) {
 			// Check latest status from monthly progress
@@ -267,9 +273,9 @@ export function aggregateProgress(projects: Project[]): ProgressAggregation {
 			}
 		} else {
 			// Default to on-track if in progress without detailed data
-				if (project.status === 'ongoing') {
-					onTrack++;
-				} else if (project.status === 'delayed') {
+			if (project.status === 'ongoing') {
+				onTrack++;
+			} else if (project.status === 'delayed') {
 				delayed++;
 			}
 		}

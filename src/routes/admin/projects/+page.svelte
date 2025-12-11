@@ -146,9 +146,7 @@
 
 	// Status summary for quick stats
 	const statusDist = $derived(aggregateByStatus(filteredProjects));
-	const activeProjectsCount = $derived(
-		statusDist.find((s) => s.status === 'ongoing')?.count ?? 0
-	);
+	const activeProjectsCount = $derived(statusDist.find((s) => s.status === 'ongoing')?.count ?? 0);
 
 	// Update URL when filters or tab change
 	function updateUrl() {

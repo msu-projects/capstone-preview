@@ -259,8 +259,8 @@
 									variant={item.project.status === 'completed' ? 'default' : 'secondary'}
 									class="shrink-0"
 								>
-								{item.project.status === 'ongoing'
-									? 'On Going'
+									{item.project.status === 'ongoing'
+										? 'On Going'
 										: toTitleCase(item.project.status)}
 								</Badge>
 							</div>

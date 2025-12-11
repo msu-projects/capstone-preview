@@ -324,17 +324,17 @@
 						class="rounded-xl bg-blue-50 p-4 text-center ring-1 ring-blue-100 dark:bg-blue-900/30 dark:ring-blue-800"
 					>
 						<div class="text-3xl font-bold text-blue-700 dark:text-blue-400">
-						{preparationProjects}
+							{preparationProjects}
+						</div>
+						<div class="mt-1 text-xs font-medium text-blue-600 dark:text-blue-500">Preparation</div>
 					</div>
-					<div class="mt-1 text-xs font-medium text-blue-600 dark:text-blue-500">Preparation</div>
-				</div>
-				<div
-					class="rounded-xl bg-orange-50 p-4 text-center ring-1 ring-orange-200 dark:bg-orange-800 dark:ring-orange-700"
-				>
-					<div class="text-3xl font-bold text-orange-700 dark:text-orange-300">
-						{delayedProjects}
-					</div>
-					<div class="mt-1 text-xs font-medium text-orange-600 dark:text-orange-400">Delayed</div>
+					<div
+						class="rounded-xl bg-orange-50 p-4 text-center ring-1 ring-orange-200 dark:bg-orange-800 dark:ring-orange-700"
+					>
+						<div class="text-3xl font-bold text-orange-700 dark:text-orange-300">
+							{delayedProjects}
+						</div>
+						<div class="mt-1 text-xs font-medium text-orange-600 dark:text-orange-400">Delayed</div>
 						<span class="text-sm text-slate-600 dark:text-slate-400">Total Investment</span>
 						<span class="text-lg font-bold text-slate-900 dark:text-slate-100"
 							>{formatCurrency(totalBudget)}</span
