@@ -16,7 +16,6 @@
 	import { categories } from '$lib/config/project-categories';
 	import type { Project, Sitio } from '$lib/types';
 	import toTitleCase from '$lib/utils/common';
-	import { formatCurrency, formatNumber } from '$lib/utils/formatters';
 	import {
 		aggregateByStatus,
 		aggregateProjectStats,
@@ -24,17 +23,7 @@
 		getUniqueYears
 	} from '$lib/utils/project-aggregation';
 	import { loadProjects, loadSitios } from '$lib/utils/storage';
-	import {
-		Banknote,
-		FileText,
-		FolderKanban,
-		Gauge,
-		List,
-		Map,
-		TrendingUp,
-		Users,
-		X
-	} from '@lucide/svelte';
+	import { Banknote, FileText, FolderKanban, Gauge, List, Map, X } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 
 	// Props from +page.ts
@@ -243,110 +232,6 @@
 					<List class="size-4" />
 					View Project List
 				</Button>
-			</div>
-
-			<!-- Quick Stats -->
-			<div class="mx-auto mt-8 hidden max-w-6xl grid-cols-2 gap-4 sm:grid-cols-4">
-				<Card.Root
-					class="border-0 shadow-sm ring-1 ring-slate-200/50 transition-shadow hover:shadow-md dark:ring-slate-700/50"
-				>
-					<Card.Content class="p-4 sm:p-5">
-						<div class="flex items-start gap-3 sm:gap-4">
-							<div
-								class="shrink-0 rounded-xl bg-blue-50 p-2.5 ring-1 ring-black/5 sm:p-3 dark:bg-blue-900/30"
-							>
-								<FolderKanban class="size-5 text-blue-600 sm:size-6" />
-							</div>
-							<div class="min-w-0 flex-1">
-								<p
-									class="truncate text-xs font-medium text-slate-500 sm:text-sm dark:text-slate-400"
-								>
-									{hasActiveFilters ? 'Filtered' : 'Total'} Projects
-								</p>
-								<p
-									class="mt-1 truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl dark:text-slate-100"
-								>
-									{filteredProjects.length}
-								</p>
-							</div>
-						</div>
-					</Card.Content>
-				</Card.Root>
-				<Card.Root
-					class="border-0 shadow-sm ring-1 ring-slate-200/50 transition-shadow hover:shadow-md dark:ring-slate-700/50"
-				>
-					<Card.Content class="p-4 sm:p-5">
-						<div class="flex items-start gap-3 sm:gap-4">
-							<div
-								class="shrink-0 rounded-xl bg-emerald-50 p-2.5 ring-1 ring-black/5 sm:p-3 dark:bg-emerald-900/30"
-							>
-								<Banknote class="size-5 text-emerald-600 sm:size-6" />
-							</div>
-							<div class="min-w-0 flex-1">
-								<p
-									class="truncate text-xs font-medium text-slate-500 sm:text-sm dark:text-slate-400"
-								>
-									Total Budget
-								</p>
-								<p
-									class="mt-1 truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl dark:text-slate-100"
-								>
-									{formatCurrency(stats.totalBudget)}
-								</p>
-							</div>
-						</div>
-					</Card.Content>
-				</Card.Root>
-				<Card.Root
-					class="border-0 shadow-sm ring-1 ring-slate-200/50 transition-shadow hover:shadow-md dark:ring-slate-700/50"
-				>
-					<Card.Content class="p-4 sm:p-5">
-						<div class="flex items-start gap-3 sm:gap-4">
-							<div
-								class="shrink-0 rounded-xl bg-indigo-50 p-2.5 ring-1 ring-black/5 sm:p-3 dark:bg-indigo-900/30"
-							>
-								<Users class="size-5 text-indigo-600 sm:size-6" />
-							</div>
-							<div class="min-w-0 flex-1">
-								<p
-									class="truncate text-xs font-medium text-slate-500 sm:text-sm dark:text-slate-400"
-								>
-									Beneficiaries
-								</p>
-								<p
-									class="mt-1 truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl dark:text-slate-100"
-								>
-									{formatNumber(stats.totalBeneficiaries)}
-								</p>
-							</div>
-						</div>
-					</Card.Content>
-				</Card.Root>
-				<Card.Root
-					class="border-0 shadow-sm ring-1 ring-slate-200/50 transition-shadow hover:shadow-md dark:ring-slate-700/50"
-				>
-					<Card.Content class="p-4 sm:p-5">
-						<div class="flex items-start gap-3 sm:gap-4">
-							<div
-								class="shrink-0 rounded-xl bg-amber-50 p-2.5 ring-1 ring-black/5 sm:p-3 dark:bg-amber-900/30"
-							>
-								<TrendingUp class="size-5 text-amber-600 sm:size-6" />
-							</div>
-							<div class="min-w-0 flex-1">
-								<p
-									class="truncate text-xs font-medium text-slate-500 sm:text-sm dark:text-slate-400"
-								>
-									Active Projects
-								</p>
-								<p
-									class="mt-1 truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl lg:text-2xl dark:text-slate-100"
-								>
-									{activeProjectsCount}
-								</p>
-							</div>
-						</div>
-					</Card.Content>
-				</Card.Root>
 			</div>
 		</div>
 	</section>
