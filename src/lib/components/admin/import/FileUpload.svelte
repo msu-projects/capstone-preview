@@ -3,7 +3,7 @@
 	import * as Card from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
-	import { Upload } from '@lucide/svelte';
+	import { Download, Upload } from '@lucide/svelte';
 
 	let { onFileSelected, year = $bindable(new Date().getFullYear()) } = $props<{
 		onFileSelected: (file: File) => void;
@@ -69,14 +69,42 @@
 			fileInput.value = '';
 		}
 	}
+
+	async function downloadSampleCSV() {
+		try {
+			const response = await fetch('/api/sample-csv');
+			if (!response.ok) throw new Error('Failed to download sample CSV');
+
+			const blob = await response.blob();
+			const url = window.URL.createObjectURL(blob);
+			const a = document.createElement('a');
+			a.href = url;
+			a.download = 'sitio-import-template.csv';
+			document.body.appendChild(a);
+			a.click();
+			window.URL.revokeObjectURL(url);
+			document.body.removeChild(a);
+		} catch (err) {
+			console.error('Error downloading sample CSV:', err);
+			error = 'Failed to download sample CSV file';
+		}
+	}
 </script>
 
 <Card.Root>
 	<Card.Header>
-		<Card.Title>Upload Sitio Data File</Card.Title>
-		<Card.Description>
-			Upload a CSV or Excel file containing sitio data. Select the year for this data snapshot.
-		</Card.Description>
+		<div class="flex items-start justify-between">
+			<div>
+				<Card.Title>Upload Sitio Data File</Card.Title>
+				<Card.Description>
+					Upload a CSV or Excel file containing sitio data. Select the year for this data snapshot.
+				</Card.Description>
+			</div>
+			<Button variant="outline" size="sm" onclick={downloadSampleCSV} class="gap-2">
+				<Download class="size-4" />
+				Download Template
+			</Button>
+		</div>
 	</Card.Header>
 	<Card.Content class="space-y-6">
 		<!-- Year Selector -->
