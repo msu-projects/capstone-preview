@@ -27,10 +27,15 @@
 
 	// Income bracket chart data (convert to HistogramData format)
 	const incomeBracketData = $derived(
-		Array.from(economy.incomeBracketDistribution.entries()).map(([bracket, count]) => ({
-			bracket,
-			count
-		}))
+		Array.from(economy.incomeBracketDistribution.entries())
+			.map(([bracket, count]) => ({
+				bracket,
+				count
+			}))
+			.sort((a, b) => {
+				const order = ['<=100', '100-300', '300-500', '>=500'];
+				return order.indexOf(a.bracket) - order.indexOf(b.bracket);
+			})
 	);
 
 	// Livestock data - now based on frequency (how many sitios have each livestock type)
