@@ -80,7 +80,7 @@
 			icon: Users,
 			iconClass: 'text-purple-600',
 			iconBgClass: 'bg-purple-500/10',
-			href: '/admin/sitios'
+			href: '/admin/sitios?tab=demographics'
 		}
 	]);
 </script>
