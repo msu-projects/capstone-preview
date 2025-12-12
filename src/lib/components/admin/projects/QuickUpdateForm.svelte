@@ -2,7 +2,6 @@
 	import ImageUploadGallery from '$lib/components/admin/projects/ImageUploadGallery.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Card from '$lib/components/ui/card';
-	import CurrencyInput from '$lib/components/ui/currency-input/currency-input.svelte';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import NumberInput from '$lib/components/ui/number-input/NumberInput.svelte';
@@ -12,15 +11,12 @@
 	import { formatMonth } from '$lib/utils/monthly-planning';
 	import {
 		calculateBeneficiaryProgress,
-		calculateBudgetUtilization,
 		calculateDaysRemaining,
 		calculateProgressSlippage,
-		formatCurrency,
 		getCurrentMonth
 	} from '$lib/utils/project-calculations';
 	import {
 		AlertTriangle,
-		Banknote,
 		Calendar,
 		CheckCircle,
 		ImageIcon,
@@ -41,11 +37,6 @@
 		catchUpPlan: string;
 		maleEmployment: number;
 		femaleEmployment: number;
-		// New fields - Financial
-		totalBudget: number;
-		budgetDisbursed: string; // Cumulative (read-only)
-		monthlyDisbursement: string; // This month only (editable)
-		targetDisbursementThisMonth: number; // Planned budget for this month
 		// New fields - Timeline
 		startDate: string;
 		contractDuration: string;
@@ -73,10 +64,6 @@
 		catchUpPlan = $bindable(),
 		maleEmployment = $bindable(),
 		femaleEmployment = $bindable(),
-		totalBudget = $bindable(),
-		budgetDisbursed = $bindable(),
-		monthlyDisbursement = $bindable(),
-		targetDisbursementThisMonth,
 		startDate = $bindable(),
 		contractDuration = $bindable(),
 		targetBeneficiaries = $bindable(),
@@ -90,28 +77,12 @@
 		onSwitchToFull
 	}: Props = $props();
 
-	if (monthlyDisbursement === '0') {
-		monthlyDisbursement = String(targetDisbursementThisMonth);
-	}
-
 	if (physicalActual === 0) {
 		physicalActual = Number(plannedPercentage) || 0;
 	}
 
 	// Derived computed values - Employment
 	let totalEmployment = $derived(maleEmployment + femaleEmployment);
-
-	// Derived computed values - Budget
-	// Calculate the new cumulative disbursement including this month's input
-	let originalBudgetDisbursed = $derived(Number(budgetDisbursed || 0));
-	let monthlyDisbursementAmount = $derived(Number(monthlyDisbursement || 0));
-	let updatedBudgetDisbursed = $derived(originalBudgetDisbursed + monthlyDisbursementAmount);
-
-	// Calculate both original and updated metrics for comparison
-	let originalBudgetMetrics = $derived(
-		calculateBudgetUtilization(totalBudget, originalBudgetDisbursed)
-	);
-	let budgetMetrics = $derived(calculateBudgetUtilization(totalBudget, updatedBudgetDisbursed));
 
 	// Derived computed values - Timeline - calculate end date from start + duration
 	const targetEndDate = $derived.by(() => {
@@ -215,189 +186,6 @@
 			</p>
 		</div>
 	</div>
-
-	<!-- Financial Section -->
-	<Card.Root>
-		<Card.Header class="flex flex-row items-center justify-between">
-			<div class="space-y-1.5">
-				<div class="flex items-center gap-2">
-					<Banknote class="size-4 text-primary" />
-					<Card.Title>Financial Status</Card.Title>
-				</div>
-				<Card.Description>Track budget utilization and balance</Card.Description>
-			</div>
-			{#if budgetMetrics.status}
-				<Badge variant={getBadgeVariant(budgetMetrics.status)}>
-					{budgetMetrics.status.replace('-', ' ')}
-				</Badge>
-			{/if}
-		</Card.Header>
-		<Card.Content class="space-y-4">
-			<div class="grid gap-4 md:grid-cols-2">
-				<!-- Total Budget (Read-only, informational) -->
-				<div class="space-y-2">
-					<Label for="total-budget">Total Budget</Label>
-					<Input
-						id="total-budget"
-						type="text"
-						value={formatCurrency(totalBudget)}
-						disabled
-						class="font-medium opacity-75"
-					/>
-				</div>
-
-				<!-- Cumulative Budget Disbursed (Read-only) -->
-				<div class="space-y-2">
-					<Label for="cumulative-disbursed" class="flex items-center gap-1.5">
-						Total Disbursed (Cumulative)
-						<Info class="size-3.5 text-muted-foreground" />
-					</Label>
-					<Input
-						id="cumulative-disbursed"
-						type="text"
-						value={formatCurrency(updatedBudgetDisbursed)}
-						disabled
-						class="font-medium opacity-75"
-					/>
-					{#if monthlyDisbursementAmount > 0}
-						<p class="text-xs text-muted-foreground">
-							Original: {formatCurrency(originalBudgetDisbursed)} + This month: {formatCurrency(
-								monthlyDisbursementAmount
-							)} = {formatCurrency(updatedBudgetDisbursed)}
-						</p>
-					{:else}
-						<p class="text-xs text-muted-foreground">Sum of all monthly disbursements until now</p>
-					{/if}
-				</div>
-
-				<!-- Target Disbursement This Month (Read-only) -->
-				<div class="space-y-2">
-					<Label for="target-disbursement" class="flex items-center gap-2">
-						<Badge variant="outline" class="gap-1.5">
-							<Calendar class="size-3" />
-							{currentMonthFormatted}
-						</Badge>
-						Target Amount
-					</Label>
-					<Input
-						id="target-disbursement"
-						type="text"
-						value={formatCurrency(targetDisbursementThisMonth)}
-						disabled
-						class="font-medium opacity-75"
-					/>
-					<p class="text-xs text-muted-foreground">Planned disbursement for this month</p>
-				</div>
-
-				<!-- Monthly Disbursement (Input for THIS month) -->
-				<div class="space-y-2">
-					<Label for="monthly-disbursement" class="flex items-center gap-2">
-						<Badge variant="default" class="gap-1.5">
-							<Calendar class="size-3" />
-							{currentMonthFormatted}
-						</Badge>
-						Amount Disbursed
-					</Label>
-					<div class="relative">
-						<CurrencyInput
-							id="monthly-disbursement"
-							min={0}
-							bind:value={monthlyDisbursement}
-							placeholder="₱0"
-						/>
-						<span class="pointer-events-none absolute top-2.5 right-3 text-sm text-muted-foreground"
-							>PHP</span
-						>
-					</div>
-					{#if targetDisbursementThisMonth > 0}
-						{@const disbursedAmount = Number(monthlyDisbursement || 0)}
-						{@const variance = disbursedAmount - targetDisbursementThisMonth}
-						{@const variancePercentage = (disbursedAmount / targetDisbursementThisMonth) * 100}
-						<p class="text-xs text-muted-foreground">
-							{#if variance === 0}
-								On target
-							{:else if variance > 0}
-								<span class="text-primary"
-									>{formatCurrency(variance)} above target ({variancePercentage.toFixed(1)}%)</span
-								>
-							{:else}
-								<span class="text-muted-foreground"
-									>{formatCurrency(Math.abs(variance))} below target ({variancePercentage.toFixed(
-										1
-									)}%)</span
-								>
-							{/if}
-						</p>
-					{/if}
-				</div>
-
-				<!-- Auto-calculated: Balance Remaining -->
-				<div class="space-y-2">
-					<Label for="budget-balance" class="flex items-center gap-1.5">
-						Balance Remaining
-						<Info class="size-3.5 text-muted-foreground" />
-					</Label>
-					<Input
-						id="budget-balance"
-						type="text"
-						value={formatCurrency(budgetMetrics.balance)}
-						disabled
-						class="font-medium opacity-75"
-					/>
-				</div>
-
-				<!-- Auto-calculated: Utilization % -->
-				<div class="space-y-2">
-					<Label for="budget-utilization" class="flex items-center gap-1.5">
-						Budget Utilization
-						<Info class="size-3.5 text-muted-foreground" />
-					</Label>
-					<div class="relative">
-						<Input
-							id="budget-utilization"
-							type="text"
-							value={budgetMetrics.utilizationPercentage.toFixed(2)}
-							disabled
-							class="font-medium opacity-75"
-						/>
-						<span class="pointer-events-none absolute top-2.5 right-3 text-sm text-muted-foreground"
-							>%</span
-						>
-					</div>
-					{#if monthlyDisbursementAmount > 0}
-						<p class="text-xs text-muted-foreground">
-							Original: {originalBudgetMetrics.utilizationPercentage.toFixed(2)}% → Updated: {budgetMetrics.utilizationPercentage.toFixed(
-								2
-							)}% (+{(
-								budgetMetrics.utilizationPercentage - originalBudgetMetrics.utilizationPercentage
-							).toFixed(2)}%)
-						</p>
-					{/if}
-				</div>
-			</div>
-
-			<!-- Budget warnings -->
-			{#if budgetMetrics.isOverBudget}
-				<div
-					class="flex items-start gap-2 rounded-lg border border-destructive bg-destructive/10 p-3"
-				>
-					<AlertTriangle class="mt-0.5 size-4 text-destructive" />
-					<div class="flex-1 text-xs text-destructive">
-						<strong>Budget Overrun:</strong> Disbursed amount exceeds total budget by
-						{formatCurrency(Number(budgetDisbursed || 0) - totalBudget)}
-					</div>
-				</div>
-			{:else if budgetMetrics.utilizationPercentage > 90}
-				<div class="flex items-start gap-2 rounded-lg border border-warning bg-warning/10 p-3">
-					<AlertTriangle class="mt-0.5 size-4 text-warning" />
-					<div class="flex-1 text-xs text-warning">
-						<strong>High Utilization:</strong> Budget is over 90% utilized. Monitor remaining balance
-						carefully.
-					</div>
-				</div>
-			{/if}
-		</Card.Content>
-	</Card.Root>
 
 	<!-- Enhanced Progress Section -->
 	<Card.Root>
@@ -730,7 +518,7 @@
 			</Card.Header>
 			<Card.Content class="space-y-4">
 				<div class="grid gap-4 md:grid-cols-2">
-					{#each performanceTargets as target, index (target.id ?? `target-${index}`)}
+					{#each performanceTargets as target, index (target.indicator_type ?? `target-${index}`)}
 						{@const cumulative = cumulativeAchievedOutputs[target.indicator_type] || 0}
 						{@const monthly = monthlyAchievedOutputs[target.indicator_type] || 0}
 						{@const achieved = updatedAchievedOutputs[target.indicator_type] || 0}
